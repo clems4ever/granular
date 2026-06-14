@@ -117,11 +117,26 @@ bin/granular github issue create octocat/Hello-World \
   --label bug --label p1 --assignee octocat
 ```
 
-`comment` and `create` are **writes** (`gh issue comment` / `gh issue create`):
+### Edit fields / change status
 
-- The grant is **content-scoped** — the approval covers exactly the body/title you
-  submitted, so changing the text requires a new approval. The approval page shows
-  the full content for the human to review.
+```sh
+bin/granular github issue edit octocat/Hello-World 1 --title "New title" --add-label bug
+bin/granular github issue close octocat/Hello-World 1 --reason "not planned"
+bin/granular github issue reopen octocat/Hello-World 1
+```
+
+`edit`, `close`, and `reopen` are **three separate operations/grants** — approving
+a status change (`close`/`reopen`) does **not** authorise editing the issue's
+fields, and vice-versa. `edit` supports `--title`, `--body`/`--body-file`,
+`--add-label`/`--remove-label`, and `--add-assignee`/`--remove-assignee` (label and
+assignee changes are merged against the issue's current values).
+
+`comment`, `create`, `edit`, `close` and `reopen` are **writes**:
+
+- Grants for content-creating writes (`comment`, `create`, `edit`) are
+  **content-scoped** — the approval covers exactly the text/changes you submitted,
+  so changing them requires a new approval. `close`/`reopen` grants are scoped to
+  the issue. Either way the approval page shows what will happen.
 - The server PAT (`GRANULAR_GITHUB_TOKEN`) must have **write** access to the repo.
 
 ### JSON output
@@ -148,7 +163,10 @@ granular
         ├── list <repo> [--state] [--limit]
         ├── view <repo> <number> [--comments]
         ├── comment <repo> <number> --body|--body-file
-        └── create <repo> --title [--body] [--label] [--assignee]
+        ├── create <repo> --title [--body] [--label] [--assignee]
+        ├── edit <repo> <number> [--title] [--body] [--add-label] [--remove-label] [--add-assignee] [--remove-assignee]
+        ├── close <repo> <number> [--reason]
+        └── reopen <repo> <number>
 ```
 
 ## Adding an operation

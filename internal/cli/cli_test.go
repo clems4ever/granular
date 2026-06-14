@@ -26,6 +26,9 @@ func TestRootCommandTree(t *testing.T) {
 		{"github", "issue", "view"},
 		{"github", "issue", "comment"},
 		{"github", "issue", "create"},
+		{"github", "issue", "edit"},
+		{"github", "issue", "close"},
+		{"github", "issue", "reopen"},
 	} {
 		cmd, _, err := root.Find(path)
 		if err != nil || cmd.Name() != path[len(path)-1] {
@@ -220,6 +223,31 @@ func TestRunIssueCreateReportsResult(t *testing.T) {
 	got := out.String()
 	if !strings.Contains(got, "#42") || !strings.Contains(got, "http://gh/i/42") {
 		t.Fatalf("expected issue number and URL, got: %q", got)
+	}
+}
+
+func TestRunIssueActionReportsResult(t *testing.T) {
+	ts := fixedServer(t, http.StatusOK, `{"status":"completed","result":{"number":5,"html_url":"http://gh/i/5"}}`)
+	var out bytes.Buffer
+	req := api.OperationRequest{Type: "github.issue.close", Params: map[string]any{"repo": "a/b", "number": 5}}
+	if err := runIssueAction(context.Background(), client.New(ts.URL), req, "close the issue", "closed", &out, false); err != nil {
+		t.Fatalf("runIssueAction: %v", err)
+	}
+	got := out.String()
+	if !strings.Contains(got, "#5") || !strings.Contains(got, "closed") || !strings.Contains(got, "http://gh/i/5") {
+		t.Fatalf("unexpected output: %q", got)
+	}
+}
+
+func TestRunIssueActionPending(t *testing.T) {
+	ts := fixedServer(t, http.StatusAccepted, `{"status":"pending","request_id":"r","approval_url":"http://x/approve/r"}`)
+	var out bytes.Buffer
+	req := api.OperationRequest{Type: "github.issue.reopen", Params: map[string]any{"repo": "a/b", "number": 5}}
+	if err := runIssueAction(context.Background(), client.New(ts.URL), req, "reopen the issue", "reopened", &out, false); err != nil {
+		t.Fatalf("runIssueAction: %v", err)
+	}
+	if !strings.Contains(out.String(), "reopen the issue") {
+		t.Fatalf("expected pending hint, got: %q", out.String())
 	}
 }
 

@@ -170,6 +170,25 @@ Because they **mutate**, two things differ from the read operations:
 
 The body can come from `--body` or `--body-file` (`-` reads stdin), mirroring `gh`.
 
+## Edit and status operations: `issue edit` / `close` / `reopen`
+
+Mirroring `gh issue edit` / `close` / `reopen`, but as **three separate operation
+types** so the grants are independent — a grant to change status cannot edit the
+issue's content, and vice-versa:
+
+- **`github.issue.edit`** — `PATCH` of fields (`--title`, `--body`,
+  `--add-label`/`--remove-label`, `--add-assignee`/`--remove-assignee`). Label and
+  assignee changes are add/remove sets, so `Execute` first `GET`s the issue to merge
+  against its current values. Content-scoped grant (hash of the requested changes).
+- **`github.issue.close`** — `PATCH {state: closed}` with an optional
+  `--reason` (`completed` / `not planned` → `state_reason`). Grant scoped to the
+  issue (and reason).
+- **`github.issue.reopen`** — `PATCH {state: open}`. Grant scoped to the issue.
+
+Status changes (`close`/`reopen`) deliberately do **not** accept a `--comment` or
+touch any field — posting a comment is its own `github.issue.comment` grant. This
+keeps "change status" a strictly separate, minimal permission from "edit content".
+
 ### Raw pass-through
 
 Both issue operations decode GitHub's response into generic JSON (`[]any` /
@@ -220,7 +239,8 @@ internal/cli/          CLI command tree, one file per command:
 internal/api/          wire types shared by client & server
 internal/operations/   Operation interface, registry
 internal/operations/github/  clone.go, api.go (REST helpers), issues.go (issue.list),
-                             issue_view.go, issue_comment.go, issue_create.go
+                             issue_view.go, issue_comment.go, issue_create.go,
+                             issue_edit.go, issue_state.go (close/reopen)
 internal/grants/       delegation-request + grant store (bbolt)
 internal/server/       HTTP handlers, approval UI, git proxy
 internal/client/       HTTP client used by the CLI

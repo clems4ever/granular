@@ -30,6 +30,9 @@ func newIssueCmd(server *string) *cobra.Command {
 		newIssueViewCmd(server, &jsonOut),
 		newIssueCommentCmd(server, &jsonOut),
 		newIssueCreateCmd(server, &jsonOut),
+		newIssueEditCmd(server, &jsonOut),
+		newIssueCloseCmd(server, &jsonOut),
+		newIssueReopenCmd(server, &jsonOut),
 	)
 	return cmd
 }

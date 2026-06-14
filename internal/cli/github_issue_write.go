@@ -105,6 +105,148 @@ func newIssueCreateCmd(server *string, jsonOut *bool) *cobra.Command {
 	return cmd
 }
 
+// newIssueEditCmd builds "github issue edit <repo> <number>", which edits an
+// issue's fields after approval.
+//
+// @arg server Pointer to the resolved --server flag value.
+// @arg jsonOut Pointer to the inherited --json flag value.
+// @return *cobra.Command The issue edit command.
+//
+// @testcase TestRootCommandTree reaches this command through the tree.
+func newIssueEditCmd(server *string, jsonOut *bool) *cobra.Command {
+	var (
+		title           string
+		body            string
+		bodyFile        string
+		addLabels       []string
+		removeLabels    []string
+		addAssignees    []string
+		removeAssignees []string
+	)
+	cmd := &cobra.Command{
+		Use:   "edit <repo> <number>",
+		Short: "Edit a GitHub issue's fields (not its status)",
+		Args:  cobra.ExactArgs(2),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			number, err := strconv.Atoi(args[1])
+			if err != nil || number <= 0 {
+				return fmt.Errorf("invalid issue number %q", args[1])
+			}
+			params := map[string]any{
+				"repo":             args[0],
+				"number":           number,
+				"add_labels":       addLabels,
+				"remove_labels":    removeLabels,
+				"add_assignees":    addAssignees,
+				"remove_assignees": removeAssignees,
+			}
+			if cmd.Flags().Changed("title") {
+				params["title"] = title
+			}
+			if cmd.Flags().Changed("body") || cmd.Flags().Changed("body-file") {
+				text, err := resolveBody(body, bodyFile, cmd.InOrStdin())
+				if err != nil {
+					return err
+				}
+				params["body"] = text
+			}
+			req := api.OperationRequest{Type: "github.issue.edit", Params: params}
+			return runIssueAction(cmd.Context(), client.New(*server), req, "edit the issue", "updated", cmd.OutOrStdout(), *jsonOut)
+		},
+	}
+	cmd.Flags().StringVarP(&title, "title", "t", "", "set the issue title")
+	cmd.Flags().StringVarP(&body, "body", "b", "", "set the issue body")
+	cmd.Flags().StringVarP(&bodyFile, "body-file", "F", "", "read the issue body from a file (\"-\" for stdin)")
+	cmd.Flags().StringArrayVar(&addLabels, "add-label", nil, "label to add (repeatable)")
+	cmd.Flags().StringArrayVar(&removeLabels, "remove-label", nil, "label to remove (repeatable)")
+	cmd.Flags().StringArrayVar(&addAssignees, "add-assignee", nil, "assignee to add (repeatable)")
+	cmd.Flags().StringArrayVar(&removeAssignees, "remove-assignee", nil, "assignee to remove (repeatable)")
+	return cmd
+}
+
+// newIssueCloseCmd builds "github issue close <repo> <number>", which closes an
+// issue after approval.
+//
+// @arg server Pointer to the resolved --server flag value.
+// @arg jsonOut Pointer to the inherited --json flag value.
+// @return *cobra.Command The issue close command.
+//
+// @testcase TestRootCommandTree reaches this command through the tree.
+func newIssueCloseCmd(server *string, jsonOut *bool) *cobra.Command {
+	var reason string
+	cmd := &cobra.Command{
+		Use:   "close <repo> <number>",
+		Short: "Close a GitHub issue",
+		Args:  cobra.ExactArgs(2),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			number, err := strconv.Atoi(args[1])
+			if err != nil || number <= 0 {
+				return fmt.Errorf("invalid issue number %q", args[1])
+			}
+			req := api.OperationRequest{
+				Type:   "github.issue.close",
+				Params: map[string]any{"repo": args[0], "number": number, "reason": reason},
+			}
+			return runIssueAction(cmd.Context(), client.New(*server), req, "close the issue", "closed", cmd.OutOrStdout(), *jsonOut)
+		},
+	}
+	cmd.Flags().StringVarP(&reason, "reason", "r", "", `reason: "completed" or "not planned"`)
+	return cmd
+}
+
+// newIssueReopenCmd builds "github issue reopen <repo> <number>", which reopens an
+// issue after approval.
+//
+// @arg server Pointer to the resolved --server flag value.
+// @arg jsonOut Pointer to the inherited --json flag value.
+// @return *cobra.Command The issue reopen command.
+//
+// @testcase TestRootCommandTree reaches this command through the tree.
+func newIssueReopenCmd(server *string, jsonOut *bool) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "reopen <repo> <number>",
+		Short: "Reopen a GitHub issue",
+		Args:  cobra.ExactArgs(2),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			number, err := strconv.Atoi(args[1])
+			if err != nil || number <= 0 {
+				return fmt.Errorf("invalid issue number %q", args[1])
+			}
+			req := api.OperationRequest{
+				Type:   "github.issue.reopen",
+				Params: map[string]any{"repo": args[0], "number": number},
+			}
+			return runIssueAction(cmd.Context(), client.New(*server), req, "reopen the issue", "reopened", cmd.OutOrStdout(), *jsonOut)
+		},
+	}
+	return cmd
+}
+
+// runIssueAction requests authorization for a mutating issue action and, once
+// authorised, reports the updated issue.
+//
+// @arg ctx Context for cancellation.
+// @arg c The HTTP client to the granular server.
+// @arg req The operation request.
+// @arg action The verb phrase for the pending "re-run to <action>" hint.
+// @arg past The past-tense verb used in the success line, e.g. "closed".
+// @arg out The writer for user-facing output.
+// @arg jsonOut When true, print the raw updated-issue JSON.
+// @error error when authorization or the action fails.
+//
+// @testcase TestRunIssueActionReportsResult prints the updated issue number and URL.
+func runIssueAction(ctx context.Context, c *client.Client, req api.OperationRequest, action, past string, out io.Writer, jsonOut bool) error {
+	resp, done, err := authorize(ctx, c, req, action, out)
+	if err != nil || done {
+		return err
+	}
+	if jsonOut {
+		return printJSON(out, resp.Result)
+	}
+	fmt.Fprintf(out, "Issue #%v %s: %v\n", asInt(resp.Result["number"]), past, resp.Result["html_url"])
+	return nil
+}
+
 // runIssueComment requests authorization to post a comment and, once authorised,
 // posts it and reports the created comment.
 //

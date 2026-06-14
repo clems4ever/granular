@@ -61,17 +61,49 @@ func getJSON(ctx context.Context, token, endpoint string, dst any) error {
 // @arg endpoint The fully-qualified request URL.
 // @arg payload The value marshalled as the JSON request body.
 // @arg dst A pointer the JSON response body is decoded into (may be nil to discard).
-// @error error when the request cannot be built, the call fails, GitHub returns a non-2xx status, or the body cannot be decoded.
+// @error error when the request fails, GitHub returns a non-2xx status, or the body cannot be decoded.
 //
 // @testcase TestIssueCommentExecutePosts posts a comment via postJSON.
 // @testcase TestIssueCreateExecutePosts posts a new issue via postJSON.
 func postJSON(ctx context.Context, token, endpoint string, payload, dst any) error {
+	return sendJSON(ctx, http.MethodPost, token, endpoint, payload, dst)
+}
+
+// patchJSON performs an authenticated PATCH against the GitHub REST API with a
+// JSON payload and decodes the (2xx) response body into dst.
+//
+// @arg ctx Context for cancellation of the call.
+// @arg token The GitHub token; when empty the request is sent unauthenticated.
+// @arg endpoint The fully-qualified request URL.
+// @arg payload The value marshalled as the JSON request body.
+// @arg dst A pointer the JSON response body is decoded into (may be nil to discard).
+// @error error when the request fails, GitHub returns a non-2xx status, or the body cannot be decoded.
+//
+// @testcase TestIssueCloseExecutePatches closes an issue via patchJSON.
+// @testcase TestIssueEditExecutePatches edits an issue via patchJSON.
+func patchJSON(ctx context.Context, token, endpoint string, payload, dst any) error {
+	return sendJSON(ctx, http.MethodPatch, token, endpoint, payload, dst)
+}
+
+// sendJSON marshals payload, sends it with the given method to the GitHub REST
+// API, and decodes the (2xx) response body into dst.
+//
+// @arg ctx Context for cancellation of the call.
+// @arg method The HTTP method (POST or PATCH).
+// @arg token The GitHub token; when empty the request is sent unauthenticated.
+// @arg endpoint The fully-qualified request URL.
+// @arg payload The value marshalled as the JSON request body.
+// @arg dst A pointer the JSON response body is decoded into (may be nil to discard).
+// @error error when the request cannot be built, the call fails, GitHub returns a non-2xx status, or the body cannot be decoded.
+//
+// @testcase TestIssueCommentExecutePosts drives sendJSON via postJSON.
+func sendJSON(ctx context.Context, method, token, endpoint string, payload, dst any) error {
 	encoded, err := json.Marshal(payload)
 	if err != nil {
 		return err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewReader(encoded))
+	req, err := http.NewRequestWithContext(ctx, method, endpoint, bytes.NewReader(encoded))
 	if err != nil {
 		return err
 	}
