@@ -82,6 +82,8 @@ command** after approval performs the clone.
 | GET    | `/approve/{id}`       | Human-facing approval page (HTML form).                       |
 | POST   | `/approve/{id}`       | Submit approval (decision + expiry) or rejection.             |
 | any    | `/git/{owner}/{repo}.git/...` | Authenticating git proxy. Re-checks the repo's grant, injects the PAT, forwards read (upload-pack) traffic to github.com. Refuses receive-pack (push). |
+| GET    | `/catalog`            | HTML capability catalog: resource hierarchy, verb lattice, CLI operations. |
+| GET    | `/api/catalog`        | JSON capability manifest (for the agent).                   |
 
 `POST /api/operations` request body:
 

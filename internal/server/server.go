@@ -48,6 +48,8 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /approve/{id}", s.handleApprovePage)
 	mux.HandleFunc("POST /approve/{id}", s.handleApproveSubmit)
 	mux.HandleFunc("/git/{rest...}", s.handleGitProxy)
+	mux.HandleFunc("GET /catalog", s.handleCatalogPage)
+	mux.HandleFunc("GET /api/catalog", s.handleCatalogJSON)
 	return mux
 }
 

@@ -176,6 +176,35 @@ func TestRepoFromGitPath(t *testing.T) {
 	}
 }
 
+func TestCatalogPageRenders(t *testing.T) {
+	ts := testServer(t)
+	resp, err := http.Get(ts.URL + "/catalog")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("want 200, got %d", resp.StatusCode)
+	}
+	html := readBody(t, resp)
+	for _, want := range []string{"capability catalog", "github.issue", "issue.view", "granular github issue view"} {
+		if !strings.Contains(html, want) {
+			t.Errorf("catalog page missing %q", want)
+		}
+	}
+}
+
+func TestCatalogJSON(t *testing.T) {
+	ts := testServer(t)
+	resp, err := http.Get(ts.URL + "/api/catalog")
+	if err != nil {
+		t.Fatal(err)
+	}
+	body := decode(t, resp)
+	if body["resources"] == nil || body["actions"] == nil {
+		t.Fatalf("catalog JSON missing resources/actions: %v", body)
+	}
+}
+
 func TestParseTTLFallsBack(t *testing.T) {
 	if parseTTL("").Hours() != 1 {
 		t.Errorf("empty should default to 1h")
