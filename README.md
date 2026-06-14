@@ -102,10 +102,33 @@ bin/granular github issue view octocat/Hello-World 1 --comments --json | jq '.co
 discussion is a distinct permission from viewing the issue's metadata. The raw
 comments array is returned under the `comments_list` key.
 
+### Comment on an issue
+
+```sh
+bin/granular github issue comment octocat/Hello-World 1 --body "Thanks, on it"
+bin/granular github issue comment octocat/Hello-World 1 --body-file note.md   # "-" for stdin
+```
+
+### Create an issue
+
+```sh
+bin/granular github issue create octocat/Hello-World \
+  --title "Something is broken" --body "Steps to reproduce…" \
+  --label bug --label p1 --assignee octocat
+```
+
+`comment` and `create` are **writes** (`gh issue comment` / `gh issue create`):
+
+- The grant is **content-scoped** — the approval covers exactly the body/title you
+  submitted, so changing the text requires a new approval. The approval page shows
+  the full content for the human to review.
+- The server PAT (`GRANULAR_GITHUB_TOKEN`) must have **write** access to the repo.
+
 ### JSON output
 
-Both issue commands accept `--json` to emit GitHub's **raw** result (every
-attribute, unmodified) instead of formatted text, for piping into tools like `jq`:
+The issue commands accept `--json` to emit GitHub's **raw** result (every
+attribute, unmodified) instead of formatted text, for piping into tools like `jq`
+(for `comment`/`create` this is the created object):
 
 ```sh
 bin/granular github issue list octocat/Hello-World --json | jq '.[].title'
@@ -123,7 +146,9 @@ granular
     ├── clone <repo> <dest> [--ref]
     └── issue
         ├── list <repo> [--state] [--limit]
-        └── view <repo> <number> [--comments]
+        ├── view <repo> <number> [--comments]
+        ├── comment <repo> <number> --body|--body-file
+        └── create <repo> --title [--body] [--label] [--assignee]
 ```
 
 ## Adding an operation

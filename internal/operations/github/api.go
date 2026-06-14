@@ -1,7 +1,10 @@
 package github
 
 import (
+	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -48,4 +51,66 @@ func getJSON(ctx context.Context, token, endpoint string, dst any) error {
 		return fmt.Errorf("github returned %d: %s", resp.StatusCode, string(body))
 	}
 	return json.NewDecoder(resp.Body).Decode(dst)
+}
+
+// postJSON performs an authenticated POST against the GitHub REST API with a JSON
+// payload and decodes the (2xx) response body into dst.
+//
+// @arg ctx Context for cancellation of the call.
+// @arg token The GitHub token; when empty the request is sent unauthenticated.
+// @arg endpoint The fully-qualified request URL.
+// @arg payload The value marshalled as the JSON request body.
+// @arg dst A pointer the JSON response body is decoded into (may be nil to discard).
+// @error error when the request cannot be built, the call fails, GitHub returns a non-2xx status, or the body cannot be decoded.
+//
+// @testcase TestIssueCommentExecutePosts posts a comment via postJSON.
+// @testcase TestIssueCreateExecutePosts posts a new issue via postJSON.
+func postJSON(ctx context.Context, token, endpoint string, payload, dst any) error {
+	encoded, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewReader(encoded))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Accept", "application/vnd.github+json")
+	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
+	req.Header.Set("Content-Type", "application/json")
+	if token != "" {
+		req.Header.Set("Authorization", "Bearer "+token)
+	}
+
+	resp, err := apiClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		body, _ := io.ReadAll(io.LimitReader(resp.Body, 2048))
+		return fmt.Errorf("github returned %d: %s", resp.StatusCode, string(body))
+	}
+	if dst == nil {
+		return nil
+	}
+	return json.NewDecoder(resp.Body).Decode(dst)
+}
+
+// contentHash returns a short, stable hash of the given content parts, used to
+// scope a write grant to exactly the content being submitted (so changing the
+// text requires a fresh approval).
+//
+// @arg parts The content strings to hash together.
+// @return string The first 12 hex characters of the SHA-256 of the parts.
+//
+// @testcase TestIssueCommentPermissionKeyIsContentScoped relies on the hash differing per body.
+func contentHash(parts ...string) string {
+	h := sha256.New()
+	for _, p := range parts {
+		h.Write([]byte(p))
+		h.Write([]byte{0})
+	}
+	return hex.EncodeToString(h.Sum(nil))[:12]
 }

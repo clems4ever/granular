@@ -24,6 +24,8 @@ func TestRootCommandTree(t *testing.T) {
 		{"github", "issue"},
 		{"github", "issue", "list"},
 		{"github", "issue", "view"},
+		{"github", "issue", "comment"},
+		{"github", "issue", "create"},
 	} {
 		cmd, _, err := root.Find(path)
 		if err != nil || cmd.Name() != path[len(path)-1] {
@@ -181,6 +183,61 @@ func TestRunIssueViewPrintsComments(t *testing.T) {
 	got := out.String()
 	if !strings.Contains(got, "a comment") || !strings.Contains(got, "alice wrote") {
 		t.Fatalf("comments not rendered: %q", got)
+	}
+}
+
+func TestRunIssueCommentPendingPrintsURL(t *testing.T) {
+	ts := fixedServer(t, http.StatusAccepted, `{"status":"pending","request_id":"req1","approval_url":"http://x/approve/req1"}`)
+	var out bytes.Buffer
+	req := api.OperationRequest{Type: "github.issue.comment", Params: map[string]any{"repo": "a/b", "number": 1, "body": "hi"}}
+	if err := runIssueComment(context.Background(), client.New(ts.URL), req, &out, false); err != nil {
+		t.Fatalf("runIssueComment: %v", err)
+	}
+	if !strings.Contains(out.String(), "http://x/approve/req1") || !strings.Contains(out.String(), "post the comment") {
+		t.Fatalf("expected approval URL and hint, got: %q", out.String())
+	}
+}
+
+func TestRunIssueCommentReportsResult(t *testing.T) {
+	ts := fixedServer(t, http.StatusOK, `{"status":"completed","result":{"html_url":"http://gh/c/99"}}`)
+	var out bytes.Buffer
+	req := api.OperationRequest{Type: "github.issue.comment", Params: map[string]any{"repo": "a/b", "number": 1, "body": "hi"}}
+	if err := runIssueComment(context.Background(), client.New(ts.URL), req, &out, false); err != nil {
+		t.Fatalf("runIssueComment: %v", err)
+	}
+	if !strings.Contains(out.String(), "http://gh/c/99") {
+		t.Fatalf("expected comment URL, got: %q", out.String())
+	}
+}
+
+func TestRunIssueCreateReportsResult(t *testing.T) {
+	ts := fixedServer(t, http.StatusOK, `{"status":"completed","result":{"number":42,"html_url":"http://gh/i/42"}}`)
+	var out bytes.Buffer
+	req := api.OperationRequest{Type: "github.issue.create", Params: map[string]any{"repo": "a/b", "title": "t"}}
+	if err := runIssueCreate(context.Background(), client.New(ts.URL), req, &out, false); err != nil {
+		t.Fatalf("runIssueCreate: %v", err)
+	}
+	got := out.String()
+	if !strings.Contains(got, "#42") || !strings.Contains(got, "http://gh/i/42") {
+		t.Fatalf("expected issue number and URL, got: %q", got)
+	}
+}
+
+func TestResolveBodyFromFile(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "body.txt")
+	if err := os.WriteFile(path, []byte("from file"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	got, err := resolveBody("inline", path, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != "from file" {
+		t.Fatalf("body-file should win: %q", got)
+	}
+	if got, _ := resolveBody("inline", "", nil); got != "inline" {
+		t.Fatalf("inline body expected, got %q", got)
 	}
 }
 

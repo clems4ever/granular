@@ -55,6 +55,8 @@ func run() error {
 	registry.Register(githubops.TypeClone, githubops.Clone)
 	registry.Register(githubops.TypeIssueList, githubops.IssueList)
 	registry.Register(githubops.TypeIssueView, githubops.IssueView)
+	registry.Register(githubops.TypeIssueComment, githubops.IssueComment)
+	registry.Register(githubops.TypeIssueCreate, githubops.IssueCreate)
 
 	srv := server.New(registry, store, env, baseURL)
 

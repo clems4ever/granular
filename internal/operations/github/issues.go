@@ -133,3 +133,28 @@ func boolParam(params map[string]any, key string) bool {
 	b, _ := params[key].(bool)
 	return b
 }
+
+// stringsParam reads a string-slice parameter, accepting either a []string or a
+// JSON-decoded []any of strings, and returns the contained strings.
+//
+// @arg params The parameter map from the wire request.
+// @arg key The parameter name to read.
+// @return []string The string values, or an empty slice when absent.
+//
+// @testcase TestIssueCreatePermissionKeyIsContentScoped uses labels via this helper.
+func stringsParam(params map[string]any, key string) []string {
+	switch v := params[key].(type) {
+	case []string:
+		return v
+	case []any:
+		out := make([]string, 0, len(v))
+		for _, e := range v {
+			if s, ok := e.(string); ok {
+				out = append(out, s)
+			}
+		}
+		return out
+	default:
+		return nil
+	}
+}

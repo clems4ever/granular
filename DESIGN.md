@@ -149,6 +149,27 @@ permission key gains a `+comments` suffix (`github.issue.view:owner/name#7+comme
 so reading an issue's discussion is approved independently from its metadata, while
 the CLI surface still matches `gh issue view --comments`.
 
+## Write operations: `github.issue.comment` and `github.issue.create`
+
+`granular github issue comment <repo> <number> --body …` posts a comment
+(`gh issue comment`); `granular github issue create <repo> --title … [--body …]
+[--label …] [--assignee …]` opens an issue (`gh issue create`). Both are
+server-executed `POST`s and return GitHub's created object verbatim.
+
+Because they **mutate**, two things differ from the read operations:
+
+- **Content-scoped grants.** The permission key includes a hash of the submitted
+  content — `github.issue.comment:owner/name#7:<hash(body)>`,
+  `github.issue.create:owner/name:<hash(title,body,labels,assignees)>`. So the
+  approver authorises *exactly* what gets written; changing the text requires a
+  fresh approval. The approval page's description shows the full body/title so the
+  human sees what they are signing off.
+- **Write scope required.** The server PAT (`GRANULAR_GITHUB_TOKEN`) needs write
+  access to the repository, unlike the read-only list/view which work on public
+  repos even unauthenticated.
+
+The body can come from `--body` or `--body-file` (`-` reads stdin), mirroring `gh`.
+
 ### Raw pass-through
 
 Both issue operations decode GitHub's response into generic JSON (`[]any` /
@@ -198,7 +219,8 @@ internal/cli/          CLI command tree, one file per command:
                          cli.go, github.go, github_clone.go, github_issue.go
 internal/api/          wire types shared by client & server
 internal/operations/   Operation interface, registry
-internal/operations/github/  clone.go, issues.go (issue.list), issue_view.go (issue.view)
+internal/operations/github/  clone.go, api.go (REST helpers), issues.go (issue.list),
+                             issue_view.go, issue_comment.go, issue_create.go
 internal/grants/       delegation-request + grant store (bbolt)
 internal/server/       HTTP handlers, approval UI, git proxy
 internal/client/       HTTP client used by the CLI
