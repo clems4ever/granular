@@ -3,6 +3,7 @@ package cli
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -22,6 +23,7 @@ func TestRootCommandTree(t *testing.T) {
 		{"github", "clone"},
 		{"github", "issue"},
 		{"github", "issue", "list"},
+		{"github", "issue", "view"},
 	} {
 		cmd, _, err := root.Find(path)
 		if err != nil || cmd.Name() != path[len(path)-1] {
@@ -86,7 +88,7 @@ func TestRunIssueListPendingPrintsURL(t *testing.T) {
 	ts := fixedServer(t, http.StatusAccepted, `{"status":"pending","request_id":"req1","approval_url":"http://x/approve/req1"}`)
 	var out bytes.Buffer
 	req := api.OperationRequest{Type: "github.issue.list", Params: map[string]any{"repo": "a/b"}}
-	if err := runIssueList(context.Background(), client.New(ts.URL), req, &out); err != nil {
+	if err := runIssueList(context.Background(), client.New(ts.URL), req, &out, false); err != nil {
 		t.Fatalf("runIssueList: %v", err)
 	}
 	if !strings.Contains(out.String(), "http://x/approve/req1") || !strings.Contains(out.String(), "list the issues") {
@@ -95,16 +97,76 @@ func TestRunIssueListPendingPrintsURL(t *testing.T) {
 }
 
 func TestRunIssueListPrintsIssues(t *testing.T) {
-	body := `{"status":"completed","result":{"issues":[{"number":7,"title":"Fix the bug","state":"open","author":"octocat"}]}}`
+	body := `{"status":"completed","result":{"issues":[{"number":7,"title":"Fix the bug","state":"open","user":{"login":"octocat"}}]}}`
 	ts := fixedServer(t, http.StatusOK, body)
 	var out bytes.Buffer
 	req := api.OperationRequest{Type: "github.issue.list", Params: map[string]any{"repo": "a/b"}}
-	if err := runIssueList(context.Background(), client.New(ts.URL), req, &out); err != nil {
+	if err := runIssueList(context.Background(), client.New(ts.URL), req, &out, false); err != nil {
 		t.Fatalf("runIssueList: %v", err)
 	}
 	got := out.String()
 	if !strings.Contains(got, "#7") || !strings.Contains(got, "Fix the bug") || !strings.Contains(got, "octocat") {
 		t.Fatalf("issue line not rendered: %q", got)
+	}
+}
+
+func TestRunIssueViewPendingPrintsURL(t *testing.T) {
+	ts := fixedServer(t, http.StatusAccepted, `{"status":"pending","request_id":"req1","approval_url":"http://x/approve/req1"}`)
+	var out bytes.Buffer
+	req := api.OperationRequest{Type: "github.issue.view", Params: map[string]any{"repo": "a/b", "number": 7}}
+	if err := runIssueView(context.Background(), client.New(ts.URL), req, &out, false); err != nil {
+		t.Fatalf("runIssueView: %v", err)
+	}
+	if !strings.Contains(out.String(), "http://x/approve/req1") || !strings.Contains(out.String(), "view the issue") {
+		t.Fatalf("expected approval URL and hint, got: %q", out.String())
+	}
+}
+
+func TestRunIssueViewPrintsIssue(t *testing.T) {
+	body := `{"status":"completed","result":{"number":7,"title":"the title","state":"open","user":{"login":"octocat"},"labels":[{"name":"bug"}],"comments":2,"body":"the body","html_url":"u"}}`
+	ts := fixedServer(t, http.StatusOK, body)
+	var out bytes.Buffer
+	req := api.OperationRequest{Type: "github.issue.view", Params: map[string]any{"repo": "a/b", "number": 7}}
+	if err := runIssueView(context.Background(), client.New(ts.URL), req, &out, false); err != nil {
+		t.Fatalf("runIssueView: %v", err)
+	}
+	got := out.String()
+	if !strings.Contains(got, "#7") || !strings.Contains(got, "the title") || !strings.Contains(got, "the body") || !strings.Contains(got, "octocat") || !strings.Contains(got, "bug") {
+		t.Fatalf("issue details not rendered: %q", got)
+	}
+}
+
+func TestRunIssueListJSON(t *testing.T) {
+	body := `{"status":"completed","result":{"issues":[{"number":7,"title":"Fix the bug","state":"open","author":"octocat"}]}}`
+	ts := fixedServer(t, http.StatusOK, body)
+	var out bytes.Buffer
+	req := api.OperationRequest{Type: "github.issue.list", Params: map[string]any{"repo": "a/b"}}
+	if err := runIssueList(context.Background(), client.New(ts.URL), req, &out, true); err != nil {
+		t.Fatalf("runIssueList: %v", err)
+	}
+	var decoded []map[string]any
+	if err := json.Unmarshal(out.Bytes(), &decoded); err != nil {
+		t.Fatalf("output is not a JSON array: %v\n%s", err, out.String())
+	}
+	if len(decoded) != 1 || decoded[0]["title"] != "Fix the bug" {
+		t.Fatalf("unexpected JSON: %s", out.String())
+	}
+}
+
+func TestRunIssueViewJSON(t *testing.T) {
+	body := `{"status":"completed","result":{"number":7,"title":"the title","state":"open"}}`
+	ts := fixedServer(t, http.StatusOK, body)
+	var out bytes.Buffer
+	req := api.OperationRequest{Type: "github.issue.view", Params: map[string]any{"repo": "a/b", "number": 7}}
+	if err := runIssueView(context.Background(), client.New(ts.URL), req, &out, true); err != nil {
+		t.Fatalf("runIssueView: %v", err)
+	}
+	var decoded map[string]any
+	if err := json.Unmarshal(out.Bytes(), &decoded); err != nil {
+		t.Fatalf("output is not a JSON object: %v\n%s", err, out.String())
+	}
+	if decoded["title"] != "the title" {
+		t.Fatalf("unexpected JSON: %s", out.String())
 	}
 }
 

@@ -70,9 +70,38 @@ bin/granular github issue list octocat/Hello-World --state closed --limit 50
 ```
 
 Listing is **server-executed**: once approved, the server calls the GitHub API
-with the PAT and returns the issues (pull requests excluded). The grant is scoped
-to the repository **and** the `--state`, so approving "open" issues does not also
+with the PAT and returns GitHub's response verbatim (every attribute; the GitHub
+issues endpoint also includes pull requests). The grant is scoped to the
+repository **and** the `--state`, so approving "open" issues does not also
 authorise "closed" ones.
+
+### View an issue
+
+```sh
+bin/granular github issue view octocat/Hello-World 1
+#  Approval required. Open this URL ...   (first time, then re-run after approving)
+#  #1  Edited README via GitHub
+#  State:    closed
+#  Author:   unoju
+#  ...
+```
+
+Also server-executed. The grant is scoped to the **specific issue**
+(`github.issue.view:owner/name#1`), so approving one issue does not authorise
+viewing another.
+
+### JSON output
+
+Both issue commands accept `--json` to emit GitHub's **raw** result (every
+attribute, unmodified) instead of formatted text, for piping into tools like `jq`:
+
+```sh
+bin/granular github issue list octocat/Hello-World --json | jq '.[].title'
+bin/granular github issue view octocat/Hello-World 1 --json | jq '{number,title,state}'
+```
+
+`--json` is a persistent flag on `github issue`, so every issue sub-command (now
+and future) inherits it. It is not offered on `clone`, whose output is git's.
 
 ## Command tree
 
@@ -81,7 +110,8 @@ granular
 └── github
     ├── clone <repo> <dest> [--ref]
     └── issue
-        └── list <repo> [--state] [--limit]
+        ├── list <repo> [--state] [--limit]
+        └── view <repo> <number>
 ```
 
 ## Adding an operation

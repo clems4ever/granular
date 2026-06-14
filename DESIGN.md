@@ -123,13 +123,33 @@ is repo-scoped (see below). Push (`git-receive-pack`) is refused by the proxy.
 `granular github issue list <repo> [--state open|closed|all] [--limit N]` lists a
 repository's issues. Unlike clone, this is **server-executed**: once a grant
 exists, the server calls the GitHub REST API (`GET /repos/{repo}/issues`) with the
-PAT, filters out pull requests, and returns the issues in the operation result;
-the CLI prints them. Nothing is proxied because the result is small structured
-data, not a stream the client must own.
+PAT and returns GitHub's response **verbatim** (every attribute, every item — note
+GitHub's issues endpoint also includes pull requests) under `result.issues`; the
+CLI text view shows a one-line summary, and `--json` emits the raw array. Nothing
+is proxied because the result is structured data, not a stream the client owns.
 
 The grant is scoped to the repository **and the requested state**
 (`github.issue.list:owner/name?state=open`), so approving "list open issues" does
 not authorise listing closed ones — a concrete example of the granular model.
+
+## Third operation: `github.issue.view`
+
+`granular github issue view <repo> <number>` shows a single issue's details
+(`gh issue view`). Also server-executed: on a live grant the server calls
+`GET /repos/{repo}/issues/{number}` with the PAT and returns GitHub's issue object
+**verbatim**. The CLI text view renders a few fields; `--json` emits the full raw
+object. The grant is scoped to the **specific issue**
+(`github.issue.view:owner/name#7`), so approving one issue does not authorise
+viewing another.
+
+### Raw pass-through
+
+Both issue operations decode GitHub's response into generic JSON (`[]any` /
+`map[string]any`) and return it unchanged, rather than projecting a curated subset.
+So `--json` matches what the GitHub API returns. The text renderers read GitHub's
+native field names (`user.login`, `html_url`, `labels[].name`). Trade-off: a
+delegated caller with `--json` sees every attribute GitHub returns — broaden the
+operation if you need to *narrow* what a grant exposes.
 
 ## Two execution models
 
@@ -171,7 +191,7 @@ internal/cli/          CLI command tree, one file per command:
                          cli.go, github.go, github_clone.go, github_issue.go
 internal/api/          wire types shared by client & server
 internal/operations/   Operation interface, registry
-internal/operations/github/  clone.go (github.clone), issues.go (github.issue.list)
+internal/operations/github/  clone.go, issues.go (issue.list), issue_view.go (issue.view)
 internal/grants/       delegation-request + grant store (bbolt)
 internal/server/       HTTP handlers, approval UI, git proxy
 internal/client/       HTTP client used by the CLI

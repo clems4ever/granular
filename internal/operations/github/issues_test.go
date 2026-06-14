@@ -36,7 +36,7 @@ func TestIssueListDescribe(t *testing.T) {
 	}
 }
 
-func TestIssueListExecuteParsesAndFiltersPRs(t *testing.T) {
+func TestIssueListExecuteReturnsRaw(t *testing.T) {
 	stub := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/repos/owner/name/issues" {
 			t.Errorf("unexpected path %q", r.URL.Path)
@@ -46,8 +46,8 @@ func TestIssueListExecuteParsesAndFiltersPRs(t *testing.T) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = w.Write([]byte(`[
-			{"number":1,"title":"a real issue","state":"open","html_url":"u1","user":{"login":"alice"}},
-			{"number":2,"title":"a pull request","state":"open","html_url":"u2","user":{"login":"bob"},"pull_request":{}}
+			{"number":1,"title":"a real issue","state":"open","html_url":"u1","user":{"login":"alice"},"locked":false},
+			{"number":2,"title":"a pull request","state":"open","html_url":"u2","user":{"login":"bob"},"pull_request":{"url":"p"}}
 		]`))
 	}))
 	defer stub.Close()
@@ -61,15 +61,20 @@ func TestIssueListExecuteParsesAndFiltersPRs(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	issues, ok := result["issues"].([]map[string]any)
+	issues, ok := result["issues"].([]any)
 	if !ok {
 		t.Fatalf("issues not a slice: %T", result["issues"])
 	}
-	if len(issues) != 1 {
-		t.Fatalf("expected 1 issue (PR filtered out), got %d", len(issues))
+	// Raw pass-through: nothing filtered, all attributes preserved.
+	if len(issues) != 2 {
+		t.Fatalf("expected 2 raw items (no filtering), got %d", len(issues))
 	}
-	if issues[0]["title"] != "a real issue" || issues[0]["author"] != "alice" {
-		t.Fatalf("unexpected issue: %v", issues[0])
+	first := issues[0].(map[string]any)
+	if first["title"] != "a real issue" || first["locked"] != false {
+		t.Fatalf("raw attributes not preserved: %v", first)
+	}
+	if _, hasPR := issues[1].(map[string]any)["pull_request"]; !hasPR {
+		t.Fatalf("pull_request attribute should be preserved in raw output")
 	}
 }
 

@@ -85,14 +85,15 @@ func (o *IssueListOperation) Describe() string {
 	return fmt.Sprintf("List %s issues of GitHub repository %s", o.state, o.repo)
 }
 
-// Execute calls the GitHub REST API to list the repository's issues (excluding
-// pull requests) and returns them as structured result entries.
+// Execute calls the GitHub REST API to list the repository's issues and returns
+// GitHub's response verbatim (every attribute, every item) under "issues". Note
+// the GitHub issues endpoint also includes pull requests.
 //
 // @arg ctx Context for cancellation of the API call.
-// @return map[string]any Result with an "issues" slice of {number,title,state,author,url}.
+// @return map[string]any Result with "issues" set to GitHub's raw issue array.
 // @error error when the request cannot be built, the call fails, or GitHub returns non-200.
 //
-// @testcase TestIssueListExecuteParsesAndFiltersPRs lists issues against a stub API.
+// @testcase TestIssueListExecuteReturnsRaw lists issues against a stub API.
 func (o *IssueListOperation) Execute(ctx context.Context) (map[string]any, error) {
 	endpoint := fmt.Sprintf("%s/repos/%s/issues?state=%s&per_page=%s",
 		apiBaseURL, o.repo, url.QueryEscape(o.state), strconv.Itoa(o.limit))
@@ -118,32 +119,9 @@ func (o *IssueListOperation) Execute(ctx context.Context) (map[string]any, error
 		return nil, fmt.Errorf("list issues: github returned %d: %s", resp.StatusCode, string(body))
 	}
 
-	var raw []struct {
-		Number  int    `json:"number"`
-		Title   string `json:"title"`
-		State   string `json:"state"`
-		HTMLURL string `json:"html_url"`
-		User    struct {
-			Login string `json:"login"`
-		} `json:"user"`
-		PullRequest *struct{} `json:"pull_request"`
-	}
-	if err := json.NewDecoder(resp.Body).Decode(&raw); err != nil {
+	var issues []any
+	if err := json.NewDecoder(resp.Body).Decode(&issues); err != nil {
 		return nil, fmt.Errorf("decode issues: %w", err)
-	}
-
-	issues := make([]map[string]any, 0, len(raw))
-	for _, it := range raw {
-		if it.PullRequest != nil {
-			continue // the issues endpoint also returns PRs; exclude them
-		}
-		issues = append(issues, map[string]any{
-			"number": it.Number,
-			"title":  it.Title,
-			"state":  it.State,
-			"author": it.User.Login,
-			"url":    it.HTMLURL,
-		})
 	}
 	return map[string]any{"issues": issues}, nil
 }
