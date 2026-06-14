@@ -11,12 +11,52 @@
       <span class="badge badge-{{.Status}}">{{.Status}}</span>.
     </p>
   {{else}}
-    <div class="desc">{{.Description}}</div>
-    <p class="kv">Operation: <code>{{.OperationType}}</code></p>
+    <p class="lead">An agent is asking permission to perform the action below. Nothing
+      happens until you approve, and the grant expires after the time you choose.</p>
+
+    <!-- 1. What will happen -->
+    <section class="review-block">
+      <p class="block-label">What will happen</p>
+      <p class="summary">{{.Summary}}</p>
+    </section>
+
+    <!-- 2. The exact content being submitted (only when there is a body) -->
+    {{if .Detail}}
+    <section class="review-block">
+      <p class="block-label">Exact content to be submitted</p>
+      <blockquote class="content-body">{{.Detail}}</blockquote>
+      <p class="hint">This grant is tied to this exact text — changing it later requires a new approval.</p>
+    </section>
+    {{end}}
+
+    <!-- 3. What this grants, in plain language -->
+    {{if .Granted}}
+    <section class="review-block">
+      <p class="block-label">This grants the agent permission to</p>
+      <ul class="grant-list">
+        {{range .Granted}}
+        <li>
+          <span class="badge badge-{{.Kind}}">{{.Kind}}</span>
+          <span class="grant-title">{{.Title}}</span>
+          {{if .Description}}<span class="grant-desc">— {{.Description}}</span>{{end}}
+        </li>
+        {{end}}
+      </ul>
+      {{if .Scopes}}
+      <p class="block-label" style="margin-top:1rem">Limited to</p>
+      <ul class="scope-list">
+        {{range .Scopes}}<li><span class="scope-kind">{{.Kind}}</span> <code>{{.ID}}</code></li>{{end}}
+      </ul>
+      {{end}}
+    </section>
+    {{end}}
+
+    <p class="kv">Operation type: <code>{{.OperationType}}</code></p>
 
     {{if .Policies}}
     <details>
-      <summary>Cedar policies this would grant ({{len .Policies}})</summary>
+      <summary>Advanced: the exact Cedar policies this would add ({{len .Policies}})</summary>
+      <p class="hint">These are the machine-enforced rules behind the plain-language summary above.</p>
       <pre><code>{{range .Policies}}{{.}}
 
 {{end}}</code></pre>
@@ -29,6 +69,7 @@
         <select id="ttl" name="ttl">
           {{range .TTLOptions}}<option value="{{.Value}}">{{.Label}}</option>{{end}}
         </select>
+        <p class="hint">After this window the permission disappears and a fresh approval is needed.</p>
       </div>
       <div class="form-actions">
         <button class="btn btn-primary" type="submit" name="decision" value="approve">Approve</button>

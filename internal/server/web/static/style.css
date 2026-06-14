@@ -235,7 +235,40 @@ summary:hover { color: var(--text); }
   border-left: 3px solid var(--accent);
   border-radius: var(--radius-sm); padding: .9rem 1.1rem; margin: 1rem 0 1.4rem;
 }
-.kv { color: var(--muted); font-size: .9rem; margin: .25rem 0; }
+.kv { color: var(--muted); font-size: .9rem; margin: .9rem 0 .25rem; }
+
+/* ---------- approval review blocks ---------- */
+.review-block {
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: .9rem 1.1rem; margin: 1rem 0;
+  background: var(--surface);
+}
+.block-label {
+  text-transform: uppercase; letter-spacing: .06em;
+  font-size: .7rem; font-weight: 700; color: var(--muted);
+  margin: 0 0 .5rem;
+}
+.summary { font-size: 1.08rem; font-weight: 600; margin: 0; line-height: 1.45; }
+.content-body {
+  white-space: pre-wrap; margin: 0; padding: .75rem 1rem;
+  background: #fbfbfd; border-left: 3px solid var(--accent);
+  border-radius: 6px; font-size: .95rem; color: var(--text);
+}
+.hint { color: var(--muted); font-size: .82rem; margin: .55rem 0 0; }
+
+.grant-list { list-style: none; padding: 0; margin: 0; }
+.grant-list li {
+  display: flex; align-items: baseline; gap: .55rem;
+  padding: .4rem 0; border-bottom: 1px solid var(--border); flex-wrap: wrap;
+}
+.grant-list li:last-child { border-bottom: none; }
+.grant-title { font-weight: 600; }
+.grant-desc { color: var(--muted); font-size: .9rem; }
+.badge-group { background: var(--accent-soft); color: var(--accent-strong); }
+
+.scope-list { list-style: none; padding: 0; margin: 0; }
+.scope-list li { padding: .25rem 0; font-size: .92rem; }
+.scope-kind { color: var(--muted); font-size: .82rem; margin-right: .35rem; }
 
 /* ---------- result ---------- */
 .result-icon {
