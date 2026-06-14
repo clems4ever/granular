@@ -77,6 +77,30 @@ func IssueRef(full string, number int) ResourceRef {
 	return ResourceRef{Type: "github.issue", ID: fmt.Sprintf("%s#%d", full, number), Parent: &repo}
 }
 
+// PullRef builds a resource reference for a pull request, parented to its repo.
+//
+// @arg full The "owner/name" repository.
+// @arg number The pull request number.
+// @return ResourceRef The pull request reference.
+//
+// @testcase TestPullAndBranchRefs builds a pull requirement parented to its repo.
+func PullRef(full string, number int) ResourceRef {
+	repo := RepoRef(full)
+	return ResourceRef{Type: "github.pull", ID: fmt.Sprintf("%s#%d", full, number), Parent: &repo}
+}
+
+// BranchRef builds a resource reference for a branch, parented to its repo.
+//
+// @arg full The "owner/name" repository.
+// @arg branch The branch name.
+// @return ResourceRef The branch reference.
+//
+// @testcase TestPullAndBranchRefs builds a branch requirement parented to its repo.
+func BranchRef(full, branch string) ResourceRef {
+	repo := RepoRef(full)
+	return ResourceRef{Type: "github.branch", ID: full + ":" + branch, Parent: &repo}
+}
+
 // AllowsAll reports whether the active policy set authorizes every requirement for
 // the principal.
 //

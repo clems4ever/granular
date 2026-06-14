@@ -21,6 +21,7 @@ func TestRootCommandTree(t *testing.T) {
 	for _, path := range [][]string{
 		{"github"},
 		{"github", "clone"},
+		{"github", "push"},
 		{"github", "issue"},
 		{"github", "issue", "list"},
 		{"github", "issue", "view"},
@@ -29,6 +30,17 @@ func TestRootCommandTree(t *testing.T) {
 		{"github", "issue", "edit"},
 		{"github", "issue", "close"},
 		{"github", "issue", "reopen"},
+		{"github", "pr"},
+		{"github", "pr", "list"},
+		{"github", "pr", "view"},
+		{"github", "pr", "diff"},
+		{"github", "pr", "create"},
+		{"github", "pr", "comment"},
+		{"github", "pr", "review"},
+		{"github", "pr", "edit"},
+		{"github", "pr", "merge"},
+		{"github", "pr", "close"},
+		{"github", "pr", "reopen"},
 		{"request"},
 		{"catalog"},
 	} {
@@ -289,5 +301,145 @@ func runGit(t *testing.T, dir string, args ...string) {
 	cmd.Dir = dir
 	if out, err := cmd.CombinedOutput(); err != nil {
 		t.Fatalf("git %s: %v\n%s", strings.Join(args, " "), err, out)
+	}
+}
+
+func TestRunPullListPrintsPulls(t *testing.T) {
+	body := `{"status":"completed","result":{"pulls":[{"number":7,"title":"Add feature","state":"open","user":{"login":"octocat"}}]}}`
+	ts := fixedServer(t, http.StatusOK, body)
+	var out bytes.Buffer
+	req := api.OperationRequest{Type: "github.pull.list", Params: map[string]any{"repo": "a/b"}}
+	if err := runPullList(context.Background(), client.New(ts.URL), req, &out, false); err != nil {
+		t.Fatalf("runPullList: %v", err)
+	}
+	got := out.String()
+	if !strings.Contains(got, "#7") || !strings.Contains(got, "Add feature") || !strings.Contains(got, "octocat") {
+		t.Fatalf("pull line not rendered: %q", got)
+	}
+}
+
+func TestRunPullListJSON(t *testing.T) {
+	body := `{"status":"completed","result":{"pulls":[{"number":7,"title":"Add feature"}]}}`
+	ts := fixedServer(t, http.StatusOK, body)
+	var out bytes.Buffer
+	req := api.OperationRequest{Type: "github.pull.list", Params: map[string]any{"repo": "a/b"}}
+	if err := runPullList(context.Background(), client.New(ts.URL), req, &out, true); err != nil {
+		t.Fatalf("runPullList: %v", err)
+	}
+	var decoded []map[string]any
+	if err := json.Unmarshal(out.Bytes(), &decoded); err != nil {
+		t.Fatalf("output is not a JSON array: %v\n%s", err, out.String())
+	}
+	if len(decoded) != 1 || decoded[0]["title"] != "Add feature" {
+		t.Fatalf("unexpected JSON: %s", out.String())
+	}
+}
+
+func TestRunPullViewPrintsPull(t *testing.T) {
+	body := `{"status":"completed","result":{"number":7,"title":"the pr","state":"open","user":{"login":"octocat"},"head":{"ref":"feature"},"base":{"ref":"main"},"body":"the body","html_url":"u"}}`
+	ts := fixedServer(t, http.StatusOK, body)
+	var out bytes.Buffer
+	req := api.OperationRequest{Type: "github.pull.view", Params: map[string]any{"repo": "a/b", "number": 7}}
+	if err := runPullView(context.Background(), client.New(ts.URL), req, &out, false); err != nil {
+		t.Fatalf("runPullView: %v", err)
+	}
+	got := out.String()
+	if !strings.Contains(got, "the pr") || !strings.Contains(got, "feature -> main") || !strings.Contains(got, "the body") {
+		t.Fatalf("pull details not rendered: %q", got)
+	}
+}
+
+func TestRunPullDiffPrintsDiff(t *testing.T) {
+	body := `{"status":"completed","result":{"diff":"diff --git a/x b/x\n+new\n"}}`
+	ts := fixedServer(t, http.StatusOK, body)
+	var out bytes.Buffer
+	req := api.OperationRequest{Type: "github.pull.diff", Params: map[string]any{"repo": "a/b", "number": 7}}
+	if err := runPullDiff(context.Background(), client.New(ts.URL), req, &out, false); err != nil {
+		t.Fatalf("runPullDiff: %v", err)
+	}
+	if !strings.Contains(out.String(), "diff --git a/x b/x") {
+		t.Fatalf("diff not rendered: %q", out.String())
+	}
+}
+
+func TestRunPullActionReportsResult(t *testing.T) {
+	ts := fixedServer(t, http.StatusOK, `{"status":"completed","result":{"number":5,"html_url":"http://gh/pr/5"}}`)
+	var out bytes.Buffer
+	req := api.OperationRequest{Type: "github.pull.merge", Params: map[string]any{"repo": "a/b", "number": 5}}
+	if err := runPullAction(context.Background(), client.New(ts.URL), req, "merge the pull request", "merged", &out, false); err != nil {
+		t.Fatalf("runPullAction: %v", err)
+	}
+	got := out.String()
+	if !strings.Contains(got, "#5") || !strings.Contains(got, "merged") || !strings.Contains(got, "http://gh/pr/5") {
+		t.Fatalf("unexpected output: %q", got)
+	}
+}
+
+func TestRunPullCommentReportsResult(t *testing.T) {
+	ts := fixedServer(t, http.StatusOK, `{"status":"completed","result":{"html_url":"http://gh/c/1"}}`)
+	var out bytes.Buffer
+	req := api.OperationRequest{Type: "github.pull.comment", Params: map[string]any{"repo": "a/b", "number": 1, "body": "hi"}}
+	if err := runPullComment(context.Background(), client.New(ts.URL), req, &out, false); err != nil {
+		t.Fatalf("runPullComment: %v", err)
+	}
+	if !strings.Contains(out.String(), "http://gh/c/1") {
+		t.Fatalf("expected comment URL, got: %q", out.String())
+	}
+}
+
+func TestRunPullCreateReportsResult(t *testing.T) {
+	ts := fixedServer(t, http.StatusOK, `{"status":"completed","result":{"number":42,"html_url":"http://gh/pr/42"}}`)
+	var out bytes.Buffer
+	req := api.OperationRequest{Type: "github.pull.create", Params: map[string]any{"repo": "a/b", "title": "t", "head": "f", "base": "m"}}
+	if err := runPullCreate(context.Background(), client.New(ts.URL), req, &out, false); err != nil {
+		t.Fatalf("runPullCreate: %v", err)
+	}
+	got := out.String()
+	if !strings.Contains(got, "#42") || !strings.Contains(got, "http://gh/pr/42") {
+		t.Fatalf("expected pull request number and URL, got: %q", got)
+	}
+}
+
+func TestRunPushPendingPrintsURL(t *testing.T) {
+	ts := fixedServer(t, http.StatusAccepted, `{"status":"pending","request_id":"req1","approval_url":"http://x/approve/req1"}`)
+	var out bytes.Buffer
+	req := api.OperationRequest{Type: "github.push", Params: map[string]any{"repo": "a/b"}}
+	if err := runPush(context.Background(), client.New(ts.URL), req, "/tmp/dir", "", &out); err != nil {
+		t.Fatalf("runPush: %v", err)
+	}
+	if !strings.Contains(out.String(), "http://x/approve/req1") || !strings.Contains(out.String(), "perform the push") {
+		t.Fatalf("expected approval URL and hint, got: %q", out.String())
+	}
+}
+
+func TestRunPushPushesViaProxy(t *testing.T) {
+	if _, err := exec.LookPath("git"); err != nil {
+		t.Skip("git not available")
+	}
+	// A bare remote stands in for the proxy endpoint.
+	remote := filepath.Join(t.TempDir(), "remote.git")
+	runGit(t, t.TempDir(), "init", "--bare", remote)
+
+	// A local repository with one commit on branch main.
+	local := filepath.Join(t.TempDir(), "local")
+	if err := os.MkdirAll(local, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	runGit(t, local, "init", "-b", "main")
+	if err := os.WriteFile(filepath.Join(local, "f.txt"), []byte("hi"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	runGit(t, local, "add", ".")
+	runGit(t, local, "-c", "user.email=t@t", "-c", "user.name=t", "commit", "-m", "init")
+
+	ts := fixedServer(t, http.StatusOK, `{"status":"completed","result":{"push_url":"`+remote+`","repo":"a/b"}}`)
+	var out bytes.Buffer
+	req := api.OperationRequest{Type: "github.push", Params: map[string]any{"repo": "a/b"}}
+	if err := runPush(context.Background(), client.New(ts.URL), req, local, "", &out); err != nil {
+		t.Fatalf("runPush: %v\n%s", err, out.String())
+	}
+	// The branch must now exist in the remote.
+	if out := exec.Command("git", "-C", remote, "rev-parse", "--verify", "main").Run(); out != nil {
+		t.Fatalf("push did not create main in the remote")
 	}
 }

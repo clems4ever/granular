@@ -12,7 +12,9 @@ func newGithubCmd(server *string) *cobra.Command {
 	cmd := &cobra.Command{Use: "github", Short: "GitHub operations"}
 	cmd.AddCommand(
 		newCloneCmd(server),
+		newPushCmd(server),
 		newIssueCmd(server),
+		newPullCmd(server),
 	)
 	return cmd
 }

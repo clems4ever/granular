@@ -78,3 +78,21 @@ func TestPoliciesFromCapabilitiesRejectsUnknownAction(t *testing.T) {
 		t.Fatal("expected error for unknown action")
 	}
 }
+
+func TestPullAndBranchRefs(t *testing.T) {
+	pull := PullRef("owner/name", 7)
+	if pull.Type != "github.pull" || pull.ID != "owner/name#7" {
+		t.Fatalf("unexpected pull ref %+v", pull)
+	}
+	if pull.Parent == nil || pull.Parent.Type != "github.repo" || pull.Parent.ID != "owner/name" {
+		t.Fatalf("pull ref should be parented to its repo: %+v", pull.Parent)
+	}
+
+	branch := BranchRef("owner/name", "feature/x")
+	if branch.Type != "github.branch" || branch.ID != "owner/name:feature/x" {
+		t.Fatalf("unexpected branch ref %+v", branch)
+	}
+	if branch.Parent == nil || branch.Parent.ID != "owner/name" {
+		t.Fatalf("branch ref should be parented to its repo: %+v", branch.Parent)
+	}
+}

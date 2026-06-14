@@ -18,6 +18,8 @@ import (
 
 // main configures and starts the granular HTTP server, reading its settings from
 // the environment.
+//
+// @testcase TestMainIsEntryPoint is a placeholder; main only delegates to run.
 func main() {
 	if err := run(); err != nil {
 		log.Fatal(err)
@@ -27,7 +29,7 @@ func main() {
 // run builds the server from environment configuration and serves until the
 // process is stopped.
 //
-// @return error Any error from configuration or from ListenAndServe.
+// @error error Any error from configuration or from ListenAndServe.
 //
 // @testcase TestRunRejectsBadWorkspace is a placeholder for config validation tests.
 func run() error {
@@ -60,6 +62,17 @@ func run() error {
 	registry.Register(githubops.TypeIssueEdit, githubops.IssueEdit)
 	registry.Register(githubops.TypeIssueClose, githubops.IssueClose)
 	registry.Register(githubops.TypeIssueReopen, githubops.IssueReopen)
+	registry.Register(githubops.TypePush, githubops.Push)
+	registry.Register(githubops.TypePullList, githubops.PullList)
+	registry.Register(githubops.TypePullView, githubops.PullView)
+	registry.Register(githubops.TypePullDiff, githubops.PullDiff)
+	registry.Register(githubops.TypePullCreate, githubops.PullCreate)
+	registry.Register(githubops.TypePullComment, githubops.PullComment)
+	registry.Register(githubops.TypePullReview, githubops.PullReview)
+	registry.Register(githubops.TypePullEdit, githubops.PullEdit)
+	registry.Register(githubops.TypePullMerge, githubops.PullMerge)
+	registry.Register(githubops.TypePullClose, githubops.PullClose)
+	registry.Register(githubops.TypePullReopen, githubops.PullReopen)
 
 	srv := server.New(registry, store, env, baseURL)
 

@@ -15,13 +15,15 @@ var githubHost = &url.URL{Scheme: "https", Host: "github.com"}
 
 // handleGitProxy reverse-proxies git smart-HTTP requests under /git/ to
 // github.com, injecting the server-held PAT, after verifying a live grant exists
-// for the targeted repository. Only read (upload-pack / clone) traffic is allowed.
+// for the targeted repository. Read (upload-pack / clone) traffic requires a
+// repo.clone grant; write (receive-pack / push) traffic requires a repo.push
+// grant, so cloning and pushing are authorised independently.
 //
 // @arg w The response writer; the upstream response is streamed through it.
 // @arg r The git client's request carrying the {rest...} path value.
 //
-// @testcase TestGitProxyDeniesWithoutGrant returns 403 when no grant exists.
-// @testcase TestGitProxyRejectsPush returns 403 for receive-pack traffic.
+// @testcase TestGitProxyDeniesWithoutGrant returns 403 when no clone grant exists.
+// @testcase TestGitProxyDeniesPushWithoutGrant returns 403 for receive-pack without a push grant.
 func (s *Server) handleGitProxy(w http.ResponseWriter, r *http.Request) {
 	rest := r.PathValue("rest")
 	repo, ok := repoFromGitPath(rest)
@@ -30,18 +32,18 @@ func (s *Server) handleGitProxy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	action, verb := "repo.clone", "clone"
 	if isPush(rest, r) {
-		http.Error(w, "push is not allowed through the granular proxy", http.StatusForbidden)
-		return
+		action, verb = "repo.push", "push to"
 	}
 
-	allowed, err := s.authorize([]authz.Requirement{{Action: "repo.clone", Resource: authz.RepoRef(repo)}})
+	allowed, err := s.authorize([]authz.Requirement{{Action: action, Resource: authz.RepoRef(repo)}})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	if !allowed {
-		http.Error(w, "no live grant for "+repo+"; request approval first", http.StatusForbidden)
+		http.Error(w, "no live grant to "+verb+" "+repo+"; request approval first", http.StatusForbidden)
 		return
 	}
 

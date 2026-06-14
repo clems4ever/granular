@@ -85,6 +85,57 @@ func patchJSON(ctx context.Context, token, endpoint string, payload, dst any) er
 	return sendJSON(ctx, http.MethodPatch, token, endpoint, payload, dst)
 }
 
+// putJSON performs an authenticated PUT against the GitHub REST API with a JSON
+// payload and decodes the (2xx) response body into dst.
+//
+// @arg ctx Context for cancellation of the call.
+// @arg token The GitHub token; when empty the request is sent unauthenticated.
+// @arg endpoint The fully-qualified request URL.
+// @arg payload The value marshalled as the JSON request body.
+// @arg dst A pointer the JSON response body is decoded into (may be nil to discard).
+// @error error when the request fails, GitHub returns a non-2xx status, or the body cannot be decoded.
+//
+// @testcase TestPullMergeExecutePuts merges a pull request via putJSON.
+func putJSON(ctx context.Context, token, endpoint string, payload, dst any) error {
+	return sendJSON(ctx, http.MethodPut, token, endpoint, payload, dst)
+}
+
+// getRaw performs an authenticated GET against the GitHub REST API requesting the
+// given media type (e.g. "application/vnd.github.diff") and returns the response
+// body verbatim, without JSON decoding.
+//
+// @arg ctx Context for cancellation of the call.
+// @arg token The GitHub token; when empty the request is sent unauthenticated.
+// @arg endpoint The fully-qualified request URL.
+// @arg accept The Accept media type to request.
+// @return string The response body as received from GitHub.
+// @error error when the request cannot be built, the call fails, or GitHub returns a non-200 status.
+//
+// @testcase TestPullDiffExecuteReturnsRaw fetches a unified diff via getRaw.
+func getRaw(ctx context.Context, token, endpoint, accept string) (string, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Accept", accept)
+	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
+	if token != "" {
+		req.Header.Set("Authorization", "Bearer "+token)
+	}
+
+	resp, err := apiClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("github returned %d: %s", resp.StatusCode, string(body[:min(len(body), 2048)]))
+	}
+	return string(body), nil
+}
+
 // sendJSON marshals payload, sends it with the given method to the GitHub REST
 // API, and decodes the (2xx) response body into dst.
 //

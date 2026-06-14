@@ -155,14 +155,14 @@ func TestGitProxyDeniesWithoutGrant(t *testing.T) {
 	}
 }
 
-func TestGitProxyRejectsPush(t *testing.T) {
+func TestGitProxyDeniesPushWithoutGrant(t *testing.T) {
 	ts := testServer(t)
 	resp, err := http.Get(ts.URL + "/git/owner/name.git/info/refs?service=git-receive-pack")
 	if err != nil {
 		t.Fatal(err)
 	}
 	if resp.StatusCode != http.StatusForbidden {
-		t.Fatalf("want 403 for push, got %d", resp.StatusCode)
+		t.Fatalf("want 403 for push without grant, got %d", resp.StatusCode)
 	}
 	if !strings.Contains(readBody(t, resp), "push") {
 		t.Fatalf("expected a push-related message")
