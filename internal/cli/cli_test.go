@@ -29,6 +29,8 @@ func TestRootCommandTree(t *testing.T) {
 		{"github", "issue", "edit"},
 		{"github", "issue", "close"},
 		{"github", "issue", "reopen"},
+		{"request"},
+		{"catalog"},
 	} {
 		cmd, _, err := root.Find(path)
 		if err != nil || cmd.Name() != path[len(path)-1] {
@@ -266,6 +268,18 @@ func TestResolveBodyFromFile(t *testing.T) {
 	}
 	if got, _ := resolveBody("inline", "", nil); got != "inline" {
 		t.Fatalf("inline body expected, got %q", got)
+	}
+}
+
+func TestRunRequestPrintsURL(t *testing.T) {
+	ts := fixedServer(t, http.StatusAccepted, `{"status":"pending","request_id":"req1","approval_url":"http://x/approve/req1"}`)
+	var out bytes.Buffer
+	req := api.PermissionsRequest{Capabilities: []api.Capability{{Actions: []string{"issues.read"}, Resource: api.ResourceSelector{Type: "github.repo", Match: map[string]string{"owner": "o", "name": "n"}}}}}
+	if err := runRequest(context.Background(), client.New(ts.URL), req, &out); err != nil {
+		t.Fatalf("runRequest: %v", err)
+	}
+	if !strings.Contains(out.String(), "http://x/approve/req1") {
+		t.Fatalf("expected approval URL, got: %q", out.String())
 	}
 }
 

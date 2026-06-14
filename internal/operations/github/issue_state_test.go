@@ -28,14 +28,11 @@ func TestIssueCloseFactoryValidatesParams(t *testing.T) {
 	}
 }
 
-func TestIssueClosePermissionKey(t *testing.T) {
-	plain, _ := IssueClose(map[string]any{"repo": "o/n", "number": 5}, operations.Env{})
-	if plain.PermissionKey() != "github.issue.close:o/n#5" {
-		t.Fatalf("unexpected key %q", plain.PermissionKey())
-	}
-	withReason, _ := IssueClose(map[string]any{"repo": "o/n", "number": 5, "reason": "not planned"}, operations.Env{})
-	if withReason.PermissionKey() != "github.issue.close:o/n#5:not_planned" {
-		t.Fatalf("unexpected key %q", withReason.PermissionKey())
+func TestIssueCloseRequirements(t *testing.T) {
+	op, _ := IssueClose(map[string]any{"repo": "o/n", "number": 5}, operations.Env{})
+	reqs := op.Requirements()
+	if len(reqs) != 1 || reqs[0].Action != "issue.close" || reqs[0].Resource.ID != "o/n#5" {
+		t.Fatalf("unexpected requirements %+v", reqs)
 	}
 }
 
@@ -82,10 +79,11 @@ func TestIssueReopenFactoryValidatesParams(t *testing.T) {
 	}
 }
 
-func TestIssueReopenPermissionKey(t *testing.T) {
+func TestIssueReopenRequirements(t *testing.T) {
 	op, _ := IssueReopen(map[string]any{"repo": "o/n", "number": 5}, operations.Env{})
-	if op.PermissionKey() != "github.issue.reopen:o/n#5" {
-		t.Fatalf("unexpected key %q", op.PermissionKey())
+	reqs := op.Requirements()
+	if len(reqs) != 1 || reqs[0].Action != "issue.reopen" || reqs[0].Resource.ID != "o/n#5" {
+		t.Fatalf("unexpected requirements %+v", reqs)
 	}
 }
 

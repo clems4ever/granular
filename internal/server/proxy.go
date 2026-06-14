@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/clems4ever/granular/internal/authz"
 	githubops "github.com/clems4ever/granular/internal/operations/github"
 )
 
@@ -34,12 +35,12 @@ func (s *Server) handleGitProxy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	live, err := s.store.HasLiveGrant(githubops.PermissionKeyForRepo(repo))
+	allowed, err := s.authorize([]authz.Requirement{{Action: "repo.clone", Resource: authz.RepoRef(repo)}})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	if !live {
+	if !allowed {
 		http.Error(w, "no live grant for "+repo+"; request approval first", http.StatusForbidden)
 		return
 	}

@@ -29,14 +29,15 @@ func TestIssueEditFactoryValidatesParams(t *testing.T) {
 	}
 }
 
-func TestIssueEditPermissionKeyIsContentScoped(t *testing.T) {
+func TestIssueEditRequirementsAreContentScoped(t *testing.T) {
 	a, _ := IssueEdit(map[string]any{"repo": "o/n", "number": 1, "title": "A"}, operations.Env{})
 	b, _ := IssueEdit(map[string]any{"repo": "o/n", "number": 1, "title": "B"}, operations.Env{})
-	if a.PermissionKey() == b.PermissionKey() {
-		t.Fatalf("different edits must yield different keys")
+	ra, rb := a.Requirements(), b.Requirements()
+	if ra[0].Action != "issue.edit" || ra[0].Resource.ID != "o/n#1" {
+		t.Fatalf("unexpected requirement %+v", ra[0])
 	}
-	if !strings.HasPrefix(a.PermissionKey(), "github.issue.edit:o/n#1:") {
-		t.Fatalf("unexpected key %q", a.PermissionKey())
+	if ra[0].Context["change_hash"] == rb[0].Context["change_hash"] {
+		t.Fatalf("different edits must yield different change_hash context")
 	}
 }
 

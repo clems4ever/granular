@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/clems4ever/granular/internal/api"
+	"github.com/clems4ever/granular/internal/authz"
 	"github.com/clems4ever/granular/internal/grants"
 	"github.com/clems4ever/granular/internal/operations"
 )
@@ -44,6 +45,7 @@ func New(registry *operations.Registry, store *grants.Store, env operations.Env,
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /api/operations", s.handleOperation)
+	mux.HandleFunc("POST /api/permissions", s.handlePermissions)
 	mux.HandleFunc("GET /api/requests/{id}", s.handleRequestStatus)
 	mux.HandleFunc("GET /approve/{id}", s.handleApprovePage)
 	mux.HandleFunc("POST /approve/{id}", s.handleApproveSubmit)
@@ -74,14 +76,14 @@ func (s *Server) handleOperation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	permKey := op.PermissionKey()
-	live, err := s.store.HasLiveGrant(permKey)
+	allowed, err := s.authorize(op.Requirements())
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, api.OperationResponse{Error: err.Error()})
 		return
 	}
-	if !live {
-		dr, err := s.store.CreateRequest(op.Type(), permKey, op.Describe(), req.Params)
+	if !allowed {
+		proposed := authz.MinimalPermits(authz.Principal(), op.Requirements())
+		dr, err := s.store.CreateRequest(op.Type(), op.Describe(), proposed, req.Params)
 		if err != nil {
 			writeJSON(w, http.StatusInternalServerError, api.OperationResponse{Error: err.Error()})
 			return
@@ -100,6 +102,21 @@ func (s *Server) handleOperation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, api.OperationResponse{Status: api.StatusCompleted, Result: result})
+}
+
+// authorize reports whether the active stored policies allow every requirement.
+//
+// @arg reqs The operation's authorization requirements.
+// @return bool True when all requirements are allowed by the active policies.
+// @error error when policies cannot be loaded or fail to parse.
+//
+// @testcase TestOperationPendingThenApprovedThenCompleted drives the allow path.
+func (s *Server) authorize(reqs []authz.Requirement) (bool, error) {
+	policies, err := s.store.ActivePolicies()
+	if err != nil {
+		return false, err
+	}
+	return authz.AllowsAll(policies, authz.Principal(), reqs)
 }
 
 // handleRequestStatus handles GET /api/requests/{id}: it reports a delegation

@@ -153,10 +153,39 @@ bin/granular github issue view octocat/Hello-World 1 --json | jq '{number,title,
 `--json` is a persistent flag on `github issue`, so every issue sub-command (now
 and future) inherits it. It is not offered on `clone`, whose output is git's.
 
+## Pre-approving a scoped set of permissions
+
+Instead of approving one operation at a time, request a **bundle** up front.
+Authorization is decided by [Cedar](https://www.cedarpolicy.com/) policies, so a
+single broad grant covers every concrete operation it allows.
+
+```sh
+bin/granular catalog          # see resources, actions, verb groups, and the request schema
+
+cat > req.json <<'JSON'
+{ "reason": "work on granular",
+  "capabilities": [
+    { "actions": ["repo.clone", "issues.read", "comment.read", "pulls.read"],
+      "resource": { "type": "github.repo", "match": {"owner": "clems4ever", "name": "granular"} } }
+  ] }
+JSON
+bin/granular request -f req.json     # prints an approval URL; approve once
+```
+
+After approving, `github issue list`, `github issue view` (incl. `--comments`),
+clone, etc. all work under that one grant — no per-operation prompts. A write or a
+repo outside the bundle still triggers its own approval. `match` `name: "*"` widens a
+capability to every repo under the owner.
+
+The vocabulary in `catalog` (resource types, actions, verb groups like `issues.read`)
+is exactly what an agent reads to build a `request`.
+
 ## Command tree
 
 ```
 granular
+├── catalog                       # print the capability manifest (vocabulary + request schema)
+├── request -f req.json           # pre-approve a custom scoped capability bundle
 └── github
     ├── clone <repo> <dest> [--ref]
     └── issue

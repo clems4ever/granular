@@ -3,6 +3,7 @@ package grants
 import (
 	"errors"
 	"path/filepath"
+	"strconv"
 	"testing"
 	"time"
 
@@ -23,38 +24,38 @@ func fixedStore(t *testing.T, now time.Time) (*Store, *time.Time) {
 	counter := 0
 	s.newID = func() string {
 		counter++
-		return "id-" + string(rune('0'+counter))
+		return "id-" + strconv.Itoa(counter)
 	}
 	return s, &clock
 }
 
-func mustCreate(t *testing.T, s *Store, permKey string) *DelegationRequest {
+func mustCreate(t *testing.T, s *Store, proposed ...string) *DelegationRequest {
 	t.Helper()
-	req, err := s.CreateRequest("github.clone", permKey, "desc", map[string]any{"repo": "a/b"})
+	req, err := s.CreateRequest("github.clone", "desc", proposed, map[string]any{"repo": "a/b"})
 	if err != nil {
 		t.Fatalf("create request: %v", err)
 	}
 	return req
 }
 
-func mustHaveLiveGrant(t *testing.T, s *Store, permKey string) bool {
+func mustActive(t *testing.T, s *Store) []string {
 	t.Helper()
-	live, err := s.HasLiveGrant(permKey)
+	p, err := s.ActivePolicies()
 	if err != nil {
-		t.Fatalf("has live grant: %v", err)
+		t.Fatalf("active policies: %v", err)
 	}
-	return live
+	return p
 }
 
 func TestCreateAndGetRequest(t *testing.T) {
 	s, _ := fixedStore(t, time.Unix(0, 0))
-	req := mustCreate(t, s, "key")
+	req := mustCreate(t, s, "permit ( principal, action, resource );")
 	if req.Status != api.StatusPending {
 		t.Fatalf("want pending, got %s", req.Status)
 	}
 	got, err := s.GetRequest(req.ID)
-	if err != nil || got.ID != req.ID {
-		t.Fatalf("request not retrievable: %v", err)
+	if err != nil || got.ID != req.ID || len(got.ProposedPolicies) != 1 {
+		t.Fatalf("request not retrievable: %v %+v", err, got)
 	}
 }
 
@@ -65,14 +66,15 @@ func TestGetMissingRequest(t *testing.T) {
 	}
 }
 
-func TestApproveCreatesLiveGrant(t *testing.T) {
+func TestApproveStoresActivePolicies(t *testing.T) {
 	s, _ := fixedStore(t, time.Unix(0, 0))
-	req := mustCreate(t, s, "key")
+	req := mustCreate(t, s, "permit ( principal, action, resource );")
 	if _, err := s.Approve(req.ID, time.Hour); err != nil {
 		t.Fatalf("approve: %v", err)
 	}
-	if !mustHaveLiveGrant(t, s, "key") {
-		t.Fatalf("expected live grant")
+	active := mustActive(t, s)
+	if len(active) != 1 || active[0] != "permit ( principal, action, resource );" {
+		t.Fatalf("unexpected active policies: %v", active)
 	}
 	if got, _ := s.GetRequest(req.ID); got.Status != api.StatusApproved {
 		t.Fatalf("want approved, got %s", got.Status)
@@ -86,33 +88,33 @@ func TestApproveMissingRequest(t *testing.T) {
 	}
 }
 
-func TestExpiredGrantIsNotLive(t *testing.T) {
+func TestExpiredPolicyIsDropped(t *testing.T) {
 	s, clock := fixedStore(t, time.Unix(0, 0))
-	req := mustCreate(t, s, "key")
+	req := mustCreate(t, s, "permit ( principal, action, resource );")
 	if _, err := s.Approve(req.ID, time.Minute); err != nil {
 		t.Fatalf("approve: %v", err)
 	}
 	*clock = clock.Add(2 * time.Minute)
-	if mustHaveLiveGrant(t, s, "key") {
-		t.Fatalf("expected grant to be expired")
+	if active := mustActive(t, s); len(active) != 0 {
+		t.Fatalf("expected no active policies, got %v", active)
 	}
 }
 
 func TestRejectRequest(t *testing.T) {
 	s, _ := fixedStore(t, time.Unix(0, 0))
-	req := mustCreate(t, s, "key")
+	req := mustCreate(t, s, "permit ( principal, action, resource );")
 	if _, err := s.Reject(req.ID); err != nil {
 		t.Fatalf("reject: %v", err)
 	}
-	if mustHaveLiveGrant(t, s, "key") {
-		t.Fatalf("reject must not create a grant")
+	if active := mustActive(t, s); len(active) != 0 {
+		t.Fatalf("reject must not store a policy, got %v", active)
 	}
 	if got, _ := s.GetRequest(req.ID); got.Status != api.StatusRejected {
 		t.Fatalf("want rejected, got %s", got.Status)
 	}
 }
 
-func TestGrantSurvivesReopen(t *testing.T) {
+func TestPolicySurvivesReopen(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "persist.db")
 
@@ -120,7 +122,7 @@ func TestGrantSurvivesReopen(t *testing.T) {
 	if err != nil {
 		t.Fatalf("open: %v", err)
 	}
-	req, err := s.CreateRequest("github.clone", "key", "desc", nil)
+	req, err := s.CreateRequest("github.clone", "desc", []string{"permit ( principal, action, resource );"}, nil)
 	if err != nil {
 		t.Fatalf("create: %v", err)
 	}
@@ -134,11 +136,7 @@ func TestGrantSurvivesReopen(t *testing.T) {
 		t.Fatalf("reopen: %v", err)
 	}
 	defer reopened.Close()
-	live, err := reopened.HasLiveGrant("key")
-	if err != nil {
-		t.Fatalf("has live grant: %v", err)
-	}
-	if !live {
-		t.Fatalf("grant did not survive reopen")
+	if active, _ := reopened.ActivePolicies(); len(active) != 1 {
+		t.Fatalf("policy did not survive reopen: %v", active)
 	}
 }

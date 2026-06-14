@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/clems4ever/granular/internal/authz"
 	"github.com/clems4ever/granular/internal/operations"
 )
 
@@ -60,17 +61,21 @@ func IssueCreate(params map[string]any, env operations.Env) (operations.Operatio
 // @testcase TestIssueCreatePermissionKeyIsContentScoped exercises a built operation.
 func (o *IssueCreateOperation) Type() string { return TypeIssueCreate }
 
-// PermissionKey returns a grant key scoped to the repository and the exact issue
-// content (title, body, labels, assignees), so approving one issue does not
-// authorise creating a different one.
+// Requirements authorizes creating an issue in the repository, qualified by a hash
+// of the exact content (title, body, labels, assignees), so approving one issue
+// does not authorise creating a different one.
 //
-// @return string A key of the form "github.issue.create:<owner/name>:<hash>".
+// @return []authz.Requirement A single issue.create requirement, context-scoped to the content.
 //
-// @testcase TestIssueCreatePermissionKeyIsContentScoped checks the key changes with content.
-func (o *IssueCreateOperation) PermissionKey() string {
+// @testcase TestIssueCreateRequirementsAreContentScoped checks the content hash context.
+func (o *IssueCreateOperation) Requirements() []authz.Requirement {
 	parts := append([]string{o.title, o.body}, o.labels...)
 	parts = append(parts, o.assignees...)
-	return fmt.Sprintf("%s:%s:%s", TypeIssueCreate, o.repo, contentHash(parts...))
+	return []authz.Requirement{{
+		Action:   "issue.create",
+		Resource: authz.RepoRef(o.repo),
+		Context:  map[string]string{"content_hash": contentHash(parts...)},
+	}}
 }
 
 // Describe returns a human summary for the approval page, including the title and

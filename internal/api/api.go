@@ -47,3 +47,25 @@ type RequestStatusResponse struct {
 	Status    OperationStatus `json:"status"`
 	Error     string          `json:"error,omitempty"`
 }
+
+// PermissionsRequest is the body of POST /api/permissions: a custom, scoped bundle
+// of capabilities the agent asks a human to pre-approve. Each capability names a
+// set of actions (catalog action or group names) on a resource selector.
+type PermissionsRequest struct {
+	Reason       string       `json:"reason,omitempty"`
+	Capabilities []Capability `json:"capabilities"`
+}
+
+// Capability grants a set of actions on resources matched by a selector.
+type Capability struct {
+	Actions  []string         `json:"actions"`
+	Resource ResourceSelector `json:"resource"`
+}
+
+// ResourceSelector picks the resources a capability applies to: a catalog resource
+// type plus matcher fields (e.g. {"owner":"clems4ever","name":"granular"}; a "*"
+// value widens, e.g. name "*" means all repos under the owner).
+type ResourceSelector struct {
+	Type  string            `json:"type"`
+	Match map[string]string `json:"match"`
+}

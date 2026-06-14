@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/clems4ever/granular/internal/authz"
 	"github.com/clems4ever/granular/internal/operations"
 )
 
@@ -60,14 +61,19 @@ func IssueComment(params map[string]any, env operations.Env) (operations.Operati
 // @testcase TestIssueCommentPermissionKeyIsContentScoped exercises a built operation.
 func (o *IssueCommentOperation) Type() string { return TypeIssueComment }
 
-// PermissionKey returns a grant key scoped to the issue and the exact comment
-// content, so approving one comment does not authorise posting a different one.
+// Requirements authorizes posting the comment on the issue, qualified by a hash of
+// the exact body so approving one comment does not authorise posting a different
+// one.
 //
-// @return string A key of the form "github.issue.comment:<owner/name>#<number>:<hash>".
+// @return []authz.Requirement A single issue.comment requirement, context-scoped to the body.
 //
-// @testcase TestIssueCommentPermissionKeyIsContentScoped checks the key changes with the body.
-func (o *IssueCommentOperation) PermissionKey() string {
-	return fmt.Sprintf("%s:%s#%d:%s", TypeIssueComment, o.repo, o.number, contentHash(o.body))
+// @testcase TestIssueCommentRequirementsAreContentScoped checks the body hash context.
+func (o *IssueCommentOperation) Requirements() []authz.Requirement {
+	return []authz.Requirement{{
+		Action:   "issue.comment",
+		Resource: authz.IssueRef(o.repo, o.number),
+		Context:  map[string]string{"body_hash": contentHash(o.body)},
+	}}
 }
 
 // Describe returns a human summary for the approval page, including the comment

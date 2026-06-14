@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/clems4ever/granular/internal/authz"
 	"github.com/clems4ever/granular/internal/operations"
 )
 
@@ -92,13 +93,13 @@ func (o *IssueEditOperation) hasChanges() bool {
 // @testcase TestIssueEditPermissionKeyIsContentScoped exercises a built operation.
 func (o *IssueEditOperation) Type() string { return TypeIssueEdit }
 
-// PermissionKey returns a grant key scoped to the issue and the exact set of
-// changes, so approving one edit does not authorise a different one.
+// Requirements authorizes editing the issue, qualified by a hash of the exact set
+// of changes, so approving one edit does not authorise a different one.
 //
-// @return string A key of the form "github.issue.edit:<owner/name>#<number>:<hash>".
+// @return []authz.Requirement A single issue.edit requirement, context-scoped to the change set.
 //
-// @testcase TestIssueEditPermissionKeyIsContentScoped checks the key changes with the edit.
-func (o *IssueEditOperation) PermissionKey() string {
+// @testcase TestIssueEditRequirementsAreContentScoped checks the change-set hash context.
+func (o *IssueEditOperation) Requirements() []authz.Requirement {
 	var parts []string
 	if o.titleSet {
 		parts = append(parts, "title="+o.title)
@@ -112,7 +113,11 @@ func (o *IssueEditOperation) PermissionKey() string {
 		"addA="+strings.Join(o.addAssignees, ","),
 		"rmA="+strings.Join(o.removeAssignees, ","),
 	)
-	return fmt.Sprintf("%s:%s#%d:%s", TypeIssueEdit, o.repo, o.number, contentHash(parts...))
+	return []authz.Requirement{{
+		Action:   "issue.edit",
+		Resource: authz.IssueRef(o.repo, o.number),
+		Context:  map[string]string{"change_hash": contentHash(parts...)},
+	}}
 }
 
 // Describe returns a human summary of the requested changes for the approval page.

@@ -17,14 +17,11 @@ func TestIssueListFactoryRequiresRepo(t *testing.T) {
 	}
 }
 
-func TestIssueListPermissionKeyIncludesState(t *testing.T) {
-	open, _ := IssueList(map[string]any{"repo": "owner/name"}, operations.Env{})
-	closed, _ := IssueList(map[string]any{"repo": "owner/name", "state": "closed"}, operations.Env{})
-	if open.PermissionKey() == closed.PermissionKey() {
-		t.Fatalf("state must change the key")
-	}
-	if open.PermissionKey() != "github.issue.list:owner/name?state=open" {
-		t.Fatalf("unexpected key %q", open.PermissionKey())
+func TestIssueListRequirements(t *testing.T) {
+	op, _ := IssueList(map[string]any{"repo": "owner/name"}, operations.Env{})
+	reqs := op.Requirements()
+	if len(reqs) != 1 || reqs[0].Action != "issue.list" || reqs[0].Resource.Type != "github.repo" || reqs[0].Resource.ID != "owner/name" {
+		t.Fatalf("unexpected requirements %+v", reqs)
 	}
 }
 

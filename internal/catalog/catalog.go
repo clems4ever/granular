@@ -5,7 +5,11 @@
 // CLI can do, what can be requested, and how grants are scoped.
 package catalog
 
-import "sort"
+import (
+	"sort"
+
+	"github.com/clems4ever/granular/internal/api"
+)
 
 // MatchField is a typed attribute a resource can be matched on in a grant.
 type MatchField struct {
@@ -50,9 +54,10 @@ type Action struct {
 
 // Catalog is the full capability manifest.
 type Catalog struct {
-	Resources []ResourceType `json:"resources"`
-	Groups    []Group        `json:"groups"`
-	Actions   []Action       `json:"actions"`
+	Resources      []ResourceType         `json:"resources"`
+	Groups         []Group                `json:"groups"`
+	Actions        []Action               `json:"actions"`
+	RequestExample api.PermissionsRequest `json:"request_example"`
 }
 
 // Build returns the capability catalog for the GitHub operations the CLI exposes
@@ -102,7 +107,44 @@ func Build() Catalog {
 			{"pull.view", "View pull request", "github.pull", []string{"pulls.read"}, "", false, "per pull request", "View a single pull request (planned)."},
 			{"pull.create", "Create pull request", "github.repo", []string{"pulls.write"}, "", true, "per repository + exact content", "Open a pull request (planned)."},
 		},
+		RequestExample: api.PermissionsRequest{
+			Reason: "Work on the granular project: clone, read issues + comments, read PRs.",
+			Capabilities: []api.Capability{{
+				Actions: []string{"repo.clone", "issues.read", "comment.read", "pulls.read"},
+				Resource: api.ResourceSelector{
+					Type:  "github.repo",
+					Match: map[string]string{"owner": "clems4ever", "name": "granular"},
+				},
+			}},
+		},
 	}
+}
+
+// HasAction reports whether name is a known concrete action or group.
+//
+// @arg name The action or group name to check.
+// @return bool True when name appears in the action lattice.
+//
+// @testcase TestHasActionAndResourceEntity checks known and unknown names.
+func (c Catalog) HasAction(name string) bool {
+	_, ok := c.ActionLattice()[name]
+	return ok
+}
+
+// ResourceEntity returns the Cedar entity type for a catalog resource name.
+//
+// @arg name The catalog resource name, e.g. "github.repo".
+// @return string The Cedar entity type, e.g. "GitHub::Repo".
+// @return bool True when the resource name is known.
+//
+// @testcase TestHasActionAndResourceEntity resolves a known resource type.
+func (c Catalog) ResourceEntity(name string) (string, bool) {
+	for _, r := range c.Resources {
+		if r.Name == name {
+			return r.Entity, true
+		}
+	}
+	return "", false
 }
 
 // ActionLattice returns the verb lattice as a flat map of every action and group

@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"time"
 
@@ -38,12 +39,38 @@ func New(baseURL string) *Client {
 //
 // @testcase TestSubmitDecodesResponse submits and checks the decoded response.
 func (c *Client) Submit(ctx context.Context, req api.OperationRequest) (api.OperationResponse, error) {
-	body, err := json.Marshal(req)
+	return c.post(ctx, "/api/operations", req)
+}
+
+// RequestPermissions posts a custom permissions request and returns the server's
+// response (pending, with an approval URL).
+//
+// @arg ctx Context for cancellation.
+// @arg req The capabilities to request.
+// @return api.OperationResponse The decoded server response.
+// @error error on transport failure, non-2xx status, or undecodable body.
+//
+// @testcase TestRequestPermissionsDecodesResponse requests and checks the response.
+func (c *Client) RequestPermissions(ctx context.Context, req api.PermissionsRequest) (api.OperationResponse, error) {
+	return c.post(ctx, "/api/permissions", req)
+}
+
+// post marshals payload, POSTs it to the path, and decodes the OperationResponse.
+//
+// @arg ctx Context for cancellation.
+// @arg path The server path to POST to.
+// @arg payload The value to marshal as the JSON body.
+// @return api.OperationResponse The decoded server response.
+// @error error on transport failure, a 5xx status, or undecodable body.
+//
+// @testcase TestSubmitDecodesResponse drives post via Submit.
+func (c *Client) post(ctx context.Context, path string, payload any) (api.OperationResponse, error) {
+	body, err := json.Marshal(payload)
 	if err != nil {
 		return api.OperationResponse{}, err
 	}
 
-	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseURL+"/api/operations", bytes.NewReader(body))
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseURL+path, bytes.NewReader(body))
 	if err != nil {
 		return api.OperationResponse{}, err
 	}
@@ -63,4 +90,27 @@ func (c *Client) Submit(ctx context.Context, req api.OperationRequest) (api.Oper
 		return out, fmt.Errorf("server error (status %d): %s", resp.StatusCode, out.Error)
 	}
 	return out, nil
+}
+
+// Catalog fetches the raw capability manifest JSON from the server.
+//
+// @arg ctx Context for cancellation.
+// @return []byte The raw /api/catalog response body.
+// @error error on transport failure or a non-2xx status.
+//
+// @testcase TestCatalogFetchesManifest fetches and checks the body.
+func (c *Client) Catalog(ctx context.Context) ([]byte, error) {
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodGet, c.baseURL+"/api/catalog", nil)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.http.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("catalog request failed: status %d", resp.StatusCode)
+	}
+	return io.ReadAll(resp.Body)
 }

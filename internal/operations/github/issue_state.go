@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/clems4ever/granular/internal/authz"
 	"github.com/clems4ever/granular/internal/operations"
 )
 
@@ -65,18 +66,13 @@ func IssueClose(params map[string]any, env operations.Env) (operations.Operation
 // @testcase TestIssueClosePermissionKey exercises a built operation.
 func (o *IssueCloseOperation) Type() string { return TypeIssueClose }
 
-// PermissionKey returns a grant key scoped to the issue and, when set, the state
-// reason.
+// Requirements authorizes closing the issue.
 //
-// @return string A key of the form "github.issue.close:<owner/name>#<number>" (plus ":<reason>").
+// @return []authz.Requirement A single issue.close requirement on the issue.
 //
-// @testcase TestIssueClosePermissionKey checks the key shape.
-func (o *IssueCloseOperation) PermissionKey() string {
-	key := fmt.Sprintf("%s:%s#%d", TypeIssueClose, o.repo, o.number)
-	if o.reason != "" {
-		key += ":" + o.reason
-	}
-	return key
+// @testcase TestIssueCloseRequirements checks the action and resource.
+func (o *IssueCloseOperation) Requirements() []authz.Requirement {
+	return []authz.Requirement{{Action: "issue.close", Resource: authz.IssueRef(o.repo, o.number)}}
 }
 
 // Describe returns a one-line human summary for the approval page.
@@ -155,13 +151,13 @@ func IssueReopen(params map[string]any, env operations.Env) (operations.Operatio
 // @testcase TestIssueReopenPermissionKey exercises a built operation.
 func (o *IssueReopenOperation) Type() string { return TypeIssueReopen }
 
-// PermissionKey returns a grant key scoped to the issue.
+// Requirements authorizes reopening the issue.
 //
-// @return string A key of the form "github.issue.reopen:<owner/name>#<number>".
+// @return []authz.Requirement A single issue.reopen requirement on the issue.
 //
-// @testcase TestIssueReopenPermissionKey checks the key shape.
-func (o *IssueReopenOperation) PermissionKey() string {
-	return fmt.Sprintf("%s:%s#%d", TypeIssueReopen, o.repo, o.number)
+// @testcase TestIssueReopenRequirements checks the action and resource.
+func (o *IssueReopenOperation) Requirements() []authz.Requirement {
+	return []authz.Requirement{{Action: "issue.reopen", Resource: authz.IssueRef(o.repo, o.number)}}
 }
 
 // Describe returns a one-line human summary for the approval page.

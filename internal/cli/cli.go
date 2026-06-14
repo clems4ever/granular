@@ -30,7 +30,11 @@ func NewRootCmd() *cobra.Command {
 	}
 	root.PersistentFlags().StringVar(&server, "server", "http://localhost:8080", "granular server base URL")
 
-	root.AddCommand(newGithubCmd(&server))
+	root.AddCommand(
+		newGithubCmd(&server),
+		newRequestCmd(&server),
+		newCatalogCmd(&server),
+	)
 	return root
 }
 

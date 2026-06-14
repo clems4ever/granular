@@ -22,14 +22,15 @@ func TestIssueCreateFactoryValidatesParams(t *testing.T) {
 	}
 }
 
-func TestIssueCreatePermissionKeyIsContentScoped(t *testing.T) {
+func TestIssueCreateRequirementsAreContentScoped(t *testing.T) {
 	a, _ := IssueCreate(map[string]any{"repo": "o/n", "title": "Bug", "labels": []any{"p1"}}, operations.Env{})
 	b, _ := IssueCreate(map[string]any{"repo": "o/n", "title": "Bug", "labels": []any{"p2"}}, operations.Env{})
-	if a.PermissionKey() == b.PermissionKey() {
-		t.Fatalf("different labels must yield different keys")
+	ra, rb := a.Requirements(), b.Requirements()
+	if ra[0].Action != "issue.create" || ra[0].Resource.Type != "github.repo" {
+		t.Fatalf("unexpected requirement %+v", ra[0])
 	}
-	if !strings.HasPrefix(a.PermissionKey(), "github.issue.create:o/n:") {
-		t.Fatalf("unexpected key %q", a.PermissionKey())
+	if ra[0].Context["content_hash"] == rb[0].Context["content_hash"] {
+		t.Fatalf("different labels must yield different content_hash context")
 	}
 }
 

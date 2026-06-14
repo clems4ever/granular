@@ -26,3 +26,37 @@ func TestSubmitDecodesResponse(t *testing.T) {
 		t.Fatalf("unexpected response: %+v", resp)
 	}
 }
+
+func TestRequestPermissionsDecodesResponse(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/api/permissions" {
+			t.Errorf("unexpected path %q", r.URL.Path)
+		}
+		w.WriteHeader(http.StatusAccepted)
+		_, _ = w.Write([]byte(`{"status":"pending","request_id":"p1","approval_url":"http://x/approve/p1"}`))
+	}))
+	defer ts.Close()
+
+	resp, err := New(ts.URL).RequestPermissions(context.Background(), api.PermissionsRequest{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp.RequestID != "p1" {
+		t.Fatalf("unexpected response: %+v", resp)
+	}
+}
+
+func TestCatalogFetchesManifest(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte(`{"resources":[]}`))
+	}))
+	defer ts.Close()
+
+	body, err := New(ts.URL).Catalog(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(body) != `{"resources":[]}` {
+		t.Fatalf("unexpected catalog body: %s", body)
+	}
+}

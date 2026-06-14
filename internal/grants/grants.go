@@ -1,8 +1,8 @@
-// Package grants persists delegation requests (operations awaiting human
-// approval) and grants (approved, time-limited permissions) in a bbolt database
-// on disk. Persistence keeps the server stateless across restarts: a decision can
-// be made out-of-band and the grant survives even if the process is restarted.
-// The clock and id generator are injectable for testing.
+// Package grants persists delegation requests (operations awaiting human approval)
+// and approved Cedar policies in a bbolt database on disk. Authorization is decided
+// by evaluating the active (non-expired) policies with the Cedar engine; this
+// package only stores and expires them. The clock and id generator are injectable
+// for testing.
 package grants
 
 import (
@@ -15,32 +15,35 @@ import (
 	bolt "go.etcd.io/bbolt"
 )
 
-// bucketRequests and bucketGrants name the two bbolt buckets.
+// bucketRequests and bucketPolicies name the two bbolt buckets.
 var (
 	bucketRequests = []byte("requests")
-	bucketGrants   = []byte("grants")
+	bucketPolicies = []byte("policies")
 )
 
-// DelegationRequest captures an operation attempt that is waiting for a human to
-// approve or reject it.
+// DelegationRequest captures an operation (or custom permissions request) waiting
+// for a human to approve or reject it. ProposedPolicies are the Cedar policies that
+// approval would store.
 type DelegationRequest struct {
-	ID            string              `json:"id"`
-	OperationType string              `json:"operation_type"`
-	PermissionKey string              `json:"permission_key"`
-	Description   string              `json:"description"`
-	Params        map[string]any      `json:"params"`
-	Status        api.OperationStatus `json:"status"`
-	CreatedAt     time.Time           `json:"created_at"`
+	ID               string              `json:"id"`
+	OperationType    string              `json:"operation_type"`
+	Description      string              `json:"description"`
+	Params           map[string]any      `json:"params"`
+	ProposedPolicies []string            `json:"proposed_policies"`
+	Status           api.OperationStatus `json:"status"`
+	CreatedAt        time.Time           `json:"created_at"`
 }
 
-// Grant is an approved permission for a single permission key, valid until
-// ExpiresAt.
-type Grant struct {
-	PermissionKey string    `json:"permission_key"`
-	ExpiresAt     time.Time `json:"expires_at"`
+// StoredPolicy is an approved Cedar policy with an expiry.
+type StoredPolicy struct {
+	ID          string    `json:"id"`
+	Policy      string    `json:"policy"`
+	Description string    `json:"description"`
+	CreatedAt   time.Time `json:"created_at"`
+	ExpiresAt   time.Time `json:"expires_at"`
 }
 
-// Store persists delegation requests and grants in a bbolt database.
+// Store persists delegation requests and approved policies in a bbolt database.
 type Store struct {
 	db    *bolt.DB
 	now   func() time.Time
@@ -61,7 +64,7 @@ func Open(path string) (*Store, error) {
 		return nil, err
 	}
 	err = db.Update(func(tx *bolt.Tx) error {
-		for _, name := range [][]byte{bucketRequests, bucketGrants} {
+		for _, name := range [][]byte{bucketRequests, bucketPolicies} {
 			if _, err := tx.CreateBucketIfNotExists(name); err != nil {
 				return err
 			}
@@ -82,26 +85,26 @@ func Open(path string) (*Store, error) {
 // @testcase TestCreateAndGetRequest closes its store on cleanup.
 func (s *Store) Close() error { return s.db.Close() }
 
-// CreateRequest persists a new pending delegation request for the given operation
-// metadata and returns it with a freshly generated id.
+// CreateRequest persists a new pending delegation request carrying the Cedar
+// policies that approval would grant.
 //
-// @arg opType The operation type id, e.g. "github.clone".
-// @arg permKey The permission key the resulting grant will be matched against.
+// @arg opType The operation type id (or "permissions.request" for custom bundles).
 // @arg description A human-readable summary shown on the approval page.
-// @arg params The original operation parameters, retained for display/auditing.
+// @arg proposed The Cedar policies approval would store.
+// @arg params The original operation parameters, retained for auditing.
 // @return *DelegationRequest The stored request with its generated id and pending status.
 // @error error when the request cannot be written to the database.
 //
 // @testcase TestCreateAndGetRequest checks the request is retrievable by id.
-func (s *Store) CreateRequest(opType, permKey, description string, params map[string]any) (*DelegationRequest, error) {
+func (s *Store) CreateRequest(opType, description string, proposed []string, params map[string]any) (*DelegationRequest, error) {
 	req := &DelegationRequest{
-		ID:            s.newID(),
-		OperationType: opType,
-		PermissionKey: permKey,
-		Description:   description,
-		Params:        params,
-		Status:        api.StatusPending,
-		CreatedAt:     s.now(),
+		ID:               s.newID(),
+		OperationType:    opType,
+		Description:      description,
+		Params:           params,
+		ProposedPolicies: proposed,
+		Status:           api.StatusPending,
+		CreatedAt:        s.now(),
 	}
 	if err := s.put(bucketRequests, req.ID, req); err != nil {
 		return nil, err
@@ -132,15 +135,15 @@ func (s *Store) GetRequest(id string) (*DelegationRequest, error) {
 	return &req, nil
 }
 
-// Approve marks the request approved and persists a grant for its permission key
-// valid for ttl from now.
+// Approve marks the request approved and stores its proposed policies, each valid
+// for ttl from now.
 //
 // @arg id The delegation request id to approve.
-// @arg ttl How long the resulting grant remains valid.
+// @arg ttl How long the stored policies remain valid.
 // @return *DelegationRequest The updated request in the approved state.
 // @error ErrRequestNotFound when no request has the given id, or a db error.
 //
-// @testcase TestApproveCreatesLiveGrant approves a request and checks the grant.
+// @testcase TestApproveStoresActivePolicies approves and checks active policies.
 // @testcase TestApproveMissingRequest returns ErrRequestNotFound.
 func (s *Store) Approve(id string, ttl time.Duration) (*DelegationRequest, error) {
 	var req DelegationRequest
@@ -157,8 +160,20 @@ func (s *Store) Approve(id string, ttl time.Duration) (*DelegationRequest, error
 		if err := putTx(rb, req.ID, &req); err != nil {
 			return err
 		}
-		grant := Grant{PermissionKey: req.PermissionKey, ExpiresAt: s.now().Add(ttl)}
-		return putTx(tx.Bucket(bucketGrants), grant.PermissionKey, grant)
+		pb := tx.Bucket(bucketPolicies)
+		for _, policy := range req.ProposedPolicies {
+			sp := StoredPolicy{
+				ID:          s.newID(),
+				Policy:      policy,
+				Description: req.Description,
+				CreatedAt:   s.now(),
+				ExpiresAt:   s.now().Add(ttl),
+			}
+			if err := putTx(pb, sp.ID, sp); err != nil {
+				return err
+			}
+		}
+		return nil
 	})
 	if err != nil {
 		return nil, err
@@ -166,7 +181,7 @@ func (s *Store) Approve(id string, ttl time.Duration) (*DelegationRequest, error
 	return &req, nil
 }
 
-// Reject marks the request rejected without creating any grant.
+// Reject marks the request rejected without storing any policy.
 //
 // @arg id The delegation request id to reject.
 // @return *DelegationRequest The updated request in the rejected state.
@@ -193,34 +208,42 @@ func (s *Store) Reject(id string) (*DelegationRequest, error) {
 	return &req, nil
 }
 
-// HasLiveGrant reports whether a non-expired grant exists for the permission key,
-// deleting the grant if it has expired.
+// ActivePolicies returns the Cedar text of every non-expired policy, deleting any
+// that have expired.
 //
-// @arg permKey The permission key to check.
-// @return bool True when a grant exists and has not expired.
+// @return []string The active policy texts.
 // @error error when the database cannot be read or updated.
 //
-// @testcase TestApproveCreatesLiveGrant checks a fresh grant is live.
-// @testcase TestExpiredGrantIsNotLive checks an elapsed grant is reported dead.
-func (s *Store) HasLiveGrant(permKey string) (bool, error) {
-	var live bool
+// @testcase TestApproveStoresActivePolicies sees a fresh policy as active.
+// @testcase TestExpiredPolicyIsDropped checks an elapsed policy is removed.
+func (s *Store) ActivePolicies() ([]string, error) {
+	var active []string
 	err := s.db.Update(func(tx *bolt.Tx) error {
-		gb := tx.Bucket(bucketGrants)
-		v := gb.Get([]byte(permKey))
-		if v == nil {
+		pb := tx.Bucket(bucketPolicies)
+		var expired [][]byte
+		err := pb.ForEach(func(k, v []byte) error {
+			var sp StoredPolicy
+			if err := json.Unmarshal(v, &sp); err != nil {
+				return err
+			}
+			if s.now().Before(sp.ExpiresAt) {
+				active = append(active, sp.Policy)
+			} else {
+				expired = append(expired, append([]byte(nil), k...))
+			}
 			return nil
-		}
-		var grant Grant
-		if err := json.Unmarshal(v, &grant); err != nil {
+		})
+		if err != nil {
 			return err
 		}
-		if s.now().Before(grant.ExpiresAt) {
-			live = true
-			return nil
+		for _, k := range expired {
+			if err := pb.Delete(k); err != nil {
+				return err
+			}
 		}
-		return gb.Delete([]byte(permKey))
+		return nil
 	})
-	return live, err
+	return active, err
 }
 
 // put writes value as JSON under key in the named bucket in its own transaction.
@@ -244,7 +267,7 @@ func (s *Store) put(bucket []byte, key string, value any) error {
 // @arg value The value to JSON-encode and store.
 // @error error when encoding or the bucket write fails.
 //
-// @testcase TestApproveCreatesLiveGrant exercises putTx via Approve.
+// @testcase TestApproveStoresActivePolicies exercises putTx via Approve.
 func putTx(b *bolt.Bucket, key string, value any) error {
 	encoded, err := json.Marshal(value)
 	if err != nil {

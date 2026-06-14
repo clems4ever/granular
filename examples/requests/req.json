@@ -1,0 +1,12 @@
+{
+  "reason": "Read access to clems4ever/go-gnupg",
+  "capabilities": [
+    {
+      "actions": ["read"],
+      "resource": {
+        "type": "github.repo",
+        "match": { "owner": "clems4ever", "name": "go-gnupg" }
+      }
+    }
+  ]
+}

@@ -28,8 +28,12 @@ var approvalPage = template.Must(template.New("approve").Parse(`<!doctype html>
  {{if .Decided}}
    <p>This request has already been <span class="status">{{.Status}}</span>.</p>
  {{else}}
-   <p class="desc">{{.Description}}</p>
+   <p class="desc" style="white-space:pre-line">{{.Description}}</p>
    <p>Operation: <code>{{.OperationType}}</code></p>
+   {{if .Policies}}<details><summary>Cedar policies this grants</summary>
+     <pre style="background:#f4f4f4;padding:.75rem;border-radius:6px;overflow:auto">{{range .Policies}}{{.}}
+
+{{end}}</pre></details>{{end}}
    <form method="post" action="/approve/{{.ID}}">
      <label for="ttl">Grant valid for</label>
      <select id="ttl" name="ttl">
@@ -56,6 +60,7 @@ type approvalView struct {
 	ID            string
 	OperationType string
 	Description   string
+	Policies      []string
 	Status        api.OperationStatus
 	Decided       bool
 	TTLOptions    []struct {
@@ -83,6 +88,7 @@ func (s *Server) handleApprovePage(w http.ResponseWriter, r *http.Request) {
 		ID:            dr.ID,
 		OperationType: dr.OperationType,
 		Description:   dr.Description,
+		Policies:      dr.ProposedPolicies,
 		Status:        dr.Status,
 		Decided:       dr.Status != api.StatusPending,
 		TTLOptions:    ttlOptions,

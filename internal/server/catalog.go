@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"html/template"
 	"net/http"
 	"strconv"
@@ -10,9 +11,10 @@ import (
 
 // catalogView is the data passed to the catalog page template.
 type catalogView struct {
-	Catalog catalog.Catalog
-	Tree    []catalog.ResourceRow
-	Groups  []catalog.GroupExpansion
+	Catalog     catalog.Catalog
+	Tree        []catalog.ResourceRow
+	Groups      []catalog.GroupExpansion
+	ExampleJSON string
 }
 
 // catalogPage renders the capability catalog: the resource hierarchy, the verb
@@ -64,6 +66,12 @@ Machine-readable form at <code>/api/catalog</code>.</p>
  </div>
 {{end}}
 
+<h2>Requesting permissions</h2>
+<p class="sub">Pre-approve a scoped bundle instead of one operation at a time: POST a
+<code>PermissionsRequest</code> to <code>/api/permissions</code> (or <code>granular request -f req.json</code>).
+Each capability lists actions (any name above) on a resource selector. Example:</p>
+<pre style="background:#f4f4f4;padding:.75rem;border-radius:6px;overflow:auto">{{.ExampleJSON}}</pre>
+
 <h2>Operations</h2>
 <p class="sub">Each concrete action and the CLI command that triggers it.</p>
 <table>
@@ -89,8 +97,14 @@ Machine-readable form at <code>/api/catalog</code>.</p>
 // @testcase TestCatalogPageRenders renders the page and checks key content.
 func (s *Server) handleCatalogPage(w http.ResponseWriter, r *http.Request) {
 	c := catalog.Build()
+	example, _ := json.MarshalIndent(c.RequestExample, "", "  ")
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	_ = catalogPage.Execute(w, catalogView{Catalog: c, Tree: c.ResourceTree(), Groups: c.VerbGroups()})
+	_ = catalogPage.Execute(w, catalogView{
+		Catalog:     c,
+		Tree:        c.ResourceTree(),
+		Groups:      c.VerbGroups(),
+		ExampleJSON: string(example),
+	})
 }
 
 // handleCatalogJSON handles GET /api/catalog: it returns the capability manifest

@@ -20,14 +20,11 @@ func TestIssueViewFactoryValidatesParams(t *testing.T) {
 	}
 }
 
-func TestIssueViewPermissionKeyIncludesNumber(t *testing.T) {
-	a, _ := IssueView(map[string]any{"repo": "owner/name", "number": 1}, operations.Env{})
-	b, _ := IssueView(map[string]any{"repo": "owner/name", "number": 2}, operations.Env{})
-	if a.PermissionKey() == b.PermissionKey() {
-		t.Fatalf("number must change the key")
-	}
-	if a.PermissionKey() != "github.issue.view:owner/name#1" {
-		t.Fatalf("unexpected key %q", a.PermissionKey())
+func TestIssueViewRequirements(t *testing.T) {
+	op, _ := IssueView(map[string]any{"repo": "owner/name", "number": 1}, operations.Env{})
+	reqs := op.Requirements()
+	if len(reqs) != 1 || reqs[0].Action != "issue.view" || reqs[0].Resource.ID != "owner/name#1" {
+		t.Fatalf("unexpected requirements %+v", reqs)
 	}
 }
 
@@ -39,14 +36,15 @@ func TestIssueViewDescribe(t *testing.T) {
 	}
 }
 
-func TestIssueViewCommentsChangesKey(t *testing.T) {
+func TestIssueViewCommentsAddsRequirement(t *testing.T) {
 	plain, _ := IssueView(map[string]any{"repo": "owner/name", "number": 7}, operations.Env{})
 	withC, _ := IssueView(map[string]any{"repo": "owner/name", "number": 7, "comments": true}, operations.Env{})
-	if plain.PermissionKey() == withC.PermissionKey() {
-		t.Fatalf("comments must change the key")
+	if len(plain.Requirements()) != 1 {
+		t.Fatalf("plain view should have one requirement, got %+v", plain.Requirements())
 	}
-	if withC.PermissionKey() != "github.issue.view:owner/name#7+comments" {
-		t.Fatalf("unexpected key %q", withC.PermissionKey())
+	reqs := withC.Requirements()
+	if len(reqs) != 2 || reqs[1].Action != "comment.read" {
+		t.Fatalf("--comments should add a comment.read requirement, got %+v", reqs)
 	}
 }
 

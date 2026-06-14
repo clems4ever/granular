@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/clems4ever/granular/internal/authz"
 	"github.com/clems4ever/granular/internal/operations"
 )
 
@@ -32,7 +33,7 @@ type CloneOperation struct {
 // @error ErrMissingRepo if the "repo" parameter is absent or empty.
 //
 // @testcase TestCloneFactoryRequiresRepo fails when repo is missing.
-// @testcase TestClonePermissionKeyIsRepoScoped builds successfully and checks the key.
+// @testcase TestCloneRequirements builds successfully and checks the key.
 func Clone(params map[string]any, env operations.Env) (operations.Operation, error) {
 	repo := stringParam(params, "repo")
 	if repo == "" {
@@ -45,17 +46,16 @@ func Clone(params map[string]any, env operations.Env) (operations.Operation, err
 //
 // @return string The constant TypeClone.
 //
-// @testcase TestClonePermissionKeyIsRepoScoped exercises a built operation.
+// @testcase TestCloneRequirements exercises a built operation.
 func (o *CloneOperation) Type() string { return TypeClone }
 
-// PermissionKey returns a grant key scoped to the repository, so approving a clone
-// authorises cloning that repository (any branch) until the grant expires.
+// Requirements authorizes cloning the repository.
 //
-// @return string A key of the form "github.clone:<owner/name>".
+// @return []authz.Requirement A single repo.clone requirement on the repository.
 //
-// @testcase TestClonePermissionKeyIsRepoScoped checks the key shape.
-func (o *CloneOperation) PermissionKey() string {
-	return PermissionKeyForRepo(o.repo)
+// @testcase TestCloneRequirements checks the action and resource.
+func (o *CloneOperation) Requirements() []authz.Requirement {
+	return []authz.Requirement{{Action: "repo.clone", Resource: authz.RepoRef(o.repo)}}
 }
 
 // Describe returns a one-line human summary for the approval page.
@@ -81,17 +81,6 @@ func (o *CloneOperation) Execute(ctx context.Context) (map[string]any, error) {
 		"clone_url": strings.TrimRight(o.baseURL, "/") + "/git/" + o.repo + ".git",
 		"repo":      o.repo,
 	}, nil
-}
-
-// PermissionKeyForRepo returns the grant key for cloning a repository. Both the
-// operation and the git proxy use it so they agree on what a grant authorises.
-//
-// @arg repo A normalized "owner/name" repository.
-// @return string The key "github.clone:<owner/name>".
-//
-// @testcase TestClonePermissionKeyIsRepoScoped compares against the operation's key.
-func PermissionKeyForRepo(repo string) string {
-	return TypeClone + ":" + repo
 }
 
 // NormalizeRepo reduces the many accepted repo spellings to a bare "owner/name".

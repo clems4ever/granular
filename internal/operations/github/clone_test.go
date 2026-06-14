@@ -15,16 +15,17 @@ func TestCloneFactoryRequiresRepo(t *testing.T) {
 	}
 }
 
-func TestClonePermissionKeyIsRepoScoped(t *testing.T) {
+func TestCloneRequirements(t *testing.T) {
 	op, err := Clone(map[string]any{"repo": "https://github.com/owner/name.git"}, operations.Env{})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if op.PermissionKey() != "github.clone:owner/name" {
-		t.Fatalf("unexpected key %q", op.PermissionKey())
+	reqs := op.Requirements()
+	if len(reqs) != 1 || reqs[0].Action != "repo.clone" {
+		t.Fatalf("unexpected requirements %+v", reqs)
 	}
-	if op.PermissionKey() != PermissionKeyForRepo("owner/name") {
-		t.Fatalf("operation and helper disagree on key")
+	if reqs[0].Resource.Type != "github.repo" || reqs[0].Resource.ID != "owner/name" {
+		t.Fatalf("unexpected resource %+v", reqs[0].Resource)
 	}
 }
 

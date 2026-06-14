@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"strconv"
 
+	"github.com/clems4ever/granular/internal/authz"
 	"github.com/clems4ever/granular/internal/operations"
 )
 
@@ -59,14 +60,14 @@ func IssueList(params map[string]any, env operations.Env) (operations.Operation,
 // @testcase TestIssueListPermissionKeyIncludesState exercises a built operation.
 func (o *IssueListOperation) Type() string { return TypeIssueList }
 
-// PermissionKey returns a grant key scoped to the repository and issue state, so
-// approving "list open issues" does not authorise listing closed ones.
+// Requirements authorizes listing the repository's issues (a repo-scoped read; the
+// state is a query filter, not part of the grant scope).
 //
-// @return string A key of the form "github.issue.list:<owner/name>?state=<state>".
+// @return []authz.Requirement A single issue.list requirement on the repository.
 //
-// @testcase TestIssueListPermissionKeyIncludesState checks the key shape.
-func (o *IssueListOperation) PermissionKey() string {
-	return fmt.Sprintf("%s:%s?state=%s", TypeIssueList, o.repo, o.state)
+// @testcase TestIssueListRequirements checks the action and resource.
+func (o *IssueListOperation) Requirements() []authz.Requirement {
+	return []authz.Requirement{{Action: "issue.list", Resource: authz.RepoRef(o.repo)}}
 }
 
 // Describe returns a one-line human summary for the approval page.

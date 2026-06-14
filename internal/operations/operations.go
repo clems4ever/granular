@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	"github.com/clems4ever/granular/internal/api"
+	"github.com/clems4ever/granular/internal/authz"
 )
 
 // Env carries the server-held material an operation needs, such as platform
@@ -29,9 +30,9 @@ type Env struct {
 type Operation interface {
 	// Type returns the operation's type id, e.g. "github.clone".
 	Type() string
-	// PermissionKey returns a deterministic key that scopes the grant to exactly
-	// the resource being acted on.
-	PermissionKey() string
+	// Requirements returns the authorization checks (action on resource, optionally
+	// context-qualified) that must all pass for the operation to be allowed.
+	Requirements() []authz.Requirement
 	// Describe returns a short human-readable summary shown on the approval page.
 	Describe() string
 	// Execute performs the operation and returns a structured result.

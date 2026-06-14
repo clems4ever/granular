@@ -1,0 +1,12 @@
+{
+  "reason": "Close any issue across all of clems4ever's repositories",
+  "capabilities": [
+    {
+      "actions": ["issue.close"],
+      "resource": {
+        "type": "github.repo",
+        "match": { "owner": "clems4ever", "name": "*" }
+      }
+    }
+  ]
+}

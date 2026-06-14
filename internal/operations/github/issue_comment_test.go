@@ -23,14 +23,15 @@ func TestIssueCommentFactoryValidatesParams(t *testing.T) {
 	}
 }
 
-func TestIssueCommentPermissionKeyIsContentScoped(t *testing.T) {
+func TestIssueCommentRequirementsAreContentScoped(t *testing.T) {
 	a, _ := IssueComment(map[string]any{"repo": "o/n", "number": 1, "body": "hello"}, operations.Env{})
 	b, _ := IssueComment(map[string]any{"repo": "o/n", "number": 1, "body": "different"}, operations.Env{})
-	if a.PermissionKey() == b.PermissionKey() {
-		t.Fatalf("different bodies must yield different keys")
+	ra, rb := a.Requirements(), b.Requirements()
+	if ra[0].Action != "issue.comment" || ra[0].Resource.ID != "o/n#1" {
+		t.Fatalf("unexpected requirement %+v", ra[0])
 	}
-	if !strings.HasPrefix(a.PermissionKey(), "github.issue.comment:o/n#1:") {
-		t.Fatalf("unexpected key %q", a.PermissionKey())
+	if ra[0].Context["body_hash"] == "" || ra[0].Context["body_hash"] == rb[0].Context["body_hash"] {
+		t.Fatalf("different bodies must yield different body_hash context")
 	}
 }
 

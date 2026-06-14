@@ -52,6 +52,22 @@ func TestResourceTreeOrder(t *testing.T) {
 	}
 }
 
+func TestHasActionAndResourceEntity(t *testing.T) {
+	c := Build()
+	if !c.HasAction("issue.view") || !c.HasAction("read") {
+		t.Error("known actions/groups should be recognised")
+	}
+	if c.HasAction("issue.delete") {
+		t.Error("unknown action must be rejected")
+	}
+	if e, ok := c.ResourceEntity("github.repo"); !ok || e != "GitHub::Repo" {
+		t.Errorf("github.repo -> %q,%v", e, ok)
+	}
+	if _, ok := c.ResourceEntity("github.nope"); ok {
+		t.Error("unknown resource must not resolve")
+	}
+}
+
 func TestActionLatticeCoversGroupsAndActions(t *testing.T) {
 	c := Build()
 	lattice := c.ActionLattice()

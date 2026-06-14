@@ -25,33 +25,57 @@ server restart. The CLI does **not** poll — it submits, and either gets the re
 (if already granted) or an approval URL to open, after which the user simply
 re-runs the command.
 
+## Authorization (Cedar)
+
+Authorization is decided by the [Cedar](https://www.cedarpolicy.com/) policy engine
+(`internal/authz`), not by exact-string key matching:
+
+- Each **operation** declares its **requirements** — `(action, resource, context)`
+  checks that must all pass (e.g. `issue.view` on `GitHub::Issue::"owner/name#7"`;
+  a `--comments` view adds a second `comment.read` requirement). Resources, actions
+  (and their roll-up groups like `read`/`issues.read`) come from the single
+  `internal/catalog` manifest.
+- A **grant** is one or more **Cedar policies** stored with an expiry
+  (`internal/grants`, bbolt). `POST /api/operations` loads the active (non-expired)
+  policies and asks the engine `AllowsAll(requirements)`.
+- If allowed → execute. If not → mint **minimal permits** (one per requirement,
+  scoped to the exact resource + content hash) and create a delegation request;
+  the human approves and the policies are stored.
+- **Pre-approval** (`POST /api/permissions`): a custom `PermissionsRequest` is
+  translated to broader Cedar policies (e.g. `permit(action in [issues.read],
+  resource in GitHub::Repo::"owner/name")`). One approval then covers every concrete
+  operation the policy allows — `list` *and* `view*, across the repo — while writes
+  outside the grant still require their own approval.
+
+Writes stay content-scoped under Cedar via a `context` condition
+(`when { context.body_hash == "…" }`) on the minimal permit, so re-running the same
+write reuses the grant but a different payload needs fresh approval.
+
 ## Core concepts
 
 - **Operation** — a concrete, parameterised action, e.g. `github.clone` with
-  params `{repo, ref}`. Each operation type knows how to (a) derive a stable
-  **permission key** from its parameters and (b) execute itself server-side using
-  the credentials.
+  params `{repo}`. Each operation knows how to (a) declare its **requirements**
+  (Cedar `action`/`resource`/`context` checks) and (b) execute itself server-side.
 
-- **Permission key** — a deterministic string derived from the operation type and
-  its parameters (e.g. `github.clone:github.com/clems4ever/granular@HEAD`). A grant
-  is matched against this key, so approving a clone of repo A does not authorise a
-  clone of repo B.
+- **Requirement** — one authorization check, e.g. `issue.view` on
+  `GitHub::Issue::"owner/name#7"`. See [Authorization (Cedar)](#authorization-cedar).
 
-- **Delegation request** — created when an operation is attempted with no live
-  grant. It captures the operation, a generated id, and a `pending` status. The id
-  is embedded in the approval URL `…/approve/{id}`.
+- **Delegation request** — created when an operation (or `PermissionsRequest`) is
+  not authorized by the active policies. It captures the proposed Cedar policies, a
+  generated id, and a `pending` status. The id is embedded in the approval URL
+  `…/approve/{id}`.
 
-- **Grant** — created when a human approves a delegation request. It records the
-  permission key and an expiry timestamp. An operation is allowed iff a grant for
-  its key exists and `now < expiry`.
+- **Grant** — one or more Cedar policies stored on approval, each with an expiry.
+  An operation is allowed iff the active (non-expired) policies authorize all of
+  its requirements.
 
 ## Request flow
 
 ```
 CLI                         server                         human (browser)
  |   POST /api/operations      |                                |
- |---------------------------->|  look up grant by perm-key     |
- |                             |  - none -> persist request, 202|
+ |---------------------------->|  Cedar: AllowsAll(reqs)?       |
+ |                             |  - no -> persist request, 202  |
  |<----------------------------|  {status:pending, approval_url}|
  |  print approval_url, EXIT   |                                |
  |                             |          GET /approve/{id} --> | shows operation
@@ -78,6 +102,7 @@ command** after approval performs the clone.
 | Method | Path                  | Purpose                                                       |
 |--------|-----------------------|---------------------------------------------------------------|
 | POST   | `/api/operations`     | Attempt an operation. `200` with result, or `202` pending.    |
+| POST   | `/api/permissions`    | Submit a custom scoped capability bundle; `202` pending.      |
 | GET    | `/api/requests/{id}`  | Inspect a delegation request's status.                        |
 | GET    | `/approve/{id}`       | Human-facing approval page (HTML form).                       |
 | POST   | `/approve/{id}`       | Submit approval (decision + expiry) or rejection.             |
@@ -146,10 +171,10 @@ viewing another.
 
 `--comments` makes the server additionally call
 `GET /repos/{repo}/issues/{number}/comments` and fold the raw comments array into
-the result under the synthetic `comments_list` key. It is a **separate grant**: the
-permission key gains a `+comments` suffix (`github.issue.view:owner/name#7+comments`),
-so reading an issue's discussion is approved independently from its metadata, while
-the CLI surface still matches `gh issue view --comments`.
+the result under the synthetic `comments_list` key. It is a **separate
+requirement** (`comment.read`), authorized independently from `issue.view`, so
+reading an issue's discussion is approved separately from its metadata while the CLI
+surface still matches `gh issue view --comments`.
 
 ## Write operations: `github.issue.comment` and `github.issue.create`
 
@@ -160,12 +185,11 @@ server-executed `POST`s and return GitHub's created object verbatim.
 
 Because they **mutate**, two things differ from the read operations:
 
-- **Content-scoped grants.** The permission key includes a hash of the submitted
-  content — `github.issue.comment:owner/name#7:<hash(body)>`,
-  `github.issue.create:owner/name:<hash(title,body,labels,assignees)>`. So the
-  approver authorises *exactly* what gets written; changing the text requires a
-  fresh approval. The approval page's description shows the full body/title so the
-  human sees what they are signing off.
+- **Content-scoped grants.** The requirement carries a `context` hash of the
+  submitted content (`body_hash`, `content_hash`, `change_hash`), and the minimal
+  permit conditions on it (`when { context.body_hash == "…" }`). So the approver
+  authorises *exactly* what gets written; changing the text requires a fresh
+  approval. The approval page shows the full body/title and the Cedar policies.
 - **Write scope required.** The server PAT (`GRANULAR_GITHUB_TOKEN`) needs write
   access to the repository, unlike the read-only list/view which work on public
   repos even unauthenticated.
@@ -213,10 +237,14 @@ The `Operation.Execute` contract is the same, but operations fall into two shape
 
 ## Decisions taken for this first iteration (and why)
 
-- **bbolt on-disk store** for grants and delegation requests (two buckets:
-  `requests`, `grants`). This keeps the server stateless toward the client and lets
-  approvals happen out-of-band and survive restarts. Path via `GRANULAR_DB`
-  (default `<workspace>/granular.db`).
+- **bbolt on-disk store** for approved Cedar policies and delegation requests (two
+  buckets: `requests`, `policies`). This keeps the server stateless toward the
+  client and lets approvals happen out-of-band and survive restarts. Path via
+  `GRANULAR_DB` (default `<workspace>/granular.db`).
+- **Cedar for authorization** (`internal/authz`), with `internal/catalog` as the
+  single source for resources, actions and the verb lattice — shared by the engine,
+  the `/catalog` page, and the `/api/catalog` manifest. Principal identity is a
+  fixed `GitHub::Agent::"agent"` for now (per-agent identity is future work).
 - **Server is a git proxy, not a git client.** The clone runs on the CLI (shelling
   out to the user's `git`) so the working tree lands on the client; the server only
   brokers credentials. This keeps the token server-side and avoids shipping repo
@@ -236,14 +264,15 @@ The `Operation.Execute` contract is the same, but operations fall into two shape
 ```
 cmd/granular/          thin CLI entrypoint (main.go only)
 cmd/granular-server/   server entrypoint (registers operations)
-internal/cli/          CLI command tree, one file per command:
-                         cli.go, github.go, github_clone.go, github_issue.go
-internal/api/          wire types shared by client & server
+internal/cli/          CLI command tree (one file per command) + request.go (request/catalog)
+internal/api/          wire types shared by client & server (incl. PermissionsRequest)
+internal/catalog/      single-source capability manifest (resources, actions, lattice)
+internal/authz/        Cedar engine: requirements, policy generation, evaluation
 internal/operations/   Operation interface, registry
 internal/operations/github/  clone.go, api.go (REST helpers), issues.go (issue.list),
                              issue_view.go, issue_comment.go, issue_create.go,
                              issue_edit.go, issue_state.go (close/reopen)
-internal/grants/       delegation-request + grant store (bbolt)
-internal/server/       HTTP handlers, approval UI, git proxy
+internal/grants/       delegation-request + Cedar-policy store (bbolt)
+internal/server/       HTTP handlers, approval UI, git proxy, /api/permissions, /catalog
 internal/client/       HTTP client used by the CLI
 ```

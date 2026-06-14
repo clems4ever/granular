@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/clems4ever/granular/internal/authz"
 	"github.com/clems4ever/granular/internal/grants"
 	"github.com/clems4ever/granular/internal/operations"
 )
@@ -16,9 +17,11 @@ import (
 // fakeOp is a no-network operation used to exercise the server.
 type fakeOp struct{}
 
-func (fakeOp) Type() string          { return "test.op" }
-func (fakeOp) PermissionKey() string { return "test.op:x" }
-func (fakeOp) Describe() string      { return "a test operation" }
+func (fakeOp) Type() string     { return "test.op" }
+func (fakeOp) Describe() string { return "a test operation" }
+func (fakeOp) Requirements() []authz.Requirement {
+	return []authz.Requirement{{Action: "issue.view", Resource: authz.RepoRef("o/n")}}
+}
 func (fakeOp) Execute(ctx context.Context) (map[string]any, error) {
 	return map[string]any{"ok": true}, nil
 }
@@ -173,6 +176,53 @@ func TestRepoFromGitPath(t *testing.T) {
 	}
 	if _, ok := repoFromGitPath("solo"); ok {
 		t.Fatalf("expected failure for single-segment path")
+	}
+}
+
+func TestPermissionsRequestFlow(t *testing.T) {
+	ts := testServer(t)
+
+	// Request a broad capability that covers the fake op's issue.view requirement.
+	body := `{"reason":"work","capabilities":[{"actions":["issues.read"],"resource":{"type":"github.repo","match":{"owner":"o","name":"n"}}}]}`
+	resp, err := http.Post(ts.URL+"/api/permissions", "application/json", strings.NewReader(body))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp.StatusCode != http.StatusAccepted {
+		t.Fatalf("want 202, got %d", resp.StatusCode)
+	}
+	id, _ := decode(t, resp)["request_id"].(string)
+	if id == "" {
+		t.Fatal("missing request_id")
+	}
+
+	// The approval page should show the granted Cedar policies.
+	page, _ := http.Get(ts.URL + "/approve/" + id)
+	if html := readBody(t, page); !strings.Contains(html, "permit") || !strings.Contains(html, "issues.read") {
+		t.Fatalf("approval page should show the policies")
+	}
+
+	// Approve it.
+	if ar, _ := http.PostForm(ts.URL+"/approve/"+id, url.Values{"decision": {"approve"}, "ttl": {"1h"}}); ar.StatusCode != http.StatusOK {
+		t.Fatalf("approve failed: %d", ar.StatusCode)
+	}
+
+	// Now the operation (issue.view on repo o/n) is authorized by the broad grant.
+	op, _ := http.Post(ts.URL+"/api/operations", "application/json", strings.NewReader(`{"type":"test.op"}`))
+	if op.StatusCode != http.StatusOK {
+		t.Fatalf("operation should be authorized after the permissions grant, got %d", op.StatusCode)
+	}
+	if decode(t, op)["status"] != "completed" {
+		t.Fatal("operation should be completed")
+	}
+}
+
+func TestPermissionsRequestRejectsUnknownAction(t *testing.T) {
+	ts := testServer(t)
+	body := `{"capabilities":[{"actions":["issue.delete"],"resource":{"type":"github.repo","match":{"owner":"o","name":"n"}}}]}`
+	resp, _ := http.Post(ts.URL+"/api/permissions", "application/json", strings.NewReader(body))
+	if resp.StatusCode != http.StatusBadRequest {
+		t.Fatalf("want 400 for unknown action, got %d", resp.StatusCode)
 	}
 }
 

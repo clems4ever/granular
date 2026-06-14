@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/clems4ever/granular/internal/authz"
 	"github.com/clems4ever/granular/internal/operations"
 )
 
@@ -56,19 +57,19 @@ func IssueView(params map[string]any, env operations.Env) (operations.Operation,
 func (o *IssueViewOperation) Type() string { return TypeIssueView }
 
 // PermissionKey returns a grant key scoped to the specific repository and issue
-// number, with a "+comments" suffix when comments are requested, so viewing an
-// issue's discussion is approved separately from its metadata.
+// number; when comments are requested it adds a second comment.read requirement,
+// so viewing an issue's discussion is approved separately from its metadata.
 //
-// @return string A key like "github.issue.view:<owner/name>#<number>" (plus "+comments").
+// @return []authz.Requirement An issue.view requirement, plus comment.read when comments are requested.
 //
-// @testcase TestIssueViewPermissionKeyIncludesNumber checks the key shape.
-// @testcase TestIssueViewCommentsChangesKey checks --comments changes the key.
-func (o *IssueViewOperation) PermissionKey() string {
-	key := fmt.Sprintf("%s:%s#%d", TypeIssueView, o.repo, o.number)
+// @testcase TestIssueViewRequirements checks the base requirement.
+// @testcase TestIssueViewCommentsAddsRequirement checks --comments adds comment.read.
+func (o *IssueViewOperation) Requirements() []authz.Requirement {
+	reqs := []authz.Requirement{{Action: "issue.view", Resource: authz.IssueRef(o.repo, o.number)}}
 	if o.comments {
-		key += "+comments"
+		reqs = append(reqs, authz.Requirement{Action: "comment.read", Resource: authz.IssueRef(o.repo, o.number)})
 	}
-	return key
+	return reqs
 }
 
 // Describe returns a one-line human summary for the approval page.
