@@ -41,6 +41,7 @@ func newIssueCmd(server *string) *cobra.Command {
 //
 // @testcase TestRootCommandTree reaches this command through the tree.
 func newIssueViewCmd(server *string, jsonOut *bool) *cobra.Command {
+	var comments bool
 	cmd := &cobra.Command{
 		Use:   "view <repo> <number>",
 		Short: "Show the details of a GitHub issue",
@@ -53,13 +54,15 @@ func newIssueViewCmd(server *string, jsonOut *bool) *cobra.Command {
 			req := api.OperationRequest{
 				Type: "github.issue.view",
 				Params: map[string]any{
-					"repo":   args[0],
-					"number": number,
+					"repo":     args[0],
+					"number":   number,
+					"comments": comments,
 				},
 			}
 			return runIssueView(cmd.Context(), client.New(*server), req, cmd.OutOrStdout(), *jsonOut)
 		},
 	}
+	cmd.Flags().BoolVar(&comments, "comments", false, "include the issue's comments (approved as a separate grant)")
 	return cmd
 }
 
@@ -186,6 +189,27 @@ func printIssue(out io.Writer, issue map[string]any) {
 	fmt.Fprintf(out, "URL:      %v\n", issue["html_url"])
 	if body, _ := issue["body"].(string); body != "" {
 		fmt.Fprintf(out, "\n%s\n", body)
+	}
+	if comments, ok := issue["comments_list"].([]any); ok {
+		printComments(out, comments)
+	}
+}
+
+// printComments renders the comments fetched alongside an issue (when --comments
+// was requested).
+//
+// @arg out The writer for user-facing output.
+// @arg comments The raw GitHub comment objects.
+//
+// @testcase TestRunIssueViewPrintsComments checks a comment body is rendered.
+func printComments(out io.Writer, comments []any) {
+	fmt.Fprintf(out, "\n--- %d comment(s) ---\n", len(comments))
+	for _, raw := range comments {
+		c, ok := raw.(map[string]any)
+		if !ok {
+			continue
+		}
+		fmt.Fprintf(out, "\n%v wrote:\n%v\n", userLogin(c), c["body"])
 	}
 }
 

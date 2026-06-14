@@ -90,6 +90,18 @@ Also server-executed. The grant is scoped to the **specific issue**
 (`github.issue.view:owner/name#1`), so approving one issue does not authorise
 viewing another.
 
+Add `--comments` (like `gh issue view --comments`) to also fetch the issue's
+comments:
+
+```sh
+bin/granular github issue view octocat/Hello-World 1 --comments
+bin/granular github issue view octocat/Hello-World 1 --comments --json | jq '.comments_list[].body'
+```
+
+`--comments` is approved as a **separate grant** (`…#1+comments`), so reading the
+discussion is a distinct permission from viewing the issue's metadata. The raw
+comments array is returned under the `comments_list` key.
+
 ### JSON output
 
 Both issue commands accept `--json` to emit GitHub's **raw** result (every
@@ -111,7 +123,7 @@ granular
     ├── clone <repo> <dest> [--ref]
     └── issue
         ├── list <repo> [--state] [--limit]
-        └── view <repo> <number>
+        └── view <repo> <number> [--comments]
 ```
 
 ## Adding an operation

@@ -39,6 +39,46 @@ func TestIssueViewDescribe(t *testing.T) {
 	}
 }
 
+func TestIssueViewCommentsChangesKey(t *testing.T) {
+	plain, _ := IssueView(map[string]any{"repo": "owner/name", "number": 7}, operations.Env{})
+	withC, _ := IssueView(map[string]any{"repo": "owner/name", "number": 7, "comments": true}, operations.Env{})
+	if plain.PermissionKey() == withC.PermissionKey() {
+		t.Fatalf("comments must change the key")
+	}
+	if withC.PermissionKey() != "github.issue.view:owner/name#7+comments" {
+		t.Fatalf("unexpected key %q", withC.PermissionKey())
+	}
+}
+
+func TestIssueViewExecuteWithComments(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/repos/owner/name/issues/7", func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte(`{"number":7,"title":"t","comments":2}`))
+	})
+	mux.HandleFunc("/repos/owner/name/issues/7/comments", func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte(`[{"body":"first","user":{"login":"alice"}},{"body":"second","user":{"login":"bob"}}]`))
+	})
+	stub := httptest.NewServer(mux)
+	defer stub.Close()
+
+	old := apiBaseURL
+	apiBaseURL = stub.URL
+	defer func() { apiBaseURL = old }()
+
+	op, _ := IssueView(map[string]any{"repo": "owner/name", "number": 7, "comments": true}, operations.Env{GitHubToken: "tok"})
+	result, err := op.Execute(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	comments, ok := result["comments_list"].([]any)
+	if !ok || len(comments) != 2 {
+		t.Fatalf("expected 2 comments under comments_list, got %v", result["comments_list"])
+	}
+	if comments[0].(map[string]any)["body"] != "first" {
+		t.Fatalf("unexpected comment body: %v", comments[0])
+	}
+}
+
 func TestIssueViewExecuteReturnsRaw(t *testing.T) {
 	stub := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/repos/owner/name/issues/7" {

@@ -2,10 +2,7 @@ package github
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 
 	"github.com/clems4ever/granular/internal/operations"
 )
@@ -14,18 +11,19 @@ import (
 const TypeIssueView = "github.issue.view"
 
 // IssueViewOperation fetches the details of a single GitHub issue server-side
-// using the server-held PAT.
+// using the server-held PAT, optionally including the issue's comments.
 type IssueViewOperation struct {
-	repo   string
-	number int
-	token  string
+	repo     string
+	number   int
+	comments bool
+	token    string
 }
 
 // IssueView builds an IssueViewOperation from request parameters and the server
-// Env. It satisfies operations.Factory. Expected params: "repo" (required) and
-// "number" (required, the issue number).
+// Env. It satisfies operations.Factory. Expected params: "repo" (required),
+// "number" (required, the issue number) and "comments" (optional bool).
 //
-// @arg params The wire parameters carrying repo and number.
+// @arg params The wire parameters carrying repo, number and comments.
 // @arg env The server Env supplying the GitHub token.
 // @return operations.Operation A ready-to-execute IssueViewOperation.
 // @error ErrMissingRepo if "repo" is absent or empty.
@@ -43,9 +41,10 @@ func IssueView(params map[string]any, env operations.Env) (operations.Operation,
 		return nil, ErrMissingIssueNumber
 	}
 	return &IssueViewOperation{
-		repo:   NormalizeRepo(repo),
-		number: number,
-		token:  env.GitHubToken,
+		repo:     NormalizeRepo(repo),
+		number:   number,
+		comments: boolParam(params, "comments"),
+		token:    env.GitHubToken,
 	}, nil
 }
 
@@ -57,13 +56,19 @@ func IssueView(params map[string]any, env operations.Env) (operations.Operation,
 func (o *IssueViewOperation) Type() string { return TypeIssueView }
 
 // PermissionKey returns a grant key scoped to the specific repository and issue
-// number, so approving one issue does not authorise viewing another.
+// number, with a "+comments" suffix when comments are requested, so viewing an
+// issue's discussion is approved separately from its metadata.
 //
-// @return string A key of the form "github.issue.view:<owner/name>#<number>".
+// @return string A key like "github.issue.view:<owner/name>#<number>" (plus "+comments").
 //
 // @testcase TestIssueViewPermissionKeyIncludesNumber checks the key shape.
+// @testcase TestIssueViewCommentsChangesKey checks --comments changes the key.
 func (o *IssueViewOperation) PermissionKey() string {
-	return fmt.Sprintf("%s:%s#%d", TypeIssueView, o.repo, o.number)
+	key := fmt.Sprintf("%s:%s#%d", TypeIssueView, o.repo, o.number)
+	if o.comments {
+		key += "+comments"
+	}
+	return key
 }
 
 // Describe returns a one-line human summary for the approval page.
@@ -72,44 +77,35 @@ func (o *IssueViewOperation) PermissionKey() string {
 //
 // @testcase TestIssueViewDescribe checks the repo and number appear in the summary.
 func (o *IssueViewOperation) Describe() string {
+	if o.comments {
+		return fmt.Sprintf("View issue #%d (with comments) of GitHub repository %s", o.number, o.repo)
+	}
 	return fmt.Sprintf("View issue #%d of GitHub repository %s", o.number, o.repo)
 }
 
-// Execute calls the GitHub REST API to fetch the issue and returns GitHub's
-// response object verbatim (every attribute).
+// Execute fetches the issue (and, when requested, its comments) from the GitHub
+// REST API and returns GitHub's raw issue object. When comments are requested the
+// raw comments array is added under the synthetic "comments_list" key.
 //
-// @arg ctx Context for cancellation of the API call.
-// @return map[string]any Result set to GitHub's raw issue object.
-// @error error when the request fails or GitHub returns a non-200 status.
+// @arg ctx Context for cancellation of the API calls.
+// @return map[string]any Result set to GitHub's raw issue object, plus "comments_list" when requested.
+// @error error when a request fails or GitHub returns a non-200 status.
 //
 // @testcase TestIssueViewExecuteReturnsRaw fetches an issue against a stub API.
+// @testcase TestIssueViewExecuteWithComments also fetches the comments endpoint.
 func (o *IssueViewOperation) Execute(ctx context.Context) (map[string]any, error) {
+	var issue map[string]any
 	endpoint := fmt.Sprintf("%s/repos/%s/issues/%d", apiBaseURL, o.repo, o.number)
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Accept", "application/vnd.github+json")
-	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
-	if o.token != "" {
-		req.Header.Set("Authorization", "Bearer "+o.token)
-	}
-
-	resp, err := apiClient.Do(req)
-	if err != nil {
+	if err := getJSON(ctx, o.token, endpoint, &issue); err != nil {
 		return nil, fmt.Errorf("view issue: %w", err)
 	}
-	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(io.LimitReader(resp.Body, 2048))
-		return nil, fmt.Errorf("view issue: github returned %d: %s", resp.StatusCode, string(body))
-	}
-
-	var issue map[string]any
-	if err := json.NewDecoder(resp.Body).Decode(&issue); err != nil {
-		return nil, fmt.Errorf("decode issue: %w", err)
+	if o.comments {
+		var comments []any
+		if err := getJSON(ctx, o.token, endpoint+"/comments", &comments); err != nil {
+			return nil, fmt.Errorf("list issue comments: %w", err)
+		}
+		issue["comments_list"] = comments
 	}
 	return issue, nil
 }

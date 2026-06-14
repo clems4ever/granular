@@ -170,6 +170,20 @@ func TestRunIssueViewJSON(t *testing.T) {
 	}
 }
 
+func TestRunIssueViewPrintsComments(t *testing.T) {
+	body := `{"status":"completed","result":{"number":7,"title":"t","state":"open","user":{"login":"octocat"},"comments_list":[{"body":"a comment","user":{"login":"alice"}}]}}`
+	ts := fixedServer(t, http.StatusOK, body)
+	var out bytes.Buffer
+	req := api.OperationRequest{Type: "github.issue.view", Params: map[string]any{"repo": "a/b", "number": 7, "comments": true}}
+	if err := runIssueView(context.Background(), client.New(ts.URL), req, &out, false); err != nil {
+		t.Fatalf("runIssueView: %v", err)
+	}
+	got := out.String()
+	if !strings.Contains(got, "a comment") || !strings.Contains(got, "alice wrote") {
+		t.Fatalf("comments not rendered: %q", got)
+	}
+}
+
 func runGit(t *testing.T, dir string, args ...string) {
 	t.Helper()
 	cmd := exec.Command("git", args...)

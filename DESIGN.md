@@ -134,13 +134,20 @@ not authorise listing closed ones — a concrete example of the granular model.
 
 ## Third operation: `github.issue.view`
 
-`granular github issue view <repo> <number>` shows a single issue's details
-(`gh issue view`). Also server-executed: on a live grant the server calls
+`granular github issue view <repo> <number> [--comments]` shows a single issue's
+details (`gh issue view`). Also server-executed: on a live grant the server calls
 `GET /repos/{repo}/issues/{number}` with the PAT and returns GitHub's issue object
 **verbatim**. The CLI text view renders a few fields; `--json` emits the full raw
 object. The grant is scoped to the **specific issue**
 (`github.issue.view:owner/name#7`), so approving one issue does not authorise
 viewing another.
+
+`--comments` makes the server additionally call
+`GET /repos/{repo}/issues/{number}/comments` and fold the raw comments array into
+the result under the synthetic `comments_list` key. It is a **separate grant**: the
+permission key gains a `+comments` suffix (`github.issue.view:owner/name#7+comments`),
+so reading an issue's discussion is approved independently from its metadata, while
+the CLI surface still matches `gh issue view --comments`.
 
 ### Raw pass-through
 

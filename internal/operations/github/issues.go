@@ -2,13 +2,9 @@ package github
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"net/url"
 	"strconv"
-	"time"
 
 	"github.com/clems4ever/granular/internal/operations"
 )
@@ -18,9 +14,6 @@ const TypeIssueList = "github.issue.list"
 
 // defaultIssueLimit is how many issues are listed when no limit is requested.
 const defaultIssueLimit = 30
-
-// apiClient is the HTTP client used for GitHub REST API calls.
-var apiClient = &http.Client{Timeout: 30 * time.Second}
 
 // IssueListOperation lists the issues of a GitHub repository server-side using the
 // server-held PAT, returning them to the client.
@@ -98,30 +91,9 @@ func (o *IssueListOperation) Execute(ctx context.Context) (map[string]any, error
 	endpoint := fmt.Sprintf("%s/repos/%s/issues?state=%s&per_page=%s",
 		apiBaseURL, o.repo, url.QueryEscape(o.state), strconv.Itoa(o.limit))
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Accept", "application/vnd.github+json")
-	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
-	if o.token != "" {
-		req.Header.Set("Authorization", "Bearer "+o.token)
-	}
-
-	resp, err := apiClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("list issues: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(io.LimitReader(resp.Body, 2048))
-		return nil, fmt.Errorf("list issues: github returned %d: %s", resp.StatusCode, string(body))
-	}
-
 	var issues []any
-	if err := json.NewDecoder(resp.Body).Decode(&issues); err != nil {
-		return nil, fmt.Errorf("decode issues: %w", err)
+	if err := getJSON(ctx, o.token, endpoint, &issues); err != nil {
+		return nil, fmt.Errorf("list issues: %w", err)
 	}
 	return map[string]any{"issues": issues}, nil
 }
@@ -149,5 +121,15 @@ func intParam(params map[string]any, key string, fallback int) int {
 	return fallback
 }
 
-// apiBaseURL is the GitHub REST API base; overridable in tests.
-var apiBaseURL = "https://api.github.com"
+// boolParam reads a boolean-valued parameter, returning false when absent or not a
+// bool.
+//
+// @arg params The parameter map from the wire request.
+// @arg key The parameter name to read.
+// @return bool The boolean value, or false when missing or non-bool.
+//
+// @testcase TestIssueViewCommentsChangesKey relies on the comments bool param.
+func boolParam(params map[string]any, key string) bool {
+	b, _ := params[key].(bool)
+	return b
+}
