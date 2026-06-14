@@ -107,8 +107,10 @@ command** after approval performs the clone.
 | GET    | `/approve/{id}`       | Human-facing approval page (HTML form).                       |
 | POST   | `/approve/{id}`       | Submit approval (decision + expiry) or rejection.             |
 | any    | `/git/{owner}/{repo}.git/...` | Authenticating git proxy. Re-checks the repo's grant, injects the PAT, forwards read (upload-pack) traffic to github.com. Refuses receive-pack (push). |
+| GET    | `/`                   | Landing page.                                               |
 | GET    | `/catalog`            | HTML capability catalog: resource hierarchy, verb lattice, CLI operations. |
 | GET    | `/api/catalog`        | JSON capability manifest (for the agent).                   |
+| GET    | `/static/…`           | Embedded CSS/static assets.                                 |
 
 `POST /api/operations` request body:
 
@@ -274,5 +276,6 @@ internal/operations/github/  clone.go, api.go (REST helpers), issues.go (issue.l
                              issue_edit.go, issue_state.go (close/reopen)
 internal/grants/       delegation-request + Cedar-policy store (bbolt)
 internal/server/       HTTP handlers, approval UI, git proxy, /api/permissions, /catalog
+internal/server/web/   embedded templates (layout + pages) and stylesheet (//go:embed)
 internal/client/       HTTP client used by the CLI
 ```

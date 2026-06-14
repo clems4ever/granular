@@ -226,6 +226,20 @@ func TestPermissionsRequestRejectsUnknownAction(t *testing.T) {
 	}
 }
 
+func TestIndexPageRenders(t *testing.T) {
+	ts := testServer(t)
+	resp, err := http.Get(ts.URL + "/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("want 200, got %d", resp.StatusCode)
+	}
+	if html := readBody(t, resp); !strings.Contains(html, "granular") || !strings.Contains(html, "/static/style.css") {
+		t.Fatalf("index page missing expected content")
+	}
+}
+
 func TestCatalogPageRenders(t *testing.T) {
 	ts := testServer(t)
 	resp, err := http.Get(ts.URL + "/catalog")
@@ -236,7 +250,7 @@ func TestCatalogPageRenders(t *testing.T) {
 		t.Fatalf("want 200, got %d", resp.StatusCode)
 	}
 	html := readBody(t, resp)
-	for _, want := range []string{"capability catalog", "github.issue", "issue.view", "granular github issue view"} {
+	for _, want := range []string{"Capability catalog", "github.issue", "issue.view", "granular github issue view"} {
 		if !strings.Contains(html, want) {
 			t.Errorf("catalog page missing %q", want)
 		}

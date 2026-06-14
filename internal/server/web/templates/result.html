@@ -1,0 +1,14 @@
+{{define "title"}}{{.Status}} · granular{{end}}
+{{define "container-class"}} narrow{{end}}
+{{define "content"}}
+<div class="card result">
+  {{if eq (printf "%s" .Status) "rejected"}}
+    <div class="result-icon no">✕</div>
+  {{else}}
+    <div class="result-icon ok">✓</div>
+  {{end}}
+  <h1>Request {{.Status}}</h1>
+  <p class="lead" style="margin-top:.5rem">{{.Message}}</p>
+  <p class="muted" style="font-size:.85rem">You can close this tab and return to your terminal.</p>
+</div>
+{{end}}

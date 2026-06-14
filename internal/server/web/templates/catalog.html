@@ -1,0 +1,62 @@
+{{define "title"}}Capabilities · granular{{end}}
+{{define "content"}}
+<p class="eyebrow">Capability catalog</p>
+<h1>What the CLI can do</h1>
+<p class="lead">
+  The resources, actions and verb groups an agent can request — and how grants are
+  scoped. Machine-readable form at <a href="/api/catalog">/api/catalog</a>.
+</p>
+
+<h2>Resources</h2>
+<p class="muted" style="margin-top:-.4rem">Typed objects, nested. A grant targets a resource (an exact object, or a class via a matcher) and an action.</p>
+<div class="card">
+  {{range .Tree}}
+  <div class="res" style="padding-left:{{indent .Depth}}">
+    <span class="name">{{.Resource.Title}}</span>
+    <code>{{.Resource.Name}}</code>
+    <span class="cedar">· Cedar <code>{{.Resource.Entity}}</code></span>
+    <div class="muted" style="font-size:.88rem">{{.Resource.Description}}</div>
+    <div>{{range .Resource.Match}}<span class="field" title="{{.Description}}">{{.Name}}: {{.Type}}</span>{{end}}</div>
+  </div>
+  {{end}}
+</div>
+
+<h2>Verbs</h2>
+<p class="muted" style="margin-top:-.4rem">Grants can name a concrete action or a group. Granting a group authorizes every action it expands to — the agent requests <code>issue.view</code>, a <code>read</code> grant covers it.</p>
+{{range .Groups}}
+<div class="group">
+  <h3>{{.Group.Title}}{{if .Group.Parents}} <span class="nests">⊂ {{range .Group.Parents}}{{.}} {{end}}</span>{{end}}</h3>
+  <div class="muted" style="font-size:.88rem">{{.Group.Description}}</div>
+  <div style="margin-top:.4rem">{{range .Actions}}<span class="chip">{{.Name}}</span>{{end}}</div>
+</div>
+{{end}}
+
+<h2>Requesting permissions</h2>
+<p class="muted" style="margin-top:-.4rem">
+  Pre-approve a scoped bundle instead of one operation at a time: POST a
+  <code>PermissionsRequest</code> to <a href="/api/permissions">/api/permissions</a>
+  (or <code>granular request -f req.json</code>). Each capability lists actions on a
+  resource selector. Example:
+</p>
+<pre><code>{{.ExampleJSON}}</code></pre>
+
+<h2>Operations</h2>
+<p class="muted" style="margin-top:-.4rem">Each concrete action and the CLI command that triggers it.</p>
+<div class="card" style="padding:.4rem .8rem">
+  <table>
+    <thead><tr><th>Command</th><th>Action</th><th>Resource</th><th>Kind</th><th>Grant scope</th></tr></thead>
+    <tbody>
+    {{range .Catalog.Actions}}
+      <tr>
+        <td>{{if .CLI}}<code>{{.CLI}}</code>{{else}}<span class="muted">(planned)</span>{{end}}
+          <div class="muted" style="font-size:.84rem">{{.Description}}</div></td>
+        <td><code>{{.Name}}</code></td>
+        <td><code>{{.Resource}}</code></td>
+        <td>{{if .Mutating}}<span class="badge badge-write">write</span>{{else}}<span class="badge badge-read">read</span>{{end}}</td>
+        <td class="muted">{{.Scope}}</td>
+      </tr>
+    {{end}}
+    </tbody>
+  </table>
+</div>
+{{end}}

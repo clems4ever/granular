@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{block "title" .}}granular{{end}}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/"><span class="brand-mark"></span> granular</a>
+      <nav class="nav">
+        <a href="/catalog">Catalog</a>
+      </nav>
+    </div>
+  </header>
+  <main class="container{{block "container-class" .}}{{end}}">
+    {{block "content" .}}{{end}}
+  </main>
+  <footer class="footer">granular · fine-grained, human-approved, time-limited permissions</footer>
+</body>
+</html>

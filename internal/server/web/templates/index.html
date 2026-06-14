@@ -1,0 +1,33 @@
+{{define "title"}}granular{{end}}
+{{define "content"}}
+<section class="hero">
+  <p class="eyebrow">Permission broker</p>
+  <h1>Fine-grained permissions, approved by a human.</h1>
+  <p class="lead">
+    granular lets an agent request narrow, time-limited capabilities on platforms like
+    GitHub. Every operation is authorized by a Cedar policy you approve in your
+    browser — and grants expire.
+  </p>
+  <div class="actions-row">
+    <a class="btn btn-primary" href="/catalog">Explore the catalog →</a>
+    <a class="btn" href="/api/catalog">View JSON manifest</a>
+  </div>
+
+  <div class="feature-grid">
+    <div class="feature card">
+      <h3>Scoped by default</h3>
+      <p>The agent gets the narrowest permit for exactly the operation it needs — or you
+         pre-approve a broader bundle when you know what's coming.</p>
+    </div>
+    <div class="feature card">
+      <h3>Human-in-the-loop</h3>
+      <p>Nothing happens until you approve it here. You choose how long each grant lasts.</p>
+    </div>
+    <div class="feature card">
+      <h3>Cedar policies</h3>
+      <p>Authorization is decided by the Cedar engine, so one read grant cleanly covers
+         every read it implies — and writes stay content-scoped.</p>
+    </div>
+  </div>
+</section>
+{{end}}

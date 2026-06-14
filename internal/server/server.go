@@ -13,6 +13,7 @@ import (
 	"github.com/clems4ever/granular/internal/authz"
 	"github.com/clems4ever/granular/internal/grants"
 	"github.com/clems4ever/granular/internal/operations"
+	"github.com/clems4ever/granular/internal/server/web"
 )
 
 // Server wires together the operation registry, the grant store, the execution
@@ -52,6 +53,8 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("/git/{rest...}", s.handleGitProxy)
 	mux.HandleFunc("GET /catalog", s.handleCatalogPage)
 	mux.HandleFunc("GET /api/catalog", s.handleCatalogJSON)
+	mux.HandleFunc("GET /{$}", s.handleIndex)
+	mux.Handle("GET /static/", web.Static())
 	return mux
 }
 

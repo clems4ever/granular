@@ -1,0 +1,40 @@
+{{define "title"}}Approve · granular{{end}}
+{{define "container-class"}} narrow{{end}}
+{{define "content"}}
+<div class="card">
+  <p class="eyebrow">Approval requested</p>
+  <h1>Review this request</h1>
+
+  {{if .Decided}}
+    <p class="lead" style="margin-top:1rem">
+      This request has already been
+      <span class="badge badge-{{.Status}}">{{.Status}}</span>.
+    </p>
+  {{else}}
+    <div class="desc">{{.Description}}</div>
+    <p class="kv">Operation: <code>{{.OperationType}}</code></p>
+
+    {{if .Policies}}
+    <details>
+      <summary>Cedar policies this would grant ({{len .Policies}})</summary>
+      <pre><code>{{range .Policies}}{{.}}
+
+{{end}}</code></pre>
+    </details>
+    {{end}}
+
+    <form method="post" action="/approve/{{.ID}}">
+      <div class="form-row">
+        <label for="ttl">Grant valid for</label>
+        <select id="ttl" name="ttl">
+          {{range .TTLOptions}}<option value="{{.Value}}">{{.Label}}</option>{{end}}
+        </select>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" type="submit" name="decision" value="approve">Approve</button>
+        <button class="btn btn-danger" type="submit" name="decision" value="reject">Reject</button>
+      </div>
+    </form>
+  {{end}}
+</div>
+{{end}}
