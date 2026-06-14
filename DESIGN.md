@@ -118,6 +118,30 @@ clones from, not a server-side result:
 The PAT never leaves the server and is never placed on a command line. The clone
 is repo-scoped (see below). Push (`git-receive-pack`) is refused by the proxy.
 
+## Second operation: `github.issue.list`
+
+`granular github issue list <repo> [--state open|closed|all] [--limit N]` lists a
+repository's issues. Unlike clone, this is **server-executed**: once a grant
+exists, the server calls the GitHub REST API (`GET /repos/{repo}/issues`) with the
+PAT, filters out pull requests, and returns the issues in the operation result;
+the CLI prints them. Nothing is proxied because the result is small structured
+data, not a stream the client must own.
+
+The grant is scoped to the repository **and the requested state**
+(`github.issue.list:owner/name?state=open`), so approving "list open issues" does
+not authorise listing closed ones — a concrete example of the granular model.
+
+## Two execution models
+
+The `Operation.Execute` contract is the same, but operations fall into two shapes:
+
+- **Server-executed** (e.g. `github.issue.list`): `Execute` does the work using the
+  PAT and returns the result, which the CLI renders.
+- **Client-fulfilled / brokered** (e.g. `github.clone`): `Execute` does no real
+  work; it returns a brokered URL (the git proxy) and the CLI performs the action
+  locally through it. Used when the client must own the output (a working tree) or
+  the protocol is a stream.
+
 ## Decisions taken for this first iteration (and why)
 
 - **bbolt on-disk store** for grants and delegation requests (two buckets:
@@ -141,12 +165,14 @@ is repo-scoped (see below). Push (`git-receive-pack`) is refused by the proxy.
 ## Layout
 
 ```
-cmd/granular/          CLI entrypoint
-cmd/granular-server/   server entrypoint
+cmd/granular/          thin CLI entrypoint (main.go only)
+cmd/granular-server/   server entrypoint (registers operations)
+internal/cli/          CLI command tree, one file per command:
+                         cli.go, github.go, github_clone.go, github_issue.go
 internal/api/          wire types shared by client & server
 internal/operations/   Operation interface, registry
-internal/operations/github/  github.clone
-internal/grants/       delegation-request + grant store
-internal/server/       HTTP handlers + approval UI
+internal/operations/github/  clone.go (github.clone), issues.go (github.issue.list)
+internal/grants/       delegation-request + grant store (bbolt)
+internal/server/       HTTP handlers, approval UI, git proxy
 internal/client/       HTTP client used by the CLI
 ```

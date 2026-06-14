@@ -1,4 +1,4 @@
-package main
+package cli
 
 import (
 	"bytes"
@@ -15,15 +15,18 @@ import (
 	"github.com/clems4ever/granular/internal/client"
 )
 
-func TestRootCommandHasGithubChild(t *testing.T) {
-	root := newRootCmd()
-	github, _, err := root.Find([]string{"github"})
-	if err != nil || github.Name() != "github" {
-		t.Fatalf("github command not found: %v", err)
-	}
-	clone, _, err := root.Find([]string{"github", "clone"})
-	if err != nil || clone.Name() != "clone" {
-		t.Fatalf("clone command not found: %v", err)
+func TestRootCommandTree(t *testing.T) {
+	root := NewRootCmd()
+	for _, path := range [][]string{
+		{"github"},
+		{"github", "clone"},
+		{"github", "issue"},
+		{"github", "issue", "list"},
+	} {
+		cmd, _, err := root.Find(path)
+		if err != nil || cmd.Name() != path[len(path)-1] {
+			t.Fatalf("command %v not found: %v", path, err)
+		}
 	}
 }
 
@@ -76,6 +79,32 @@ func TestRunCloneClonesViaProxy(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(dest, "README.md")); err != nil {
 		t.Fatalf("clone did not produce README.md: %v", err)
+	}
+}
+
+func TestRunIssueListPendingPrintsURL(t *testing.T) {
+	ts := fixedServer(t, http.StatusAccepted, `{"status":"pending","request_id":"req1","approval_url":"http://x/approve/req1"}`)
+	var out bytes.Buffer
+	req := api.OperationRequest{Type: "github.issue.list", Params: map[string]any{"repo": "a/b"}}
+	if err := runIssueList(context.Background(), client.New(ts.URL), req, &out); err != nil {
+		t.Fatalf("runIssueList: %v", err)
+	}
+	if !strings.Contains(out.String(), "http://x/approve/req1") || !strings.Contains(out.String(), "list the issues") {
+		t.Fatalf("expected approval URL and hint, got: %q", out.String())
+	}
+}
+
+func TestRunIssueListPrintsIssues(t *testing.T) {
+	body := `{"status":"completed","result":{"issues":[{"number":7,"title":"Fix the bug","state":"open","author":"octocat"}]}}`
+	ts := fixedServer(t, http.StatusOK, body)
+	var out bytes.Buffer
+	req := api.OperationRequest{Type: "github.issue.list", Params: map[string]any{"repo": "a/b"}}
+	if err := runIssueList(context.Background(), client.New(ts.URL), req, &out); err != nil {
+		t.Fatalf("runIssueList: %v", err)
+	}
+	got := out.String()
+	if !strings.Contains(got, "#7") || !strings.Contains(got, "Fix the bug") || !strings.Contains(got, "octocat") {
+		t.Fatalf("issue line not rendered: %q", got)
 	}
 }
 

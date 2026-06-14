@@ -59,6 +59,31 @@ non-default server URL. `github clone` accepts `--ref <branch-or-tag>` to contro
 the checked-out branch. The grant is **repo-scoped** and lasts for the expiration
 chosen at approval time. Requires `git` on the client's PATH.
 
+### List issues
+
+```sh
+bin/granular github issue list octocat/Hello-World            # open issues (default)
+bin/granular github issue list octocat/Hello-World --state closed --limit 50
+#  Approval required. Open this URL ...   (first time, then re-run after approving)
+#  #9822  open   🚨 New article published 😫  (rididbxeuebb)
+#  ...
+```
+
+Listing is **server-executed**: once approved, the server calls the GitHub API
+with the PAT and returns the issues (pull requests excluded). The grant is scoped
+to the repository **and** the `--state`, so approving "open" issues does not also
+authorise "closed" ones.
+
+## Command tree
+
+```
+granular
+└── github
+    ├── clone <repo> <dest> [--ref]
+    └── issue
+        └── list <repo> [--state] [--limit]
+```
+
 ## Adding an operation
 
 1. Implement `operations.Operation` (and a matching `operations.Factory`) in a new
