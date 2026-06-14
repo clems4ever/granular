@@ -24,6 +24,7 @@ var pages = map[string]*template.Template{
 	"catalog": page("catalog.html"),
 	"approve": page("approve.html"),
 	"result":  page("result.html"),
+	"grants":  page("grants.html"),
 }
 
 // page parses the shared layout together with a single page template.

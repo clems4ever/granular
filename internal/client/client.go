@@ -114,3 +114,55 @@ func (c *Client) Catalog(ctx context.Context) ([]byte, error) {
 	}
 	return io.ReadAll(resp.Body)
 }
+
+// Grants fetches the active grants and request history from the server.
+//
+// @arg ctx Context for cancellation.
+// @return api.GrantsResponse The decoded grants and requests.
+// @error error on transport failure, a non-2xx status, or an undecodable body.
+//
+// @testcase TestGrantsAndRevoke lists grants from a test server.
+func (c *Client) Grants(ctx context.Context) (api.GrantsResponse, error) {
+	var out api.GrantsResponse
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodGet, c.baseURL+"/api/grants", nil)
+	if err != nil {
+		return out, err
+	}
+	resp, err := c.http.Do(httpReq)
+	if err != nil {
+		return out, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return out, fmt.Errorf("grants request failed: status %d", resp.StatusCode)
+	}
+	return out, json.NewDecoder(resp.Body).Decode(&out)
+}
+
+// Revoke asks the server to revoke the active grants for a grant id or request id.
+//
+// @arg ctx Context for cancellation.
+// @arg id A grant id or a request id.
+// @return api.RevokeResponse The decoded response with the number revoked.
+// @error error on transport failure, a non-2xx status, or an undecodable body.
+//
+// @testcase TestGrantsAndRevoke revokes a grant via a test server.
+func (c *Client) Revoke(ctx context.Context, id string) (api.RevokeResponse, error) {
+	var out api.RevokeResponse
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseURL+"/api/grants/"+id+"/revoke", nil)
+	if err != nil {
+		return out, err
+	}
+	resp, err := c.http.Do(httpReq)
+	if err != nil {
+		return out, err
+	}
+	defer resp.Body.Close()
+	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
+		return out, fmt.Errorf("decode response (status %d): %w", resp.StatusCode, err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		return out, fmt.Errorf("revoke failed (status %d): %s", resp.StatusCode, out.Error)
+	}
+	return out, nil
+}

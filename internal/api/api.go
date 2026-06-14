@@ -20,7 +20,47 @@ const (
 	StatusRejected OperationStatus = "rejected"
 	// StatusExpired means the delegation request elapsed before being acted on.
 	StatusExpired OperationStatus = "expired"
+	// StatusRevoked means a previously approved grant was revoked by a human before
+	// its expiry.
+	StatusRevoked OperationStatus = "revoked"
 )
+
+// GrantInfo describes one active (non-expired) grant — a stored Cedar policy with
+// its lifetime — for listing and revocation.
+type GrantInfo struct {
+	ID            string          `json:"id"`
+	RequestID     string          `json:"request_id"`
+	OperationType string          `json:"operation_type"`
+	Description   string          `json:"description"`
+	Policy        string          `json:"policy"`
+	CreatedAt     string          `json:"created_at"`
+	ExpiresAt     string          `json:"expires_at"`
+	Status        OperationStatus `json:"status"`
+}
+
+// RequestInfo describes one delegation request for listing (the approval audit
+// trail), without the full proposed-policy bodies.
+type RequestInfo struct {
+	ID            string          `json:"id"`
+	OperationType string          `json:"operation_type"`
+	Description   string          `json:"description"`
+	Status        OperationStatus `json:"status"`
+	CreatedAt     string          `json:"created_at"`
+}
+
+// GrantsResponse is returned by GET /api/grants: the active grants plus the
+// delegation-request history.
+type GrantsResponse struct {
+	Grants   []GrantInfo   `json:"grants"`
+	Requests []RequestInfo `json:"requests"`
+}
+
+// RevokeResponse is returned by POST /api/grants/{id}/revoke: how many active
+// grants were revoked for the given id.
+type RevokeResponse struct {
+	Revoked int    `json:"revoked"`
+	Error   string `json:"error,omitempty"`
+}
 
 // OperationRequest is the body of POST /api/operations: the operation type and
 // its free-form parameters.

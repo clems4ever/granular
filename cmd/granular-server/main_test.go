@@ -4,8 +4,11 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 )
 
+// TestEnvOrFallback checks envOr returns the variable's value when set and the
+// fallback when unset.
 func TestEnvOrFallback(t *testing.T) {
 	const key = "GRANULAR_TEST_ENVOR"
 	_ = os.Unsetenv(key)
@@ -18,6 +21,8 @@ func TestEnvOrFallback(t *testing.T) {
 	}
 }
 
+// TestRunRejectsBadWorkspace checks run fails fast when the workspace directory
+// cannot be created.
 func TestRunRejectsBadWorkspace(t *testing.T) {
 	// Point the workspace at a path whose parent is a regular file, so the
 	// MkdirAll in run fails fast before any server is started.
@@ -37,5 +42,23 @@ func TestRunRejectsBadWorkspace(t *testing.T) {
 func TestMainIsEntryPoint(t *testing.T) {
 	if testing.Short() {
 		t.Skip("main is an entry point exercised via run")
+	}
+}
+
+// TestParseDurationOr checks parsing a valid duration, the unset fallback, and the
+// invalid-value fallback.
+func TestParseDurationOr(t *testing.T) {
+	const key = "GRANULAR_TEST_DUR"
+	_ = os.Unsetenv(key)
+	if d := parseDurationOr(key, 30*time.Second); d != 30*time.Second {
+		t.Fatalf("unset should fall back, got %v", d)
+	}
+	t.Setenv(key, "45s")
+	if d := parseDurationOr(key, 30*time.Second); d != 45*time.Second {
+		t.Fatalf("valid should parse, got %v", d)
+	}
+	t.Setenv(key, "garbage")
+	if d := parseDurationOr(key, 30*time.Second); d != 30*time.Second {
+		t.Fatalf("invalid should fall back, got %v", d)
 	}
 }

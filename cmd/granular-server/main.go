@@ -4,11 +4,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/clems4ever/granular/internal/grants"
 	"github.com/clems4ever/granular/internal/operations"
@@ -76,6 +78,12 @@ func run() error {
 
 	srv := server.New(registry, store, env, baseURL)
 
+	cleanupInterval := parseDurationOr("GRANULAR_CLEANUP_INTERVAL", 30*time.Second)
+	store.StartCleanup(context.Background(), cleanupInterval, func(n int) {
+		log.Printf("cleaned up %d expired grant(s)", n)
+	})
+	log.Printf("grant janitor purging expired grants every %s", cleanupInterval)
+
 	log.Printf("granular-server listening on %s (base URL %s, workspace %s)", addr, baseURL, workspace)
 	if env.GitHubToken == "" {
 		log.Printf("warning: GRANULAR_GITHUB_TOKEN is empty; the git proxy cannot authenticate to GitHub until it is set")
@@ -94,6 +102,23 @@ func run() error {
 func envOr(key, fallback string) string {
 	if v := os.Getenv(key); v != "" {
 		return v
+	}
+	return fallback
+}
+
+// parseDurationOr reads a duration from the named environment variable, returning
+// fallback when the variable is unset, empty, or not a valid Go duration.
+//
+// @arg key The environment variable name.
+// @arg fallback The duration to return when the variable is unset or invalid.
+// @return time.Duration The parsed duration, or fallback.
+//
+// @testcase TestParseDurationOr checks parsing, fallback, and invalid input.
+func parseDurationOr(key string, fallback time.Duration) time.Duration {
+	if v := os.Getenv(key); v != "" {
+		if d, err := time.ParseDuration(v); err == nil && d > 0 {
+			return d
+		}
 	}
 	return fallback
 }

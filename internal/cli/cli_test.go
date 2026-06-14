@@ -43,6 +43,9 @@ func TestRootCommandTree(t *testing.T) {
 		{"github", "pr", "reopen"},
 		{"request"},
 		{"catalog"},
+		{"grants"},
+		{"grants", "list"},
+		{"grants", "revoke"},
 	} {
 		cmd, _, err := root.Find(path)
 		if err != nil || cmd.Name() != path[len(path)-1] {
@@ -441,5 +444,48 @@ func TestRunPushPushesViaProxy(t *testing.T) {
 	// The branch must now exist in the remote.
 	if out := exec.Command("git", "-C", remote, "rev-parse", "--verify", "main").Run(); out != nil {
 		t.Fatalf("push did not create main in the remote")
+	}
+}
+
+func TestRunGrantsListPrints(t *testing.T) {
+	body := `{"grants":[{"id":"g1","request_id":"r1","operation_type":"github.pull.create","description":"Open a PR","expires_at":"2026-06-14T21:00:00Z","status":"approved"}],"requests":[{"id":"r1","operation_type":"github.pull.create","status":"approved"}]}`
+	ts := fixedServer(t, http.StatusOK, body)
+	var out bytes.Buffer
+	if err := runGrantsList(context.Background(), client.New(ts.URL), &out, false); err != nil {
+		t.Fatalf("runGrantsList: %v", err)
+	}
+	got := out.String()
+	if !strings.Contains(got, "g1") || !strings.Contains(got, "github.pull.create") || !strings.Contains(got, "Open a PR") {
+		t.Fatalf("grant not rendered: %q", got)
+	}
+	if !strings.Contains(got, "Request history (1)") {
+		t.Fatalf("request history not rendered: %q", got)
+	}
+}
+
+func TestRunGrantsListJSON(t *testing.T) {
+	body := `{"grants":[{"id":"g1"}],"requests":[]}`
+	ts := fixedServer(t, http.StatusOK, body)
+	var out bytes.Buffer
+	if err := runGrantsList(context.Background(), client.New(ts.URL), &out, true); err != nil {
+		t.Fatalf("runGrantsList: %v", err)
+	}
+	var decoded map[string]any
+	if err := json.Unmarshal(out.Bytes(), &decoded); err != nil {
+		t.Fatalf("output is not JSON: %v\n%s", err, out.String())
+	}
+	if decoded["grants"] == nil {
+		t.Fatalf("expected grants in JSON: %s", out.String())
+	}
+}
+
+func TestRunGrantsRevokeReportsCount(t *testing.T) {
+	ts := fixedServer(t, http.StatusOK, `{"revoked":2}`)
+	var out bytes.Buffer
+	if err := runGrantsRevoke(context.Background(), client.New(ts.URL), "r1", &out); err != nil {
+		t.Fatalf("runGrantsRevoke: %v", err)
+	}
+	if !strings.Contains(out.String(), "Revoked 2 active grant(s) for r1") {
+		t.Fatalf("unexpected output: %q", out.String())
 	}
 }

@@ -96,6 +96,7 @@ h2 {
 h3 { font-size: 1rem; margin: 0 0 .25rem; }
 .lead { color: var(--muted); font-size: 1.02rem; margin: 0 0 1.5rem; }
 .muted { color: var(--muted); }
+.nowrap { white-space: nowrap; font-size: .82rem; }
 .eyebrow {
   text-transform: uppercase; letter-spacing: .08em;
   font-size: .72rem; font-weight: 600; color: var(--accent);
@@ -170,6 +171,8 @@ pre code { background: none; color: inherit; padding: 0; }
 .badge-approved { background: var(--success-soft); color: var(--success); }
 .badge-completed{ background: var(--success-soft); color: var(--success); }
 .badge-rejected { background: var(--danger-soft); color: var(--danger); }
+.badge-revoked  { background: var(--danger-soft); color: var(--danger); }
+.badge-expired  { background: #f1f5f9; color: #64748b; }
 .badge-read  { background: var(--success-soft); color: var(--success); }
 .badge-write { background: var(--danger-soft); color: var(--danger); }
 

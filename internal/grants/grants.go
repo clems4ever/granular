@@ -6,8 +6,10 @@
 package grants
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
+	"sort"
 	"time"
 
 	"github.com/clems4ever/granular/internal/api"
@@ -34,13 +36,17 @@ type DelegationRequest struct {
 	CreatedAt        time.Time           `json:"created_at"`
 }
 
-// StoredPolicy is an approved Cedar policy with an expiry.
+// StoredPolicy is an approved Cedar policy with an expiry. RequestID links it back
+// to the delegation request that produced it, so a whole request's grants can be
+// revoked together.
 type StoredPolicy struct {
-	ID          string    `json:"id"`
-	Policy      string    `json:"policy"`
-	Description string    `json:"description"`
-	CreatedAt   time.Time `json:"created_at"`
-	ExpiresAt   time.Time `json:"expires_at"`
+	ID            string    `json:"id"`
+	RequestID     string    `json:"request_id"`
+	OperationType string    `json:"operation_type"`
+	Policy        string    `json:"policy"`
+	Description   string    `json:"description"`
+	CreatedAt     time.Time `json:"created_at"`
+	ExpiresAt     time.Time `json:"expires_at"`
 }
 
 // Store persists delegation requests and approved policies in a bbolt database.
@@ -163,11 +169,13 @@ func (s *Store) Approve(id string, ttl time.Duration) (*DelegationRequest, error
 		pb := tx.Bucket(bucketPolicies)
 		for _, policy := range req.ProposedPolicies {
 			sp := StoredPolicy{
-				ID:          s.newID(),
-				Policy:      policy,
-				Description: req.Description,
-				CreatedAt:   s.now(),
-				ExpiresAt:   s.now().Add(ttl),
+				ID:            s.newID(),
+				RequestID:     req.ID,
+				OperationType: req.OperationType,
+				Policy:        policy,
+				Description:   req.Description,
+				CreatedAt:     s.now(),
+				ExpiresAt:     s.now().Add(ttl),
 			}
 			if err := putTx(pb, sp.ID, sp); err != nil {
 				return err
@@ -244,6 +252,207 @@ func (s *Store) ActivePolicies() ([]string, error) {
 		return nil
 	})
 	return active, err
+}
+
+// ListRequests returns every delegation request, newest first.
+//
+// @return []DelegationRequest All stored delegation requests, sorted by creation time descending.
+// @error error when the database cannot be read or a record cannot be decoded.
+//
+// @testcase TestListRequestsAndGrants lists requests after creating some.
+func (s *Store) ListRequests() ([]DelegationRequest, error) {
+	var out []DelegationRequest
+	err := s.db.View(func(tx *bolt.Tx) error {
+		return tx.Bucket(bucketRequests).ForEach(func(_, v []byte) error {
+			var req DelegationRequest
+			if err := json.Unmarshal(v, &req); err != nil {
+				return err
+			}
+			out = append(out, req)
+			return nil
+		})
+	})
+	if err != nil {
+		return nil, err
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].CreatedAt.After(out[j].CreatedAt) })
+	return out, nil
+}
+
+// ListGrants returns every active (non-expired) stored policy, newest first,
+// deleting any that have expired as a side effect.
+//
+// @return []StoredPolicy The active grants, sorted by creation time descending.
+// @error error when the database cannot be read or updated.
+//
+// @testcase TestListRequestsAndGrants lists grants after an approval.
+// @testcase TestRevokeGrantByID removes a grant so it no longer lists.
+func (s *Store) ListGrants() ([]StoredPolicy, error) {
+	var out []StoredPolicy
+	err := s.db.Update(func(tx *bolt.Tx) error {
+		pb := tx.Bucket(bucketPolicies)
+		var expired [][]byte
+		err := pb.ForEach(func(k, v []byte) error {
+			var sp StoredPolicy
+			if err := json.Unmarshal(v, &sp); err != nil {
+				return err
+			}
+			if s.now().Before(sp.ExpiresAt) {
+				out = append(out, sp)
+			} else {
+				expired = append(expired, append([]byte(nil), k...))
+			}
+			return nil
+		})
+		if err != nil {
+			return err
+		}
+		for _, k := range expired {
+			if err := pb.Delete(k); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].CreatedAt.After(out[j].CreatedAt) })
+	return out, nil
+}
+
+// Revoke immediately invalidates access identified by id. The id may be a single
+// grant (stored policy) id, in which case just that grant is deleted, or a
+// delegation request id, in which case every grant produced by that request is
+// deleted and the request itself is marked revoked (even when it had no live
+// grants, e.g. a still-pending request). It returns the number of grants removed
+// and whether anything — a grant or a request — matched the id.
+//
+// @arg id A grant (stored policy) id, or a delegation request id.
+// @return int The number of active grants that were revoked.
+// @return bool True when a grant or a request matched the id.
+// @error error when the database cannot be updated.
+//
+// @testcase TestRevokeGrantByID revokes a single grant by its policy id.
+// @testcase TestRevokeByRequestID revokes all grants of a request and marks it revoked.
+// @testcase TestRevokePendingRequest revokes a pending request that has no grants.
+func (s *Store) Revoke(id string) (int, bool, error) {
+	revoked := 0
+	found := false
+	err := s.db.Update(func(tx *bolt.Tx) error {
+		pb := tx.Bucket(bucketPolicies)
+		// Direct hit: the id is a stored-policy id.
+		if v := pb.Get([]byte(id)); v != nil {
+			if err := pb.Delete([]byte(id)); err != nil {
+				return err
+			}
+			revoked = 1
+			found = true
+			return nil
+		}
+		// Otherwise treat id as a request id: delete all of its grants.
+		var keys [][]byte
+		err := pb.ForEach(func(k, v []byte) error {
+			var sp StoredPolicy
+			if err := json.Unmarshal(v, &sp); err != nil {
+				return err
+			}
+			if sp.RequestID == id {
+				keys = append(keys, append([]byte(nil), k...))
+			}
+			return nil
+		})
+		if err != nil {
+			return err
+		}
+		for _, k := range keys {
+			if err := pb.Delete(k); err != nil {
+				return err
+			}
+			revoked++
+		}
+		// Mark the originating request revoked, if it still exists and is still
+		// in an actionable (pending or approved) state.
+		rb := tx.Bucket(bucketRequests)
+		if rv := rb.Get([]byte(id)); rv != nil {
+			found = true
+			var req DelegationRequest
+			if err := json.Unmarshal(rv, &req); err != nil {
+				return err
+			}
+			if req.Status == api.StatusPending || req.Status == api.StatusApproved {
+				req.Status = api.StatusRevoked
+				if err := putTx(rb, req.ID, &req); err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	})
+	return revoked, found, err
+}
+
+// PurgeExpired deletes every stored policy whose expiry has passed and returns how
+// many were removed. It is what the background janitor calls on each tick.
+//
+// @return int The number of expired grants deleted.
+// @error error when the database cannot be updated.
+//
+// @testcase TestPurgeExpired deletes elapsed grants and keeps live ones.
+func (s *Store) PurgeExpired() (int, error) {
+	purged := 0
+	err := s.db.Update(func(tx *bolt.Tx) error {
+		pb := tx.Bucket(bucketPolicies)
+		var expired [][]byte
+		err := pb.ForEach(func(k, v []byte) error {
+			var sp StoredPolicy
+			if err := json.Unmarshal(v, &sp); err != nil {
+				return err
+			}
+			if !s.now().Before(sp.ExpiresAt) {
+				expired = append(expired, append([]byte(nil), k...))
+			}
+			return nil
+		})
+		if err != nil {
+			return err
+		}
+		for _, k := range expired {
+			if err := pb.Delete(k); err != nil {
+				return err
+			}
+			purged++
+		}
+		return nil
+	})
+	return purged, err
+}
+
+// StartCleanup launches a background goroutine that calls PurgeExpired on the given
+// interval until ctx is cancelled. onPurge, when non-nil, is invoked with the count
+// each time a tick removes one or more grants (used for logging).
+//
+// @arg ctx Context whose cancellation stops the janitor.
+// @arg interval How often to purge expired grants.
+// @arg onPurge Optional callback invoked with the number of grants removed on a tick.
+//
+// @testcase TestStartCleanupPurges runs the loop and observes a purge callback.
+func (s *Store) StartCleanup(ctx context.Context, interval time.Duration, onPurge func(int)) {
+	go func() {
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				n, err := s.PurgeExpired()
+				if err == nil && n > 0 && onPurge != nil {
+					onPurge(n)
+				}
+			}
+		}
+	}()
 }
 
 // put writes value as JSON under key in the named bucket in its own transaction.

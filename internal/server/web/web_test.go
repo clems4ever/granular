@@ -13,6 +13,7 @@ func TestRenderProducesHTML(t *testing.T) {
 		"catalog": map[string]any{"ExampleJSON": "{}"},
 		"approve": map[string]any{"ID": "abc", "Description": "do a thing", "Decided": false},
 		"result":  map[string]any{"Status": "approved", "Message": "done"},
+		"grants":  map[string]any{"Grants": []any{}, "Requests": []any{}},
 	}
 	for name, data := range cases {
 		rec := httptest.NewRecorder()

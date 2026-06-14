@@ -270,11 +270,11 @@ func TestCatalogJSON(t *testing.T) {
 }
 
 func TestParseTTLFallsBack(t *testing.T) {
-	if parseTTL("").Hours() != 1 {
-		t.Errorf("empty should default to 1h")
+	if parseTTL("").Minutes() != 2 {
+		t.Errorf("empty should default to 2m")
 	}
-	if parseTTL("garbage").Hours() != 1 {
-		t.Errorf("invalid should default to 1h")
+	if parseTTL("garbage").Minutes() != 2 {
+		t.Errorf("invalid should default to 2m")
 	}
 	if parseTTL("15m").Minutes() != 15 {
 		t.Errorf("15m should parse")

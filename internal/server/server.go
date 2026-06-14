@@ -53,6 +53,10 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("/git/{rest...}", s.handleGitProxy)
 	mux.HandleFunc("GET /catalog", s.handleCatalogPage)
 	mux.HandleFunc("GET /api/catalog", s.handleCatalogJSON)
+	mux.HandleFunc("GET /grants", s.handleGrantsPage)
+	mux.HandleFunc("GET /api/grants", s.handleGrantsJSON)
+	mux.HandleFunc("POST /api/grants/{id}/revoke", s.handleRevoke)
+	mux.HandleFunc("POST /grants/{id}/revoke", s.handleRevokeForm)
 	mux.HandleFunc("GET /{$}", s.handleIndex)
 	mux.Handle("GET /static/", web.Static())
 	return mux
@@ -157,32 +161,37 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 	_ = json.NewEncoder(w).Encode(v)
 }
 
-// ttlOptions lists the expiration choices offered on the approval page.
+// defaultTTL is the grant lifetime used when the approval form omits or sends an
+// invalid duration. It is short by design so grants expire quickly.
+const defaultTTL = 2 * time.Minute
+
+// ttlOptions lists the expiration choices offered on the approval page; the first
+// entry is the default selected option.
 var ttlOptions = []struct {
 	Label string
 	Value string
 }{
+	{"2 minutes", "2m"},
 	{"15 minutes", "15m"},
 	{"1 hour", "1h"},
 	{"8 hours", "8h"},
 	{"24 hours", "24h"},
-	{"7 days", "168h"},
 }
 
 // parseTTL converts an approval-form duration value into a time.Duration, falling
-// back to one hour for empty or invalid input.
+// back to defaultTTL (2 minutes) for empty or invalid input.
 //
-// @arg value The raw duration string from the form, e.g. "1h".
-// @return time.Duration The parsed duration, or one hour on failure.
+// @arg value The raw duration string from the form, e.g. "2m".
+// @return time.Duration The parsed duration, or defaultTTL on failure.
 //
-// @testcase TestParseTTLFallsBack checks empty and invalid values default to 1h.
+// @testcase TestParseTTLFallsBack checks empty and invalid values default to 2m.
 func parseTTL(value string) time.Duration {
 	if value == "" {
-		return time.Hour
+		return defaultTTL
 	}
 	d, err := time.ParseDuration(value)
 	if err != nil || d <= 0 {
-		return time.Hour
+		return defaultTTL
 	}
 	return d
 }

@@ -60,3 +60,25 @@ func TestCatalogFetchesManifest(t *testing.T) {
 		t.Fatalf("unexpected catalog body: %s", body)
 	}
 }
+
+func TestGrantsAndRevoke(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /api/grants", func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte(`{"grants":[{"id":"g1","operation_type":"github.clone"}],"requests":[]}`))
+	})
+	mux.HandleFunc("POST /api/grants/{id}/revoke", func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte(`{"revoked":1}`))
+	})
+	ts := httptest.NewServer(mux)
+	defer ts.Close()
+
+	c := New(ts.URL)
+	g, err := c.Grants(context.Background())
+	if err != nil || len(g.Grants) != 1 || g.Grants[0].ID != "g1" {
+		t.Fatalf("Grants = %+v, %v", g, err)
+	}
+	rv, err := c.Revoke(context.Background(), "g1")
+	if err != nil || rv.Revoked != 1 {
+		t.Fatalf("Revoke = %+v, %v", rv, err)
+	}
+}

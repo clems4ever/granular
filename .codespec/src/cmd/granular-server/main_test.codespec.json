@@ -1,0 +1,28 @@
+{
+	"functions": [
+		{
+			"function_name": "TestParseDurationOr",
+			"documentation_hash": "96a22935638568b809e0db0e8dd5f6d0e8d7e7577952af26f8cdcf481b7bc1d2",
+			"definition_hash": "a3412e94740e65c61c9f870bf4d910b9c24c67a21dfe6df77a77d30b5f20e004",
+			"reviewed_at": "2026-06-14T21:10:05.653045426Z"
+		},
+		{
+			"function_name": "TestEnvOrFallback",
+			"documentation_hash": "f8436b2461a58fcdde047d46c56953452d2785d8ab0d5405bc68792fc017358b",
+			"definition_hash": "f443c24e6edbfdf22a17568f8ea96b876fe331fc631e2d000d1ec098ea59b34b",
+			"reviewed_at": "2026-06-14T21:10:05.645293486Z"
+		},
+		{
+			"function_name": "TestRunRejectsBadWorkspace",
+			"documentation_hash": "873b127290af94786d7725eef6df7ecfa70b421857d4bddd5a9984f1ad754bb8",
+			"definition_hash": "1cb3fee6892cf76565ee03052af79ac243b85e708cd8dfa6e8a6c92d94edfc84",
+			"reviewed_at": "2026-06-14T21:10:05.647872735Z"
+		},
+		{
+			"function_name": "TestMainIsEntryPoint",
+			"documentation_hash": "c7945750ec5bb143539600079882c69b628b91aae297d1091d9b64cf9dadf915",
+			"definition_hash": "2caf41b34b9a85da87060d0d265d285b3a165d8a246168d42df8b665e46e4b95",
+			"reviewed_at": "2026-06-14T21:10:05.650255834Z"
+		}
+	]
+}

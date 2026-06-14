@@ -34,6 +34,7 @@ func NewRootCmd() *cobra.Command {
 		newGithubCmd(&server),
 		newRequestCmd(&server),
 		newCatalogCmd(&server),
+		newGrantsCmd(&server),
 	)
 	return root
 }
