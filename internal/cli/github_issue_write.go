@@ -42,7 +42,7 @@ func newIssueCommentCmd(server *string, jsonOut *bool) *cobra.Command {
 			if text == "" {
 				return fmt.Errorf("a comment body is required (use --body or --body-file)")
 			}
-			req := api.OperationRequest{
+			req := api.Operation{
 				Type: "github.issue.comment",
 				Params: map[string]any{
 					"repo":   args[0],
@@ -83,7 +83,7 @@ func newIssueCreateCmd(server *string, jsonOut *bool) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			req := api.OperationRequest{
+			req := api.Operation{
 				Type: "github.issue.create",
 				Params: map[string]any{
 					"repo":      args[0],
@@ -150,7 +150,7 @@ func newIssueEditCmd(server *string, jsonOut *bool) *cobra.Command {
 				}
 				params["body"] = text
 			}
-			req := api.OperationRequest{Type: "github.issue.edit", Params: params}
+			req := api.Operation{Type: "github.issue.edit", Params: params}
 			return runIssueAction(cmd.Context(), client.New(*server), req, "edit the issue", "updated", cmd.OutOrStdout(), *jsonOut)
 		},
 	}
@@ -183,7 +183,7 @@ func newIssueCloseCmd(server *string, jsonOut *bool) *cobra.Command {
 			if err != nil || number <= 0 {
 				return fmt.Errorf("invalid issue number %q", args[1])
 			}
-			req := api.OperationRequest{
+			req := api.Operation{
 				Type:   "github.issue.close",
 				Params: map[string]any{"repo": args[0], "number": number, "reason": reason},
 			}
@@ -212,7 +212,7 @@ func newIssueReopenCmd(server *string, jsonOut *bool) *cobra.Command {
 			if err != nil || number <= 0 {
 				return fmt.Errorf("invalid issue number %q", args[1])
 			}
-			req := api.OperationRequest{
+			req := api.Operation{
 				Type:   "github.issue.reopen",
 				Params: map[string]any{"repo": args[0], "number": number},
 			}
@@ -235,7 +235,7 @@ func newIssueReopenCmd(server *string, jsonOut *bool) *cobra.Command {
 // @error error when authorization or the action fails.
 //
 // @testcase TestRunIssueActionReportsResult prints the updated issue number and URL.
-func runIssueAction(ctx context.Context, c *client.Client, req api.OperationRequest, action, past string, out io.Writer, jsonOut bool) error {
+func runIssueAction(ctx context.Context, c *client.Client, req api.Operation, action, past string, out io.Writer, jsonOut bool) error {
 	resp, done, err := authorize(ctx, c, req, action, out)
 	if err != nil || done {
 		return err
@@ -259,7 +259,7 @@ func runIssueAction(ctx context.Context, c *client.Client, req api.OperationRequ
 //
 // @testcase TestRunIssueCommentPendingPrintsURL prints the approval URL when pending.
 // @testcase TestRunIssueCommentReportsResult prints the created comment URL.
-func runIssueComment(ctx context.Context, c *client.Client, req api.OperationRequest, out io.Writer, jsonOut bool) error {
+func runIssueComment(ctx context.Context, c *client.Client, req api.Operation, out io.Writer, jsonOut bool) error {
 	resp, done, err := authorize(ctx, c, req, "post the comment", out)
 	if err != nil || done {
 		return err
@@ -282,7 +282,7 @@ func runIssueComment(ctx context.Context, c *client.Client, req api.OperationReq
 // @error error when authorization or the creation fails.
 //
 // @testcase TestRunIssueCreateReportsResult prints the created issue number and URL.
-func runIssueCreate(ctx context.Context, c *client.Client, req api.OperationRequest, out io.Writer, jsonOut bool) error {
+func runIssueCreate(ctx context.Context, c *client.Client, req api.Operation, out io.Writer, jsonOut bool) error {
 	resp, done, err := authorize(ctx, c, req, "create the issue", out)
 	if err != nil || done {
 		return err

@@ -30,7 +30,8 @@ func fixedStore(t *testing.T, now time.Time) (*Store, *time.Time) {
 	return s, &clock
 }
 
-func mustCreate(t *testing.T, s *Store, proposed ...string) *DelegationRequest {
+// mustCreate creates a pending grant request, failing the test on error.
+func mustCreate(t *testing.T, s *Store, proposed ...string) *GrantRequest {
 	t.Helper()
 	req, err := s.CreateRequest("github.clone", "desc", proposed, map[string]any{"repo": "a/b"})
 	if err != nil {
@@ -39,6 +40,7 @@ func mustCreate(t *testing.T, s *Store, proposed ...string) *DelegationRequest {
 	return req
 }
 
+// mustActive returns the store's active policy texts, failing the test on error.
 func mustActive(t *testing.T, s *Store) []string {
 	t.Helper()
 	p, err := s.ActivePolicies()
@@ -48,6 +50,7 @@ func mustActive(t *testing.T, s *Store) []string {
 	return p
 }
 
+// TestCreateAndGetRequest checks a created request is retrievable by id.
 func TestCreateAndGetRequest(t *testing.T) {
 	s, _ := fixedStore(t, time.Unix(0, 0))
 	req := mustCreate(t, s, "permit ( principal, action, resource );")
@@ -60,6 +63,7 @@ func TestCreateAndGetRequest(t *testing.T) {
 	}
 }
 
+// TestGetMissingRequest checks GetRequest returns ErrRequestNotFound for an unknown id.
 func TestGetMissingRequest(t *testing.T) {
 	s, _ := fixedStore(t, time.Unix(0, 0))
 	if _, err := s.GetRequest("nope"); !errors.Is(err, ErrRequestNotFound) {
@@ -67,6 +71,7 @@ func TestGetMissingRequest(t *testing.T) {
 	}
 }
 
+// TestApproveStoresActivePolicies checks approval stores the proposed policies as active.
 func TestApproveStoresActivePolicies(t *testing.T) {
 	s, _ := fixedStore(t, time.Unix(0, 0))
 	req := mustCreate(t, s, "permit ( principal, action, resource );")
@@ -82,6 +87,7 @@ func TestApproveStoresActivePolicies(t *testing.T) {
 	}
 }
 
+// TestApproveMissingRequest checks Approve returns ErrRequestNotFound for an unknown id.
 func TestApproveMissingRequest(t *testing.T) {
 	s, _ := fixedStore(t, time.Unix(0, 0))
 	if _, err := s.Approve("nope", time.Hour); !errors.Is(err, ErrRequestNotFound) {
@@ -89,6 +95,7 @@ func TestApproveMissingRequest(t *testing.T) {
 	}
 }
 
+// TestExpiredPolicyIsDropped checks an elapsed policy is no longer active and gets pruned.
 func TestExpiredPolicyIsDropped(t *testing.T) {
 	s, clock := fixedStore(t, time.Unix(0, 0))
 	req := mustCreate(t, s, "permit ( principal, action, resource );")
@@ -101,6 +108,7 @@ func TestExpiredPolicyIsDropped(t *testing.T) {
 	}
 }
 
+// TestRejectRequest checks rejection sets the status and stores no policy.
 func TestRejectRequest(t *testing.T) {
 	s, _ := fixedStore(t, time.Unix(0, 0))
 	req := mustCreate(t, s, "permit ( principal, action, resource );")
@@ -115,6 +123,7 @@ func TestRejectRequest(t *testing.T) {
 	}
 }
 
+// TestPolicySurvivesReopen checks an active policy survives reopening the store.
 func TestPolicySurvivesReopen(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "persist.db")
@@ -142,6 +151,7 @@ func TestPolicySurvivesReopen(t *testing.T) {
 	}
 }
 
+// TestListRequestsAndGrants checks ListRequests and ListGrants return the created request and its grant.
 func TestListRequestsAndGrants(t *testing.T) {
 	s, _ := fixedStore(t, time.Unix(100, 0))
 	req := mustCreate(t, s, "permit ( principal, action, resource );")
@@ -162,6 +172,7 @@ func TestListRequestsAndGrants(t *testing.T) {
 	}
 }
 
+// TestRevokeGrantByID checks revoking by grant id removes just that grant.
 func TestRevokeGrantByID(t *testing.T) {
 	s, _ := fixedStore(t, time.Unix(100, 0))
 	req := mustCreate(t, s, "permit ( principal, action, resource );")
@@ -185,6 +196,7 @@ func TestRevokeGrantByID(t *testing.T) {
 	}
 }
 
+// TestRevokeByRequestID checks revoking by request id removes all its grants and marks it revoked.
 func TestRevokeByRequestID(t *testing.T) {
 	s, _ := fixedStore(t, time.Unix(100, 0))
 	req := mustCreate(t, s,
@@ -206,6 +218,7 @@ func TestRevokeByRequestID(t *testing.T) {
 	}
 }
 
+// TestPurgeExpired checks PurgeExpired deletes elapsed grants and keeps live ones.
 func TestPurgeExpired(t *testing.T) {
 	s, clock := fixedStore(t, time.Unix(100, 0))
 	req := mustCreate(t, s, "permit ( principal, action, resource );")
@@ -226,6 +239,7 @@ func TestPurgeExpired(t *testing.T) {
 	}
 }
 
+// TestStartCleanupPurges checks the background janitor purges expired grants on its tick.
 func TestStartCleanupPurges(t *testing.T) {
 	s, err := Open(filepath.Join(t.TempDir(), "cleanup.db"))
 	if err != nil {
@@ -258,6 +272,7 @@ func TestStartCleanupPurges(t *testing.T) {
 	}
 }
 
+// TestRevokePendingRequest checks a pending request with no grants can still be revoked.
 func TestRevokePendingRequest(t *testing.T) {
 	s, _ := fixedStore(t, time.Unix(100, 0))
 	req := mustCreate(t, s, "permit ( principal, action, resource );")

@@ -16,7 +16,7 @@ import (
 func approveAGrant(t *testing.T, ts string) string {
 	t.Helper()
 	body := `{"reason":"work","capabilities":[{"actions":["issues.read"],"resource":{"type":"github.repo","match":{"owner":"o","name":"n"}}}]}`
-	resp, err := http.Post(ts+"/api/permissions", "application/json", strings.NewReader(body))
+	resp, err := http.Post(ts+"/api/requests", "application/json", strings.NewReader(body))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -30,6 +30,7 @@ func approveAGrant(t *testing.T, ts string) string {
 	return id
 }
 
+// grantsResponse fetches and decodes the /api/grants response.
 func grantsResponse(t *testing.T, ts string) api.GrantsResponse {
 	t.Helper()
 	resp, err := http.Get(ts + "/api/grants")
@@ -44,6 +45,7 @@ func grantsResponse(t *testing.T, ts string) api.GrantsResponse {
 	return out
 }
 
+// TestGrantsPageRenders checks the grants page renders its active-grants and history sections.
 func TestGrantsPageRenders(t *testing.T) {
 	ts := testServer(t)
 	resp, err := http.Get(ts.URL + "/grants")
@@ -58,6 +60,7 @@ func TestGrantsPageRenders(t *testing.T) {
 	}
 }
 
+// TestGrantsPageShowsExpiryAndRevoke checks the page shows expiry dates and revoke forms for grants and requests.
 func TestGrantsPageShowsExpiryAndRevoke(t *testing.T) {
 	ts := testServer(t)
 	reqID := approveAGrant(t, ts.URL)
@@ -79,6 +82,7 @@ func TestGrantsPageShowsExpiryAndRevoke(t *testing.T) {
 	}
 }
 
+// TestGrantsJSONListsActiveGrants checks /api/grants lists an active grant linked to its request.
 func TestGrantsJSONListsActiveGrants(t *testing.T) {
 	ts := testServer(t)
 	reqID := approveAGrant(t, ts.URL)
@@ -101,6 +105,7 @@ func TestGrantsJSONListsActiveGrants(t *testing.T) {
 	}
 }
 
+// TestRevokeEndpointRemovesGrant checks the revoke endpoint removes a grant and 404s on an unknown id.
 func TestRevokeEndpointRemovesGrant(t *testing.T) {
 	ts := testServer(t)
 	approveAGrant(t, ts.URL)
@@ -126,11 +131,12 @@ func TestRevokeEndpointRemovesGrant(t *testing.T) {
 	}
 }
 
+// TestRevokePendingRequestEndpoint checks revoking a pending request by id returns 200 and marks it revoked.
 func TestRevokePendingRequestEndpoint(t *testing.T) {
 	ts := testServer(t)
 
 	// A pending operation request (no grant exists for it yet).
-	resp, err := http.Post(ts.URL+"/api/operations", "application/json", strings.NewReader(`{"type":"test.op"}`))
+	resp, err := http.Post(ts.URL+"/api/requests", "application/json", strings.NewReader(`{"operation":{"type":"test.op"}}`))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -155,6 +161,7 @@ func TestRevokePendingRequestEndpoint(t *testing.T) {
 	}
 }
 
+// TestRevokeFormRedirects checks the web revoke form redirects back to the grants page.
 func TestRevokeFormRedirects(t *testing.T) {
 	ts := testServer(t)
 	approveAGrant(t, ts.URL)
@@ -174,6 +181,7 @@ func TestRevokeFormRedirects(t *testing.T) {
 	}
 }
 
+// TestFirstLine checks firstLine returns the first line of a string.
 func TestFirstLine(t *testing.T) {
 	if got := firstLine("one\ntwo\nthree"); got != "one" {
 		t.Fatalf("firstLine = %q", got)
@@ -183,6 +191,7 @@ func TestFirstLine(t *testing.T) {
 	}
 }
 
+// TestHumanRemaining checks humanRemaining formats positive durations and clamps negatives to expired.
 func TestHumanRemaining(t *testing.T) {
 	if got := humanRemaining(90 * time.Second); got != "1m30s" {
 		t.Fatalf("humanRemaining = %q", got)

@@ -1,0 +1,57 @@
+{
+	"functions": [
+		{
+			"function_name": "New",
+			"documentation_hash": "84e54d7fe928c9094bae0aada661f2b9af6871314a1d43872c87d2510a40c087",
+			"definition_hash": "08a52181fb07fa50eba172167cadbfeed70bdcf91dcbcf89e502747ae13886ae",
+			"reviewed_at": "2026-06-15T14:59:49.032181573Z"
+		},
+		{
+			"function_name": "Handler",
+			"receiver": "Server",
+			"documentation_hash": "987539ace680705db31aebc3a378d606a8d3e5f08963393ca7d05f2e63f36ef7",
+			"definition_hash": "ab61ea31c87eeca07bad38d50d72f2b41202edecd6bc9604e1621883f99b6cf9",
+			"reviewed_at": "2026-06-15T14:59:49.039857215Z"
+		},
+		{
+			"function_name": "handleRequest",
+			"receiver": "Server",
+			"documentation_hash": "06c0dbbc62602ce826d66f74a3a6064acf668e556c96fa81519b211f88f3002a",
+			"definition_hash": "f7cbf91efeb296ae798d773bd75ca3ddec5828ff05d62adb7d5a46f09a4fe06f",
+			"reviewed_at": "2026-06-15T14:59:49.043432802Z"
+		},
+		{
+			"function_name": "handleOperationRequest",
+			"receiver": "Server",
+			"documentation_hash": "c6625f914a154ad24bd85522173f811037cd96c177548d9957b6b649809e4f14",
+			"definition_hash": "d099dbbfbb9fb7af98a9f427f5b92cb6ac4fde9ccb2e11c09513b721e1225259",
+			"reviewed_at": "2026-06-15T14:59:49.05412116Z"
+		},
+		{
+			"function_name": "authorize",
+			"receiver": "Server",
+			"documentation_hash": "d2c183dbc471ae024f0ff71ef60b3025d22752a3ff657f3d9ef41988b2116d44",
+			"definition_hash": "4c028cd2ddfe26a2201beb7e4351eefefeef321c5e4e5a45f10d89ba1d47fe1e",
+			"reviewed_at": "2026-06-15T14:59:49.064699422Z"
+		},
+		{
+			"function_name": "handleRequestStatus",
+			"receiver": "Server",
+			"documentation_hash": "d214461b3adc6103b38deb9e6897fdd07b22cb2c8ecf8bab98dab21f0246a8b2",
+			"definition_hash": "1b5e71748c24876c43a69ac0fd5554346c0e44e9097f6413f3fc1751339f2b9a",
+			"reviewed_at": "2026-06-15T14:59:49.075042276Z"
+		},
+		{
+			"function_name": "writeJSON",
+			"documentation_hash": "660f55545062f579c36147085342b9982bc2ded63c1de6ce5b030c57bfa4d7a3",
+			"definition_hash": "7d55273efed15d1d8b9f8a9c413cfc0519a5196f46a1fecc8b851ed7beec385f",
+			"reviewed_at": "2026-06-15T14:59:49.07742519Z"
+		},
+		{
+			"function_name": "parseTTL",
+			"documentation_hash": "5775c42a086cd99e122d81c944c858d96d5187f57519c9b281de9d95a3a9fccd",
+			"definition_hash": "ed7f25489906e8e9bc233f2895ae447d2331eaddc1bf3f1cef54a80b0f083755",
+			"reviewed_at": "2026-06-15T14:59:49.082770309Z"
+		}
+	]
+}

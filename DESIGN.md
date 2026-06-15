@@ -14,12 +14,12 @@ each concrete operation must be approved by a human, and the approval expires.
 
 - **`granular-server` (HTTP server)** — holds the platform credentials (for now a
   GitHub PAT supplied through the `GRANULAR_GITHUB_TOKEN` environment variable).
-  It decides whether an operation is allowed, mints **delegation requests**,
+  It decides whether an operation is allowed, mints **grant requests**,
   serves a small approval web page, records **grants**, and executes the
   operation when a live grant exists.
 
 The server is **stateless with respect to the client**: it never makes the client
-wait. Delegation requests and grants are persisted to a **bbolt** database on disk,
+wait. Grant requests and grants are persisted to a **bbolt** database on disk,
 so a decision is made entirely **out-of-band** (in the browser) and survives a
 server restart. The CLI does **not** poll — it submits, and either gets the result
 (if already granted) or an approval URL to open, after which the user simply
@@ -36,13 +36,15 @@ Authorization is decided by the [Cedar](https://www.cedarpolicy.com/) policy eng
   (and their roll-up groups like `read`/`issues.read`) come from the single
   `internal/catalog` manifest.
 - A **grant** is one or more **Cedar policies** stored with an expiry
-  (`internal/grants`, bbolt). `POST /api/operations` loads the active (non-expired)
-  policies and asks the engine `AllowsAll(requirements)`.
+  (`internal/grants`, bbolt). Everything is submitted as a **`GrantRequest`** to the
+  single `POST /api/requests` endpoint. When it names an `operation`, the server
+  loads the active (non-expired) policies and asks the engine
+  `AllowsAll(requirements)`.
 - If allowed → execute. If not → mint **minimal permits** (one per requirement,
-  scoped to the exact resource + content hash) and create a delegation request;
+  scoped to the exact resource + content hash) and create a pending grant request;
   the human approves and the policies are stored.
-- **Pre-approval** (`POST /api/permissions`): a custom `PermissionsRequest` is
-  translated to broader Cedar policies (e.g. `permit(action in [issues.read],
+- **Pre-approval**: a `GrantRequest` carrying `capabilities` (instead of an
+  `operation`) is translated to broader Cedar policies (e.g. `permit(action in [issues.read],
   resource in GitHub::Repo::"owner/name")`). One approval then covers every concrete
   operation the policy allows — `list` *and* `view*, across the repo — while writes
   outside the grant still require their own approval.
@@ -60,9 +62,9 @@ write reuses the grant but a different payload needs fresh approval.
 - **Requirement** — one authorization check, e.g. `issue.view` on
   `GitHub::Issue::"owner/name#7"`. See [Authorization (Cedar)](#authorization-cedar).
 
-- **Delegation request** — created when an operation (or `PermissionsRequest`) is
-  not authorized by the active policies. It captures the proposed Cedar policies, a
-  generated id, and a `pending` status. The id is embedded in the approval URL
+- **Grant request** — a submitted `GrantRequest` that needs approval (an operation
+  not yet authorized by the active policies, or a capability bundle). It captures the
+  proposed Cedar policies, a generated id, and a `pending` status. The id is embedded in the approval URL
   `…/approve/{id}`.
 
 - **Grant** — one or more Cedar policies stored on approval, each with an expiry.
@@ -73,7 +75,7 @@ write reuses the grant but a different payload needs fresh approval.
 
 ```
 CLI                         server                         human (browser)
- |   POST /api/operations      |                                |
+ |   POST /api/requests        |                                |
  |---------------------------->|  Cedar: AllowsAll(reqs)?       |
  |                             |  - no -> persist request, 202  |
  |<----------------------------|  {status:pending, approval_url}|
@@ -81,7 +83,7 @@ CLI                         server                         human (browser)
  |                             |          GET /approve/{id} --> | shows operation
  |                             |          POST /approve/{id} <--| picks expiry, approves
  |                             |  persist grant (bbolt)         |
- |   POST /api/operations      |   (user re-runs the command)   |
+ |   POST /api/requests        |   (user re-runs the command)   |
  |---------------------------->|  live grant -> 200 {clone_url} |
  |<----------------------------|  brokered git-proxy URL        |
  |   git clone <clone_url>     |                                |
@@ -101,21 +103,28 @@ command** after approval performs the clone.
 
 | Method | Path                  | Purpose                                                       |
 |--------|-----------------------|---------------------------------------------------------------|
-| POST   | `/api/operations`     | Attempt an operation. `200` with result, or `202` pending.    |
-| POST   | `/api/permissions`    | Submit a custom scoped capability bundle; `202` pending.      |
-| GET    | `/api/requests/{id}`  | Inspect a delegation request's status.                        |
+| POST   | `/api/requests`       | Submit a `GrantRequest`. With an `operation`: `200` with result, or `202` pending. With `capabilities`: `202` pending. |
+| GET    | `/api/requests/{id}`  | Inspect a grant request's status.                        |
+| GET    | `/api/grants`         | List active grants and the request history.                  |
+| POST   | `/api/grants/{id}/revoke` | Revoke a grant (by grant id) or a request's grants (by request id). |
 | GET    | `/approve/{id}`       | Human-facing approval page (HTML form).                       |
 | POST   | `/approve/{id}`       | Submit approval (decision + expiry) or rejection.             |
-| any    | `/git/{owner}/{repo}.git/...` | Authenticating git proxy. Re-checks the repo's grant, injects the PAT, forwards read (upload-pack) traffic to github.com. Refuses receive-pack (push). |
+| any    | `/git/{owner}/{repo}.git/...` | Authenticating git proxy. Re-checks the repo's grant, injects the PAT, forwards read (upload-pack, repo.clone grant) and write (receive-pack, repo.push grant) traffic to github.com. |
 | GET    | `/`                   | Landing page.                                               |
 | GET    | `/catalog`            | HTML capability catalog: resource hierarchy, verb lattice, CLI operations. |
 | GET    | `/api/catalog`        | JSON capability manifest (for the agent).                   |
 | GET    | `/static/…`           | Embedded CSS/static assets.                                 |
 
-`POST /api/operations` request body:
+`POST /api/requests` request body — an operation (just-in-time):
 
 ```json
-{ "type": "github.clone", "params": { "repo": "github.com/owner/name" } }
+{ "operation": { "type": "github.clone", "params": { "repo": "github.com/owner/name" } } }
+```
+
+…or a capability bundle (pre-approval):
+
+```json
+{ "reason": "work on the repo", "capabilities": [ { "actions": ["issues.read"], "resource": { "type": "github.repo", "match": { "owner": "owner", "name": "name" } } } ] }
 ```
 
 Pending response (`202`):
@@ -136,8 +145,9 @@ clones from, not a server-side result:
 `granular github clone <repo> <dest> [--ref <ref>]` clones a GitHub repository
 **on the client**, with the server acting as a credential-injecting git proxy:
 
-1. The CLI calls `POST /api/operations`. With a live grant the server returns a
-   `clone_url` pointing at its own `/git/owner/name.git` proxy endpoint.
+1. The CLI calls `POST /api/requests` with the clone operation. With a live grant
+   the server returns a `clone_url` pointing at its own `/git/owner/name.git` proxy
+   endpoint.
 2. The CLI runs a local `git clone <clone_url> <dest>` (plus `--branch <ref>` when
    `--ref` is given).
 3. git's smart-HTTP requests hit the server proxy, which re-checks the grant for
@@ -239,7 +249,7 @@ The `Operation.Execute` contract is the same, but operations fall into two shape
 
 ## Decisions taken for this first iteration (and why)
 
-- **bbolt on-disk store** for approved Cedar policies and delegation requests (two
+- **bbolt on-disk store** for approved Cedar policies and grant requests (two
   buckets: `requests`, `policies`). This keeps the server stateless toward the
   client and lets approvals happen out-of-band and survive restarts. Path via
   `GRANULAR_DB` (default `<workspace>/granular.db`).
@@ -267,7 +277,7 @@ The `Operation.Execute` contract is the same, but operations fall into two shape
 cmd/granular/          thin CLI entrypoint (main.go only)
 cmd/granular-server/   server entrypoint (registers operations)
 internal/cli/          CLI command tree (one file per command) + request.go (request/catalog)
-internal/api/          wire types shared by client & server (incl. PermissionsRequest)
+internal/api/          wire types shared by client & server (GrantRequest, Grant, …)
 internal/catalog/      single-source capability manifest (resources, actions, lattice)
 internal/authz/        Cedar engine: requirements, policy generation, evaluation
 internal/operations/   Operation interface, registry
@@ -275,7 +285,7 @@ internal/operations/github/  clone.go, api.go (REST helpers), issues.go (issue.l
                              issue_view.go, issue_comment.go, issue_create.go,
                              issue_edit.go, issue_state.go (close/reopen)
 internal/grants/       delegation-request + Cedar-policy store (bbolt)
-internal/server/       HTTP handlers, approval UI, git proxy, /api/permissions, /catalog
+internal/server/       HTTP handlers, approval UI, git proxy, /api/requests, /grants, /catalog
 internal/server/web/   embedded templates (layout + pages) and stylesheet (//go:embed)
 internal/client/       HTTP client used by the CLI
 ```

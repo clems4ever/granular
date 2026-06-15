@@ -31,10 +31,11 @@
 </div>
 {{end}}
 
-<h2>Requesting permissions</h2>
+<h2>Requesting a grant</h2>
 <p class="muted" style="margin-top:-.4rem">
-  Pre-approve a scoped bundle instead of one operation at a time: POST a
-  <code>PermissionsRequest</code> to <a href="/api/permissions">/api/permissions</a>
+  Everything goes through one endpoint: POST a <code>GrantRequest</code> to
+  <a href="/api/requests">/api/requests</a>. Name an <code>operation</code> to run one
+  action just-in-time, or list <code>capabilities</code> to pre-approve a scoped bundle
   (or <code>granular request -f req.json</code>). Each capability lists actions on a
   resource selector. Example:
 </p>

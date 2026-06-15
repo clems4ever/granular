@@ -30,29 +30,31 @@ func New(baseURL string) *Client {
 	return &Client{baseURL: baseURL, http: &http.Client{Timeout: 5 * time.Minute}}
 }
 
-// Submit posts an operation attempt and returns the server's response.
+// Submit posts a grant request (an operation to run, or a capability bundle to
+// pre-approve) to the single /api/requests endpoint and returns the server's
+// response.
 //
 // @arg ctx Context for cancellation.
-// @arg req The operation type and parameters to attempt.
-// @return api.OperationResponse The decoded server response (pending or completed).
-// @error error on transport failure, non-2xx status, or undecodable body.
+// @arg req The grant request: either Operation or Capabilities.
+// @return api.RequestResponse The decoded server response (pending or completed).
+// @error error on transport failure, a 5xx status, or undecodable body.
 //
 // @testcase TestSubmitDecodesResponse submits and checks the decoded response.
-func (c *Client) Submit(ctx context.Context, req api.OperationRequest) (api.OperationResponse, error) {
-	return c.post(ctx, "/api/operations", req)
+func (c *Client) Submit(ctx context.Context, req api.GrantRequest) (api.RequestResponse, error) {
+	return c.post(ctx, "/api/requests", req)
 }
 
-// RequestPermissions posts a custom permissions request and returns the server's
-// response (pending, with an approval URL).
+// SubmitOperation is a convenience wrapper that submits a single operation as a
+// grant request.
 //
 // @arg ctx Context for cancellation.
-// @arg req The capabilities to request.
-// @return api.OperationResponse The decoded server response.
-// @error error on transport failure, non-2xx status, or undecodable body.
+// @arg op The operation type and parameters to attempt.
+// @return api.RequestResponse The decoded server response (pending or completed).
+// @error error on transport failure, a 5xx status, or undecodable body.
 //
-// @testcase TestRequestPermissionsDecodesResponse requests and checks the response.
-func (c *Client) RequestPermissions(ctx context.Context, req api.PermissionsRequest) (api.OperationResponse, error) {
-	return c.post(ctx, "/api/permissions", req)
+// @testcase TestSubmitDecodesResponse submits an operation grant request.
+func (c *Client) SubmitOperation(ctx context.Context, op api.Operation) (api.RequestResponse, error) {
+	return c.Submit(ctx, api.GrantRequest{Operation: &op})
 }
 
 // post marshals payload, POSTs it to the path, and decodes the OperationResponse.
@@ -60,31 +62,31 @@ func (c *Client) RequestPermissions(ctx context.Context, req api.PermissionsRequ
 // @arg ctx Context for cancellation.
 // @arg path The server path to POST to.
 // @arg payload The value to marshal as the JSON body.
-// @return api.OperationResponse The decoded server response.
+// @return api.RequestResponse The decoded server response.
 // @error error on transport failure, a 5xx status, or undecodable body.
 //
 // @testcase TestSubmitDecodesResponse drives post via Submit.
-func (c *Client) post(ctx context.Context, path string, payload any) (api.OperationResponse, error) {
+func (c *Client) post(ctx context.Context, path string, payload any) (api.RequestResponse, error) {
 	body, err := json.Marshal(payload)
 	if err != nil {
-		return api.OperationResponse{}, err
+		return api.RequestResponse{}, err
 	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseURL+path, bytes.NewReader(body))
 	if err != nil {
-		return api.OperationResponse{}, err
+		return api.RequestResponse{}, err
 	}
 	httpReq.Header.Set("Content-Type", "application/json")
 
 	resp, err := c.http.Do(httpReq)
 	if err != nil {
-		return api.OperationResponse{}, err
+		return api.RequestResponse{}, err
 	}
 	defer resp.Body.Close()
 
-	var out api.OperationResponse
+	var out api.RequestResponse
 	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
-		return api.OperationResponse{}, fmt.Errorf("decode response (status %d): %w", resp.StatusCode, err)
+		return api.RequestResponse{}, fmt.Errorf("decode response (status %d): %w", resp.StatusCode, err)
 	}
 	if resp.StatusCode >= 500 {
 		return out, fmt.Errorf("server error (status %d): %s", resp.StatusCode, out.Error)

@@ -156,7 +156,7 @@ func (s *Server) handleApprovePage(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	dr, err := s.store.GetRequest(id)
 	if err != nil {
-		http.Error(w, "delegation request not found", http.StatusNotFound)
+		http.Error(w, "grant request not found", http.StatusNotFound)
 		return
 	}
 	summary, detail := splitDescription(dr.Description)
@@ -200,12 +200,12 @@ func (s *Server) handleApproveSubmit(w http.ResponseWriter, r *http.Request) {
 		ttl := parseTTL(r.FormValue("ttl"))
 		if _, err = s.store.Approve(id, ttl); err == nil {
 			status = api.StatusApproved
-			message = "The operation has been approved. You can return to your terminal."
+			message = "The grant request has been approved. You can return to your terminal."
 		}
 	case "reject":
 		if _, err = s.store.Reject(id); err == nil {
 			status = api.StatusRejected
-			message = "The operation has been rejected."
+			message = "The grant request has been rejected."
 		}
 	default:
 		http.Error(w, "invalid decision", http.StatusBadRequest)

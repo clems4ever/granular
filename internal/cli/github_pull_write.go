@@ -38,7 +38,7 @@ func newPullCreateCmd(server *string, jsonOut *bool) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			req := api.OperationRequest{
+			req := api.Operation{
 				Type: "github.pull.create",
 				Params: map[string]any{
 					"repo": args[0], "title": title, "body": text,
@@ -89,7 +89,7 @@ func newPullCommentCmd(server *string, jsonOut *bool) *cobra.Command {
 			if text == "" {
 				return fmt.Errorf("a comment body is required (use --body or --body-file)")
 			}
-			req := api.OperationRequest{
+			req := api.Operation{
 				Type:   "github.pull.comment",
 				Params: map[string]any{"repo": args[0], "number": number, "body": text},
 			}
@@ -128,7 +128,7 @@ func newPullReviewCmd(server *string, jsonOut *bool) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			req := api.OperationRequest{
+			req := api.Operation{
 				Type:   "github.pull.review",
 				Params: map[string]any{"repo": args[0], "number": number, "event": event, "body": text},
 			}
@@ -180,7 +180,7 @@ func newPullEditCmd(server *string, jsonOut *bool) *cobra.Command {
 			if cmd.Flags().Changed("base") {
 				params["base"] = base
 			}
-			req := api.OperationRequest{Type: "github.pull.edit", Params: params}
+			req := api.Operation{Type: "github.pull.edit", Params: params}
 			return runPullAction(cmd.Context(), client.New(*server), req, "edit the pull request", "updated", cmd.OutOrStdout(), *jsonOut)
 		},
 	}
@@ -213,7 +213,7 @@ func newPullMergeCmd(server *string, jsonOut *bool) *cobra.Command {
 			if err != nil || number <= 0 {
 				return fmt.Errorf("invalid pull request number %q", args[1])
 			}
-			req := api.OperationRequest{
+			req := api.Operation{
 				Type:   "github.pull.merge",
 				Params: map[string]any{"repo": args[0], "number": number, "method": method, "sha": sha},
 			}
@@ -243,7 +243,7 @@ func newPullCloseCmd(server *string, jsonOut *bool) *cobra.Command {
 			if err != nil || number <= 0 {
 				return fmt.Errorf("invalid pull request number %q", args[1])
 			}
-			req := api.OperationRequest{
+			req := api.Operation{
 				Type:   "github.pull.close",
 				Params: map[string]any{"repo": args[0], "number": number},
 			}
@@ -271,7 +271,7 @@ func newPullReopenCmd(server *string, jsonOut *bool) *cobra.Command {
 			if err != nil || number <= 0 {
 				return fmt.Errorf("invalid pull request number %q", args[1])
 			}
-			req := api.OperationRequest{
+			req := api.Operation{
 				Type:   "github.pull.reopen",
 				Params: map[string]any{"repo": args[0], "number": number},
 			}
@@ -294,7 +294,7 @@ func newPullReopenCmd(server *string, jsonOut *bool) *cobra.Command {
 // @error error when authorization or the action fails.
 //
 // @testcase TestRunPullActionReportsResult prints the pull request number and URL.
-func runPullAction(ctx context.Context, c *client.Client, req api.OperationRequest, action, past string, out io.Writer, jsonOut bool) error {
+func runPullAction(ctx context.Context, c *client.Client, req api.Operation, action, past string, out io.Writer, jsonOut bool) error {
 	resp, done, err := authorize(ctx, c, req, action, out)
 	if err != nil || done {
 		return err
@@ -321,7 +321,7 @@ func runPullAction(ctx context.Context, c *client.Client, req api.OperationReque
 // @error error when authorization or the post fails.
 //
 // @testcase TestRunPullCommentReportsResult prints the created comment URL.
-func runPullComment(ctx context.Context, c *client.Client, req api.OperationRequest, out io.Writer, jsonOut bool) error {
+func runPullComment(ctx context.Context, c *client.Client, req api.Operation, out io.Writer, jsonOut bool) error {
 	resp, done, err := authorize(ctx, c, req, "post the comment", out)
 	if err != nil || done {
 		return err
@@ -344,7 +344,7 @@ func runPullComment(ctx context.Context, c *client.Client, req api.OperationRequ
 // @error error when authorization or the creation fails.
 //
 // @testcase TestRunPullCreateReportsResult prints the created pull request number and URL.
-func runPullCreate(ctx context.Context, c *client.Client, req api.OperationRequest, out io.Writer, jsonOut bool) error {
+func runPullCreate(ctx context.Context, c *client.Client, req api.Operation, out io.Writer, jsonOut bool) error {
 	resp, done, err := authorize(ctx, c, req, "open the pull request", out)
 	if err != nil || done {
 		return err

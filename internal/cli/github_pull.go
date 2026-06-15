@@ -56,7 +56,7 @@ func newPullListCmd(server *string, jsonOut *bool) *cobra.Command {
 		Short: "List pull requests of a GitHub repository",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			req := api.OperationRequest{
+			req := api.Operation{
 				Type:   "github.pull.list",
 				Params: map[string]any{"repo": args[0], "state": state, "limit": limit},
 			}
@@ -87,7 +87,7 @@ func newPullViewCmd(server *string, jsonOut *bool) *cobra.Command {
 			if err != nil || number <= 0 {
 				return fmt.Errorf("invalid pull request number %q", args[1])
 			}
-			req := api.OperationRequest{
+			req := api.Operation{
 				Type:   "github.pull.view",
 				Params: map[string]any{"repo": args[0], "number": number, "comments": comments},
 			}
@@ -116,7 +116,7 @@ func newPullDiffCmd(server *string, jsonOut *bool) *cobra.Command {
 			if err != nil || number <= 0 {
 				return fmt.Errorf("invalid pull request number %q", args[1])
 			}
-			req := api.OperationRequest{
+			req := api.Operation{
 				Type:   "github.pull.diff",
 				Params: map[string]any{"repo": args[0], "number": number},
 			}
@@ -138,7 +138,7 @@ func newPullDiffCmd(server *string, jsonOut *bool) *cobra.Command {
 //
 // @testcase TestRunPullListPrintsPulls prints the pull requests once authorized.
 // @testcase TestRunPullListJSON prints the pulls as JSON when jsonOut is set.
-func runPullList(ctx context.Context, c *client.Client, req api.OperationRequest, out io.Writer, jsonOut bool) error {
+func runPullList(ctx context.Context, c *client.Client, req api.Operation, out io.Writer, jsonOut bool) error {
 	resp, done, err := authorize(ctx, c, req, "list the pull requests", out)
 	if err != nil || done {
 		return err
@@ -183,7 +183,7 @@ func printPulls(out io.Writer, pulls []any) {
 // @error error when authorization or the lookup fails.
 //
 // @testcase TestRunPullViewPrintsPull prints the pull request details once authorized.
-func runPullView(ctx context.Context, c *client.Client, req api.OperationRequest, out io.Writer, jsonOut bool) error {
+func runPullView(ctx context.Context, c *client.Client, req api.Operation, out io.Writer, jsonOut bool) error {
 	resp, done, err := authorize(ctx, c, req, "view the pull request", out)
 	if err != nil || done {
 		return err
@@ -239,7 +239,7 @@ func refName(pull map[string]any, side string) string {
 // @error error when authorization or the lookup fails.
 //
 // @testcase TestRunPullDiffPrintsDiff prints the diff once authorized.
-func runPullDiff(ctx context.Context, c *client.Client, req api.OperationRequest, out io.Writer, jsonOut bool) error {
+func runPullDiff(ctx context.Context, c *client.Client, req api.Operation, out io.Writer, jsonOut bool) error {
 	resp, done, err := authorize(ctx, c, req, "view the pull request diff", out)
 	if err != nil || done {
 		return err

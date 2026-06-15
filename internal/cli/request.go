@@ -31,19 +31,19 @@ func newRequestCmd(server *string) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			var req api.PermissionsRequest
+			var req api.GrantRequest
 			if err := json.Unmarshal(data, &req); err != nil {
-				return fmt.Errorf("invalid permissions request JSON: %w", err)
+				return fmt.Errorf("invalid grant request JSON: %w", err)
 			}
 			return runRequest(cmd.Context(), client.New(*server), req, cmd.OutOrStdout())
 		},
 	}
-	cmd.Flags().StringVarP(&file, "file", "f", "-", "permissions request JSON file (\"-\" for stdin)")
+	cmd.Flags().StringVarP(&file, "file", "f", "-", "grant request JSON file (\"-\" for stdin)")
 	return cmd
 }
 
 // newCatalogCmd builds "granular catalog", which prints the server's capability
-// manifest (the vocabulary for building a permissions request).
+// manifest (the vocabulary for building a grant request).
 //
 // @arg server Pointer to the resolved --server flag value.
 // @return *cobra.Command The catalog command.
@@ -65,24 +65,24 @@ func newCatalogCmd(server *string) *cobra.Command {
 	}
 }
 
-// runRequest submits a permissions request and reports the approval URL.
+// runRequest submits a capability grant request and reports the approval URL.
 //
 // @arg ctx Context for cancellation.
 // @arg c The HTTP client to the granular server.
-// @arg req The permissions request to submit.
+// @arg req The grant request (capability bundle) to submit.
 // @arg out The writer for user-facing output.
 // @error error when the submission fails.
 //
 // @testcase TestRunRequestPrintsURL prints the approval URL.
-func runRequest(ctx context.Context, c *client.Client, req api.PermissionsRequest, out io.Writer) error {
-	resp, err := c.RequestPermissions(ctx, req)
+func runRequest(ctx context.Context, c *client.Client, req api.GrantRequest, out io.Writer) error {
+	resp, err := c.Submit(ctx, req)
 	if err != nil {
 		return err
 	}
 	if resp.Status != api.StatusPending {
 		return fmt.Errorf("unexpected status %s: %s", resp.Status, resp.Error)
 	}
-	fmt.Fprintf(out, "Permissions requested. Open this URL to review and approve:\n\n  %s\n", resp.ApprovalURL)
+	fmt.Fprintf(out, "Grant requested. Open this URL to review and approve:\n\n  %s\n", resp.ApprovalURL)
 	return nil
 }
 

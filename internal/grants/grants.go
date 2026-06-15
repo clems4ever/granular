@@ -1,4 +1,4 @@
-// Package grants persists delegation requests (operations awaiting human approval)
+// Package grants persists grant requests (operations awaiting human approval)
 // and approved Cedar policies in a bbolt database on disk. Authorization is decided
 // by evaluating the active (non-expired) policies with the Cedar engine; this
 // package only stores and expires them. The clock and id generator are injectable
@@ -23,10 +23,10 @@ var (
 	bucketPolicies = []byte("policies")
 )
 
-// DelegationRequest captures an operation (or custom permissions request) waiting
+// GrantRequest captures an operation (or custom grant request) waiting
 // for a human to approve or reject it. ProposedPolicies are the Cedar policies that
 // approval would store.
-type DelegationRequest struct {
+type GrantRequest struct {
 	ID               string              `json:"id"`
 	OperationType    string              `json:"operation_type"`
 	Description      string              `json:"description"`
@@ -36,10 +36,10 @@ type DelegationRequest struct {
 	CreatedAt        time.Time           `json:"created_at"`
 }
 
-// StoredPolicy is an approved Cedar policy with an expiry. RequestID links it back
-// to the delegation request that produced it, so a whole request's grants can be
+// Grant is an approved Cedar policy with an expiry. RequestID links it back
+// to the grant request that produced it, so a whole request's grants can be
 // revoked together.
-type StoredPolicy struct {
+type Grant struct {
 	ID            string    `json:"id"`
 	RequestID     string    `json:"request_id"`
 	OperationType string    `json:"operation_type"`
@@ -49,7 +49,7 @@ type StoredPolicy struct {
 	ExpiresAt     time.Time `json:"expires_at"`
 }
 
-// Store persists delegation requests and approved policies in a bbolt database.
+// Store persists grant requests and approved policies in a bbolt database.
 type Store struct {
 	db    *bolt.DB
 	now   func() time.Time
@@ -86,24 +86,24 @@ func Open(path string) (*Store, error) {
 
 // Close closes the underlying database.
 //
-// @return error Any error from closing the database.
+// @error error Any error from closing the database.
 //
 // @testcase TestCreateAndGetRequest closes its store on cleanup.
 func (s *Store) Close() error { return s.db.Close() }
 
-// CreateRequest persists a new pending delegation request carrying the Cedar
+// CreateRequest persists a new pending grant request carrying the Cedar
 // policies that approval would grant.
 //
 // @arg opType The operation type id (or "permissions.request" for custom bundles).
 // @arg description A human-readable summary shown on the approval page.
 // @arg proposed The Cedar policies approval would store.
 // @arg params The original operation parameters, retained for auditing.
-// @return *DelegationRequest The stored request with its generated id and pending status.
+// @return *GrantRequest The stored request with its generated id and pending status.
 // @error error when the request cannot be written to the database.
 //
 // @testcase TestCreateAndGetRequest checks the request is retrievable by id.
-func (s *Store) CreateRequest(opType, description string, proposed []string, params map[string]any) (*DelegationRequest, error) {
-	req := &DelegationRequest{
+func (s *Store) CreateRequest(opType, description string, proposed []string, params map[string]any) (*GrantRequest, error) {
+	req := &GrantRequest{
 		ID:               s.newID(),
 		OperationType:    opType,
 		Description:      description,
@@ -118,16 +118,16 @@ func (s *Store) CreateRequest(opType, description string, proposed []string, par
 	return req, nil
 }
 
-// GetRequest loads the delegation request with the given id.
+// GetRequest loads the grant request with the given id.
 //
-// @arg id The delegation request id.
-// @return *DelegationRequest The stored request.
+// @arg id The grant request id.
+// @return *GrantRequest The stored request.
 // @error ErrRequestNotFound when no request has that id, or a decode/db error.
 //
 // @testcase TestCreateAndGetRequest retrieves an existing request.
 // @testcase TestGetMissingRequest returns ErrRequestNotFound for an unknown id.
-func (s *Store) GetRequest(id string) (*DelegationRequest, error) {
-	var req DelegationRequest
+func (s *Store) GetRequest(id string) (*GrantRequest, error) {
+	var req GrantRequest
 	err := s.db.View(func(tx *bolt.Tx) error {
 		v := tx.Bucket(bucketRequests).Get([]byte(id))
 		if v == nil {
@@ -144,15 +144,15 @@ func (s *Store) GetRequest(id string) (*DelegationRequest, error) {
 // Approve marks the request approved and stores its proposed policies, each valid
 // for ttl from now.
 //
-// @arg id The delegation request id to approve.
+// @arg id The grant request id to approve.
 // @arg ttl How long the stored policies remain valid.
-// @return *DelegationRequest The updated request in the approved state.
+// @return *GrantRequest The updated request in the approved state.
 // @error ErrRequestNotFound when no request has the given id, or a db error.
 //
 // @testcase TestApproveStoresActivePolicies approves and checks active policies.
 // @testcase TestApproveMissingRequest returns ErrRequestNotFound.
-func (s *Store) Approve(id string, ttl time.Duration) (*DelegationRequest, error) {
-	var req DelegationRequest
+func (s *Store) Approve(id string, ttl time.Duration) (*GrantRequest, error) {
+	var req GrantRequest
 	err := s.db.Update(func(tx *bolt.Tx) error {
 		rb := tx.Bucket(bucketRequests)
 		v := rb.Get([]byte(id))
@@ -168,7 +168,7 @@ func (s *Store) Approve(id string, ttl time.Duration) (*DelegationRequest, error
 		}
 		pb := tx.Bucket(bucketPolicies)
 		for _, policy := range req.ProposedPolicies {
-			sp := StoredPolicy{
+			sp := Grant{
 				ID:            s.newID(),
 				RequestID:     req.ID,
 				OperationType: req.OperationType,
@@ -191,13 +191,13 @@ func (s *Store) Approve(id string, ttl time.Duration) (*DelegationRequest, error
 
 // Reject marks the request rejected without storing any policy.
 //
-// @arg id The delegation request id to reject.
-// @return *DelegationRequest The updated request in the rejected state.
+// @arg id The grant request id to reject.
+// @return *GrantRequest The updated request in the rejected state.
 // @error ErrRequestNotFound when no request has the given id, or a db error.
 //
 // @testcase TestRejectRequest sets the status to rejected and grants nothing.
-func (s *Store) Reject(id string) (*DelegationRequest, error) {
-	var req DelegationRequest
+func (s *Store) Reject(id string) (*GrantRequest, error) {
+	var req GrantRequest
 	err := s.db.Update(func(tx *bolt.Tx) error {
 		rb := tx.Bucket(bucketRequests)
 		v := rb.Get([]byte(id))
@@ -230,7 +230,7 @@ func (s *Store) ActivePolicies() ([]string, error) {
 		pb := tx.Bucket(bucketPolicies)
 		var expired [][]byte
 		err := pb.ForEach(func(k, v []byte) error {
-			var sp StoredPolicy
+			var sp Grant
 			if err := json.Unmarshal(v, &sp); err != nil {
 				return err
 			}
@@ -254,17 +254,17 @@ func (s *Store) ActivePolicies() ([]string, error) {
 	return active, err
 }
 
-// ListRequests returns every delegation request, newest first.
+// ListRequests returns every grant request, newest first.
 //
-// @return []DelegationRequest All stored delegation requests, sorted by creation time descending.
+// @return []GrantRequest All stored grant requests, sorted by creation time descending.
 // @error error when the database cannot be read or a record cannot be decoded.
 //
 // @testcase TestListRequestsAndGrants lists requests after creating some.
-func (s *Store) ListRequests() ([]DelegationRequest, error) {
-	var out []DelegationRequest
+func (s *Store) ListRequests() ([]GrantRequest, error) {
+	var out []GrantRequest
 	err := s.db.View(func(tx *bolt.Tx) error {
 		return tx.Bucket(bucketRequests).ForEach(func(_, v []byte) error {
-			var req DelegationRequest
+			var req GrantRequest
 			if err := json.Unmarshal(v, &req); err != nil {
 				return err
 			}
@@ -282,18 +282,18 @@ func (s *Store) ListRequests() ([]DelegationRequest, error) {
 // ListGrants returns every active (non-expired) stored policy, newest first,
 // deleting any that have expired as a side effect.
 //
-// @return []StoredPolicy The active grants, sorted by creation time descending.
+// @return []Grant The active grants, sorted by creation time descending.
 // @error error when the database cannot be read or updated.
 //
 // @testcase TestListRequestsAndGrants lists grants after an approval.
 // @testcase TestRevokeGrantByID removes a grant so it no longer lists.
-func (s *Store) ListGrants() ([]StoredPolicy, error) {
-	var out []StoredPolicy
+func (s *Store) ListGrants() ([]Grant, error) {
+	var out []Grant
 	err := s.db.Update(func(tx *bolt.Tx) error {
 		pb := tx.Bucket(bucketPolicies)
 		var expired [][]byte
 		err := pb.ForEach(func(k, v []byte) error {
-			var sp StoredPolicy
+			var sp Grant
 			if err := json.Unmarshal(v, &sp); err != nil {
 				return err
 			}
@@ -323,12 +323,12 @@ func (s *Store) ListGrants() ([]StoredPolicy, error) {
 
 // Revoke immediately invalidates access identified by id. The id may be a single
 // grant (stored policy) id, in which case just that grant is deleted, or a
-// delegation request id, in which case every grant produced by that request is
+// grant request id, in which case every grant produced by that request is
 // deleted and the request itself is marked revoked (even when it had no live
 // grants, e.g. a still-pending request). It returns the number of grants removed
 // and whether anything — a grant or a request — matched the id.
 //
-// @arg id A grant (stored policy) id, or a delegation request id.
+// @arg id A grant (stored policy) id, or a grant request id.
 // @return int The number of active grants that were revoked.
 // @return bool True when a grant or a request matched the id.
 // @error error when the database cannot be updated.
@@ -353,7 +353,7 @@ func (s *Store) Revoke(id string) (int, bool, error) {
 		// Otherwise treat id as a request id: delete all of its grants.
 		var keys [][]byte
 		err := pb.ForEach(func(k, v []byte) error {
-			var sp StoredPolicy
+			var sp Grant
 			if err := json.Unmarshal(v, &sp); err != nil {
 				return err
 			}
@@ -376,7 +376,7 @@ func (s *Store) Revoke(id string) (int, bool, error) {
 		rb := tx.Bucket(bucketRequests)
 		if rv := rb.Get([]byte(id)); rv != nil {
 			found = true
-			var req DelegationRequest
+			var req GrantRequest
 			if err := json.Unmarshal(rv, &req); err != nil {
 				return err
 			}
@@ -405,7 +405,7 @@ func (s *Store) PurgeExpired() (int, error) {
 		pb := tx.Bucket(bucketPolicies)
 		var expired [][]byte
 		err := pb.ForEach(func(k, v []byte) error {
-			var sp StoredPolicy
+			var sp Grant
 			if err := json.Unmarshal(v, &sp); err != nil {
 				return err
 			}
@@ -486,5 +486,5 @@ func putTx(b *bolt.Bucket, key string, value any) error {
 }
 
 // ErrRequestNotFound is returned when an operation references an unknown
-// delegation request id.
-var ErrRequestNotFound = errors.New("delegation request not found")
+// grant request id.
+var ErrRequestNotFound = errors.New("grant request not found")

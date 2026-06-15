@@ -152,7 +152,7 @@ func MinimalPermits(principal cedar.EntityUID, reqs []Requirement) []string {
 	return out
 }
 
-// PoliciesFromCapabilities translates a custom permissions request into Cedar
+// PoliciesFromCapabilities translates a custom grant request into Cedar
 // policies, validating action and resource names against the catalog.
 //
 // @arg principal The principal the policies are written for.

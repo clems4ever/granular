@@ -17,15 +17,23 @@ import (
 // fakeOp is a no-network operation used to exercise the server.
 type fakeOp struct{}
 
-func (fakeOp) Type() string     { return "test.op" }
+// Type returns the fake operation type id.
+func (fakeOp) Type() string { return "test.op" }
+
+// Describe returns the fake operation summary.
 func (fakeOp) Describe() string { return "a test operation" }
+
+// Requirements returns the fake operation authorization requirements.
 func (fakeOp) Requirements() []authz.Requirement {
 	return []authz.Requirement{{Action: "issue.view", Resource: authz.RepoRef("o/n")}}
 }
+
+// Execute returns a fixed success result.
 func (fakeOp) Execute(ctx context.Context) (map[string]any, error) {
 	return map[string]any{"ok": true}, nil
 }
 
+// testServer builds an httptest server backed by a temp store and a fake operation.
 func testServer(t *testing.T) *httptest.Server {
 	t.Helper()
 	reg := operations.NewRegistry()
@@ -43,11 +51,12 @@ func testServer(t *testing.T) *httptest.Server {
 	return ts
 }
 
+// TestOperationPendingThenApprovedThenCompleted drives an operation request from pending through approval to completion.
 func TestOperationPendingThenApprovedThenCompleted(t *testing.T) {
 	ts := testServer(t)
 
 	// First attempt -> pending.
-	resp, err := http.Post(ts.URL+"/api/operations", "application/json", strings.NewReader(`{"type":"test.op"}`))
+	resp, err := http.Post(ts.URL+"/api/requests", "application/json", strings.NewReader(`{"operation":{"type":"test.op"}}`))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -78,7 +87,7 @@ func TestOperationPendingThenApprovedThenCompleted(t *testing.T) {
 	}
 
 	// Retry -> completed.
-	resp2, _ := http.Post(ts.URL+"/api/operations", "application/json", strings.NewReader(`{"type":"test.op"}`))
+	resp2, _ := http.Post(ts.URL+"/api/requests", "application/json", strings.NewReader(`{"operation":{"type":"test.op"}}`))
 	if resp2.StatusCode != http.StatusOK {
 		t.Fatalf("retry: want 200, got %d", resp2.StatusCode)
 	}
@@ -88,14 +97,25 @@ func TestOperationPendingThenApprovedThenCompleted(t *testing.T) {
 	}
 }
 
+// TestOperationUnknownTypeIsBadRequest checks an unregistered operation type returns 400.
 func TestOperationUnknownTypeIsBadRequest(t *testing.T) {
 	ts := testServer(t)
-	resp, _ := http.Post(ts.URL+"/api/operations", "application/json", strings.NewReader(`{"type":"nope"}`))
+	resp, _ := http.Post(ts.URL+"/api/requests", "application/json", strings.NewReader(`{"operation":{"type":"nope"}}`))
 	if resp.StatusCode != http.StatusBadRequest {
 		t.Fatalf("want 400, got %d", resp.StatusCode)
 	}
 }
 
+// TestRequestWithoutOperationOrCapabilities checks an empty grant request (no operation or capabilities) returns 400.
+func TestRequestWithoutOperationOrCapabilities(t *testing.T) {
+	ts := testServer(t)
+	resp, _ := http.Post(ts.URL+"/api/requests", "application/json", strings.NewReader(`{"reason":"nothing"}`))
+	if resp.StatusCode != http.StatusBadRequest {
+		t.Fatalf("want 400 for an empty grant request, got %d", resp.StatusCode)
+	}
+}
+
+// TestRequestStatusNotFound checks the status endpoint 404s for an unknown request id.
 func TestRequestStatusNotFound(t *testing.T) {
 	ts := testServer(t)
 	resp, _ := http.Get(ts.URL + "/api/requests/missing")
@@ -104,9 +124,10 @@ func TestRequestStatusNotFound(t *testing.T) {
 	}
 }
 
+// TestApprovePageRendersForm checks the approval page renders the request's form.
 func TestApprovePageRendersForm(t *testing.T) {
 	ts := testServer(t)
-	resp, _ := http.Post(ts.URL+"/api/operations", "application/json", strings.NewReader(`{"type":"test.op"}`))
+	resp, _ := http.Post(ts.URL+"/api/requests", "application/json", strings.NewReader(`{"operation":{"type":"test.op"}}`))
 	id := decode(t, resp)["request_id"].(string)
 
 	page, _ := http.Get(ts.URL + "/approve/" + id)
@@ -119,6 +140,7 @@ func TestApprovePageRendersForm(t *testing.T) {
 	}
 }
 
+// TestApprovePageNotFound checks the approval page 404s for an unknown id.
 func TestApprovePageNotFound(t *testing.T) {
 	ts := testServer(t)
 	resp, _ := http.Get(ts.URL + "/approve/missing")
@@ -127,9 +149,10 @@ func TestApprovePageNotFound(t *testing.T) {
 	}
 }
 
+// TestApproveSubmitReject checks rejecting via the approval form sets the rejected status.
 func TestApproveSubmitReject(t *testing.T) {
 	ts := testServer(t)
-	resp, _ := http.Post(ts.URL+"/api/operations", "application/json", strings.NewReader(`{"type":"test.op"}`))
+	resp, _ := http.Post(ts.URL+"/api/requests", "application/json", strings.NewReader(`{"operation":{"type":"test.op"}}`))
 	id := decode(t, resp)["request_id"].(string)
 
 	form := url.Values{"decision": {"reject"}}
@@ -143,6 +166,7 @@ func TestApproveSubmitReject(t *testing.T) {
 	}
 }
 
+// TestGitProxyDeniesWithoutGrant checks the git proxy returns 403 for clone traffic without a grant.
 func TestGitProxyDeniesWithoutGrant(t *testing.T) {
 	ts := testServer(t)
 	resp, err := http.Get(ts.URL + "/git/owner/name.git/info/refs?service=git-upload-pack")
@@ -155,6 +179,7 @@ func TestGitProxyDeniesWithoutGrant(t *testing.T) {
 	}
 }
 
+// TestGitProxyDeniesPushWithoutGrant checks the git proxy returns 403 for push traffic without a grant.
 func TestGitProxyDeniesPushWithoutGrant(t *testing.T) {
 	ts := testServer(t)
 	resp, err := http.Get(ts.URL + "/git/owner/name.git/info/refs?service=git-receive-pack")
@@ -169,6 +194,7 @@ func TestGitProxyDeniesPushWithoutGrant(t *testing.T) {
 	}
 }
 
+// TestRepoFromGitPath checks repoFromGitPath parses owner/name from a smart-HTTP path.
 func TestRepoFromGitPath(t *testing.T) {
 	repo, ok := repoFromGitPath("owner/name.git/info/refs")
 	if !ok || repo != "owner/name" {
@@ -179,12 +205,13 @@ func TestRepoFromGitPath(t *testing.T) {
 	}
 }
 
+// TestPermissionsRequestFlow checks a capability request, once approved, authorizes a covered operation.
 func TestPermissionsRequestFlow(t *testing.T) {
 	ts := testServer(t)
 
 	// Request a broad capability that covers the fake op's issue.view requirement.
 	body := `{"reason":"work","capabilities":[{"actions":["issues.read"],"resource":{"type":"github.repo","match":{"owner":"o","name":"n"}}}]}`
-	resp, err := http.Post(ts.URL+"/api/permissions", "application/json", strings.NewReader(body))
+	resp, err := http.Post(ts.URL+"/api/requests", "application/json", strings.NewReader(body))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -208,7 +235,7 @@ func TestPermissionsRequestFlow(t *testing.T) {
 	}
 
 	// Now the operation (issue.view on repo o/n) is authorized by the broad grant.
-	op, _ := http.Post(ts.URL+"/api/operations", "application/json", strings.NewReader(`{"type":"test.op"}`))
+	op, _ := http.Post(ts.URL+"/api/requests", "application/json", strings.NewReader(`{"operation":{"type":"test.op"}}`))
 	if op.StatusCode != http.StatusOK {
 		t.Fatalf("operation should be authorized after the permissions grant, got %d", op.StatusCode)
 	}
@@ -217,15 +244,17 @@ func TestPermissionsRequestFlow(t *testing.T) {
 	}
 }
 
+// TestPermissionsRequestRejectsUnknownAction checks a capability request with an unknown action returns 400.
 func TestPermissionsRequestRejectsUnknownAction(t *testing.T) {
 	ts := testServer(t)
 	body := `{"capabilities":[{"actions":["issue.delete"],"resource":{"type":"github.repo","match":{"owner":"o","name":"n"}}}]}`
-	resp, _ := http.Post(ts.URL+"/api/permissions", "application/json", strings.NewReader(body))
+	resp, _ := http.Post(ts.URL+"/api/requests", "application/json", strings.NewReader(body))
 	if resp.StatusCode != http.StatusBadRequest {
 		t.Fatalf("want 400 for unknown action, got %d", resp.StatusCode)
 	}
 }
 
+// TestIndexPageRenders checks the landing page renders.
 func TestIndexPageRenders(t *testing.T) {
 	ts := testServer(t)
 	resp, err := http.Get(ts.URL + "/")
@@ -240,6 +269,7 @@ func TestIndexPageRenders(t *testing.T) {
 	}
 }
 
+// TestCatalogPageRenders checks the catalog page renders its key content.
 func TestCatalogPageRenders(t *testing.T) {
 	ts := testServer(t)
 	resp, err := http.Get(ts.URL + "/catalog")
@@ -257,6 +287,7 @@ func TestCatalogPageRenders(t *testing.T) {
 	}
 }
 
+// TestCatalogJSON checks the JSON catalog endpoint returns resources and actions.
 func TestCatalogJSON(t *testing.T) {
 	ts := testServer(t)
 	resp, err := http.Get(ts.URL + "/api/catalog")
@@ -269,6 +300,7 @@ func TestCatalogJSON(t *testing.T) {
 	}
 }
 
+// TestParseTTLFallsBack checks parseTTL defaults to two minutes for empty or invalid input.
 func TestParseTTLFallsBack(t *testing.T) {
 	if parseTTL("").Minutes() != 2 {
 		t.Errorf("empty should default to 2m")

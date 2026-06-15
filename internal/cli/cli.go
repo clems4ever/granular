@@ -48,14 +48,14 @@ func NewRootCmd() *cobra.Command {
 // @arg req The operation to attempt.
 // @arg action A short verb phrase for the "re-run to <action>" hint, e.g. "clone".
 // @arg out The writer for user-facing output.
-// @return api.OperationResponse The server response (meaningful when done is false).
+// @return api.RequestResponse The server response (meaningful when done is false).
 // @return bool True when approval is pending and the URL was printed.
 // @error error when the call fails or the server returns an unexpected status.
 //
 // @testcase TestRunClonePendingPrintsURL covers the pending branch.
 // @testcase TestRunIssueListPrintsIssues covers the authorised branch.
-func authorize(ctx context.Context, c *client.Client, req api.OperationRequest, action string, out io.Writer) (api.OperationResponse, bool, error) {
-	resp, err := c.Submit(ctx, req)
+func authorize(ctx context.Context, c *client.Client, req api.Operation, action string, out io.Writer) (api.RequestResponse, bool, error) {
+	resp, err := c.SubmitOperation(ctx, req)
 	if err != nil {
 		return resp, false, err
 	}

@@ -1,0 +1,17 @@
+{
+	"functions": [
+		{
+			"function_name": "handleCapabilityRequest",
+			"receiver": "Server",
+			"documentation_hash": "a7bdb4ed825edece79580cfc9a79ce03673ce9381ee61eed8667e1d20169f0e4",
+			"definition_hash": "ab00d785fbc84be1df706c783ac7a1ebc2dba90c8343606b69ea713045d1a664",
+			"reviewed_at": "2026-06-15T14:59:49.014219144Z"
+		},
+		{
+			"function_name": "describePermissions",
+			"documentation_hash": "cddbe3edf90e03ba3388fe9ed149b4937af64c7436137688e9c2d76fc1408714",
+			"definition_hash": "359776eef4083abc870719b0f9d7526f68a24236b2441d6a628f06db034f8652",
+			"reviewed_at": "2026-06-15T14:59:49.022948464Z"
+		}
+	]
+}

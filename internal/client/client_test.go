@@ -9,6 +9,7 @@ import (
 	"github.com/clems4ever/granular/internal/api"
 )
 
+// TestSubmitDecodesResponse verifies Submit decodes the server's pending response.
 func TestSubmitDecodesResponse(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -18,7 +19,7 @@ func TestSubmitDecodesResponse(t *testing.T) {
 	defer ts.Close()
 
 	c := New(ts.URL)
-	resp, err := c.Submit(context.Background(), api.OperationRequest{Type: "test.op"})
+	resp, err := c.SubmitOperation(context.Background(), api.Operation{Type: "test.op"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -27,9 +28,10 @@ func TestSubmitDecodesResponse(t *testing.T) {
 	}
 }
 
-func TestRequestPermissionsDecodesResponse(t *testing.T) {
+// TestSubmitGrantRequestPostsToRequests verifies Submit posts a capability grant request to /api/requests.
+func TestSubmitGrantRequestPostsToRequests(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/api/permissions" {
+		if r.URL.Path != "/api/requests" {
 			t.Errorf("unexpected path %q", r.URL.Path)
 		}
 		w.WriteHeader(http.StatusAccepted)
@@ -37,7 +39,7 @@ func TestRequestPermissionsDecodesResponse(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	resp, err := New(ts.URL).RequestPermissions(context.Background(), api.PermissionsRequest{})
+	resp, err := New(ts.URL).Submit(context.Background(), api.GrantRequest{Capabilities: []api.Capability{{Actions: []string{"issues.read"}}}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -46,6 +48,7 @@ func TestRequestPermissionsDecodesResponse(t *testing.T) {
 	}
 }
 
+// TestCatalogFetchesManifest verifies Catalog returns the raw capability manifest body.
 func TestCatalogFetchesManifest(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte(`{"resources":[]}`))
@@ -61,6 +64,7 @@ func TestCatalogFetchesManifest(t *testing.T) {
 	}
 }
 
+// TestGrantsAndRevoke verifies Grants lists active grants and Revoke revokes one.
 func TestGrantsAndRevoke(t *testing.T) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/grants", func(w http.ResponseWriter, r *http.Request) {

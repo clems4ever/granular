@@ -54,10 +54,10 @@ type Action struct {
 
 // Catalog is the full capability manifest.
 type Catalog struct {
-	Resources      []ResourceType         `json:"resources"`
-	Groups         []Group                `json:"groups"`
-	Actions        []Action               `json:"actions"`
-	RequestExample api.PermissionsRequest `json:"request_example"`
+	Resources      []ResourceType   `json:"resources"`
+	Groups         []Group          `json:"groups"`
+	Actions        []Action         `json:"actions"`
+	RequestExample api.GrantRequest `json:"request_example"`
 }
 
 // Build returns the capability catalog for the GitHub operations the CLI exposes
@@ -115,7 +115,7 @@ func Build() Catalog {
 			{"pull.close", "Close pull request", "github.pull", []string{"pulls.triage"}, "granular github pr close <repo> <number>", true, "per pull request", "Close a pull request."},
 			{"pull.reopen", "Reopen pull request", "github.pull", []string{"pulls.triage"}, "granular github pr reopen <repo> <number>", true, "per pull request", "Reopen a pull request."},
 		},
-		RequestExample: api.PermissionsRequest{
+		RequestExample: api.GrantRequest{
 			Reason: "Work on the granular project: clone, read issues + comments, read PRs.",
 			Capabilities: []api.Capability{{
 				Actions: []string{"repo.clone", "issues.read", "comment.read", "pulls.read"},

@@ -1,5 +1,5 @@
 // Command granular-server is the HTTP server. It holds platform credentials,
-// checks grants, mints delegation requests, serves the approval page, and
+// checks grants, mints grant requests, serves the approval page, and
 // executes approved operations.
 package main
 

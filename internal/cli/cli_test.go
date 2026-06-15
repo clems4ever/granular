@@ -16,6 +16,7 @@ import (
 	"github.com/clems4ever/granular/internal/client"
 )
 
+// TestRootCommandTree checks the expected command tree is wired up.
 func TestRootCommandTree(t *testing.T) {
 	root := NewRootCmd()
 	for _, path := range [][]string{
@@ -66,10 +67,11 @@ func fixedServer(t *testing.T, status int, body string) *httptest.Server {
 	return ts
 }
 
+// TestRunClonePendingPrintsURL checks runClone prints the approval URL when pending.
 func TestRunClonePendingPrintsURL(t *testing.T) {
 	ts := fixedServer(t, http.StatusAccepted, `{"status":"pending","request_id":"req1","approval_url":"http://x/approve/req1"}`)
 	var out bytes.Buffer
-	req := api.OperationRequest{Type: "github.clone", Params: map[string]any{"repo": "a/b"}}
+	req := api.Operation{Type: "github.clone", Params: map[string]any{"repo": "a/b"}}
 	if err := runClone(context.Background(), client.New(ts.URL), req, "/tmp/dest", "", &out); err != nil {
 		t.Fatalf("runClone: %v", err)
 	}
@@ -78,6 +80,7 @@ func TestRunClonePendingPrintsURL(t *testing.T) {
 	}
 }
 
+// TestRunCloneClonesViaProxy checks runClone performs the clone once authorized.
 func TestRunCloneClonesViaProxy(t *testing.T) {
 	if _, err := exec.LookPath("git"); err != nil {
 		t.Skip("git not available")
@@ -97,7 +100,7 @@ func TestRunCloneClonesViaProxy(t *testing.T) {
 	ts := fixedServer(t, http.StatusOK, `{"status":"completed","result":{"clone_url":"`+src+`","repo":"a/b"}}`)
 	dest := filepath.Join(t.TempDir(), "dest")
 	var out bytes.Buffer
-	req := api.OperationRequest{Type: "github.clone", Params: map[string]any{"repo": "a/b"}}
+	req := api.Operation{Type: "github.clone", Params: map[string]any{"repo": "a/b"}}
 	if err := runClone(context.Background(), client.New(ts.URL), req, dest, "", &out); err != nil {
 		t.Fatalf("runClone: %v\n%s", err, out.String())
 	}
@@ -106,10 +109,11 @@ func TestRunCloneClonesViaProxy(t *testing.T) {
 	}
 }
 
+// TestRunIssueListPendingPrintsURL checks runIssueList prints the approval URL when pending.
 func TestRunIssueListPendingPrintsURL(t *testing.T) {
 	ts := fixedServer(t, http.StatusAccepted, `{"status":"pending","request_id":"req1","approval_url":"http://x/approve/req1"}`)
 	var out bytes.Buffer
-	req := api.OperationRequest{Type: "github.issue.list", Params: map[string]any{"repo": "a/b"}}
+	req := api.Operation{Type: "github.issue.list", Params: map[string]any{"repo": "a/b"}}
 	if err := runIssueList(context.Background(), client.New(ts.URL), req, &out, false); err != nil {
 		t.Fatalf("runIssueList: %v", err)
 	}
@@ -118,11 +122,12 @@ func TestRunIssueListPendingPrintsURL(t *testing.T) {
 	}
 }
 
+// TestRunIssueListPrintsIssues checks runIssueList renders the listed issues.
 func TestRunIssueListPrintsIssues(t *testing.T) {
 	body := `{"status":"completed","result":{"issues":[{"number":7,"title":"Fix the bug","state":"open","user":{"login":"octocat"}}]}}`
 	ts := fixedServer(t, http.StatusOK, body)
 	var out bytes.Buffer
-	req := api.OperationRequest{Type: "github.issue.list", Params: map[string]any{"repo": "a/b"}}
+	req := api.Operation{Type: "github.issue.list", Params: map[string]any{"repo": "a/b"}}
 	if err := runIssueList(context.Background(), client.New(ts.URL), req, &out, false); err != nil {
 		t.Fatalf("runIssueList: %v", err)
 	}
@@ -132,10 +137,11 @@ func TestRunIssueListPrintsIssues(t *testing.T) {
 	}
 }
 
+// TestRunIssueViewPendingPrintsURL checks runIssueView prints the approval URL when pending.
 func TestRunIssueViewPendingPrintsURL(t *testing.T) {
 	ts := fixedServer(t, http.StatusAccepted, `{"status":"pending","request_id":"req1","approval_url":"http://x/approve/req1"}`)
 	var out bytes.Buffer
-	req := api.OperationRequest{Type: "github.issue.view", Params: map[string]any{"repo": "a/b", "number": 7}}
+	req := api.Operation{Type: "github.issue.view", Params: map[string]any{"repo": "a/b", "number": 7}}
 	if err := runIssueView(context.Background(), client.New(ts.URL), req, &out, false); err != nil {
 		t.Fatalf("runIssueView: %v", err)
 	}
@@ -144,11 +150,12 @@ func TestRunIssueViewPendingPrintsURL(t *testing.T) {
 	}
 }
 
+// TestRunIssueViewPrintsIssue checks runIssueView renders the issue details.
 func TestRunIssueViewPrintsIssue(t *testing.T) {
 	body := `{"status":"completed","result":{"number":7,"title":"the title","state":"open","user":{"login":"octocat"},"labels":[{"name":"bug"}],"comments":2,"body":"the body","html_url":"u"}}`
 	ts := fixedServer(t, http.StatusOK, body)
 	var out bytes.Buffer
-	req := api.OperationRequest{Type: "github.issue.view", Params: map[string]any{"repo": "a/b", "number": 7}}
+	req := api.Operation{Type: "github.issue.view", Params: map[string]any{"repo": "a/b", "number": 7}}
 	if err := runIssueView(context.Background(), client.New(ts.URL), req, &out, false); err != nil {
 		t.Fatalf("runIssueView: %v", err)
 	}
@@ -158,11 +165,12 @@ func TestRunIssueViewPrintsIssue(t *testing.T) {
 	}
 }
 
+// TestRunIssueListJSON checks runIssueList emits raw JSON when requested.
 func TestRunIssueListJSON(t *testing.T) {
 	body := `{"status":"completed","result":{"issues":[{"number":7,"title":"Fix the bug","state":"open","author":"octocat"}]}}`
 	ts := fixedServer(t, http.StatusOK, body)
 	var out bytes.Buffer
-	req := api.OperationRequest{Type: "github.issue.list", Params: map[string]any{"repo": "a/b"}}
+	req := api.Operation{Type: "github.issue.list", Params: map[string]any{"repo": "a/b"}}
 	if err := runIssueList(context.Background(), client.New(ts.URL), req, &out, true); err != nil {
 		t.Fatalf("runIssueList: %v", err)
 	}
@@ -175,11 +183,12 @@ func TestRunIssueListJSON(t *testing.T) {
 	}
 }
 
+// TestRunIssueViewJSON checks runIssueView emits raw JSON when requested.
 func TestRunIssueViewJSON(t *testing.T) {
 	body := `{"status":"completed","result":{"number":7,"title":"the title","state":"open"}}`
 	ts := fixedServer(t, http.StatusOK, body)
 	var out bytes.Buffer
-	req := api.OperationRequest{Type: "github.issue.view", Params: map[string]any{"repo": "a/b", "number": 7}}
+	req := api.Operation{Type: "github.issue.view", Params: map[string]any{"repo": "a/b", "number": 7}}
 	if err := runIssueView(context.Background(), client.New(ts.URL), req, &out, true); err != nil {
 		t.Fatalf("runIssueView: %v", err)
 	}
@@ -192,11 +201,12 @@ func TestRunIssueViewJSON(t *testing.T) {
 	}
 }
 
+// TestRunIssueViewPrintsComments checks runIssueView renders fetched comments.
 func TestRunIssueViewPrintsComments(t *testing.T) {
 	body := `{"status":"completed","result":{"number":7,"title":"t","state":"open","user":{"login":"octocat"},"comments_list":[{"body":"a comment","user":{"login":"alice"}}]}}`
 	ts := fixedServer(t, http.StatusOK, body)
 	var out bytes.Buffer
-	req := api.OperationRequest{Type: "github.issue.view", Params: map[string]any{"repo": "a/b", "number": 7, "comments": true}}
+	req := api.Operation{Type: "github.issue.view", Params: map[string]any{"repo": "a/b", "number": 7, "comments": true}}
 	if err := runIssueView(context.Background(), client.New(ts.URL), req, &out, false); err != nil {
 		t.Fatalf("runIssueView: %v", err)
 	}
@@ -206,10 +216,11 @@ func TestRunIssueViewPrintsComments(t *testing.T) {
 	}
 }
 
+// TestRunIssueCommentPendingPrintsURL checks runIssueComment prints the approval URL when pending.
 func TestRunIssueCommentPendingPrintsURL(t *testing.T) {
 	ts := fixedServer(t, http.StatusAccepted, `{"status":"pending","request_id":"req1","approval_url":"http://x/approve/req1"}`)
 	var out bytes.Buffer
-	req := api.OperationRequest{Type: "github.issue.comment", Params: map[string]any{"repo": "a/b", "number": 1, "body": "hi"}}
+	req := api.Operation{Type: "github.issue.comment", Params: map[string]any{"repo": "a/b", "number": 1, "body": "hi"}}
 	if err := runIssueComment(context.Background(), client.New(ts.URL), req, &out, false); err != nil {
 		t.Fatalf("runIssueComment: %v", err)
 	}
@@ -218,10 +229,11 @@ func TestRunIssueCommentPendingPrintsURL(t *testing.T) {
 	}
 }
 
+// TestRunIssueCommentReportsResult checks runIssueComment reports the created comment URL.
 func TestRunIssueCommentReportsResult(t *testing.T) {
 	ts := fixedServer(t, http.StatusOK, `{"status":"completed","result":{"html_url":"http://gh/c/99"}}`)
 	var out bytes.Buffer
-	req := api.OperationRequest{Type: "github.issue.comment", Params: map[string]any{"repo": "a/b", "number": 1, "body": "hi"}}
+	req := api.Operation{Type: "github.issue.comment", Params: map[string]any{"repo": "a/b", "number": 1, "body": "hi"}}
 	if err := runIssueComment(context.Background(), client.New(ts.URL), req, &out, false); err != nil {
 		t.Fatalf("runIssueComment: %v", err)
 	}
@@ -230,10 +242,11 @@ func TestRunIssueCommentReportsResult(t *testing.T) {
 	}
 }
 
+// TestRunIssueCreateReportsResult checks runIssueCreate reports the created issue number and URL.
 func TestRunIssueCreateReportsResult(t *testing.T) {
 	ts := fixedServer(t, http.StatusOK, `{"status":"completed","result":{"number":42,"html_url":"http://gh/i/42"}}`)
 	var out bytes.Buffer
-	req := api.OperationRequest{Type: "github.issue.create", Params: map[string]any{"repo": "a/b", "title": "t"}}
+	req := api.Operation{Type: "github.issue.create", Params: map[string]any{"repo": "a/b", "title": "t"}}
 	if err := runIssueCreate(context.Background(), client.New(ts.URL), req, &out, false); err != nil {
 		t.Fatalf("runIssueCreate: %v", err)
 	}
@@ -243,10 +256,11 @@ func TestRunIssueCreateReportsResult(t *testing.T) {
 	}
 }
 
+// TestRunIssueActionReportsResult checks runIssueAction reports the updated issue number and URL.
 func TestRunIssueActionReportsResult(t *testing.T) {
 	ts := fixedServer(t, http.StatusOK, `{"status":"completed","result":{"number":5,"html_url":"http://gh/i/5"}}`)
 	var out bytes.Buffer
-	req := api.OperationRequest{Type: "github.issue.close", Params: map[string]any{"repo": "a/b", "number": 5}}
+	req := api.Operation{Type: "github.issue.close", Params: map[string]any{"repo": "a/b", "number": 5}}
 	if err := runIssueAction(context.Background(), client.New(ts.URL), req, "close the issue", "closed", &out, false); err != nil {
 		t.Fatalf("runIssueAction: %v", err)
 	}
@@ -256,10 +270,11 @@ func TestRunIssueActionReportsResult(t *testing.T) {
 	}
 }
 
+// TestRunIssueActionPending checks runIssueAction prints the pending approval hint.
 func TestRunIssueActionPending(t *testing.T) {
 	ts := fixedServer(t, http.StatusAccepted, `{"status":"pending","request_id":"r","approval_url":"http://x/approve/r"}`)
 	var out bytes.Buffer
-	req := api.OperationRequest{Type: "github.issue.reopen", Params: map[string]any{"repo": "a/b", "number": 5}}
+	req := api.Operation{Type: "github.issue.reopen", Params: map[string]any{"repo": "a/b", "number": 5}}
 	if err := runIssueAction(context.Background(), client.New(ts.URL), req, "reopen the issue", "reopened", &out, false); err != nil {
 		t.Fatalf("runIssueAction: %v", err)
 	}
@@ -268,6 +283,7 @@ func TestRunIssueActionPending(t *testing.T) {
 	}
 }
 
+// TestResolveBodyFromFile checks resolveBody reads a body from a file over the inline value.
 func TestResolveBodyFromFile(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "body.txt")
@@ -286,10 +302,11 @@ func TestResolveBodyFromFile(t *testing.T) {
 	}
 }
 
+// TestRunRequestPrintsURL checks runRequest prints the approval URL for a capability request.
 func TestRunRequestPrintsURL(t *testing.T) {
 	ts := fixedServer(t, http.StatusAccepted, `{"status":"pending","request_id":"req1","approval_url":"http://x/approve/req1"}`)
 	var out bytes.Buffer
-	req := api.PermissionsRequest{Capabilities: []api.Capability{{Actions: []string{"issues.read"}, Resource: api.ResourceSelector{Type: "github.repo", Match: map[string]string{"owner": "o", "name": "n"}}}}}
+	req := api.GrantRequest{Capabilities: []api.Capability{{Actions: []string{"issues.read"}, Resource: api.ResourceSelector{Type: "github.repo", Match: map[string]string{"owner": "o", "name": "n"}}}}}
 	if err := runRequest(context.Background(), client.New(ts.URL), req, &out); err != nil {
 		t.Fatalf("runRequest: %v", err)
 	}
@@ -298,6 +315,7 @@ func TestRunRequestPrintsURL(t *testing.T) {
 	}
 }
 
+// runGit runs a git command in a directory, failing the test on error.
 func runGit(t *testing.T, dir string, args ...string) {
 	t.Helper()
 	cmd := exec.Command("git", args...)
@@ -307,11 +325,12 @@ func runGit(t *testing.T, dir string, args ...string) {
 	}
 }
 
+// TestRunPullListPrintsPulls checks runPullList renders the listed pull requests.
 func TestRunPullListPrintsPulls(t *testing.T) {
 	body := `{"status":"completed","result":{"pulls":[{"number":7,"title":"Add feature","state":"open","user":{"login":"octocat"}}]}}`
 	ts := fixedServer(t, http.StatusOK, body)
 	var out bytes.Buffer
-	req := api.OperationRequest{Type: "github.pull.list", Params: map[string]any{"repo": "a/b"}}
+	req := api.Operation{Type: "github.pull.list", Params: map[string]any{"repo": "a/b"}}
 	if err := runPullList(context.Background(), client.New(ts.URL), req, &out, false); err != nil {
 		t.Fatalf("runPullList: %v", err)
 	}
@@ -321,11 +340,12 @@ func TestRunPullListPrintsPulls(t *testing.T) {
 	}
 }
 
+// TestRunPullListJSON checks runPullList emits raw JSON when requested.
 func TestRunPullListJSON(t *testing.T) {
 	body := `{"status":"completed","result":{"pulls":[{"number":7,"title":"Add feature"}]}}`
 	ts := fixedServer(t, http.StatusOK, body)
 	var out bytes.Buffer
-	req := api.OperationRequest{Type: "github.pull.list", Params: map[string]any{"repo": "a/b"}}
+	req := api.Operation{Type: "github.pull.list", Params: map[string]any{"repo": "a/b"}}
 	if err := runPullList(context.Background(), client.New(ts.URL), req, &out, true); err != nil {
 		t.Fatalf("runPullList: %v", err)
 	}
@@ -338,11 +358,12 @@ func TestRunPullListJSON(t *testing.T) {
 	}
 }
 
+// TestRunPullViewPrintsPull checks runPullView renders the pull request details.
 func TestRunPullViewPrintsPull(t *testing.T) {
 	body := `{"status":"completed","result":{"number":7,"title":"the pr","state":"open","user":{"login":"octocat"},"head":{"ref":"feature"},"base":{"ref":"main"},"body":"the body","html_url":"u"}}`
 	ts := fixedServer(t, http.StatusOK, body)
 	var out bytes.Buffer
-	req := api.OperationRequest{Type: "github.pull.view", Params: map[string]any{"repo": "a/b", "number": 7}}
+	req := api.Operation{Type: "github.pull.view", Params: map[string]any{"repo": "a/b", "number": 7}}
 	if err := runPullView(context.Background(), client.New(ts.URL), req, &out, false); err != nil {
 		t.Fatalf("runPullView: %v", err)
 	}
@@ -352,11 +373,12 @@ func TestRunPullViewPrintsPull(t *testing.T) {
 	}
 }
 
+// TestRunPullDiffPrintsDiff checks runPullDiff prints the unified diff.
 func TestRunPullDiffPrintsDiff(t *testing.T) {
 	body := `{"status":"completed","result":{"diff":"diff --git a/x b/x\n+new\n"}}`
 	ts := fixedServer(t, http.StatusOK, body)
 	var out bytes.Buffer
-	req := api.OperationRequest{Type: "github.pull.diff", Params: map[string]any{"repo": "a/b", "number": 7}}
+	req := api.Operation{Type: "github.pull.diff", Params: map[string]any{"repo": "a/b", "number": 7}}
 	if err := runPullDiff(context.Background(), client.New(ts.URL), req, &out, false); err != nil {
 		t.Fatalf("runPullDiff: %v", err)
 	}
@@ -365,10 +387,11 @@ func TestRunPullDiffPrintsDiff(t *testing.T) {
 	}
 }
 
+// TestRunPullActionReportsResult checks runPullAction reports the pull request number and URL.
 func TestRunPullActionReportsResult(t *testing.T) {
 	ts := fixedServer(t, http.StatusOK, `{"status":"completed","result":{"number":5,"html_url":"http://gh/pr/5"}}`)
 	var out bytes.Buffer
-	req := api.OperationRequest{Type: "github.pull.merge", Params: map[string]any{"repo": "a/b", "number": 5}}
+	req := api.Operation{Type: "github.pull.merge", Params: map[string]any{"repo": "a/b", "number": 5}}
 	if err := runPullAction(context.Background(), client.New(ts.URL), req, "merge the pull request", "merged", &out, false); err != nil {
 		t.Fatalf("runPullAction: %v", err)
 	}
@@ -378,10 +401,11 @@ func TestRunPullActionReportsResult(t *testing.T) {
 	}
 }
 
+// TestRunPullCommentReportsResult checks runPullComment reports the created comment URL.
 func TestRunPullCommentReportsResult(t *testing.T) {
 	ts := fixedServer(t, http.StatusOK, `{"status":"completed","result":{"html_url":"http://gh/c/1"}}`)
 	var out bytes.Buffer
-	req := api.OperationRequest{Type: "github.pull.comment", Params: map[string]any{"repo": "a/b", "number": 1, "body": "hi"}}
+	req := api.Operation{Type: "github.pull.comment", Params: map[string]any{"repo": "a/b", "number": 1, "body": "hi"}}
 	if err := runPullComment(context.Background(), client.New(ts.URL), req, &out, false); err != nil {
 		t.Fatalf("runPullComment: %v", err)
 	}
@@ -390,10 +414,11 @@ func TestRunPullCommentReportsResult(t *testing.T) {
 	}
 }
 
+// TestRunPullCreateReportsResult checks runPullCreate reports the created pull request number and URL.
 func TestRunPullCreateReportsResult(t *testing.T) {
 	ts := fixedServer(t, http.StatusOK, `{"status":"completed","result":{"number":42,"html_url":"http://gh/pr/42"}}`)
 	var out bytes.Buffer
-	req := api.OperationRequest{Type: "github.pull.create", Params: map[string]any{"repo": "a/b", "title": "t", "head": "f", "base": "m"}}
+	req := api.Operation{Type: "github.pull.create", Params: map[string]any{"repo": "a/b", "title": "t", "head": "f", "base": "m"}}
 	if err := runPullCreate(context.Background(), client.New(ts.URL), req, &out, false); err != nil {
 		t.Fatalf("runPullCreate: %v", err)
 	}
@@ -403,10 +428,11 @@ func TestRunPullCreateReportsResult(t *testing.T) {
 	}
 }
 
+// TestRunPushPendingPrintsURL checks runPush prints the approval URL when pending.
 func TestRunPushPendingPrintsURL(t *testing.T) {
 	ts := fixedServer(t, http.StatusAccepted, `{"status":"pending","request_id":"req1","approval_url":"http://x/approve/req1"}`)
 	var out bytes.Buffer
-	req := api.OperationRequest{Type: "github.push", Params: map[string]any{"repo": "a/b"}}
+	req := api.Operation{Type: "github.push", Params: map[string]any{"repo": "a/b"}}
 	if err := runPush(context.Background(), client.New(ts.URL), req, "/tmp/dir", "", &out); err != nil {
 		t.Fatalf("runPush: %v", err)
 	}
@@ -415,6 +441,7 @@ func TestRunPushPendingPrintsURL(t *testing.T) {
 	}
 }
 
+// TestRunPushPushesViaProxy checks runPush pushes the branch once authorized.
 func TestRunPushPushesViaProxy(t *testing.T) {
 	if _, err := exec.LookPath("git"); err != nil {
 		t.Skip("git not available")
@@ -437,7 +464,7 @@ func TestRunPushPushesViaProxy(t *testing.T) {
 
 	ts := fixedServer(t, http.StatusOK, `{"status":"completed","result":{"push_url":"`+remote+`","repo":"a/b"}}`)
 	var out bytes.Buffer
-	req := api.OperationRequest{Type: "github.push", Params: map[string]any{"repo": "a/b"}}
+	req := api.Operation{Type: "github.push", Params: map[string]any{"repo": "a/b"}}
 	if err := runPush(context.Background(), client.New(ts.URL), req, local, "", &out); err != nil {
 		t.Fatalf("runPush: %v\n%s", err, out.String())
 	}
@@ -447,6 +474,7 @@ func TestRunPushPushesViaProxy(t *testing.T) {
 	}
 }
 
+// TestRunGrantsListPrints checks runGrantsList renders active grants and the request history.
 func TestRunGrantsListPrints(t *testing.T) {
 	body := `{"grants":[{"id":"g1","request_id":"r1","operation_type":"github.pull.create","description":"Open a PR","expires_at":"2026-06-14T21:00:00Z","status":"approved"}],"requests":[{"id":"r1","operation_type":"github.pull.create","status":"approved"}]}`
 	ts := fixedServer(t, http.StatusOK, body)
@@ -463,6 +491,7 @@ func TestRunGrantsListPrints(t *testing.T) {
 	}
 }
 
+// TestRunGrantsListJSON checks runGrantsList emits raw JSON when requested.
 func TestRunGrantsListJSON(t *testing.T) {
 	body := `{"grants":[{"id":"g1"}],"requests":[]}`
 	ts := fixedServer(t, http.StatusOK, body)
@@ -479,6 +508,7 @@ func TestRunGrantsListJSON(t *testing.T) {
 	}
 }
 
+// TestRunGrantsRevokeReportsCount checks runGrantsRevoke reports how many grants were revoked.
 func TestRunGrantsRevokeReportsCount(t *testing.T) {
 	ts := fixedServer(t, http.StatusOK, `{"revoked":2}`)
 	var out bytes.Buffer

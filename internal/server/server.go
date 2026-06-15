@@ -1,5 +1,5 @@
 // Package server implements the granular HTTP server: it receives operation
-// attempts, checks grants, mints delegation requests, serves a human approval
+// attempts, checks grants, mints grant requests, serves a human approval
 // page, and executes approved operations.
 package server
 
@@ -45,8 +45,7 @@ func New(registry *operations.Registry, store *grants.Store, env operations.Env,
 // @testcase TestOperationPendingThenApprovedThenCompleted exercises the routes.
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc("POST /api/operations", s.handleOperation)
-	mux.HandleFunc("POST /api/permissions", s.handlePermissions)
+	mux.HandleFunc("POST /api/requests", s.handleRequest)
 	mux.HandleFunc("GET /api/requests/{id}", s.handleRequestStatus)
 	mux.HandleFunc("GET /approve/{id}", s.handleApprovePage)
 	mux.HandleFunc("POST /approve/{id}", s.handleApproveSubmit)
@@ -62,40 +61,63 @@ func (s *Server) Handler() http.Handler {
 	return mux
 }
 
-// handleOperation handles POST /api/operations: it executes the operation when a
-// live grant exists, otherwise creates a pending delegation request.
+// handleRequest handles POST /api/requests, the single entry point for grant
+// requests. A request naming an Operation runs the just-in-time path (execute when
+// already granted, otherwise create a pending request); a request carrying
+// Capabilities creates a pending pre-approval request.
 //
 // @arg w The response writer.
-// @arg r The request whose body is an api.OperationRequest.
+// @arg r The request whose body is an api.GrantRequest.
 //
-// @testcase TestOperationPendingThenApprovedThenCompleted drives this endpoint end to end.
-// @testcase TestOperationUnknownTypeIsBadRequest posts an unregistered type.
-func (s *Server) handleOperation(w http.ResponseWriter, r *http.Request) {
-	var req api.OperationRequest
+// @testcase TestOperationPendingThenApprovedThenCompleted drives the operation path.
+// @testcase TestPermissionsRequestFlow drives the capability path.
+// @testcase TestRequestWithoutOperationOrCapabilities returns 400 for an empty request.
+func (s *Server) handleRequest(w http.ResponseWriter, r *http.Request) {
+	var req api.GrantRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeJSON(w, http.StatusBadRequest, api.OperationResponse{Error: "invalid request body"})
+		writeJSON(w, http.StatusBadRequest, api.RequestResponse{Error: "invalid request body"})
 		return
 	}
+	switch {
+	case req.Operation != nil:
+		s.handleOperationRequest(w, r, *req.Operation)
+	case len(req.Capabilities) > 0:
+		s.handleCapabilityRequest(w, req)
+	default:
+		writeJSON(w, http.StatusBadRequest, api.RequestResponse{Error: "grant request must name an operation or capabilities"})
+	}
+}
 
+// handleOperationRequest runs the just-in-time operation path: it executes the
+// operation when a live grant exists, otherwise creates a pending grant request
+// scoped to exactly that operation's requirements.
+//
+// @arg w The response writer.
+// @arg r The HTTP request, for its context.
+// @arg req The operation to attempt.
+//
+// @testcase TestOperationPendingThenApprovedThenCompleted drives this end to end.
+// @testcase TestOperationUnknownTypeIsBadRequest posts an unregistered type.
+func (s *Server) handleOperationRequest(w http.ResponseWriter, r *http.Request, req api.Operation) {
 	op, err := s.registry.Build(req, s.env)
 	if err != nil {
-		writeJSON(w, http.StatusBadRequest, api.OperationResponse{Error: err.Error()})
+		writeJSON(w, http.StatusBadRequest, api.RequestResponse{Error: err.Error()})
 		return
 	}
 
 	allowed, err := s.authorize(op.Requirements())
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, api.OperationResponse{Error: err.Error()})
+		writeJSON(w, http.StatusInternalServerError, api.RequestResponse{Error: err.Error()})
 		return
 	}
 	if !allowed {
 		proposed := authz.MinimalPermits(authz.Principal(), op.Requirements())
 		dr, err := s.store.CreateRequest(op.Type(), op.Describe(), proposed, req.Params)
 		if err != nil {
-			writeJSON(w, http.StatusInternalServerError, api.OperationResponse{Error: err.Error()})
+			writeJSON(w, http.StatusInternalServerError, api.RequestResponse{Error: err.Error()})
 			return
 		}
-		writeJSON(w, http.StatusAccepted, api.OperationResponse{
+		writeJSON(w, http.StatusAccepted, api.RequestResponse{
 			Status:      api.StatusPending,
 			RequestID:   dr.ID,
 			ApprovalURL: s.baseURL + "/approve/" + dr.ID,
@@ -105,10 +127,10 @@ func (s *Server) handleOperation(w http.ResponseWriter, r *http.Request) {
 
 	result, err := op.Execute(r.Context())
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, api.OperationResponse{Error: err.Error()})
+		writeJSON(w, http.StatusInternalServerError, api.RequestResponse{Error: err.Error()})
 		return
 	}
-	writeJSON(w, http.StatusOK, api.OperationResponse{Status: api.StatusCompleted, Result: result})
+	writeJSON(w, http.StatusOK, api.RequestResponse{Status: api.StatusCompleted, Result: result})
 }
 
 // authorize reports whether the active stored policies allow every requirement.

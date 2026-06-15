@@ -1,0 +1,45 @@
+{
+	"functions": [
+		{
+			"function_name": "Build",
+			"documentation_hash": "94ef005164b829e59f5f076858188b797afcf66d280d4ca962b37203b4540fa4",
+			"definition_hash": "77ec2e1c6a4e9145a8aa2c0a4dfa9c4428c60acb2e9f732af25cf8eea0981f2d",
+			"reviewed_at": "2026-06-15T14:59:48.387305981Z"
+		},
+		{
+			"function_name": "HasAction",
+			"receiver": "Catalog",
+			"documentation_hash": "ce99d16fd4797e70d4e2c8720433046b3b98302051adb773fe80fbf6bcaefc2c",
+			"definition_hash": "aa07c0733231e168cac1ca7cedb4400f8bfc2927a1cd6a61387a04298202573d",
+			"reviewed_at": "2026-06-15T14:59:48.39901934Z"
+		},
+		{
+			"function_name": "ResourceEntity",
+			"receiver": "Catalog",
+			"documentation_hash": "6e892522f4737290cbb556ef1e358d9cd133a30cb9fe9b118324602e286874ee",
+			"definition_hash": "683c6c9791bfe5f971b1e7390c23dd1696bf24e789a16881a0112caa5e4c0b5e",
+			"reviewed_at": "2026-06-15T14:59:48.407340495Z"
+		},
+		{
+			"function_name": "ActionLattice",
+			"receiver": "Catalog",
+			"documentation_hash": "0f3b8a9543e95ddee8483471c795b56a917666b18fa0d0e76eb7a5211399dee9",
+			"definition_hash": "7398570e74e7eed12657a7a90932221363ad87d0062939098d8610a3d7d880f9",
+			"reviewed_at": "2026-06-15T14:59:48.410244558Z"
+		},
+		{
+			"function_name": "ResourceTree",
+			"receiver": "Catalog",
+			"documentation_hash": "616348f4921d440c31b97f4c1c046569db2f1e842fbfce8bce3b5d8a3bff542c",
+			"definition_hash": "f64c0f86256740d38aca81c022b05d28dee633f9f9157cf91c3a2398af4559c2",
+			"reviewed_at": "2026-06-15T14:59:48.412916264Z"
+		},
+		{
+			"function_name": "VerbGroups",
+			"receiver": "Catalog",
+			"documentation_hash": "b231fc38d7e7f3fc5a84f0ae5e2c403cb4a7dae1b7c09504819a35279b613eba",
+			"definition_hash": "d5860b9817ef79b98c8b1e3f03d7862a25d5ff25bada313fcaf7f924980cbf1c",
+			"reviewed_at": "2026-06-15T14:59:48.41540072Z"
+		}
+	]
+}

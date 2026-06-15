@@ -28,7 +28,7 @@ func newPushCmd(server *string) *cobra.Command {
 		Short: "Push a local repository to GitHub through the granular proxy",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			req := api.OperationRequest{
+			req := api.Operation{
 				Type:   "github.push",
 				Params: map[string]any{"repo": args[0]},
 			}
@@ -52,7 +52,7 @@ func newPushCmd(server *string) *cobra.Command {
 //
 // @testcase TestRunPushPendingPrintsURL prints the approval URL when pending.
 // @testcase TestRunPushPushesViaProxy pushes to the brokered URL once authorized.
-func runPush(ctx context.Context, c *client.Client, req api.OperationRequest, dir, branch string, out io.Writer) error {
+func runPush(ctx context.Context, c *client.Client, req api.Operation, dir, branch string, out io.Writer) error {
 	resp, done, err := authorize(ctx, c, req, "perform the push", out)
 	if err != nil || done {
 		return err

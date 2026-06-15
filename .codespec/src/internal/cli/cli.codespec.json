@@ -4,13 +4,13 @@
 			"function_name": "NewRootCmd",
 			"documentation_hash": "401b909f6b2836c54b033ab2b342bc0fa71f5f78af9b40ddbd670834bd4274d8",
 			"definition_hash": "066daa8a33e5700e716298d5fe479919d978201274336dbb1abc3524d66044f3",
-			"reviewed_at": "2026-06-15T14:07:38.22462356Z"
+			"reviewed_at": "2026-06-15T14:59:48.41713054Z"
 		},
 		{
 			"function_name": "authorize",
-			"documentation_hash": "646101ee0d644dbc4d56998155f2a3033385e860e99e53d1028e1e01cb2d31a9",
-			"definition_hash": "e2499e0b56d3e9e50b5632f1f6ff7f3f76e84b682c6852745f68122dfa8d142e",
-			"reviewed_at": "2026-06-15T14:07:38.243387385Z"
+			"documentation_hash": "8997a0c9f5269f8503a8f8677f773e7c0a9fabf873e9c70e9336980dd8a3e67f",
+			"definition_hash": "66483c6e80cf13f4116fdd3838e844227661ff31a0078d95220db20254c15602",
+			"reviewed_at": "2026-06-15T14:59:48.419326525Z"
 		}
 	]
 }

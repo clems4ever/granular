@@ -56,7 +56,7 @@ func newIssueViewCmd(server *string, jsonOut *bool) *cobra.Command {
 			if err != nil || number <= 0 {
 				return fmt.Errorf("invalid issue number %q", args[1])
 			}
-			req := api.OperationRequest{
+			req := api.Operation{
 				Type: "github.issue.view",
 				Params: map[string]any{
 					"repo":     args[0],
@@ -89,7 +89,7 @@ func newIssueListCmd(server *string, jsonOut *bool) *cobra.Command {
 		Short: "List issues of a GitHub repository",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			req := api.OperationRequest{
+			req := api.Operation{
 				Type: "github.issue.list",
 				Params: map[string]any{
 					"repo":  args[0],
@@ -118,7 +118,7 @@ func newIssueListCmd(server *string, jsonOut *bool) *cobra.Command {
 // @testcase TestRunIssueListPendingPrintsURL prints the approval URL when pending.
 // @testcase TestRunIssueListPrintsIssues prints the issues once authorized.
 // @testcase TestRunIssueListJSON prints the issues as JSON when jsonOut is set.
-func runIssueList(ctx context.Context, c *client.Client, req api.OperationRequest, out io.Writer, jsonOut bool) error {
+func runIssueList(ctx context.Context, c *client.Client, req api.Operation, out io.Writer, jsonOut bool) error {
 	resp, done, err := authorize(ctx, c, req, "list the issues", out)
 	if err != nil || done {
 		return err
@@ -165,7 +165,7 @@ func printIssues(out io.Writer, issues []any) {
 // @testcase TestRunIssueViewPendingPrintsURL prints the approval URL when pending.
 // @testcase TestRunIssueViewPrintsIssue prints the issue details once authorized.
 // @testcase TestRunIssueViewJSON prints the issue as JSON when jsonOut is set.
-func runIssueView(ctx context.Context, c *client.Client, req api.OperationRequest, out io.Writer, jsonOut bool) error {
+func runIssueView(ctx context.Context, c *client.Client, req api.Operation, out io.Writer, jsonOut bool) error {
 	resp, done, err := authorize(ctx, c, req, "view the issue", out)
 	if err != nil || done {
 		return err

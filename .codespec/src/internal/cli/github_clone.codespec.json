@@ -1,0 +1,22 @@
+{
+	"functions": [
+		{
+			"function_name": "newCloneCmd",
+			"documentation_hash": "5cbe5e2c60f477e8263f2b732f0993c9edc7dc9d4cf1883cede9205bc8e23f71",
+			"definition_hash": "a92f368849efb30b4e80f38c35dacb5128a4fd929ae9a72b170ee273859cadf9",
+			"reviewed_at": "2026-06-15T14:59:48.42131013Z"
+		},
+		{
+			"function_name": "runClone",
+			"documentation_hash": "54550c0c55b424c768b2403fe0c32c3941667a05af778e9a8dc1a5720b6d82c8",
+			"definition_hash": "dc4ab96d252068f429745968803e326a231b62844a88fa2cd0f04d5d09a0347a",
+			"reviewed_at": "2026-06-15T14:59:48.423482632Z"
+		},
+		{
+			"function_name": "gitClone",
+			"documentation_hash": "b41bf2b002a7a947d35bbf9a01e6ea6e29048a9f7f04ca84abe14a60b55f4a47",
+			"definition_hash": "2708910664acde1bd4ced37aee77203cd40450ef8d3e2dea606f0a9b5e5db8c0",
+			"reviewed_at": "2026-06-15T14:59:48.425782406Z"
+		}
+	]
+}

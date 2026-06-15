@@ -26,7 +26,7 @@ func newCloneCmd(server *string) *cobra.Command {
 		Short: "Clone a GitHub repository locally through the granular proxy",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			req := api.OperationRequest{
+			req := api.Operation{
 				Type:   "github.clone",
 				Params: map[string]any{"repo": args[0]},
 			}
@@ -50,7 +50,7 @@ func newCloneCmd(server *string) *cobra.Command {
 //
 // @testcase TestRunClonePendingPrintsURL prints the approval URL when pending.
 // @testcase TestRunCloneClonesViaProxy clones from the brokered URL once authorized.
-func runClone(ctx context.Context, c *client.Client, req api.OperationRequest, dest, ref string, out io.Writer) error {
+func runClone(ctx context.Context, c *client.Client, req api.Operation, dest, ref string, out io.Writer) error {
 	resp, done, err := authorize(ctx, c, req, "perform the clone", out)
 	if err != nil || done {
 		return err

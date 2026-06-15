@@ -78,7 +78,7 @@ func (r *Registry) Register(opType string, factory Factory) {
 //
 // @testcase TestRegistryBuildKnownType builds a registered operation successfully.
 // @testcase TestRegistryBuildUnknownType returns an error for an unregistered type.
-func (r *Registry) Build(req api.OperationRequest, env Env) (Operation, error) {
+func (r *Registry) Build(req api.Operation, env Env) (Operation, error) {
 	factory, ok := r.factories[req.Type]
 	if !ok {
 		return nil, fmt.Errorf("%w: %q", ErrUnknownType, req.Type)

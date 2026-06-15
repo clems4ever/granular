@@ -15,7 +15,7 @@ approved by a human in a browser, and the approval **expires**. See
 - **`granular-server`** — the HTTP server. Holds the platform credentials, decides
   whether an operation is allowed, serves the approval page, and acts as a
   **credential-injecting git proxy** (it adds the PAT to git traffic but the clone
-  runs on the client). State (delegation requests + grants) is persisted in a
+  runs on the client). State (grant requests + grants) is persisted in a
   bbolt file, so the server is stateless toward the client and approvals happen
   out-of-band.
 
@@ -203,4 +203,5 @@ granular
 1. Implement `operations.Operation` (and a matching `operations.Factory`) in a new
    package under `internal/operations/`.
 2. Register it in `cmd/granular-server` with `registry.Register(type, factory)`.
-3. Add a CLI sub-command in `cmd/granular` that builds the `OperationRequest`.
+3. Add a CLI sub-command in `cmd/granular` that builds an `api.Operation` and
+   submits it with `client.SubmitOperation` (which wraps it in a `GrantRequest`).

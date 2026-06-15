@@ -27,7 +27,7 @@ type grantRow struct {
 	Expired       bool
 }
 
-// requestRow is one delegation request rendered in the history table.
+// requestRow is one grant request rendered in the history table.
 type requestRow struct {
 	ID            string
 	OperationType string
@@ -41,7 +41,7 @@ type requestRow struct {
 // view/wire-friendly rows.
 //
 // @return []grantRow The active grants as rows.
-// @return []requestRow The delegation requests as rows.
+// @return []requestRow The grant requests as rows.
 // @error error when the store cannot be read.
 //
 // @testcase TestGrantsPageRenders drives this through the HTML page.
@@ -165,13 +165,13 @@ func (s *Server) handleRevokeForm(w http.ResponseWriter, r *http.Request) {
 // grantsToAPI converts stored policies into the wire grant list.
 //
 // @arg policies The stored policies.
-// @return []api.GrantInfo The wire representation.
+// @return []api.Grant The wire representation.
 //
 // @testcase TestGrantsJSONListsActiveGrants decodes this output.
-func grantsToAPI(policies []grants.StoredPolicy) []api.GrantInfo {
-	out := make([]api.GrantInfo, 0, len(policies))
+func grantsToAPI(policies []grants.Grant) []api.Grant {
+	out := make([]api.Grant, 0, len(policies))
 	for _, p := range policies {
-		out = append(out, api.GrantInfo{
+		out = append(out, api.Grant{
 			ID:            p.ID,
 			RequestID:     p.RequestID,
 			OperationType: p.OperationType,
@@ -185,16 +185,16 @@ func grantsToAPI(policies []grants.StoredPolicy) []api.GrantInfo {
 	return out
 }
 
-// requestsToAPI converts delegation requests into the wire request list.
+// requestsToAPI converts grant requests into the wire request list.
 //
-// @arg reqs The delegation requests.
-// @return []api.RequestInfo The wire representation.
+// @arg reqs The grant requests.
+// @return []api.GrantRequestInfo The wire representation.
 //
 // @testcase TestGrantsJSONListsActiveGrants decodes this output.
-func requestsToAPI(reqs []grants.DelegationRequest) []api.RequestInfo {
-	out := make([]api.RequestInfo, 0, len(reqs))
+func requestsToAPI(reqs []grants.GrantRequest) []api.GrantRequestInfo {
+	out := make([]api.GrantRequestInfo, 0, len(reqs))
 	for _, r := range reqs {
-		out = append(out, api.RequestInfo{
+		out = append(out, api.GrantRequestInfo{
 			ID:            r.ID,
 			OperationType: r.OperationType,
 			Description:   firstLine(r.Description),
