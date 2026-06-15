@@ -81,8 +81,8 @@
 		{
 			"function_name": "TestLogoutClearsSession",
 			"documentation_hash": "875ba7d9a79f4e2b3f82ce52b6ee76017ed49478527364b1654915173d5d53dd",
-			"definition_hash": "07e3ba164ae50a401633ef12a726624ea5750b61cdad8031f3151145ae03ddb6",
-			"reviewed_at": "2026-06-15T17:34:39.424473356Z"
+			"definition_hash": "d44c1bef5e99bc80940deb50449a437176192788a5b9e2a169acad2b643f5949",
+			"reviewed_at": "2026-06-15T20:01:09.814304556Z"
 		}
 	]
 }

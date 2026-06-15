@@ -45,8 +45,8 @@
 			"function_name": "handleCallback",
 			"receiver": "Authenticator",
 			"documentation_hash": "ee004dcf215853d9248f070dbfffd9c78e51ffba496df8429654ca5cdfbbc150",
-			"definition_hash": "3e27f8579bba538d05f2210159067becd6816179796457f22f8121fea34ec1ae",
-			"reviewed_at": "2026-06-15T17:34:39.383868041Z"
+			"definition_hash": "b56a27c3d914f80af437efb265b670ae48d767ea791171a49bf0e6e72e2bb530",
+			"reviewed_at": "2026-06-15T20:01:09.813116303Z"
 		},
 		{
 			"function_name": "handleLogout",

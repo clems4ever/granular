@@ -5,55 +5,80 @@ package main
 
 import (
 	"context"
+	"errors"
+	"flag"
 	"fmt"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
-	"strings"
-	"time"
 
+	"github.com/clems4ever/granular/internal/config"
 	"github.com/clems4ever/granular/internal/grants"
 	"github.com/clems4ever/granular/internal/operations"
 	githubops "github.com/clems4ever/granular/internal/operations/github"
 	"github.com/clems4ever/granular/internal/server"
 )
 
-// main configures and starts the granular HTTP server, reading its settings from
-// the environment.
+// main parses flags, loads the YAML configuration, and starts the server.
 //
 // @testcase TestMainIsEntryPoint is a placeholder; main only delegates to run.
 func main() {
-	if err := run(); err != nil {
+	configPath := flag.String("config", "granular.yaml", "path to the YAML configuration file")
+	flag.Parse()
+	cfg, err := loadConfig(*configPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := run(cfg); err != nil {
 		log.Fatal(err)
 	}
 }
 
-// run builds the server from environment configuration and serves until the
-// process is stopped.
+// loadConfig loads the configuration file, falling back to built-in defaults when
+// the file does not exist, so the server runs out of the box without one.
 //
+// @arg path The path to the YAML configuration file.
+// @return *config.Config The loaded or default configuration.
+// @error error when the file exists but cannot be read or parsed.
+//
+// @testcase TestLoadConfigMissingUsesDefaults falls back to defaults for a missing file.
+func loadConfig(path string) (*config.Config, error) {
+	// Decide the fallback by the config file's own existence, so that a missing
+	// *secret* file referenced inside it stays a fatal error rather than silently
+	// dropping us onto the defaults.
+	if _, err := os.Stat(path); errors.Is(err, fs.ErrNotExist) {
+		log.Printf("config file %q not found; using built-in defaults", path)
+		return config.Default(), nil
+	}
+	cfg, err := config.Load(path)
+	if err != nil {
+		return nil, err
+	}
+	log.Printf("loaded configuration from %q", path)
+	return cfg, nil
+}
+
+// run builds the server from cfg and serves until the process is stopped.
+//
+// @arg cfg The server configuration.
 // @error error Any error from configuration or from ListenAndServe.
 //
-// @testcase TestRunRejectsBadWorkspace is a placeholder for config validation tests.
-func run() error {
-	addr := envOr("GRANULAR_ADDR", ":8080")
-	baseURL := envOr("GRANULAR_BASE_URL", "http://localhost"+addr)
-	workspace := envOr("GRANULAR_WORKSPACE", filepath.Join(os.TempDir(), "granular-workspace"))
-	dbPath := envOr("GRANULAR_DB", filepath.Join(workspace, "granular.db"))
-
-	if err := os.MkdirAll(workspace, 0o755); err != nil {
+// @testcase TestRunRejectsBadWorkspace checks run fails when the workspace cannot be created.
+func run(cfg *config.Config) error {
+	if err := os.MkdirAll(cfg.Workspace, 0o755); err != nil {
 		return fmt.Errorf("create workspace: %w", err)
 	}
 
-	store, err := grants.Open(dbPath)
+	store, err := grants.Open(cfg.DBPath)
 	if err != nil {
 		return fmt.Errorf("open database: %w", err)
 	}
 	defer store.Close()
 
 	env := operations.Env{
-		GitHubToken: os.Getenv("GRANULAR_GITHUB_TOKEN"),
-		BaseURL:     baseURL,
+		GitHubToken: cfg.GitHubToken,
+		BaseURL:     cfg.BaseURL,
 	}
 
 	registry := operations.NewRegistry()
@@ -77,66 +102,33 @@ func run() error {
 	registry.Register(githubops.TypePullClose, githubops.PullClose)
 	registry.Register(githubops.TypePullReopen, githubops.PullReopen)
 
-	srv := server.New(registry, store, env, baseURL)
+	srv := server.New(registry, store, env, cfg.BaseURL)
 
 	auth := server.NewAuthenticator(server.AuthConfig{
-		ClientID:      os.Getenv("GRANULAR_GITHUB_OAUTH_CLIENT_ID"),
-		ClientSecret:  os.Getenv("GRANULAR_GITHUB_OAUTH_CLIENT_SECRET"),
-		AllowedUsers:  strings.Split(os.Getenv("GRANULAR_ALLOWED_USERS"), ","),
-		SessionSecret: []byte(os.Getenv("GRANULAR_SESSION_SECRET")),
-		BaseURL:       baseURL,
+		ClientID:      cfg.Auth.ClientID,
+		ClientSecret:  cfg.Auth.ClientSecret,
+		AllowedUsers:  cfg.Auth.AllowedUsers,
+		SessionSecret: []byte(cfg.Auth.SessionSecret),
+		BaseURL:       cfg.BaseURL,
 	})
 	srv.UseAuth(auth)
 	switch {
 	case !auth.Enabled():
-		log.Printf("warning: web UI is UNAUTHENTICATED; set GRANULAR_GITHUB_OAUTH_CLIENT_ID and GRANULAR_GITHUB_OAUTH_CLIENT_SECRET to require a GitHub login (OAuth app callback URL: %s/auth/callback)", baseURL)
+		log.Printf("warning: web UI is UNAUTHENTICATED; set auth.client_id and auth.client_secret_file to require a GitHub login (OAuth app callback URL: %s/auth/callback)", cfg.BaseURL)
 	case auth.AllowedCount() == 0:
-		log.Printf("warning: web UI authentication is enabled but GRANULAR_ALLOWED_USERS is empty; all logins will be denied")
+		log.Printf("warning: web UI authentication is enabled but auth.allowed_users is empty; all logins will be denied")
 	default:
 		log.Printf("web UI authentication enabled (GitHub OAuth); %d allowed user(s)", auth.AllowedCount())
 	}
 
-	cleanupInterval := parseDurationOr("GRANULAR_CLEANUP_INTERVAL", 30*time.Second)
-	store.StartCleanup(context.Background(), cleanupInterval, func(n int) {
+	store.StartCleanup(context.Background(), cfg.CleanupInterval.Std(), func(n int) {
 		log.Printf("cleaned up %d expired grant(s)", n)
 	})
-	log.Printf("grant janitor purging expired grants every %s", cleanupInterval)
+	log.Printf("grant janitor purging expired grants every %s", cfg.CleanupInterval.Std())
 
-	log.Printf("granular-server listening on %s (base URL %s, workspace %s)", addr, baseURL, workspace)
+	log.Printf("granular-server listening on %s (base URL %s, workspace %s)", cfg.Addr, cfg.BaseURL, cfg.Workspace)
 	if env.GitHubToken == "" {
-		log.Printf("warning: GRANULAR_GITHUB_TOKEN is empty; the git proxy cannot authenticate to GitHub until it is set")
+		log.Printf("warning: github_token is empty; the git proxy cannot authenticate to GitHub until it is set")
 	}
-	return http.ListenAndServe(addr, srv.Handler())
-}
-
-// envOr returns the value of the named environment variable, or fallback when it
-// is unset or empty.
-//
-// @arg key The environment variable name.
-// @arg fallback The value to return when the variable is unset or empty.
-// @return string The variable's value, or fallback.
-//
-// @testcase TestEnvOrFallback checks the fallback is used for an unset variable.
-func envOr(key, fallback string) string {
-	if v := os.Getenv(key); v != "" {
-		return v
-	}
-	return fallback
-}
-
-// parseDurationOr reads a duration from the named environment variable, returning
-// fallback when the variable is unset, empty, or not a valid Go duration.
-//
-// @arg key The environment variable name.
-// @arg fallback The duration to return when the variable is unset or invalid.
-// @return time.Duration The parsed duration, or fallback.
-//
-// @testcase TestParseDurationOr checks parsing, fallback, and invalid input.
-func parseDurationOr(key string, fallback time.Duration) time.Duration {
-	if v := os.Getenv(key); v != "" {
-		if d, err := time.ParseDuration(v); err == nil && d > 0 {
-			return d
-		}
-	}
-	return fallback
+	return http.ListenAndServe(cfg.Addr, srv.Handler())
 }

@@ -19,20 +19,39 @@ func TestRenderProducesHTML(t *testing.T) {
 	}
 	for name, data := range cases {
 		rec := httptest.NewRecorder()
-		if err := Render(rec, name, data); err != nil {
+		if err := Render(rec, name, Nav{}, data); err != nil {
 			t.Fatalf("render %s: %v", name, err)
 		}
 		body := rec.Body.String()
 		if !strings.Contains(body, "<!doctype html>") || !strings.Contains(body, "granular") {
 			t.Errorf("page %s missing layout chrome", name)
 		}
+		// With no auth chrome, no sign-out button is shown.
+		if strings.Contains(body, "Sign out") {
+			t.Errorf("page %s should not show Sign out without auth chrome", name)
+		}
+	}
+}
+
+// TestRenderShowsSignedInUser checks the nav shows the signed-in user and a sign-out button.
+func TestRenderShowsSignedInUser(t *testing.T) {
+	rec := httptest.NewRecorder()
+	if err := Render(rec, "grants", Nav{User: "octocat", AuthEnabled: true}, map[string]any{"Grants": []any{}, "Requests": []any{}}); err != nil {
+		t.Fatal(err)
+	}
+	body := rec.Body.String()
+	if !strings.Contains(body, "@octocat") {
+		t.Error("nav should show the signed-in user")
+	}
+	if !strings.Contains(body, "Sign out") || !strings.Contains(body, `action="/auth/logout"`) {
+		t.Error("nav should show a sign-out form posting to /auth/logout")
 	}
 }
 
 // TestRenderUnknownPage checks Render returns an error for an unknown page name.
 func TestRenderUnknownPage(t *testing.T) {
 	rec := httptest.NewRecorder()
-	if err := Render(rec, "nope", nil); err == nil {
+	if err := Render(rec, "nope", Nav{}, nil); err == nil {
 		t.Fatal("expected error for unknown page")
 	}
 }

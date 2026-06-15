@@ -202,7 +202,7 @@ func TestCallbackRejectsBadState(t *testing.T) {
 func TestLogoutClearsSession(t *testing.T) {
 	a := testAuth("octocat")
 	rec := httptest.NewRecorder()
-	a.handleLogout(rec, httptest.NewRequest(http.MethodGet, "/auth/logout", nil))
+	a.handleLogout(rec, httptest.NewRequest(http.MethodPost, "/auth/logout", nil))
 	sess := cookieNamed(rec.Result(), sessionCookie)
 	if sess == nil || sess.MaxAge >= 0 {
 		t.Fatalf("logout should expire the session cookie, got %+v", sess)

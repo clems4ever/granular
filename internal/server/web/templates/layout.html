@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{block "title" .}}granular{{end}}</title>
+  <title>{{block "title" .Page}}granular{{end}}</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
@@ -13,11 +13,17 @@
       <nav class="nav">
         <a href="/catalog">Catalog</a>
         <a href="/grants">Grants</a>
+        {{if .Nav.AuthEnabled}}
+        {{if .Nav.User}}<span class="nav-user" title="Signed in">@{{.Nav.User}}</span>{{end}}
+        <form class="logout-form" action="/auth/logout" method="post">
+          <button type="submit" class="logout-btn">Sign out</button>
+        </form>
+        {{end}}
       </nav>
     </div>
   </header>
-  <main class="container{{block "container-class" .}}{{end}}">
-    {{block "content" .}}{{end}}
+  <main class="container{{block "container-class" .Page}}{{end}}">
+    {{block "content" .Page}}{{end}}
   </main>
   <footer class="footer">granular · fine-grained, human-approved, time-limited permissions</footer>
 </body>

@@ -22,15 +22,15 @@
 			"function_name": "handleApprovePage",
 			"receiver": "Server",
 			"documentation_hash": "306c35ddb3eab05062f8b4d6621988583ca0bc275bf489048341df08da4daf0a",
-			"definition_hash": "777454fc0e5aa37ae8f8b2a9c8f591156c639517a5cc1cd1e0d6e38546356801",
-			"reviewed_at": "2026-06-15T14:59:48.922566725Z"
+			"definition_hash": "7816df25ef6bcd54a671018d6ba292efb959d7e69436ffbf60efbf089cdc48de",
+			"reviewed_at": "2026-06-15T20:01:09.812217548Z"
 		},
 		{
 			"function_name": "handleApproveSubmit",
 			"receiver": "Server",
 			"documentation_hash": "8de4b854021b6f3b46e6f4ade566b2cc9031aa6952a73865960bdfedac2ee4da",
-			"definition_hash": "e5527ccdd922bd723aa1937c571a820e50f948a08d712aa270304df2074be40a",
-			"reviewed_at": "2026-06-15T14:59:48.926765226Z"
+			"definition_hash": "e63521da16bab00d1062d407f69fb0d15b4fc563023b1a5a8994b04155513ab6",
+			"reviewed_at": "2026-06-15T20:01:09.812549598Z"
 		}
 	]
 }

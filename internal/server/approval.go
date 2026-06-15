@@ -7,7 +7,6 @@ import (
 
 	"github.com/clems4ever/granular/internal/api"
 	"github.com/clems4ever/granular/internal/catalog"
-	"github.com/clems4ever/granular/internal/server/web"
 )
 
 // grantedAction is a plain-English description of one action a request would
@@ -172,7 +171,7 @@ func (s *Server) handleApprovePage(w http.ResponseWriter, r *http.Request) {
 		Decided:       dr.Status != api.StatusPending,
 		TTLOptions:    ttlOptions,
 	}
-	_ = web.Render(w, "approve", view)
+	_ = s.render(w, r, "approve", view)
 }
 
 // handleApproveSubmit handles POST /approve/{id}: it records the human's approve
@@ -216,7 +215,7 @@ func (s *Server) handleApproveSubmit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_ = web.Render(w, "result", struct {
+	_ = s.render(w, r, "result", struct {
 		Status  api.OperationStatus
 		Message string
 	}{Status: status, Message: message})

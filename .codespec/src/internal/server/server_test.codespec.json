@@ -135,6 +135,12 @@
 			"documentation_hash": "c0168bc0b9930c5e75bce61d93f076ba1b3b6c9f77035517e23b8041d646b33e",
 			"definition_hash": "2056a11d5bd3df6fca8807edeb97f0729d972fa0296080528dad385fa5279a79",
 			"reviewed_at": "2026-06-15T17:34:39.424890747Z"
+		},
+		{
+			"function_name": "TestSignedInUserShownInNav",
+			"documentation_hash": "d8f807d6898c3369e669472d7514e0008efe7ce28f482f1c0ae58b8ba2b2a0da",
+			"definition_hash": "08c6b704f519039f80f5f23ab9ff32a366e2ddaeeceda5d97fd6d69f33f1fb20",
+			"reviewed_at": "2026-06-15T20:01:09.815494555Z"
 		}
 	]
 }

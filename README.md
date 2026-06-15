@@ -28,26 +28,42 @@ go build -o bin/granular-server ./cmd/granular-server
 
 ## Run the server
 
-```sh
-export GRANULAR_GITHUB_TOKEN=ghp_your_pat   # used for github.* operations
-export GRANULAR_ADDR=:8080                  # listen address (default :8080)
-export GRANULAR_BASE_URL=http://localhost:8080  # used to build approval links
-export GRANULAR_WORKSPACE=/var/lib/granular # holds the bbolt database
-# GRANULAR_DB defaults to $GRANULAR_WORKSPACE/granular.db
+The server is configured by a YAML file. Copy the example and edit it:
 
-# Optional: protect the web pages behind a "log in with GitHub" flow. Register a
-# GitHub OAuth App with callback URL $GRANULAR_BASE_URL/auth/callback.
-export GRANULAR_GITHUB_OAUTH_CLIENT_ID=Iv1_xxx
-export GRANULAR_GITHUB_OAUTH_CLIENT_SECRET=xxxx
-export GRANULAR_ALLOWED_USERS=clems4ever,alice  # GitHub logins allowed to sign in
-# export GRANULAR_SESSION_SECRET=$(openssl rand -hex 32)  # else random per restart
-bin/granular-server
+```sh
+cp granular.example.yaml granular.yaml
+$EDITOR granular.yaml
+bin/granular-server                 # loads ./granular.yaml by default
+# or: bin/granular-server --config /etc/granular/config.yaml
 ```
 
-When the OAuth variables are set, the human pages (approval, grants, catalog,
-landing) require a GitHub login and admit only `GRANULAR_ALLOWED_USERS`. The CLI
-API and git proxy are unaffected. When they are unset, the pages stay open and the
-server logs a warning.
+```yaml
+# granular.yaml
+addr: ":8080"
+base_url: "http://localhost:8080"   # used to build approval links + OAuth callback
+workspace: "/var/lib/granular"      # holds the bbolt database
+cleanup_interval: "2m"
+
+# Secrets are not stored inline — point at a file that holds each one (e.g. a
+# Docker/Kubernetes secret mount). The PAT is used for github.* operations + git proxy.
+github_token_file: "/run/secrets/granular_github_token"
+
+# Optional: protect the web pages behind a "log in with GitHub" flow. Register a
+# GitHub OAuth App with callback URL <base_url>/auth/callback.
+auth:
+  client_id: "Iv1_xxx"                                  # public, so inline
+  client_secret_file: "/run/secrets/granular_oauth_secret"
+  allowed_users: [clems4ever, alice]                    # GitHub logins allowed to sign in
+  session_secret_file: ""                               # random per restart if empty
+```
+
+Every field is optional and falls back to a default (see `granular.example.yaml`);
+if no config file is found the server starts with built-in defaults. **Secrets live
+in separate files** named by the `*_file` keys, never in the config itself. When
+`auth.client_id` and `auth.client_secret_file` are set, the human pages (approval,
+grants, catalog, landing) require a GitHub login and admit only `auth.allowed_users`;
+the CLI API and git proxy are unaffected. When they are unset, the pages stay open
+and the server logs a warning.
 
 ## Use the CLI
 

@@ -10,8 +10,8 @@
 			"function_name": "Handler",
 			"receiver": "Server",
 			"documentation_hash": "987539ace680705db31aebc3a378d606a8d3e5f08963393ca7d05f2e63f36ef7",
-			"definition_hash": "382e9fe9ffe34dbdf3208ac64bcaf11a2d2ed90d983a08cb09c6aad16a765ce5",
-			"reviewed_at": "2026-06-15T17:34:39.363740492Z"
+			"definition_hash": "0fe4144375bb96a7b6ca4b7188dde6479ea2c7d9e14833ce7ab3ce73f7a64589",
+			"reviewed_at": "2026-06-15T20:01:09.810020205Z"
 		},
 		{
 			"function_name": "authorize",
@@ -59,6 +59,20 @@
 			"documentation_hash": "bcfb3823f8c93e1565ac92332072995b3e403b31cf8b4b3753f8e7016e512ac3",
 			"definition_hash": "727620a1481bb0fca25eca7052fbe54f30e645b23720980ab1dcd1eddc43363d",
 			"reviewed_at": "2026-06-15T17:34:39.366070455Z"
+		},
+		{
+			"function_name": "render",
+			"receiver": "Server",
+			"documentation_hash": "79a37efa4c4f9a654c558d7bcdc4871b4d92e695f449c5d44618d19563b71b85",
+			"definition_hash": "b865aaa3651bfc0bdfa267c0ac888ba87496146bffa9bfc7908cfe3a2a498da1",
+			"reviewed_at": "2026-06-15T20:01:09.810477625Z"
+		},
+		{
+			"function_name": "navFor",
+			"receiver": "Server",
+			"documentation_hash": "4b237cbc988852169bab9c9e242b871a3583e7f671cd6299eef5799c64f41f52",
+			"definition_hash": "d7b30000cd0b73e8e6ba7392d92f02bff2269355a6dd4e1023cccb9841fe1d56",
+			"reviewed_at": "2026-06-15T20:01:09.811098977Z"
 		}
 	]
 }

@@ -38,22 +38,40 @@ func page(name string) *template.Template {
 	return template.Must(template.New("layout.html").Funcs(funcs).ParseFS(files, "templates/layout.html", "templates/"+name))
 }
 
-// Render writes the named page, executed against the shared layout, to w.
+// Nav holds the per-request layout chrome: whether the web UI is behind a login
+// and, if so, the signed-in GitHub user. It is shown in the top bar.
+type Nav struct {
+	User        string
+	AuthEnabled bool
+}
+
+// layoutData wraps a page's own data with the shared layout chrome (Nav). The
+// layout passes Page to each page template (as dot), so page templates are
+// unaffected, while the top bar renders Nav.
+type layoutData struct {
+	Nav  Nav
+	Page any
+}
+
+// Render writes the named page, executed against the shared layout, to w. nav is
+// the layout chrome (the signed-in user); data is the page's own template data.
 //
 // @arg w The response writer; its content type is set to HTML.
 // @arg name The page name (key of pages), e.g. "approve".
-// @arg data The data passed to the template.
+// @arg nav The layout chrome (signed-in user / whether auth is enabled).
+// @arg data The data passed to the page template.
 // @error error when the page is unknown or template execution fails.
 //
 // @testcase TestRenderProducesHTML renders a page and checks the output.
 // @testcase TestRenderUnknownPage returns an error for an unknown page.
-func Render(w http.ResponseWriter, name string, data any) error {
+// @testcase TestRenderShowsSignedInUser renders the nav with a signed-in user.
+func Render(w http.ResponseWriter, name string, nav Nav, data any) error {
 	tmpl, ok := pages[name]
 	if !ok {
 		return fs.ErrNotExist
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	return tmpl.ExecuteTemplate(w, "layout.html", data)
+	return tmpl.ExecuteTemplate(w, "layout.html", layoutData{Nav: nav, Page: data})
 }
 
 // Static serves the embedded static assets, stripped of the /static/ prefix.

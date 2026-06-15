@@ -10,9 +10,9 @@
 		{
 			"function_name": "handleGrantsPage",
 			"receiver": "Server",
-			"documentation_hash": "2d761af2021119ea380a6a74c945064d756fb3271698013013c5c515f3a22c47",
-			"definition_hash": "2928701692e88c67c4c534901e92c563753de59671496e89abf09e964499f2d0",
-			"reviewed_at": "2026-06-15T14:59:48.944128997Z"
+			"documentation_hash": "6b29b24fc2642aa190cdb0509e9fe0caaaaba62387729cb4a56ddeaad6fa9001",
+			"definition_hash": "e5810269104be89af6eb898d0415b088bd1bd05cb5686ac4fc0d190b622bde56",
+			"reviewed_at": "2026-06-15T20:01:09.811812135Z"
 		},
 		{
 			"function_name": "handleGrantsJSON",

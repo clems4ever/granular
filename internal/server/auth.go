@@ -209,7 +209,7 @@ func (a *Authenticator) handleCallback(w http.ResponseWriter, r *http.Request) {
 	if !a.isAllowed(login) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(http.StatusForbidden)
-		_ = web.Render(w, "denied", deniedView{User: login})
+		_ = web.Render(w, "denied", web.Nav{}, deniedView{User: login})
 		return
 	}
 

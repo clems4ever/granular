@@ -1,28 +1,34 @@
 {
 	"functions": [
 		{
-			"function_name": "TestParseDurationOr",
-			"documentation_hash": "96a22935638568b809e0db0e8dd5f6d0e8d7e7577952af26f8cdcf481b7bc1d2",
-			"definition_hash": "a3412e94740e65c61c9f870bf4d910b9c24c67a21dfe6df77a77d30b5f20e004",
-			"reviewed_at": "2026-06-14T21:10:05.653045426Z"
-		},
-		{
-			"function_name": "TestEnvOrFallback",
-			"documentation_hash": "f8436b2461a58fcdde047d46c56953452d2785d8ab0d5405bc68792fc017358b",
-			"definition_hash": "f443c24e6edbfdf22a17568f8ea96b876fe331fc631e2d000d1ec098ea59b34b",
-			"reviewed_at": "2026-06-14T21:10:05.645293486Z"
-		},
-		{
 			"function_name": "TestRunRejectsBadWorkspace",
 			"documentation_hash": "873b127290af94786d7725eef6df7ecfa70b421857d4bddd5a9984f1ad754bb8",
-			"definition_hash": "1cb3fee6892cf76565ee03052af79ac243b85e708cd8dfa6e8a6c92d94edfc84",
-			"reviewed_at": "2026-06-14T21:10:05.647872735Z"
+			"definition_hash": "170502f4832017db998919b1d2c7ec7b8946ae92467900fae1e118e8fe0e14c5",
+			"reviewed_at": "2026-06-15T17:44:29.742912601Z"
 		},
 		{
 			"function_name": "TestMainIsEntryPoint",
 			"documentation_hash": "c7945750ec5bb143539600079882c69b628b91aae297d1091d9b64cf9dadf915",
 			"definition_hash": "2caf41b34b9a85da87060d0d265d285b3a165d8a246168d42df8b665e46e4b95",
-			"reviewed_at": "2026-06-14T21:10:05.650255834Z"
+			"reviewed_at": "2026-06-15T17:44:29.74324151Z"
+		},
+		{
+			"function_name": "TestLoadConfigMissingUsesDefaults",
+			"documentation_hash": "d74182ac885d5f650fd97c7fe0f0b7603959890c62eed19edfd6dbf56b11bdb3",
+			"definition_hash": "2d26161857a4a78c99b815bef8cee85fdc9542a5208e85842b0776689cb47a64",
+			"reviewed_at": "2026-06-15T17:44:29.742185918Z"
+		},
+		{
+			"function_name": "TestLoadConfigReadsFile",
+			"documentation_hash": "033ac97ef58015e6ab34a40259570aafeaba024633604cadf34f4678692f334c",
+			"definition_hash": "79c7fc455518a4eb019283995b07bea23e9bcebbc63b5eb263c1147cc3ff4118",
+			"reviewed_at": "2026-06-15T17:44:29.742590547Z"
+		},
+		{
+			"function_name": "TestLoadConfigPropagatesSecretError",
+			"documentation_hash": "c6e17cedafc7d6ebece39fbbabaa3e9f84a2222c126bfe17523e51c5727767dc",
+			"definition_hash": "a834d0aa6c6587f9a50443d9b939f0446a64f39951507a0b52ece395ee2cefce",
+			"reviewed_at": "2026-06-15T19:46:38.282007191Z"
 		}
 	]
 }

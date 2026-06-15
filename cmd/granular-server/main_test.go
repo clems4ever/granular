@@ -4,20 +4,49 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-	"time"
+
+	"github.com/clems4ever/granular/internal/config"
 )
 
-// TestEnvOrFallback checks envOr returns the variable's value when set and the
-// fallback when unset.
-func TestEnvOrFallback(t *testing.T) {
-	const key = "GRANULAR_TEST_ENVOR"
-	_ = os.Unsetenv(key)
-	if got := envOr(key, "fallback"); got != "fallback" {
-		t.Fatalf("unset variable should use fallback, got %q", got)
+// TestLoadConfigMissingUsesDefaults checks loadConfig falls back to defaults when
+// the configuration file does not exist.
+func TestLoadConfigMissingUsesDefaults(t *testing.T) {
+	cfg, err := loadConfig(filepath.Join(t.TempDir(), "absent.yaml"))
+	if err != nil {
+		t.Fatalf("loadConfig: %v", err)
 	}
-	t.Setenv(key, "value")
-	if got := envOr(key, "fallback"); got != "value" {
-		t.Fatalf("set variable should win, got %q", got)
+	if cfg.Addr != ":8080" {
+		t.Fatalf("expected built-in defaults, got addr %q", cfg.Addr)
+	}
+}
+
+// TestLoadConfigReadsFile checks loadConfig parses an existing configuration file.
+func TestLoadConfigReadsFile(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "granular.yaml")
+	if err := os.WriteFile(path, []byte("addr: \":9999\"\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := loadConfig(path)
+	if err != nil {
+		t.Fatalf("loadConfig: %v", err)
+	}
+	if cfg.Addr != ":9999" {
+		t.Fatalf("addr = %q, want :9999", cfg.Addr)
+	}
+}
+
+// TestLoadConfigPropagatesSecretError checks that when the config file exists but
+// references a missing secret file, loadConfig returns an error instead of
+// silently falling back to defaults (the bug: a missing secret file matched
+// os.ErrNotExist and was mistaken for a missing config file).
+func TestLoadConfigPropagatesSecretError(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "granular.yaml")
+	if err := os.WriteFile(path, []byte("github_token_file: /no/such/secret\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := loadConfig(path)
+	if err == nil {
+		t.Fatalf("expected an error for a missing secret file, got config %+v", cfg)
 	}
 }
 
@@ -30,8 +59,10 @@ func TestRunRejectsBadWorkspace(t *testing.T) {
 	if err := os.WriteFile(file, []byte("x"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("GRANULAR_WORKSPACE", filepath.Join(file, "workspace"))
-	if err := run(); err == nil {
+	cfg := config.Default()
+	cfg.Workspace = filepath.Join(file, "workspace")
+	cfg.DBPath = filepath.Join(cfg.Workspace, "granular.db")
+	if err := run(cfg); err == nil {
 		t.Fatal("run should fail when the workspace cannot be created")
 	}
 }
@@ -42,23 +73,5 @@ func TestRunRejectsBadWorkspace(t *testing.T) {
 func TestMainIsEntryPoint(t *testing.T) {
 	if testing.Short() {
 		t.Skip("main is an entry point exercised via run")
-	}
-}
-
-// TestParseDurationOr checks parsing a valid duration, the unset fallback, and the
-// invalid-value fallback.
-func TestParseDurationOr(t *testing.T) {
-	const key = "GRANULAR_TEST_DUR"
-	_ = os.Unsetenv(key)
-	if d := parseDurationOr(key, 30*time.Second); d != 30*time.Second {
-		t.Fatalf("unset should fall back, got %v", d)
-	}
-	t.Setenv(key, "45s")
-	if d := parseDurationOr(key, 30*time.Second); d != 45*time.Second {
-		t.Fatalf("valid should parse, got %v", d)
-	}
-	t.Setenv(key, "garbage")
-	if d := parseDurationOr(key, 30*time.Second); d != 30*time.Second {
-		t.Fatalf("invalid should fall back, got %v", d)
 	}
 }

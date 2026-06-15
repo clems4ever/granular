@@ -330,6 +330,43 @@ func TestWebPagesRequireAuthWhenEnabled(t *testing.T) {
 	}
 }
 
+// TestSignedInUserShownInNav checks a signed-in user sees their name and a sign-out button on a page.
+func TestSignedInUserShownInNav(t *testing.T) {
+	reg := operations.NewRegistry()
+	store, err := grants.Open(filepath.Join(t.TempDir(), "nav.db"))
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	t.Cleanup(func() { _ = store.Close() })
+	srv := New(reg, store, operations.Env{}, "http://example.test")
+	auth := NewAuthenticator(AuthConfig{
+		ClientID: "c", ClientSecret: "s", AllowedUsers: []string{"octocat"},
+		SessionSecret: []byte("test-secret-key-0123456789abcdef"), BaseURL: "http://example.test",
+	})
+	srv.UseAuth(auth)
+	ts := httptest.NewServer(srv.Handler())
+	t.Cleanup(ts.Close)
+
+	// Visit a protected page with a valid session for an allowed user.
+	req, _ := http.NewRequest(http.MethodGet, ts.URL+"/grants", nil)
+	req.AddCookie(auth.sessionCookieFor("octocat"))
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("want 200 for a signed-in user, got %d", resp.StatusCode)
+	}
+	html := readBody(t, resp)
+	if !strings.Contains(html, "@octocat") {
+		t.Error("nav should show the signed-in user")
+	}
+	if !strings.Contains(html, "Sign out") || !strings.Contains(html, `action="/auth/logout"`) {
+		t.Error("nav should show a sign-out form")
+	}
+}
+
 // TestParseTTLFallsBack checks parseTTL defaults to two minutes for empty or invalid input.
 func TestParseTTLFallsBack(t *testing.T) {
 	if parseTTL("").Minutes() != 2 {

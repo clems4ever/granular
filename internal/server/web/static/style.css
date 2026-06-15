@@ -66,8 +66,27 @@ a:hover { color: var(--accent-strong); }
   background: linear-gradient(135deg, var(--accent), #8b5cf6);
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.25);
 }
+.nav { display: inline-flex; align-items: center; }
 .nav a { color: var(--muted); font-weight: 500; margin-left: 1.25rem; }
 .nav a:hover { color: var(--text); }
+.nav-user {
+  margin-left: 1.25rem;
+  color: var(--text);
+  font-weight: 600;
+  font-size: .9rem;
+}
+.logout-form { display: inline; margin: 0 0 0 .85rem; }
+.logout-btn {
+  background: transparent;
+  border: 1px solid var(--border, rgba(255,255,255,.18));
+  color: var(--muted);
+  border-radius: 7px;
+  padding: .28rem .7rem;
+  font: inherit;
+  font-size: .85rem;
+  cursor: pointer;
+}
+.logout-btn:hover { color: var(--text); border-color: var(--text); }
 
 /* ---------- layout ---------- */
 .container {

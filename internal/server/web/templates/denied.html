@@ -3,7 +3,9 @@
 <section class="card">
   <h1>Access denied</h1>
   <p>The GitHub account <strong>{{.User}}</strong> is not allowed to access this granular server.</p>
-  <p class="muted">Ask an administrator to add your GitHub username to the allowlist, then
-    <a href="/auth/logout">sign in with a different account</a>.</p>
+  <p class="muted">Ask an administrator to add your GitHub username to the allowlist.</p>
+  <form action="/auth/logout" method="post">
+    <button type="submit">Sign in with a different account</button>
+  </form>
 </section>
 {{end}}

@@ -64,6 +64,36 @@ func (s *Server) protect(h http.HandlerFunc) http.Handler {
 	return s.auth.Require(h)
 }
 
+// render writes an HTML page wrapped in the shared layout, injecting the current
+// signed-in user (when authentication is enabled) into the layout chrome so the
+// top bar can show the user and a sign-out button.
+//
+// @arg w The response writer.
+// @arg r The request, used to read the current session.
+// @arg name The page name to render.
+// @arg data The page's own template data.
+// @error error when the page is unknown or rendering fails.
+//
+// @testcase TestSignedInUserShownInNav renders a page showing the signed-in user.
+func (s *Server) render(w http.ResponseWriter, r *http.Request, name string, data any) error {
+	return web.Render(w, name, s.navFor(r), data)
+}
+
+// navFor builds the layout chrome for r: the signed-in GitHub user when
+// authentication is enabled, or an empty Nav otherwise.
+//
+// @arg r The request, used to read the current session.
+// @return web.Nav The layout chrome for the request.
+//
+// @testcase TestSignedInUserShownInNav reads the nav for a signed-in request.
+func (s *Server) navFor(r *http.Request) web.Nav {
+	if s.auth == nil || !s.auth.Enabled() {
+		return web.Nav{}
+	}
+	user, _ := s.auth.sessionUser(r)
+	return web.Nav{User: user, AuthEnabled: true}
+}
+
 // Handler builds the HTTP routing for the server.
 //
 // @return http.Handler A mux routing the API and approval endpoints.
@@ -87,7 +117,7 @@ func (s *Server) Handler() http.Handler {
 	if s.auth != nil && s.auth.Enabled() {
 		mux.HandleFunc("GET /auth/login", s.auth.handleLogin)
 		mux.HandleFunc("GET /auth/callback", s.auth.handleCallback)
-		mux.HandleFunc("GET /auth/logout", s.auth.handleLogout)
+		mux.HandleFunc("POST /auth/logout", s.auth.handleLogout)
 	}
 
 	// Human-facing pages require a GitHub login when authentication is enabled.

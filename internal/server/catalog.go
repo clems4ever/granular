@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/clems4ever/granular/internal/catalog"
-	"github.com/clems4ever/granular/internal/server/web"
 )
 
 // catalogView is the data passed to the catalog page template.
@@ -19,24 +18,24 @@ type catalogView struct {
 // handleIndex handles GET /: it renders the landing page.
 //
 // @arg w The response writer.
-// @arg r The request (unused).
+// @arg r The request, used to read the current session for the nav.
 //
 // @testcase TestIndexPageRenders renders the landing page.
 func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
-	_ = web.Render(w, "index", nil)
+	_ = s.render(w, r, "index", nil)
 }
 
 // handleCatalogPage handles GET /catalog: it renders the capability catalog as an
 // HTML page.
 //
 // @arg w The response writer.
-// @arg r The request (unused).
+// @arg r The request, used to read the current session for the nav.
 //
 // @testcase TestCatalogPageRenders renders the page and checks key content.
 func (s *Server) handleCatalogPage(w http.ResponseWriter, r *http.Request) {
 	c := catalog.Build()
 	example, _ := json.MarshalIndent(c.RequestExample, "", "  ")
-	_ = web.Render(w, "catalog", catalogView{
+	_ = s.render(w, r, "catalog", catalogView{
 		Catalog:     c,
 		Tree:        c.ResourceTree(),
 		Groups:      c.VerbGroups(),

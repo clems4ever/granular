@@ -6,7 +6,6 @@ import (
 
 	"github.com/clems4ever/granular/internal/api"
 	"github.com/clems4ever/granular/internal/grants"
-	"github.com/clems4ever/granular/internal/server/web"
 )
 
 // grantsView is the data passed to the grants page template.
@@ -88,7 +87,7 @@ func (s *Server) collectGrants() ([]grantRow, []requestRow, error) {
 // request history as an HTML page with per-grant revoke buttons.
 //
 // @arg w The response writer.
-// @arg r The request (unused).
+// @arg r The request, used to read the current session for the nav.
 //
 // @testcase TestGrantsPageRenders renders the grants page.
 func (s *Server) handleGrantsPage(w http.ResponseWriter, r *http.Request) {
@@ -97,7 +96,7 @@ func (s *Server) handleGrantsPage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	_ = web.Render(w, "grants", grantsView{Grants: grantRows, Requests: reqRows})
+	_ = s.render(w, r, "grants", grantsView{Grants: grantRows, Requests: reqRows})
 }
 
 // handleGrantsJSON handles GET /api/grants: it returns the active grants and the

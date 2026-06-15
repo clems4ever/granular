@@ -13,7 +13,7 @@ each concrete operation must be approved by a human, and the approval expires.
   URL and waits.
 
 - **`granular-server` (HTTP server)** — holds the platform credentials (for now a
-  GitHub PAT supplied through the `GRANULAR_GITHUB_TOKEN` environment variable).
+  GitHub PAT supplied through the `github_token_file` key of the YAML config file).
   It decides whether an operation is allowed, mints **grant requests**,
   serves a small approval web page, records **grants**, and executes the
   operation when a live grant exists.
@@ -132,20 +132,23 @@ The **human-facing pages** (`/`, `/catalog`, `/grants`, `/approve/{id}` GET+POST
 not offer browser OIDC/id_tokens for user login — and admits only an **allowlist of
 GitHub usernames**. The session is kept in an HMAC-signed, HttpOnly cookie.
 
-Protection is enabled when `GRANULAR_GITHUB_OAUTH_CLIENT_ID` and
-`GRANULAR_GITHUB_OAUTH_CLIENT_SECRET` are set (register a GitHub OAuth App with the
-callback URL `<GRANULAR_BASE_URL>/auth/callback`):
+Protection is enabled when `auth.client_id` and `auth.client_secret_file` are set
+in the config file (register a GitHub OAuth App with the callback URL
+`<base_url>/auth/callback`). Secrets are referenced by file path, never stored
+inline; `config.Load` reads each `*_file` into its resolved field:
 
-| Variable | Purpose |
-|----------|---------|
-| `GRANULAR_GITHUB_OAUTH_CLIENT_ID` / `_SECRET` | OAuth App credentials; enable web auth when both are set. |
-| `GRANULAR_ALLOWED_USERS` | Comma-separated GitHub logins permitted to sign in. Empty ⇒ everyone is denied (fail closed). |
-| `GRANULAR_SESSION_SECRET` | Optional HMAC key for session cookies; a random one is generated per start if unset (sessions reset on restart). |
+| Config key | Purpose |
+|------------|---------|
+| `auth.client_id` | OAuth App client id (public, inline). |
+| `auth.client_secret_file` | Path to a file holding the OAuth App client secret; web auth is enabled once both this and `client_id` are set. |
+| `auth.allowed_users` | List of GitHub logins permitted to sign in. Empty ⇒ everyone is denied (fail closed). |
+| `auth.session_secret_file` | Optional path to a file holding the HMAC key for session cookies; a random one is generated per start if unset (sessions reset on restart). |
+| `github_token_file` | Path to a file holding the GitHub PAT used for `github.*` operations and the git proxy. |
 
 The **agent/CLI API** (`/api/*`) and the **git proxy** (`/git/...`) are deliberately
 *not* behind the browser login: the agent submits requests programmatically and git
-authenticates per-grant. When the OAuth variables are unset the pages stay open and
-the server logs a warning.
+authenticates per-grant. When the OAuth keys are unset the pages stay open and the
+server logs a warning.
 
 `POST /api/operations` request body — an operation to run just-in-time:
 
@@ -234,7 +237,7 @@ Because they **mutate**, two things differ from the read operations:
   permit conditions on it (`when { context.body_hash == "…" }`). So the approver
   authorises *exactly* what gets written; changing the text requires a fresh
   approval. The approval page shows the full body/title and the Cedar policies.
-- **Write scope required.** The server PAT (`GRANULAR_GITHUB_TOKEN`) needs write
+- **Write scope required.** The server PAT (`github_token_file`) needs write
   access to the repository, unlike the read-only list/view which work on public
   repos even unauthenticated.
 
@@ -284,7 +287,7 @@ The `Operation.Execute` contract is the same, but operations fall into two shape
 - **bbolt on-disk store** for approved Cedar policies and grant requests (two
   buckets: `requests`, `policies`). This keeps the server stateless toward the
   client and lets approvals happen out-of-band and survive restarts. Path via
-  `GRANULAR_DB` (default `<workspace>/granular.db`).
+  the `db` config key (default `<workspace>/granular.db`).
 - **Cedar for authorization** (`internal/authz`), with `internal/catalog` as the
   single source for resources, actions and the verb lattice — shared by the engine,
   the `/catalog` page, and the `/api/catalog` manifest. Principal identity is a
@@ -293,7 +296,7 @@ The `Operation.Execute` contract is the same, but operations fall into two shape
   out to the user's `git`) so the working tree lands on the client; the server only
   brokers credentials. This keeps the token server-side and avoids shipping repo
   bytes back through the API.
-- **PAT via env var** (`GRANULAR_GITHUB_TOKEN`) — "on the server for now", per the
+- **PAT via secret file** (`github_token_file`) — "on the server for now", per the
   brief. Per-user / OAuth credential brokering is future work.
 - **CLI does not poll.** It prints the approval URL and exits; the user approves
   out-of-band and re-runs the command. This keeps the server stateless and avoids
@@ -310,6 +313,7 @@ cmd/granular/          thin CLI entrypoint (main.go only)
 cmd/granular-server/   server entrypoint (registers operations)
 internal/cli/          CLI command tree (one file per command) + request.go (request/catalog)
 internal/api/          wire types shared by client & server (GrantRequest, Grant, …)
+internal/config/       YAML server configuration (loaded by granular-server)
 internal/catalog/      single-source capability manifest (resources, actions, lattice)
 internal/authz/        Cedar engine: requirements, policy generation, evaluation
 internal/operations/   Operation interface, registry
@@ -317,7 +321,7 @@ internal/operations/github/  clone.go, api.go (REST helpers), issues.go (issue.l
                              issue_view.go, issue_comment.go, issue_create.go,
                              issue_edit.go, issue_state.go (close/reopen)
 internal/grants/       delegation-request + Cedar-policy store (bbolt)
-internal/server/       HTTP handlers, approval UI, git proxy, /api/operations, /api/grant-requests, /grants, /catalog
+internal/server/       HTTP handlers, approval UI, GitHub-OAuth login (auth.go), git proxy, /api/operations, /api/grant-requests, /grants, /catalog
 internal/server/web/   embedded templates (layout + pages) and stylesheet (//go:embed)
 internal/client/       HTTP client used by the CLI
 ```

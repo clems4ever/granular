@@ -8,9 +8,9 @@
 		},
 		{
 			"function_name": "Render",
-			"documentation_hash": "f4221982e5247b3955ad4f846083edf193c7fe9f566d0b64a44c9ea628bba80f",
-			"definition_hash": "0ea86a5ceb1f36906b8bcf117e2ba442d1ab83e8bd53152115be118f27acbe2e",
-			"reviewed_at": "2026-06-15T17:35:01.756917203Z"
+			"documentation_hash": "9a2efc4cd0320244c96a28871d98cdc285badf730312c062fd87d1fd40c488a9",
+			"definition_hash": "f4bed331e12fa3e5d063d764d816548cc84c74aaacf4c0f584b51731b0ef7005",
+			"reviewed_at": "2026-06-15T20:01:09.809480875Z"
 		},
 		{
 			"function_name": "Static",
