@@ -3,8 +3,8 @@
 		{
 			"function_name": "approveAGrant",
 			"documentation_hash": "4d9c76c6dae48ca65735c67d133391a43e34a3b526c751fcae34178a04785fda",
-			"definition_hash": "94dbd38eaeb1ef7492fbe3b152f7e86b3ae695117d0a709a64c7b5f7973a2da5",
-			"reviewed_at": "2026-06-15T14:52:39.482502772Z"
+			"definition_hash": "f16b203f713e11ca06a30d00b53490b68898fdfdb7dd835f7172c8f3c53f9476",
+			"reviewed_at": "2026-06-15T15:30:16.510821003Z"
 		},
 		{
 			"function_name": "grantsResponse",
@@ -39,8 +39,8 @@
 		{
 			"function_name": "TestRevokePendingRequestEndpoint",
 			"documentation_hash": "9bf2e1c15ead057949c14e59b689bd44a2dd6fec3cbdf6e28f614d5d6f9ff793",
-			"definition_hash": "0986e0a83794a9cc2da4304a332a94713030b2db6f1e692a1052c824a67e45ea",
-			"reviewed_at": "2026-06-15T14:52:39.497712751Z"
+			"definition_hash": "83a5fb6a87667c4f6c4542a25795ee81e3bd76d3857c589a59b52b9dbdc511ed",
+			"reviewed_at": "2026-06-15T15:30:16.511115258Z"
 		},
 		{
 			"function_name": "TestRevokeFormRedirects",

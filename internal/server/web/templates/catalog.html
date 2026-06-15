@@ -33,11 +33,13 @@
 
 <h2>Requesting a grant</h2>
 <p class="muted" style="margin-top:-.4rem">
-  Everything goes through one endpoint: POST a <code>GrantRequest</code> to
-  <a href="/api/requests">/api/requests</a>. Name an <code>operation</code> to run one
-  action just-in-time, or list <code>capabilities</code> to pre-approve a scoped bundle
-  (or <code>granular request -f req.json</code>). Each capability lists actions on a
-  resource selector. Example:
+  An agent has two verbs. POST an <code>Operation</code> to
+  <a href="/api/operations">/api/operations</a> to run one action just-in-time — it
+  executes if already granted, otherwise you get an approval URL and a re-run succeeds.
+  Or POST a <code>GrantRequest</code> (a list of <code>capabilities</code>) to
+  <a href="/api/grant-requests">/api/grant-requests</a> to pre-approve a scoped bundle
+  for later (or <code>granular request -f req.json</code>). Each capability lists actions
+  on a resource selector. Example grant request:
 </p>
 <pre><code>{{.ExampleJSON}}</code></pre>
 

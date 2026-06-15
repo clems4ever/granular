@@ -7,18 +7,11 @@
 			"reviewed_at": "2026-06-15T14:59:48.804025822Z"
 		},
 		{
-			"function_name": "Submit",
-			"receiver": "Client",
-			"documentation_hash": "8b4b64704168332488290cf524aa55fd8934dc4e68547b3401608141d5c023ac",
-			"definition_hash": "970b2995fe9c05a90cb146592d33f2e0416c15730c63789ea7453efbd93d1c44",
-			"reviewed_at": "2026-06-15T14:59:48.806711783Z"
-		},
-		{
 			"function_name": "SubmitOperation",
 			"receiver": "Client",
-			"documentation_hash": "5e8b38bc24b0b070f2861cd72ee606393cf2fcd8b11895fac197798c0a8f5c47",
-			"definition_hash": "39992572314ef4e17337cf9e5b870e680ce1f98be78742700fe97038b9316c29",
-			"reviewed_at": "2026-06-15T14:59:48.809748345Z"
+			"documentation_hash": "e0f9eac036f669c1493686e7aaca9095c994b9446106a763f41179e53dc29819",
+			"definition_hash": "2c81e464f083b79b14c3288c4df162c8dda5aa4b1eea3630ba467b9b5de01824",
+			"reviewed_at": "2026-06-15T15:29:43.578624581Z"
 		},
 		{
 			"function_name": "post",
@@ -47,6 +40,13 @@
 			"documentation_hash": "4faac30876435e9fe919999df70c7ffc94d4c29f14ac0f688d30bab04e6ab690",
 			"definition_hash": "c047f55110b2e14f961cffb1555f962d91306232bcba23590f58746b7719af0f",
 			"reviewed_at": "2026-06-15T14:59:48.838742002Z"
+		},
+		{
+			"function_name": "RequestGrant",
+			"receiver": "Client",
+			"documentation_hash": "0835ff22572eed702cb6aeeb9312aef101cccafe213f1adc30021c1ba9b2d856",
+			"definition_hash": "be42a6083b184176af2770099e89f41b5f723a4b018345850c3b558048a6a7b5",
+			"reviewed_at": "2026-06-15T15:29:43.588777902Z"
 		}
 	]
 }

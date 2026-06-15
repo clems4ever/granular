@@ -1,5 +1,6 @@
 // Package client is the HTTP client the granular CLI uses to talk to the granular
-// server: it submits operations and polls delegation-request status.
+// server: it submits operations, requests capability grants, and polls
+// grant-request status.
 package client
 
 import (
@@ -30,31 +31,32 @@ func New(baseURL string) *Client {
 	return &Client{baseURL: baseURL, http: &http.Client{Timeout: 5 * time.Minute}}
 }
 
-// Submit posts a grant request (an operation to run, or a capability bundle to
-// pre-approve) to the single /api/requests endpoint and returns the server's
-// response.
-//
-// @arg ctx Context for cancellation.
-// @arg req The grant request: either Operation or Capabilities.
-// @return api.RequestResponse The decoded server response (pending or completed).
-// @error error on transport failure, a 5xx status, or undecodable body.
-//
-// @testcase TestSubmitDecodesResponse submits and checks the decoded response.
-func (c *Client) Submit(ctx context.Context, req api.GrantRequest) (api.RequestResponse, error) {
-	return c.post(ctx, "/api/requests", req)
-}
-
-// SubmitOperation is a convenience wrapper that submits a single operation as a
-// grant request.
+// SubmitOperation posts an operation to POST /api/operations: the server executes
+// it when live grants authorise it (Status completed), otherwise it returns a
+// pending response whose ApprovalURL a human must visit before a retry can execute.
 //
 // @arg ctx Context for cancellation.
 // @arg op The operation type and parameters to attempt.
 // @return api.RequestResponse The decoded server response (pending or completed).
 // @error error on transport failure, a 5xx status, or undecodable body.
 //
-// @testcase TestSubmitDecodesResponse submits an operation grant request.
+// @testcase TestSubmitDecodesResponse submits an operation and checks the response.
 func (c *Client) SubmitOperation(ctx context.Context, op api.Operation) (api.RequestResponse, error) {
-	return c.Submit(ctx, api.GrantRequest{Operation: &op})
+	return c.post(ctx, "/api/operations", op)
+}
+
+// RequestGrant posts a capability grant request to POST /api/grant-requests, asking
+// a human to pre-approve a bundle of capabilities for later use. The response is
+// always pending with an ApprovalURL; nothing is executed.
+//
+// @arg ctx Context for cancellation.
+// @arg req The grant request carrying the capability bundle.
+// @return api.RequestResponse The decoded server response (pending).
+// @error error on transport failure, a 5xx status, or undecodable body.
+//
+// @testcase TestRequestGrantPostsToGrantRequests posts a capability bundle.
+func (c *Client) RequestGrant(ctx context.Context, req api.GrantRequest) (api.RequestResponse, error) {
+	return c.post(ctx, "/api/grant-requests", req)
 }
 
 // post marshals payload, POSTs it to the path, and decodes the OperationResponse.

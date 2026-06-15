@@ -9,7 +9,7 @@ import (
 	"github.com/clems4ever/granular/internal/api"
 )
 
-// TestSubmitDecodesResponse verifies Submit decodes the server's pending response.
+// TestSubmitDecodesResponse verifies SubmitOperation decodes the server's pending response.
 func TestSubmitDecodesResponse(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -28,10 +28,10 @@ func TestSubmitDecodesResponse(t *testing.T) {
 	}
 }
 
-// TestSubmitGrantRequestPostsToRequests verifies Submit posts a capability grant request to /api/requests.
-func TestSubmitGrantRequestPostsToRequests(t *testing.T) {
+// TestRequestGrantPostsToGrantRequests verifies RequestGrant posts a capability bundle to /api/grant-requests.
+func TestRequestGrantPostsToGrantRequests(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/api/requests" {
+		if r.URL.Path != "/api/grant-requests" {
 			t.Errorf("unexpected path %q", r.URL.Path)
 		}
 		w.WriteHeader(http.StatusAccepted)
@@ -39,7 +39,7 @@ func TestSubmitGrantRequestPostsToRequests(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	resp, err := New(ts.URL).Submit(context.Background(), api.GrantRequest{Capabilities: []api.Capability{{Actions: []string{"issues.read"}}}})
+	resp, err := New(ts.URL).RequestGrant(context.Background(), api.GrantRequest{Capabilities: []api.Capability{{Actions: []string{"issues.read"}}}})
 	if err != nil {
 		t.Fatal(err)
 	}

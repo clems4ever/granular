@@ -56,7 +56,7 @@ func TestOperationPendingThenApprovedThenCompleted(t *testing.T) {
 	ts := testServer(t)
 
 	// First attempt -> pending.
-	resp, err := http.Post(ts.URL+"/api/requests", "application/json", strings.NewReader(`{"operation":{"type":"test.op"}}`))
+	resp, err := http.Post(ts.URL+"/api/operations", "application/json", strings.NewReader(`{"type":"test.op"}`))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -80,14 +80,14 @@ func TestOperationPendingThenApprovedThenCompleted(t *testing.T) {
 	}
 
 	// Status should be approved.
-	sr, _ := http.Get(ts.URL + "/api/requests/" + id)
+	sr, _ := http.Get(ts.URL + "/api/grant-requests/" + id)
 	sb := decode(t, sr)
 	if sb["status"] != "approved" {
 		t.Fatalf("want approved, got %v", sb["status"])
 	}
 
 	// Retry -> completed.
-	resp2, _ := http.Post(ts.URL+"/api/requests", "application/json", strings.NewReader(`{"operation":{"type":"test.op"}}`))
+	resp2, _ := http.Post(ts.URL+"/api/operations", "application/json", strings.NewReader(`{"type":"test.op"}`))
 	if resp2.StatusCode != http.StatusOK {
 		t.Fatalf("retry: want 200, got %d", resp2.StatusCode)
 	}
@@ -100,25 +100,25 @@ func TestOperationPendingThenApprovedThenCompleted(t *testing.T) {
 // TestOperationUnknownTypeIsBadRequest checks an unregistered operation type returns 400.
 func TestOperationUnknownTypeIsBadRequest(t *testing.T) {
 	ts := testServer(t)
-	resp, _ := http.Post(ts.URL+"/api/requests", "application/json", strings.NewReader(`{"operation":{"type":"nope"}}`))
+	resp, _ := http.Post(ts.URL+"/api/operations", "application/json", strings.NewReader(`{"type":"nope"}`))
 	if resp.StatusCode != http.StatusBadRequest {
 		t.Fatalf("want 400, got %d", resp.StatusCode)
 	}
 }
 
-// TestRequestWithoutOperationOrCapabilities checks an empty grant request (no operation or capabilities) returns 400.
-func TestRequestWithoutOperationOrCapabilities(t *testing.T) {
+// TestGrantRequestWithoutCapabilities checks a grant request with an empty capability bundle returns 400.
+func TestGrantRequestWithoutCapabilities(t *testing.T) {
 	ts := testServer(t)
-	resp, _ := http.Post(ts.URL+"/api/requests", "application/json", strings.NewReader(`{"reason":"nothing"}`))
+	resp, _ := http.Post(ts.URL+"/api/grant-requests", "application/json", strings.NewReader(`{"reason":"nothing"}`))
 	if resp.StatusCode != http.StatusBadRequest {
-		t.Fatalf("want 400 for an empty grant request, got %d", resp.StatusCode)
+		t.Fatalf("want 400 for an empty capability bundle, got %d", resp.StatusCode)
 	}
 }
 
 // TestRequestStatusNotFound checks the status endpoint 404s for an unknown request id.
 func TestRequestStatusNotFound(t *testing.T) {
 	ts := testServer(t)
-	resp, _ := http.Get(ts.URL + "/api/requests/missing")
+	resp, _ := http.Get(ts.URL + "/api/grant-requests/missing")
 	if resp.StatusCode != http.StatusNotFound {
 		t.Fatalf("want 404, got %d", resp.StatusCode)
 	}
@@ -127,7 +127,7 @@ func TestRequestStatusNotFound(t *testing.T) {
 // TestApprovePageRendersForm checks the approval page renders the request's form.
 func TestApprovePageRendersForm(t *testing.T) {
 	ts := testServer(t)
-	resp, _ := http.Post(ts.URL+"/api/requests", "application/json", strings.NewReader(`{"operation":{"type":"test.op"}}`))
+	resp, _ := http.Post(ts.URL+"/api/operations", "application/json", strings.NewReader(`{"type":"test.op"}`))
 	id := decode(t, resp)["request_id"].(string)
 
 	page, _ := http.Get(ts.URL + "/approve/" + id)
@@ -152,7 +152,7 @@ func TestApprovePageNotFound(t *testing.T) {
 // TestApproveSubmitReject checks rejecting via the approval form sets the rejected status.
 func TestApproveSubmitReject(t *testing.T) {
 	ts := testServer(t)
-	resp, _ := http.Post(ts.URL+"/api/requests", "application/json", strings.NewReader(`{"operation":{"type":"test.op"}}`))
+	resp, _ := http.Post(ts.URL+"/api/operations", "application/json", strings.NewReader(`{"type":"test.op"}`))
 	id := decode(t, resp)["request_id"].(string)
 
 	form := url.Values{"decision": {"reject"}}
@@ -160,7 +160,7 @@ func TestApproveSubmitReject(t *testing.T) {
 	if rr.StatusCode != http.StatusOK {
 		t.Fatalf("want 200, got %d", rr.StatusCode)
 	}
-	sr, _ := http.Get(ts.URL + "/api/requests/" + id)
+	sr, _ := http.Get(ts.URL + "/api/grant-requests/" + id)
 	if decode(t, sr)["status"] != "rejected" {
 		t.Fatalf("status should be rejected")
 	}
@@ -211,7 +211,7 @@ func TestPermissionsRequestFlow(t *testing.T) {
 
 	// Request a broad capability that covers the fake op's issue.view requirement.
 	body := `{"reason":"work","capabilities":[{"actions":["issues.read"],"resource":{"type":"github.repo","match":{"owner":"o","name":"n"}}}]}`
-	resp, err := http.Post(ts.URL+"/api/requests", "application/json", strings.NewReader(body))
+	resp, err := http.Post(ts.URL+"/api/grant-requests", "application/json", strings.NewReader(body))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -235,7 +235,7 @@ func TestPermissionsRequestFlow(t *testing.T) {
 	}
 
 	// Now the operation (issue.view on repo o/n) is authorized by the broad grant.
-	op, _ := http.Post(ts.URL+"/api/requests", "application/json", strings.NewReader(`{"operation":{"type":"test.op"}}`))
+	op, _ := http.Post(ts.URL+"/api/operations", "application/json", strings.NewReader(`{"type":"test.op"}`))
 	if op.StatusCode != http.StatusOK {
 		t.Fatalf("operation should be authorized after the permissions grant, got %d", op.StatusCode)
 	}
@@ -248,7 +248,7 @@ func TestPermissionsRequestFlow(t *testing.T) {
 func TestPermissionsRequestRejectsUnknownAction(t *testing.T) {
 	ts := testServer(t)
 	body := `{"capabilities":[{"actions":["issue.delete"],"resource":{"type":"github.repo","match":{"owner":"o","name":"n"}}}]}`
-	resp, _ := http.Post(ts.URL+"/api/requests", "application/json", strings.NewReader(body))
+	resp, _ := http.Post(ts.URL+"/api/grant-requests", "application/json", strings.NewReader(body))
 	if resp.StatusCode != http.StatusBadRequest {
 		t.Fatalf("want 400 for unknown action, got %d", resp.StatusCode)
 	}

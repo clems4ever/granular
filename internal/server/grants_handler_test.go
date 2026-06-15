@@ -16,7 +16,7 @@ import (
 func approveAGrant(t *testing.T, ts string) string {
 	t.Helper()
 	body := `{"reason":"work","capabilities":[{"actions":["issues.read"],"resource":{"type":"github.repo","match":{"owner":"o","name":"n"}}}]}`
-	resp, err := http.Post(ts+"/api/requests", "application/json", strings.NewReader(body))
+	resp, err := http.Post(ts+"/api/grant-requests", "application/json", strings.NewReader(body))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -136,7 +136,7 @@ func TestRevokePendingRequestEndpoint(t *testing.T) {
 	ts := testServer(t)
 
 	// A pending operation request (no grant exists for it yet).
-	resp, err := http.Post(ts.URL+"/api/requests", "application/json", strings.NewReader(`{"operation":{"type":"test.op"}}`))
+	resp, err := http.Post(ts.URL+"/api/operations", "application/json", strings.NewReader(`{"type":"test.op"}`))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -155,7 +155,7 @@ func TestRevokePendingRequestEndpoint(t *testing.T) {
 	}
 
 	// The request is now marked revoked.
-	sr, _ := http.Get(ts.URL + "/api/requests/" + reqID)
+	sr, _ := http.Get(ts.URL + "/api/grant-requests/" + reqID)
 	if got := decode(t, sr)["status"]; got != "revoked" {
 		t.Fatalf("request should be revoked, got %v", got)
 	}

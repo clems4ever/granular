@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -9,17 +10,28 @@ import (
 	"github.com/clems4ever/granular/internal/authz"
 )
 
-// handleCapabilityRequest handles the capability path of POST /api/requests: it
-// translates a scoped capability bundle to Cedar policies (validated against the
-// catalog) and creates a human-approvable grant request. Unlike the operation
-// path it never executes anything — it only pre-approves access.
+// handleGrantRequest handles POST /api/grant-requests: an agent asks to be granted
+// a bundle of capabilities for later use. It translates the scoped capabilities to
+// Cedar policies (validated against the catalog) and records a human-approvable
+// grant request. Unlike an operation it never executes anything — it only
+// pre-approves access. An empty capability bundle is rejected with 400.
 //
 // @arg w The response writer.
-// @arg req The grant request carrying the capability bundle.
+// @arg r The request whose body is an api.GrantRequest.
 //
 // @testcase TestPermissionsRequestFlow submits a request and approves it.
 // @testcase TestPermissionsRequestRejectsUnknownAction returns 400 for a bad action.
-func (s *Server) handleCapabilityRequest(w http.ResponseWriter, req api.GrantRequest) {
+// @testcase TestGrantRequestWithoutCapabilities returns 400 for an empty bundle.
+func (s *Server) handleGrantRequest(w http.ResponseWriter, r *http.Request) {
+	var req api.GrantRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSON(w, http.StatusBadRequest, api.RequestResponse{Error: "invalid request body"})
+		return
+	}
+	if len(req.Capabilities) == 0 {
+		writeJSON(w, http.StatusBadRequest, api.RequestResponse{Error: "grant request must name at least one capability"})
+		return
+	}
 	policies, err := authz.PoliciesFromCapabilities(authz.Principal(), req.Capabilities)
 	if err != nil {
 		writeJSON(w, http.StatusBadRequest, api.RequestResponse{Error: err.Error()})

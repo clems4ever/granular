@@ -45,8 +45,9 @@ func New(registry *operations.Registry, store *grants.Store, env operations.Env,
 // @testcase TestOperationPendingThenApprovedThenCompleted exercises the routes.
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc("POST /api/requests", s.handleRequest)
-	mux.HandleFunc("GET /api/requests/{id}", s.handleRequestStatus)
+	mux.HandleFunc("POST /api/operations", s.handleOperation)
+	mux.HandleFunc("POST /api/grant-requests", s.handleGrantRequest)
+	mux.HandleFunc("GET /api/grant-requests/{id}", s.handleRequestStatus)
 	mux.HandleFunc("GET /approve/{id}", s.handleApprovePage)
 	mux.HandleFunc("POST /approve/{id}", s.handleApproveSubmit)
 	mux.HandleFunc("/git/{rest...}", s.handleGitProxy)
@@ -61,44 +62,24 @@ func (s *Server) Handler() http.Handler {
 	return mux
 }
 
-// handleRequest handles POST /api/requests, the single entry point for grant
-// requests. A request naming an Operation runs the just-in-time path (execute when
-// already granted, otherwise create a pending request); a request carrying
-// Capabilities creates a pending pre-approval request.
+// handleOperation handles POST /api/operations, the just-in-time path: an agent
+// asks the server to perform an operation now. When live grants already authorise
+// it the operation executes immediately; otherwise the server creates a pending
+// grant request scoped to exactly that operation's requirements and returns its
+// approval URL, so a later retry of the same operation executes once a human has
+// approved.
 //
 // @arg w The response writer.
-// @arg r The request whose body is an api.GrantRequest.
+// @arg r The request whose body is an api.Operation.
 //
-// @testcase TestOperationPendingThenApprovedThenCompleted drives the operation path.
-// @testcase TestPermissionsRequestFlow drives the capability path.
-// @testcase TestRequestWithoutOperationOrCapabilities returns 400 for an empty request.
-func (s *Server) handleRequest(w http.ResponseWriter, r *http.Request) {
-	var req api.GrantRequest
+// @testcase TestOperationPendingThenApprovedThenCompleted drives this end to end.
+// @testcase TestOperationUnknownTypeIsBadRequest posts an unregistered type.
+func (s *Server) handleOperation(w http.ResponseWriter, r *http.Request) {
+	var req api.Operation
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeJSON(w, http.StatusBadRequest, api.RequestResponse{Error: "invalid request body"})
 		return
 	}
-	switch {
-	case req.Operation != nil:
-		s.handleOperationRequest(w, r, *req.Operation)
-	case len(req.Capabilities) > 0:
-		s.handleCapabilityRequest(w, req)
-	default:
-		writeJSON(w, http.StatusBadRequest, api.RequestResponse{Error: "grant request must name an operation or capabilities"})
-	}
-}
-
-// handleOperationRequest runs the just-in-time operation path: it executes the
-// operation when a live grant exists, otherwise creates a pending grant request
-// scoped to exactly that operation's requirements.
-//
-// @arg w The response writer.
-// @arg r The HTTP request, for its context.
-// @arg req The operation to attempt.
-//
-// @testcase TestOperationPendingThenApprovedThenCompleted drives this end to end.
-// @testcase TestOperationUnknownTypeIsBadRequest posts an unregistered type.
-func (s *Server) handleOperationRequest(w http.ResponseWriter, r *http.Request, req api.Operation) {
 	op, err := s.registry.Build(req, s.env)
 	if err != nil {
 		writeJSON(w, http.StatusBadRequest, api.RequestResponse{Error: err.Error()})
@@ -148,8 +129,8 @@ func (s *Server) authorize(reqs []authz.Requirement) (bool, error) {
 	return authz.AllowsAll(policies, authz.Principal(), reqs)
 }
 
-// handleRequestStatus handles GET /api/requests/{id}: it reports a delegation
-// request's current status so the CLI can poll.
+// handleRequestStatus handles GET /api/grant-requests/{id}: it reports a pending
+// grant request's current status so the CLI can poll.
 //
 // @arg w The response writer.
 // @arg r The request carrying the {id} path value.

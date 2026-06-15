@@ -75,7 +75,7 @@ func newCatalogCmd(server *string) *cobra.Command {
 //
 // @testcase TestRunRequestPrintsURL prints the approval URL.
 func runRequest(ctx context.Context, c *client.Client, req api.GrantRequest, out io.Writer) error {
-	resp, err := c.Submit(ctx, req)
+	resp, err := c.RequestGrant(ctx, req)
 	if err != nil {
 		return err
 	}

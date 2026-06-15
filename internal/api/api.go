@@ -2,11 +2,18 @@
 // the granular HTTP server. Keeping them in one place lets both sides depend on a
 // single source of truth for the request/response shapes.
 //
-// The model is deliberately small: an agent submits a GrantRequest (asking to be
-// allowed to do something — either a specific Operation or a broad Capability
-// bundle); a human approves it; approval turns its proposed Cedar policies into
-// time-limited Grants. Narrow "just do this now" and broad "pre-approve this set"
-// are the same flow — they differ only in how the requested scope is described.
+// An agent has two distinct verbs:
+//   - Submit an Operation (POST /api/operations) — "do this now". If live Grants
+//     already authorise it the server executes it immediately; otherwise the server
+//     mints a pending grant request derived from the operation's requirements and
+//     returns an approval URL, and a later retry of the same operation executes once
+//     a human has approved.
+//   - Submit a GrantRequest (POST /api/grant-requests) — "grant me these
+//     capabilities for later". The server records a pending grant request for the
+//     bundle; it never executes anything, it only pre-approves access.
+//
+// Both verbs converge on the same lifecycle: a pending request that a human
+// approves, whose proposed Cedar policies become time-limited Grants.
 package api
 
 // OperationStatus is the lifecycle state reported for a grant request.
@@ -31,27 +38,27 @@ const (
 	StatusRevoked OperationStatus = "revoked"
 )
 
-// Operation names a concrete operation to perform: its type id and the free-form
-// parameters that configure it. It is the executable kind of grant request.
+// Operation names a concrete operation to perform now: its type id and the
+// free-form parameters that configure it. An agent submits it to POST
+// /api/operations and the server executes it (or requests approval first).
 type Operation struct {
 	Type   string         `json:"type"`
 	Params map[string]any `json:"params,omitempty"`
 }
 
-// GrantRequest is the single thing an agent submits to POST /api/requests. It asks
-// a human to grant some access. Exactly one of Operation or Capabilities is set:
-//   - Operation: a specific action to perform now. Its required scope is derived
-//     automatically and, once granted, the operation executes.
-//   - Capabilities: a broad, scoped bundle to pre-approve for later use.
+// GrantRequest is an agent's explicit request, submitted to POST /api/grant-requests,
+// to be granted a bundle of capabilities for later use. It names the actions and
+// resources to pre-approve; unlike an Operation it never executes anything, it only
+// asks a human to authorise the scope.
 type GrantRequest struct {
 	Reason       string       `json:"reason,omitempty"`
-	Operation    *Operation   `json:"operation,omitempty"`
-	Capabilities []Capability `json:"capabilities,omitempty"`
+	Capabilities []Capability `json:"capabilities"`
 }
 
-// RequestResponse is returned by POST /api/requests. When Status is StatusPending
-// the RequestID and ApprovalURL are populated; when StatusCompleted the Result is
-// populated (the executed operation's output).
+// RequestResponse is returned by both POST /api/operations and POST
+// /api/grant-requests. When Status is StatusPending the RequestID and ApprovalURL
+// are populated; when StatusCompleted the Result is populated (the executed
+// operation's output).
 type RequestResponse struct {
 	Status      OperationStatus `json:"status"`
 	RequestID   string          `json:"request_id,omitempty"`
@@ -60,8 +67,9 @@ type RequestResponse struct {
 	Error       string          `json:"error,omitempty"`
 }
 
-// RequestStatusResponse is returned by GET /api/requests/{id} for inspecting a
-// grant request's current status.
+// RequestStatusResponse is returned by GET /api/grant-requests/{id} for inspecting
+// a pending grant request's current status (whether it came from an operation that
+// needed approval or from an explicit grant request).
 type RequestStatusResponse struct {
 	RequestID string          `json:"request_id"`
 	Status    OperationStatus `json:"status"`
