@@ -17,12 +17,14 @@ import (
 )
 
 // Server wires together the operation registry, the grant store, the execution
-// environment and the public base URL used to build approval links.
+// environment and the public base URL used to build approval links. An optional
+// authenticator guards the human-facing web pages behind a GitHub login.
 type Server struct {
 	registry *operations.Registry
 	store    *grants.Store
 	env      operations.Env
 	baseURL  string
+	auth     *Authenticator
 }
 
 // New creates a Server.
@@ -38,6 +40,30 @@ func New(registry *operations.Registry, store *grants.Store, env operations.Env,
 	return &Server{registry: registry, store: store, env: env, baseURL: baseURL}
 }
 
+// UseAuth attaches an authenticator that guards the web pages behind a GitHub
+// login. When auth is nil or not enabled, the pages remain open.
+//
+// @arg auth The authenticator to use; nil leaves the pages unprotected.
+//
+// @testcase TestWebPagesRequireAuthWhenEnabled attaches an enabled authenticator.
+func (s *Server) UseAuth(auth *Authenticator) {
+	s.auth = auth
+}
+
+// protect wraps a human-facing handler so it requires a GitHub login when an
+// enabled authenticator is attached; otherwise it returns the handler unchanged.
+//
+// @arg h The page handler to guard.
+// @return http.Handler The handler, wrapped with authentication when enabled.
+//
+// @testcase TestWebPagesRequireAuthWhenEnabled checks a guarded page redirects.
+func (s *Server) protect(h http.HandlerFunc) http.Handler {
+	if s.auth == nil {
+		return h
+	}
+	return s.auth.Require(h)
+}
+
 // Handler builds the HTTP routing for the server.
 //
 // @return http.Handler A mux routing the API and approval endpoints.
@@ -45,20 +71,32 @@ func New(registry *operations.Registry, store *grants.Store, env operations.Env,
 // @testcase TestOperationPendingThenApprovedThenCompleted exercises the routes.
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
+
+	// Agent/CLI API, the git proxy and static assets are not behind the browser
+	// login: the agent authenticates per-grant and git has its own credentials.
 	mux.HandleFunc("POST /api/operations", s.handleOperation)
 	mux.HandleFunc("POST /api/grant-requests", s.handleGrantRequest)
 	mux.HandleFunc("GET /api/grant-requests/{id}", s.handleRequestStatus)
-	mux.HandleFunc("GET /approve/{id}", s.handleApprovePage)
-	mux.HandleFunc("POST /approve/{id}", s.handleApproveSubmit)
-	mux.HandleFunc("/git/{rest...}", s.handleGitProxy)
-	mux.HandleFunc("GET /catalog", s.handleCatalogPage)
 	mux.HandleFunc("GET /api/catalog", s.handleCatalogJSON)
-	mux.HandleFunc("GET /grants", s.handleGrantsPage)
 	mux.HandleFunc("GET /api/grants", s.handleGrantsJSON)
 	mux.HandleFunc("POST /api/grants/{id}/revoke", s.handleRevoke)
-	mux.HandleFunc("POST /grants/{id}/revoke", s.handleRevokeForm)
-	mux.HandleFunc("GET /{$}", s.handleIndex)
+	mux.HandleFunc("/git/{rest...}", s.handleGitProxy)
 	mux.Handle("GET /static/", web.Static())
+
+	// GitHub OAuth login endpoints (public, only registered when enabled).
+	if s.auth != nil && s.auth.Enabled() {
+		mux.HandleFunc("GET /auth/login", s.auth.handleLogin)
+		mux.HandleFunc("GET /auth/callback", s.auth.handleCallback)
+		mux.HandleFunc("GET /auth/logout", s.auth.handleLogout)
+	}
+
+	// Human-facing pages require a GitHub login when authentication is enabled.
+	mux.Handle("GET /approve/{id}", s.protect(s.handleApprovePage))
+	mux.Handle("POST /approve/{id}", s.protect(s.handleApproveSubmit))
+	mux.Handle("GET /catalog", s.protect(s.handleCatalogPage))
+	mux.Handle("GET /grants", s.protect(s.handleGrantsPage))
+	mux.Handle("POST /grants/{id}/revoke", s.protect(s.handleRevokeForm))
+	mux.Handle("GET /{$}", s.protect(s.handleIndex))
 	return mux
 }
 

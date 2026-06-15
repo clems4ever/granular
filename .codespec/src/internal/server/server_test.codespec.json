@@ -129,6 +129,12 @@
 			"documentation_hash": "412e46e3fdef677111fb0ff8d416503d697eaf39f3e53416e5f80f1ed0bd0059",
 			"definition_hash": "ece41e1ba87094de6fe8dda9e034e66392281e2563c9e1e216c2931d15b25088",
 			"reviewed_at": "2026-06-15T15:30:16.512352838Z"
+		},
+		{
+			"function_name": "TestWebPagesRequireAuthWhenEnabled",
+			"documentation_hash": "c0168bc0b9930c5e75bce61d93f076ba1b3b6c9f77035517e23b8041d646b33e",
+			"definition_hash": "2056a11d5bd3df6fca8807edeb97f0729d972fa0296080528dad385fa5279a79",
+			"reviewed_at": "2026-06-15T17:34:39.424890747Z"
 		}
 	]
 }

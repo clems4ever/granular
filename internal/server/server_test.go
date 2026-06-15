@@ -300,6 +300,36 @@ func TestCatalogJSON(t *testing.T) {
 	}
 }
 
+// TestWebPagesRequireAuthWhenEnabled checks that, with auth enabled, web pages redirect to login while the agent API stays open.
+func TestWebPagesRequireAuthWhenEnabled(t *testing.T) {
+	reg := operations.NewRegistry()
+	store, err := grants.Open(filepath.Join(t.TempDir(), "auth.db"))
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	t.Cleanup(func() { _ = store.Close() })
+	srv := New(reg, store, operations.Env{}, "http://example.test")
+	srv.UseAuth(NewAuthenticator(AuthConfig{
+		ClientID: "c", ClientSecret: "s", AllowedUsers: []string{"octocat"},
+		SessionSecret: []byte("test-secret-key-0123456789abcdef"), BaseURL: "http://example.test",
+	}))
+	ts := httptest.NewServer(srv.Handler())
+	t.Cleanup(ts.Close)
+
+	client := &http.Client{CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
+
+	// A human page redirects to the GitHub login.
+	page, _ := client.Get(ts.URL + "/grants")
+	if page.StatusCode != http.StatusFound || !strings.HasPrefix(page.Header.Get("Location"), "/auth/login") {
+		t.Fatalf("grants page should redirect to login, got %d %q", page.StatusCode, page.Header.Get("Location"))
+	}
+	// The agent-facing API is not behind the browser login.
+	apiResp, _ := client.Get(ts.URL + "/api/catalog")
+	if apiResp.StatusCode != http.StatusOK {
+		t.Fatalf("api/catalog should stay open, got %d", apiResp.StatusCode)
+	}
+}
+
 // TestParseTTLFallsBack checks parseTTL defaults to two minutes for empty or invalid input.
 func TestParseTTLFallsBack(t *testing.T) {
 	if parseTTL("").Minutes() != 2 {

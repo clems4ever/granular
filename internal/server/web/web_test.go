@@ -7,6 +7,7 @@ import (
 	"testing"
 )
 
+// TestRenderProducesHTML renders every page against the layout and checks the chrome.
 func TestRenderProducesHTML(t *testing.T) {
 	cases := map[string]any{
 		"index":   nil,
@@ -14,6 +15,7 @@ func TestRenderProducesHTML(t *testing.T) {
 		"approve": map[string]any{"ID": "abc", "Description": "do a thing", "Decided": false},
 		"result":  map[string]any{"Status": "approved", "Message": "done"},
 		"grants":  map[string]any{"Grants": []any{}, "Requests": []any{}},
+		"denied":  map[string]any{"User": "octocat"},
 	}
 	for name, data := range cases {
 		rec := httptest.NewRecorder()
@@ -27,6 +29,7 @@ func TestRenderProducesHTML(t *testing.T) {
 	}
 }
 
+// TestRenderUnknownPage checks Render returns an error for an unknown page name.
 func TestRenderUnknownPage(t *testing.T) {
 	rec := httptest.NewRecorder()
 	if err := Render(rec, "nope", nil); err == nil {
@@ -34,6 +37,7 @@ func TestRenderUnknownPage(t *testing.T) {
 	}
 }
 
+// TestStaticServesCSS checks the static handler serves the embedded stylesheet.
 func TestStaticServesCSS(t *testing.T) {
 	srv := httptest.NewServer(Static())
 	defer srv.Close()

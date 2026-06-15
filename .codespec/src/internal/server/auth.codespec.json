@@ -1,0 +1,119 @@
+{
+	"functions": [
+		{
+			"function_name": "NewAuthenticator",
+			"documentation_hash": "9e969f3cc914b6844b9e71a00e2d29c82f3d8093fd211fb2eae0d9738953f783",
+			"definition_hash": "640296c301e815755d62ef6092c263cac0c899fc690ad68f973c6a58ba8d2686",
+			"reviewed_at": "2026-06-15T17:34:39.367676396Z"
+		},
+		{
+			"function_name": "Enabled",
+			"receiver": "Authenticator",
+			"documentation_hash": "38a0ece7cea1b7758e4a0072d55e577f09b8810f3c9758e61ff96bc303565211",
+			"definition_hash": "eda151e3da5cfbbb75804dd2c0e0383ea1f5e68582ad156eefaaa41e05bdebd1",
+			"reviewed_at": "2026-06-15T17:34:39.369484022Z"
+		},
+		{
+			"function_name": "AllowedCount",
+			"receiver": "Authenticator",
+			"documentation_hash": "258a3c06a7ca335bce49d53587322ec5f041c7d9917f723ab9ebc86000eff25d",
+			"definition_hash": "b340bea9844fe4b653056eb11eecbbc774248d9e69a62cf01aa8ef5e98f72153",
+			"reviewed_at": "2026-06-15T17:34:39.371342278Z"
+		},
+		{
+			"function_name": "Require",
+			"receiver": "Authenticator",
+			"documentation_hash": "a48f76a497f6932147e63316c4382062093abbb27477198ad78d074e5f82ca01",
+			"definition_hash": "60ce3d1c29bf2592763e93cd312f33991d93282fa84b82e44aab9e473895b1f2",
+			"reviewed_at": "2026-06-15T17:34:39.373125461Z"
+		},
+		{
+			"function_name": "isAllowed",
+			"receiver": "Authenticator",
+			"documentation_hash": "a9e3cab08ac26d48b5c338ef3211e04e423d302b589cdac3d3b0a868f144c3e4",
+			"definition_hash": "dda9e2bcd6bc21a3257ed4807c88d4f730b2e7f252c4796380a740f331202cd9",
+			"reviewed_at": "2026-06-15T17:34:39.379205029Z"
+		},
+		{
+			"function_name": "handleLogin",
+			"receiver": "Authenticator",
+			"documentation_hash": "cff4f505a001a4130f3801355571178fe779f5ea5a195e2208e6c0374562aeb1",
+			"definition_hash": "35e781efcfd97e8f9c14bbcb4183442bfb13a854fcb77d9531041f3ac218f9b6",
+			"reviewed_at": "2026-06-15T17:34:39.382077826Z"
+		},
+		{
+			"function_name": "handleCallback",
+			"receiver": "Authenticator",
+			"documentation_hash": "ee004dcf215853d9248f070dbfffd9c78e51ffba496df8429654ca5cdfbbc150",
+			"definition_hash": "3e27f8579bba538d05f2210159067becd6816179796457f22f8121fea34ec1ae",
+			"reviewed_at": "2026-06-15T17:34:39.383868041Z"
+		},
+		{
+			"function_name": "handleLogout",
+			"receiver": "Authenticator",
+			"documentation_hash": "295028d052cc46297cf500664d25acd64e93e67dde97cff36f0673542585e5ac",
+			"definition_hash": "15b8f748bc6a2983a15f3ce2bc42af3de0cd088e5638d3d96fb453479dc5444d",
+			"reviewed_at": "2026-06-15T17:34:39.385527339Z"
+		},
+		{
+			"function_name": "exchangeCode",
+			"receiver": "Authenticator",
+			"documentation_hash": "e1c2de9750b554a5a529377850a70517930bee94e9923c9ba19d69e2b0ab5300",
+			"definition_hash": "95a7204b4914f87fdf929c85740142df39957636468a9606bcbb34c336e686df",
+			"reviewed_at": "2026-06-15T17:34:39.387118703Z"
+		},
+		{
+			"function_name": "fetchUser",
+			"receiver": "Authenticator",
+			"documentation_hash": "b156c2f483123a8ea0f945acab6524707c20694011168cc4900213e1af30753a",
+			"definition_hash": "777e41a3b925fa883241a3140dd240a4c05f0296eca9d37ca5812fa864206ac1",
+			"reviewed_at": "2026-06-15T17:34:39.388831766Z"
+		},
+		{
+			"function_name": "sessionCookieFor",
+			"receiver": "Authenticator",
+			"documentation_hash": "64d535e12511d3a2af3eb490ed13fea3635863aad6d3d8e35c065361f9eee13d",
+			"definition_hash": "466bd86bdbb7e378f530415cf57128e4ce6330edd85948181d98a5756cac152c",
+			"reviewed_at": "2026-06-15T17:34:39.389448132Z"
+		},
+		{
+			"function_name": "sessionUser",
+			"receiver": "Authenticator",
+			"documentation_hash": "0bd6ba70a48e485bd68d49c63f598b9235d25b8c986d29a07b6daa8137ef3236",
+			"definition_hash": "f22d0a77bab7e807698997ee3917ee3e148f85cb32914620b6c8f219d2fc9642",
+			"reviewed_at": "2026-06-15T17:34:39.392437474Z"
+		},
+		{
+			"function_name": "sign",
+			"receiver": "Authenticator",
+			"documentation_hash": "2fbe8b2394d274b45d163aa6f8aaba2d414157645efdf7c60787c2f2185898fa",
+			"definition_hash": "5b4fec7613158452163751bba623756ac26169f42c11d8039caddda665fb8f60",
+			"reviewed_at": "2026-06-15T17:34:39.394338819Z"
+		},
+		{
+			"function_name": "cookie",
+			"receiver": "Authenticator",
+			"documentation_hash": "acf20871db8548e0e674222bd5092d880f33e599f3e7f49810c04f77b44af261",
+			"definition_hash": "e8f1dd840b8c17bb83972098153e2dae68db6a8adf30e9c613ab392f3bac0f41",
+			"reviewed_at": "2026-06-15T17:34:39.396091113Z"
+		},
+		{
+			"function_name": "splitSession",
+			"documentation_hash": "71e61ef10a43229de6ebfd496667d054d5b2cc1bcdf026171acc4b34afcdbf43",
+			"definition_hash": "7587e3683a3906e4ef78766b893241cef9a6d0b4a86105f9293044345778a940",
+			"reviewed_at": "2026-06-15T17:34:39.398423561Z"
+		},
+		{
+			"function_name": "randomToken",
+			"documentation_hash": "1afb16a33584b2d4d608232e2d3028b4f16788e51eb86656165dac559e2eff2c",
+			"definition_hash": "dedec501d6e6a48141efbbc860ba0c44e779ec7461eed197a7734dd332d3d616",
+			"reviewed_at": "2026-06-15T17:34:39.402807265Z"
+		},
+		{
+			"function_name": "safeNext",
+			"documentation_hash": "6cec94adcf52b57e7b145ea2f8c2dd3e19d4797102105967224d921b22d548a6",
+			"definition_hash": "9ed0fc8a0dbd88d507a0c330c78fa3f1e017c09e716b477a2c282b1153bd2007",
+			"reviewed_at": "2026-06-15T17:34:39.406161981Z"
+		}
+	]
+}

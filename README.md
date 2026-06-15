@@ -34,8 +34,20 @@ export GRANULAR_ADDR=:8080                  # listen address (default :8080)
 export GRANULAR_BASE_URL=http://localhost:8080  # used to build approval links
 export GRANULAR_WORKSPACE=/var/lib/granular # holds the bbolt database
 # GRANULAR_DB defaults to $GRANULAR_WORKSPACE/granular.db
+
+# Optional: protect the web pages behind a "log in with GitHub" flow. Register a
+# GitHub OAuth App with callback URL $GRANULAR_BASE_URL/auth/callback.
+export GRANULAR_GITHUB_OAUTH_CLIENT_ID=Iv1_xxx
+export GRANULAR_GITHUB_OAUTH_CLIENT_SECRET=xxxx
+export GRANULAR_ALLOWED_USERS=clems4ever,alice  # GitHub logins allowed to sign in
+# export GRANULAR_SESSION_SECRET=$(openssl rand -hex 32)  # else random per restart
 bin/granular-server
 ```
+
+When the OAuth variables are set, the human pages (approval, grants, catalog,
+landing) require a GitHub login and admit only `GRANULAR_ALLOWED_USERS`. The CLI
+API and git proxy are unaffected. When they are unset, the pages stay open and the
+server logs a warning.
 
 ## Use the CLI
 

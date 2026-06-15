@@ -10,8 +10,8 @@
 			"function_name": "Handler",
 			"receiver": "Server",
 			"documentation_hash": "987539ace680705db31aebc3a378d606a8d3e5f08963393ca7d05f2e63f36ef7",
-			"definition_hash": "d782df0f84bdaa4b1ee4bcaffe9d766299f03869e746d82107393f4a0e954afb",
-			"reviewed_at": "2026-06-15T15:30:16.50731857Z"
+			"definition_hash": "382e9fe9ffe34dbdf3208ac64bcaf11a2d2ed90d983a08cb09c6aad16a765ce5",
+			"reviewed_at": "2026-06-15T17:34:39.363740492Z"
 		},
 		{
 			"function_name": "authorize",
@@ -45,6 +45,20 @@
 			"documentation_hash": "9be0a7ee8d96f0c3a9ca86d0a287b9ec61c458076b7f2a89ffdbd17ca891eafe",
 			"definition_hash": "6efefc6552850c6a245df363acaf3c62fbed8cad3ff52fd2bb952b037b2a7b37",
 			"reviewed_at": "2026-06-15T15:30:16.508624196Z"
+		},
+		{
+			"function_name": "UseAuth",
+			"receiver": "Server",
+			"documentation_hash": "95bbd30effe3be30f4a5ad2560bf286354f7f296b95641918f0f725e713fbb44",
+			"definition_hash": "9714b9be2a27a2aa866e1cc5bdc08cffba0f3ad23e104a4dc5da89c4007da35a",
+			"reviewed_at": "2026-06-15T17:34:39.364917017Z"
+		},
+		{
+			"function_name": "protect",
+			"receiver": "Server",
+			"documentation_hash": "bcfb3823f8c93e1565ac92332072995b3e403b31cf8b4b3753f8e7016e512ac3",
+			"definition_hash": "727620a1481bb0fca25eca7052fbe54f30e645b23720980ab1dcd1eddc43363d",
+			"reviewed_at": "2026-06-15T17:34:39.366070455Z"
 		}
 	]
 }

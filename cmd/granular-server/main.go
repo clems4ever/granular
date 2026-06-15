@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/clems4ever/granular/internal/grants"
@@ -77,6 +78,23 @@ func run() error {
 	registry.Register(githubops.TypePullReopen, githubops.PullReopen)
 
 	srv := server.New(registry, store, env, baseURL)
+
+	auth := server.NewAuthenticator(server.AuthConfig{
+		ClientID:      os.Getenv("GRANULAR_GITHUB_OAUTH_CLIENT_ID"),
+		ClientSecret:  os.Getenv("GRANULAR_GITHUB_OAUTH_CLIENT_SECRET"),
+		AllowedUsers:  strings.Split(os.Getenv("GRANULAR_ALLOWED_USERS"), ","),
+		SessionSecret: []byte(os.Getenv("GRANULAR_SESSION_SECRET")),
+		BaseURL:       baseURL,
+	})
+	srv.UseAuth(auth)
+	switch {
+	case !auth.Enabled():
+		log.Printf("warning: web UI is UNAUTHENTICATED; set GRANULAR_GITHUB_OAUTH_CLIENT_ID and GRANULAR_GITHUB_OAUTH_CLIENT_SECRET to require a GitHub login (OAuth app callback URL: %s/auth/callback)", baseURL)
+	case auth.AllowedCount() == 0:
+		log.Printf("warning: web UI authentication is enabled but GRANULAR_ALLOWED_USERS is empty; all logins will be denied")
+	default:
+		log.Printf("web UI authentication enabled (GitHub OAuth); %d allowed user(s)", auth.AllowedCount())
+	}
 
 	cleanupInterval := parseDurationOr("GRANULAR_CLEANUP_INTERVAL", 30*time.Second)
 	store.StartCleanup(context.Background(), cleanupInterval, func(n int) {

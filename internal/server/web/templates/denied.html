@@ -1,0 +1,9 @@
+{{define "title"}}Access denied · granular{{end}}
+{{define "content"}}
+<section class="card">
+  <h1>Access denied</h1>
+  <p>The GitHub account <strong>{{.User}}</strong> is not allowed to access this granular server.</p>
+  <p class="muted">Ask an administrator to add your GitHub username to the allowlist, then
+    <a href="/auth/logout">sign in with a different account</a>.</p>
+</section>
+{{end}}

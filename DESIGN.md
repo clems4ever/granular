@@ -119,7 +119,33 @@ command** after approval performs the clone.
 | GET    | `/`                   | Landing page.                                               |
 | GET    | `/catalog`            | HTML capability catalog: resource hierarchy, verb lattice, CLI operations. |
 | GET    | `/api/catalog`        | JSON capability manifest (for the agent).                   |
+| GET    | `/auth/login`         | Start the GitHub OAuth login (when auth is enabled).        |
+| GET    | `/auth/callback`      | GitHub OAuth callback; sets the session on success.         |
+| GET    | `/auth/logout`        | Clear the session.                                          |
 | GET    | `/static/…`           | Embedded CSS/static assets.                                 |
+
+### Web authentication
+
+The **human-facing pages** (`/`, `/catalog`, `/grants`, `/approve/{id}` GET+POST,
+`/grants/{id}/revoke`) can be protected behind a "log in with GitHub" flow
+(`internal/server/auth.go`). It is the OAuth2 authorization-code flow — GitHub does
+not offer browser OIDC/id_tokens for user login — and admits only an **allowlist of
+GitHub usernames**. The session is kept in an HMAC-signed, HttpOnly cookie.
+
+Protection is enabled when `GRANULAR_GITHUB_OAUTH_CLIENT_ID` and
+`GRANULAR_GITHUB_OAUTH_CLIENT_SECRET` are set (register a GitHub OAuth App with the
+callback URL `<GRANULAR_BASE_URL>/auth/callback`):
+
+| Variable | Purpose |
+|----------|---------|
+| `GRANULAR_GITHUB_OAUTH_CLIENT_ID` / `_SECRET` | OAuth App credentials; enable web auth when both are set. |
+| `GRANULAR_ALLOWED_USERS` | Comma-separated GitHub logins permitted to sign in. Empty ⇒ everyone is denied (fail closed). |
+| `GRANULAR_SESSION_SECRET` | Optional HMAC key for session cookies; a random one is generated per start if unset (sessions reset on restart). |
+
+The **agent/CLI API** (`/api/*`) and the **git proxy** (`/git/...`) are deliberately
+*not* behind the browser login: the agent submits requests programmatically and git
+authenticates per-grant. When the OAuth variables are unset the pages stay open and
+the server logs a warning.
 
 `POST /api/operations` request body — an operation to run just-in-time:
 
