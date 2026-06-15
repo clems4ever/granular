@@ -1,0 +1,23 @@
+# syntax=docker/dockerfile:1
+
+# Build stage: cross-compile a static granular-server for the target platform on
+# the (native) build platform, so no emulation is needed for the Go build.
+FROM --platform=$BUILDPLATFORM golang:1.26 AS build
+ARG TARGETOS
+ARG TARGETARCH
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
+    go build -ldflags="-s -w" -o /out/granular-server ./cmd/granular-server
+
+# Runtime stage: a minimal static base (CA certs included for GitHub HTTPS).
+FROM gcr.io/distroless/static-debian12:nonroot
+COPY --from=build /out/granular-server /usr/local/bin/granular-server
+# The server reads its configuration from the environment; see cmd/granular-server.
+# It listens on :8080 and stores grants in a bbolt DB under GRANULAR_WORKSPACE
+# (defaults to a temp dir). Mount a writable volume and set GRANULAR_WORKSPACE to
+# persist grants across restarts.
+EXPOSE 8080
+ENTRYPOINT ["granular-server"]
