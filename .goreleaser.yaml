@@ -73,6 +73,44 @@ archives:
       - LICENSE*
       - README*
 
+# Docker images reuse the binaries built above (one per OS/arch) — they are not
+# recompiled. dockers_v2 builds each image for both platforms and pushes a
+# multi-arch manifest automatically.
+dockers_v2:
+  - id: granular
+    ids:
+      - granular
+    dockerfile: Dockerfile.cli
+    images:
+      - ghcr.io/clems4ever/granular
+    platforms:
+      - linux/amd64
+      - linux/arm64
+    tags:
+      - "{{ .Version }}"
+      - latest
+    labels:
+      org.opencontainers.image.source: https://github.com/clems4ever/granular
+      org.opencontainers.image.version: "{{ .Version }}"
+      org.opencontainers.image.revision: "{{ .FullCommit }}"
+
+  - id: granular-server
+    ids:
+      - granular-server
+    dockerfile: Dockerfile.server
+    images:
+      - ghcr.io/clems4ever/granular-server
+    platforms:
+      - linux/amd64
+      - linux/arm64
+    tags:
+      - "{{ .Version }}"
+      - latest
+    labels:
+      org.opencontainers.image.source: https://github.com/clems4ever/granular
+      org.opencontainers.image.version: "{{ .Version }}"
+      org.opencontainers.image.revision: "{{ .FullCommit }}"
+
 checksum:
   name_template: "checksums.txt"
 

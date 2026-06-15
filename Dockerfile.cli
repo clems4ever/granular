@@ -1,20 +1,11 @@
 # syntax=docker/dockerfile:1
-
-# Build stage: cross-compile the granular CLI for the target platform on the
-# (native) build platform, so no emulation is needed for the Go build.
-FROM --platform=$BUILDPLATFORM golang:1.26 AS build
-ARG TARGETOS
-ARG TARGETARCH
-WORKDIR /src
-COPY go.mod go.sum ./
-RUN go mod download
-COPY . .
-RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
-    go build -ldflags="-s -w" -o /out/granular ./cmd/granular
-
-# Runtime stage: the CLI shells out to `git` for clone/push, so the image bundles
-# git and CA certificates.
-FROM alpine:3.20
-RUN apk add --no-cache git ca-certificates
-COPY --from=build /out/granular /usr/local/bin/granular
+#
+# Built by GoReleaser: the cross-compiled granular binary is provided in the
+# build context. The CLI shells out to `git` for clone/push, so it sits on the
+# alpine/git base (git + CA certs preinstalled). No in-container compilation, no
+# RUN steps — so the arm64 image builds without emulation.
+FROM alpine/git:latest
+# GoReleaser (dockers_v2) stages the per-platform binary under $TARGETPLATFORM.
+ARG TARGETPLATFORM
+COPY ${TARGETPLATFORM}/granular /usr/local/bin/granular
 ENTRYPOINT ["granular"]
