@@ -1,0 +1,71 @@
+{{define "title"}}Approve · granular{{end}}
+{{define "container-class"}} narrow{{end}}
+{{define "content"}}
+<div class="card">
+  <p class="eyebrow">Approval requested</p>
+  <h1>Review this request</h1>
+
+  {{if .Decided}}
+    <p class="lead" style="margin-top:1rem">
+      This request has already been
+      <span class="badge badge-{{.Status}}">{{.Status}}</span>.
+    </p>
+  {{else}}
+    <p class="lead">An agent is asking permission to perform the {{if gt (len .Items) 1}}actions{{else}}action{{end}}
+      below. Nothing happens until you approve, and the grant expires after the time you choose.</p>
+    <p class="kv">Approver: <code>{{.Approver}}</code></p>
+
+    {{range .Items}}
+    <section class="review-block">
+      <p class="block-label">Requested by gateway <code>{{.GatewayID}}</code></p>
+      {{if .Title}}<h3>{{.Title}}</h3>{{end}}
+      <p class="summary">{{.Summary}}</p>
+
+      {{if .Detail}}
+      <p class="block-label" style="margin-top:.9rem">Exact content to be submitted</p>
+      <blockquote class="content-body">{{.Detail}}</blockquote>
+      <p class="hint">This grant is tied to this exact text — changing it later requires a new approval.</p>
+      {{end}}
+
+      {{if .Permissions}}
+      <p class="block-label" style="margin-top:.9rem">This grants the agent permission to</p>
+      <ul class="grant-list">
+        {{range .Permissions}}<li><span class="grant-title">{{.}}</span></li>{{end}}
+      </ul>
+      {{end}}
+
+      {{if .Scopes}}
+      <p class="block-label" style="margin-top:.9rem">Limited to</p>
+      <ul class="scope-list">
+        {{range .Scopes}}<li><code>{{.}}</code></li>{{end}}
+      </ul>
+      {{end}}
+
+      {{if .Policies}}
+      <details>
+        <summary>Advanced: the exact policies this would add ({{len .Policies}})</summary>
+        <p class="hint">These are the machine-enforced rules behind the plain-language summary above.</p>
+        <pre><code>{{range .Policies}}{{.}}
+
+{{end}}</code></pre>
+      </details>
+      {{end}}
+    </section>
+    {{end}}
+
+    <form method="post" action="/proposal/{{.ID}}">
+      <div class="form-row">
+        <label for="ttl">Grant valid for</label>
+        <select id="ttl" name="ttl">
+          {{range .TTLOptions}}<option value="{{.Value}}">{{.Label}}</option>{{end}}
+        </select>
+        <p class="hint">After this window the permission disappears and a fresh approval is needed.</p>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" type="submit" name="decision" value="approve">Approve</button>
+        <button class="btn btn-danger" type="submit" name="decision" value="reject">Reject</button>
+      </div>
+    </form>
+  {{end}}
+</div>
+{{end}}

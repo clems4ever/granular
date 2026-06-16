@@ -1,0 +1,14 @@
+{{define "title"}}Wrong approver · granular{{end}}
+{{define "container-class"}} narrow{{end}}
+{{define "content"}}
+<section class="card">
+  <h1>This request isn't yours to approve</h1>
+  <p>You are signed in as <strong>{{.SignedInAs}}</strong>, but this request must be
+    approved by <strong>{{.Approver}}</strong>.</p>
+  <p class="muted">Sign in with the account whose verified email matches the approver,
+    then open the link again.</p>
+  <form action="/auth/github/logout" method="post">
+    <button type="submit" class="btn">Sign in with a different account</button>
+  </form>
+</section>
+{{end}}

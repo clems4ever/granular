@@ -1,0 +1,49 @@
+# granular authorization-server (AS) configuration.
+# Copy to granular-auth.yaml (the default path; override with --config) and edit.
+# Every field is optional; omitted values fall back to the defaults shown here.
+#
+# The AS is the policy authority: it stores grants, runs the human consent screen,
+# and answers allow/deny. It holds NO platform credentials — those live on the
+# Resource-Gateways, which authenticate to the AS with the per-gateway shared secret
+# registered below.
+
+# HTTP listen address.
+addr: ":9090"
+
+# Externally reachable base URL. Used to build approval links and the GitHub OAuth
+# callback URL. Defaults to http://localhost<addr>.
+base_url: "http://localhost:9090"
+
+# Directory holding the bbolt database. Defaults to a temp directory.
+workspace: "/var/lib/granular-auth"
+
+# Database file path. Defaults to <workspace>/granular-auth.db.
+db: ""
+
+# How often expired grants are purged in the background.
+cleanup_interval: "2m"
+
+# Registered Resource-Gateways. Each gateway signs its grant-request and verify
+# calls with the shared secret loaded from secret_file (an HMAC over the request
+# body, sent in X-Gateway-Signature with the gateway id in X-Gateway-ID). A request
+# from an unregistered or wrongly-signed gateway is rejected with 401.
+gateways:
+  - id: "github-gateway"
+    secret_file: "/run/secrets/granular_gateway_github_secret"
+
+# Consent-screen authentication (GitHub login, for now). When client_id and the
+# client-secret file are both set, the consent pages (/proposal/{id}) require a "log
+# in with GitHub". There is no global allowlist: each proposal names an approver
+# email, and only the human whose verified GitHub email matches may decide it.
+#
+# The login routes live under /auth/github/ so a second provider (Google) can be
+# added under /auth/google/ later.
+auth:
+  # Register a GitHub OAuth App and set its callback URL to
+  # <base_url>/auth/github/callback. The client id is public, so it stays inline.
+  client_id: ""
+  # Path to a file holding the OAuth App client secret.
+  client_secret_file: "/run/secrets/granular_auth_oauth_client_secret"
+  # Path to a file holding the HMAC key for session cookies. If empty, a random key
+  # is generated each start, which invalidates existing sessions on restart.
+  session_secret_file: ""
