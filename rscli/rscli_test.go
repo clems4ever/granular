@@ -20,10 +20,13 @@ import (
 // grant requests, and echoes operation params back as the result. Fields capture
 // the last request for assertions.
 type stubRS struct {
-	denyOps    bool
-	lastOp     resourceserver.OperationRequest
-	lastAuth   string
-	signCalled bool
+	denyOps       bool
+	lastOp        resourceserver.OperationRequest
+	lastAuth      string
+	signCalled    bool
+	proposalAuth  string
+	lastApprover  string
+	proposalItems int
 }
 
 // schema returns a small representative schema the stub serves.
@@ -52,6 +55,21 @@ func newStubServer(s *stubRS) *httptest.Server {
 			Presentation:     proposal.Presentation{Title: "Access request", Summary: "Grant 1 permission set"},
 			Policies:         []string{"permit (...);"},
 			Signature:        "deadbeef",
+		})
+	})
+	mux.HandleFunc("/api/proposals", func(w http.ResponseWriter, r *http.Request) {
+		s.proposalAuth = r.Header.Get("Authorization")
+		var in struct {
+			ApproverEmail string            `json:"approver_email"`
+			Items         []json.RawMessage `json:"items"`
+		}
+		_ = json.NewDecoder(r.Body).Decode(&in)
+		s.lastApprover, s.proposalItems = in.ApproverEmail, len(in.Items)
+		w.WriteHeader(http.StatusAccepted)
+		_ = json.NewEncoder(w).Encode(map[string]string{
+			"proposal_id": "prop-1",
+			"url":         "http://approve.example/prop-1",
+			"expires_at":  "2026-06-18T00:00:00Z",
 		})
 	})
 	mux.HandleFunc("/api/operations", func(w http.ResponseWriter, r *http.Request) {
@@ -107,10 +125,10 @@ func TestLoadConfigMissingIsEmpty(t *testing.T) {
 	}
 }
 
-// TestLoadConfigReadsBaseURL checks the base URL is parsed from the config file.
+// TestLoadConfigReadsBaseURL checks the base URL and AS URL are parsed.
 func TestLoadConfigReadsBaseURL(t *testing.T) {
 	cfgPath := filepath.Join(t.TempDir(), defaultBaseName("github"))
-	if err := os.WriteFile(cfgPath, []byte("base_url: http://rs.example\n"), 0o600); err != nil {
+	if err := os.WriteFile(cfgPath, []byte("base_url: http://rs.example\nas_url: http://as.example\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	c, err := loadConfig(cfgPath)
@@ -119,6 +137,9 @@ func TestLoadConfigReadsBaseURL(t *testing.T) {
 	}
 	if c.BaseURL != "http://rs.example" {
 		t.Errorf("base_url = %q", c.BaseURL)
+	}
+	if c.ASURL != "http://as.example" {
+		t.Errorf("as_url = %q", c.ASURL)
 	}
 }
 
@@ -270,6 +291,46 @@ func TestSignToFile(t *testing.T) {
 	var sgr proposal.SignedGrantRequest
 	if err := json.Unmarshal(data, &sgr); err != nil {
 		t.Fatalf("file not JSON: %v", err)
+	}
+}
+
+// TestRequestSubmitsAndPrintsURL checks `request` signs and submits a grant
+// request to the AS and prints the approval URL.
+func TestRequestSubmitsAndPrintsURL(t *testing.T) {
+	s := &stubRS{}
+	srv := newStubServer(s)
+	defer srv.Close()
+
+	out, err := run(echoSpec(srv.URL), "request", "--base-url", srv.URL, "--as-url", srv.URL,
+		"--token", "subj-tok", "--approver", "alice@example.com",
+		"--actions", "repo.clone", "--resource", "github.repo", "--match", "owner=clems4ever")
+	if err != nil {
+		t.Fatalf("request: %v", err)
+	}
+	if !s.signCalled {
+		t.Error("sign endpoint not called")
+	}
+	if s.lastApprover != "alice@example.com" || s.proposalItems != 1 {
+		t.Errorf("proposal approver=%q items=%d", s.lastApprover, s.proposalItems)
+	}
+	if s.proposalAuth != "Bearer subj-tok" {
+		t.Errorf("proposal auth = %q, want Bearer subj-tok", s.proposalAuth)
+	}
+	if !strings.Contains(out, "http://approve.example/prop-1") {
+		t.Errorf("approval URL not printed: %q", out)
+	}
+}
+
+// TestRequestNeedsASURL checks `request` errors clearly when no AS URL is set.
+func TestRequestNeedsASURL(t *testing.T) {
+	s := &stubRS{}
+	srv := newStubServer(s)
+	defer srv.Close()
+
+	_, err := run(echoSpec(srv.URL), "request", "--base-url", srv.URL, "--token", "t",
+		"--approver", "a@b.com", "--actions", "repo.clone", "--resource", "github.repo")
+	if err == nil || !strings.Contains(err.Error(), "authorization server URL") {
+		t.Fatalf("err = %v, want a clear no-AS-URL error", err)
 	}
 }
 

@@ -49,20 +49,23 @@ func defaultConfigPath(rsID string) string {
 	return "~/.granular/" + rsID + ".yaml"
 }
 
-// fileConfig is the resource-server CLI config: only the RS base URL.
+// fileConfig is the resource-server CLI config: the RS base URL, and an optional
+// authorization server URL needed only by the `request` command (which submits a
+// grant request to the AS for approval).
 type fileConfig struct {
 	BaseURL string `yaml:"base_url"`
+	ASURL   string `yaml:"as_url"`
 }
 
 // loadConfig reads and parses the config at path. A missing file is not an error:
-// it yields an empty config so flags and the spec default can supply the base URL.
+// it yields an empty config so flags and the spec default can supply the URLs.
 //
 // @arg path The config file path ("~" is expanded).
 // @return *fileConfig The parsed config, or an empty one when the file is absent.
 // @error error when the file exists but cannot be parsed.
 //
 // @testcase TestLoadConfigMissingIsEmpty returns an empty config for a missing file.
-// @testcase TestLoadConfigReadsBaseURL parses the base URL.
+// @testcase TestLoadConfigReadsBaseURL parses the base URL and AS URL.
 func loadConfig(path string) (*fileConfig, error) {
 	data, err := os.ReadFile(expandHome(path))
 	if os.IsNotExist(err) {

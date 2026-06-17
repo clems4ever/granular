@@ -1,0 +1,16 @@
+{
+	"functions": [
+		{
+			"function_name": "operations",
+			"documentation_hash": "dc6aba56fbdbeda6540912e265306d0712b27d63f905f1458075c0a357f7e890",
+			"definition_hash": "e396dc0a1ce7914a43b5bfcc90dc3ac4d87569748e7ea53685463b4f123dd523",
+			"reviewed_at": "2026-06-17T20:39:30.705450617Z"
+		},
+		{
+			"function_name": "NewRootCmd",
+			"documentation_hash": "7a3481bbc505e6c4970b05eb019cfb03116325df09ab66f57325d29017c46f54",
+			"definition_hash": "e3322374538b07066833d0d504197087e2c72bb4539663b034c30dd577293c17",
+			"reviewed_at": "2026-06-17T20:39:30.705581533Z"
+		}
+	]
+}

@@ -7,8 +7,8 @@ package githubcli
 import (
 	"io"
 
-	"github.com/clems4ever/granular/rscli"
 	githubops "github.com/clems4ever/granular/resourceserver-github/internal/operations/github"
+	"github.com/clems4ever/granular/rscli"
 	"github.com/spf13/cobra"
 )
 

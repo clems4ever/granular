@@ -8,9 +8,9 @@
 		},
 		{
 			"function_name": "loadConfig",
-			"documentation_hash": "68edd22c0e902c69345b5c9979d04f81069414241e3b45fb7795a9b7c5b3aa09",
+			"documentation_hash": "7eaebb67f58e5dfd1fc4191e3270f8872c57c8d83dce0cff0f83e1a667a08c24",
 			"definition_hash": "b48a7561d93205967dcb8713651818ff6d77c6d73308fd3689b071ea012dc8fd",
-			"reviewed_at": "2026-06-17T20:07:10.665020509Z"
+			"reviewed_at": "2026-06-17T20:39:30.621440522Z"
 		},
 		{
 			"function_name": "resolveToken",

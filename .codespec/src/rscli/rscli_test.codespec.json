@@ -10,8 +10,8 @@
 		{
 			"function_name": "newStubServer",
 			"documentation_hash": "f942415e6f4b8f9e8da51d11b4e00fd2daadde48543f85128b7b3f82ff1aee6b",
-			"definition_hash": "27d9d91e531583d98862170830e054c6d5d9abc12c16fa98457f7341d99f48de",
-			"reviewed_at": "2026-06-17T20:07:12.560690297Z"
+			"definition_hash": "650eb7641b9601260289cfff2fc15276ac975ccb2dc8ed15dd1b68717d5e52a5",
+			"reviewed_at": "2026-06-17T20:39:30.621872226Z"
 		},
 		{
 			"function_name": "echoSpec",
@@ -33,9 +33,9 @@
 		},
 		{
 			"function_name": "TestLoadConfigReadsBaseURL",
-			"documentation_hash": "590f4a73d710c5849513620c35738f6dfc64db9cff5ee5b74bdf177488b1c000",
-			"definition_hash": "fa94d52ff880c303fcf96aad3a8810720420226ea924538752ef14f743cf8035",
-			"reviewed_at": "2026-06-17T20:07:12.563583142Z"
+			"documentation_hash": "8e76b7b94d87c0b3932d46a4b32371cb53b5159eda3b5b6fb39146734b7ba33f",
+			"definition_hash": "ff46899d0b04ef6da77d2070bf1b454685bff4d384b400a8a200f9b46a204b64",
+			"reviewed_at": "2026-06-17T20:39:30.622704262Z"
 		},
 		{
 			"function_name": "defaultBaseName",
@@ -132,6 +132,18 @@
 			"documentation_hash": "f4273f60c1fa4b75a79855f5e2088f16fc9a20b206cc3b39056b176af593ea24",
 			"definition_hash": "668567636873ece4338cf3f441546aa5d7bd02a6b8aabff335aa4713324bf572",
 			"reviewed_at": "2026-06-17T20:07:12.573560933Z"
+		},
+		{
+			"function_name": "TestRequestSubmitsAndPrintsURL",
+			"documentation_hash": "86d6ff5b78af064240bcd16a9a5d0b61951d14d665f9f2fb594eae5a038cdaad",
+			"definition_hash": "ee6348749603733d59d29d327f30a4d39d2f28f1dfe0c0b5c285c68e3864b885",
+			"reviewed_at": "2026-06-17T20:39:30.623324186Z"
+		},
+		{
+			"function_name": "TestRequestNeedsASURL",
+			"documentation_hash": "296a718a665988d2681140127997794dc9ee4d1fcb6e49499bfc3417354ccb10",
+			"definition_hash": "00ee1325148fbd09d8eff35fb6498b16e8bb284072aad1e9c163834985c1f0bf",
+			"reviewed_at": "2026-06-17T20:39:30.623796607Z"
 		}
 	]
 }

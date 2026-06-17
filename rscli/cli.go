@@ -100,6 +100,8 @@ type App struct {
 	defaultBaseURL string
 	configPath     string
 	baseURL        string
+	asURL          string // resolved AS URL (for the request command)
+	asURLFlag      string
 	token          string
 	tokenFile      string
 }
@@ -175,10 +177,11 @@ func NewRootCmd(spec Spec, out io.Writer) *cobra.Command {
 	}
 	root.PersistentFlags().StringVar(&a.configPath, "config", defaultConfigPath(spec.RSID), "path to the config file")
 	root.PersistentFlags().StringVar(&a.baseURL, "base-url", "", "resource server base URL (overrides config)")
+	root.PersistentFlags().StringVar(&a.asURLFlag, "as-url", "", "authorization server URL, for `request` (overrides config)")
 	root.PersistentFlags().StringVar(&a.token, "token", "", "subject token (overrides --token-file)")
 	root.PersistentFlags().StringVar(&a.tokenFile, "token-file", "", "file holding the subject token (default ~/.granular/subject_token)")
 
-	root.AddCommand(a.catalogCmd(), a.signCmd())
+	root.AddCommand(a.catalogCmd(), a.signCmd(), a.requestCmd())
 	root.AddCommand(operationCommands(a, spec.Operations)...)
 	if spec.Extra != nil {
 		root.AddCommand(spec.Extra(a)...)
@@ -186,11 +189,12 @@ func NewRootCmd(spec Spec, out io.Writer) *cobra.Command {
 	return root
 }
 
-// load reads the config file (only the RS base URL) and builds the client into
-// the App. The base URL is the --base-url flag, else the config's base_url, else
-// the spec default. The token is --token, else read from --token-file, else from
-// the default subject token path on disk. tokenFileFlagSet reports whether
-// --token-file was given explicitly (which makes a missing file an error).
+// load reads the config file and builds the client into the App. The base URL is
+// the --base-url flag, else the config's base_url, else the spec default. The AS
+// URL (used only by `request`) is --as-url, else the config's as_url. The token
+// is --token, else read from --token-file, else from the default subject token
+// path on disk. tokenFileFlagSet reports whether --token-file was given
+// explicitly (which makes a missing file an error).
 //
 // @arg tokenFileFlagSet Whether --token-file was set explicitly.
 // @error error when the config or an explicitly chosen token file cannot be read.
@@ -212,6 +216,11 @@ func (a *App) load(tokenFileFlagSet bool) error {
 		base = a.defaultBaseURL
 	}
 
+	a.asURL = a.asURLFlag
+	if a.asURL == "" {
+		a.asURL = cfg.ASURL
+	}
+
 	tokenFile := a.tokenFile
 	if tokenFile == "" {
 		tokenFile = DefaultSubjectTokenPath
@@ -222,6 +231,7 @@ func (a *App) load(tokenFileFlagSet bool) error {
 	}
 
 	a.c = client.New(client.Config{
+		ASURL:           a.asURL,
 		Token:           token,
 		ResourceServers: []client.ResourceServer{{ID: a.RSID, BaseURL: base}},
 	})

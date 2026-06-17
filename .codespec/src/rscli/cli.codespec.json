@@ -38,15 +38,15 @@
 		{
 			"function_name": "NewRootCmd",
 			"documentation_hash": "b29817fab5b3b73b273a2c6bede3f10233ae173d9a08f6f7eb132235d3c0fd64",
-			"definition_hash": "205f6f287b1f5273ef805d123247440ef03e59594411e991d2e2161dc0022daa",
-			"reviewed_at": "2026-06-17T20:07:08.57550216Z"
+			"definition_hash": "af96806e80e4f5de49c9f4c6da2377f901ade48051c38f8c1e8ffc2a5bc88a7e",
+			"reviewed_at": "2026-06-17T20:39:30.620447078Z"
 		},
 		{
 			"function_name": "load",
 			"receiver": "App",
-			"documentation_hash": "e7def7f679854228785b829395b30a98dbf7e439c6d5fa0dc57ab09fa87d5b43",
-			"definition_hash": "ebd6b4a0f71ac281742ba3da859158abe3d9252573976b1e9cb4e7a76bbc7c82",
-			"reviewed_at": "2026-06-17T20:07:08.576758381Z"
+			"documentation_hash": "5ae2c70b8f82d57a529426160318f52e8c0902e72417bdb5ed9c8cfa0460a0b3",
+			"definition_hash": "9845b055511f1f28090daf4f818762c0390a76c75d84e2ca3a923ec22287b6cf",
+			"reviewed_at": "2026-06-17T20:39:30.620812857Z"
 		},
 		{
 			"function_name": "operationCommands",
