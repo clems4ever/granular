@@ -98,7 +98,7 @@ func TestApproveDeniesWrongApprover(t *testing.T) {
 		t.Fatalf("open: %v", err)
 	}
 	t.Cleanup(func() { st.Close() })
-	srv := New(st, "http://as.example", map[string]string{"gw": gwSecret})
+	srv := New(st, "http://as.example", map[string]string{"rs": rsSecret})
 	srv.UseAdminToken(adminToken)
 	auth := NewAuthenticator(AuthConfig{ClientID: "id", ClientSecret: "sec", SessionSecret: []byte("k"), BaseURL: "http://as.example"})
 	srv.UseAuth(auth)

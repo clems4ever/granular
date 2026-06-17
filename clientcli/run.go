@@ -10,8 +10,8 @@ import (
 	"strings"
 
 	"github.com/clems4ever/granular/client"
-	"github.com/clems4ever/granular/gateway"
 	"github.com/clems4ever/granular/internal/proposal"
+	"github.com/clems4ever/granular/resourceserver"
 )
 
 // parseParams parses repeated "key=value" strings into an operation parameter map.
@@ -63,17 +63,17 @@ func parseMatch(s string) map[string]string {
 // @arg actions The freeform action or group names.
 // @arg resType The freeform resource type.
 // @arg match The freeform "key=value,key=value" resource match.
-// @return gateway.GrantRequest The assembled request.
+// @return resourceserver.GrantRequest The assembled request.
 // @error error when a template binding is malformed.
 //
 // @testcase TestBuildSignRequest builds both the template and freeform forms.
-func buildSignRequest(template string, binds []string, reason string, actions []string, resType, match string) (gateway.GrantRequest, error) {
+func buildSignRequest(template string, binds []string, reason string, actions []string, resType, match string) (resourceserver.GrantRequest, error) {
 	if template != "" {
 		bindings, err := parseBinds(binds)
 		if err != nil {
-			return gateway.GrantRequest{}, err
+			return resourceserver.GrantRequest{}, err
 		}
-		return gateway.GrantRequest{Template: template, Bindings: bindings}, nil
+		return resourceserver.GrantRequest{Template: template, Bindings: bindings}, nil
 	}
 	return buildGrantRequest(reason, actions, resType, parseMatch(match)), nil
 }
@@ -103,20 +103,20 @@ func parseBinds(binds []string) (map[string]string, error) {
 // @arg actions The action or group names to request.
 // @arg resType The resource type the capability is scoped to.
 // @arg match The resource match fields.
-// @return gateway.GrantRequest The assembled grant request.
+// @return resourceserver.GrantRequest The assembled grant request.
 //
 // @testcase TestBuildGrantRequest builds a request from flags.
-func buildGrantRequest(reason string, actions []string, resType string, match map[string]string) gateway.GrantRequest {
-	return gateway.GrantRequest{
+func buildGrantRequest(reason string, actions []string, resType string, match map[string]string) resourceserver.GrantRequest {
+	return resourceserver.GrantRequest{
 		Reason: reason,
-		Capabilities: []gateway.Capability{{
+		Capabilities: []resourceserver.Capability{{
 			Actions:  actions,
-			Resource: gateway.ResourceSelector{Type: resType, Match: match},
+			Resource: resourceserver.ResourceSelector{Type: resType, Match: match},
 		}},
 	}
 }
 
-// runCatalog fetches the schemas of the requested gateways (or all of them) and prints
+// runCatalog fetches the schemas of the requested resource servers (or all of them) and prints
 // everything an agent needs to build a grant request: the resource types with their
 // match fields and hierarchy, the action groups, every action with the resource type it
 // targets, and a ready-to-use example. With asJSON it prints the raw schemas instead, for
@@ -124,10 +124,10 @@ func buildGrantRequest(reason string, actions []string, resType string, match ma
 //
 // @arg ctx Context for cancellation.
 // @arg c The client SDK.
-// @arg ids An optional subset of gateway ids.
+// @arg ids An optional subset of resource server ids.
 // @arg asJSON Whether to print the raw schema JSON instead of the human-readable form.
 // @arg w The writer for user-facing output.
-// @error error when a gateway request fails or the JSON cannot be encoded.
+// @error error when a resource server request fails or the JSON cannot be encoded.
 //
 // @testcase TestRunCatalog prints resources, actions and an example.
 // @testcase TestRunCatalogJSON prints the raw schema as JSON.
@@ -141,28 +141,28 @@ func runCatalog(ctx context.Context, c *client.Client, ids []string, asJSON bool
 		enc.SetIndent("", "  ")
 		return enc.Encode(schemas)
 	}
-	gws := make([]string, 0, len(schemas))
+	rsIDs := make([]string, 0, len(schemas))
 	for id := range schemas {
-		gws = append(gws, id)
+		rsIDs = append(rsIDs, id)
 	}
-	sort.Strings(gws)
-	for _, id := range gws {
+	sort.Strings(rsIDs)
+	for _, id := range rsIDs {
 		printSchema(w, id, schemas[id])
 	}
 	return nil
 }
 
-// printSchema renders one gateway's schema in a form an agent can act on: the resource
+// printSchema renders one resource server's schema in a form an agent can act on: the resource
 // hierarchy with each type's match fields (for a grant's resource selector), the groups
 // expanded to the actions they grant, the action vocabulary, and the executable
 // operations with their full parameter signatures (for running work).
 //
 // @arg w The writer for user-facing output.
-// @arg id The gateway id.
-// @arg s The gateway's permission schema.
+// @arg id The resource server id.
+// @arg s The resource server's permission schema.
 //
 // @testcase TestRunCatalog renders resources, groups, operations and an example.
-func printSchema(w io.Writer, id string, s gateway.Schema) {
+func printSchema(w io.Writer, id string, s resourceserver.Schema) {
 	fmt.Fprintf(w, "%s\n\n", id)
 
 	fmt.Fprintf(w, "  Resources — a grant's resource.type and the match fields a selector may set:\n")
@@ -213,7 +213,7 @@ func printSchema(w io.Writer, id string, s gateway.Schema) {
 	}
 
 	if len(s.Example.Capabilities) > 0 {
-		fmt.Fprintf(w, "\n  Example — sign this with: granular sign --gateway %s ...\n", id)
+		fmt.Fprintf(w, "\n  Example — sign this with: granular sign --resource-server %s ...\n", id)
 		for _, cap := range s.Example.Capabilities {
 			fmt.Fprintf(w, "    --actions %s --resource %s --match %s\n",
 				strings.Join(cap.Actions, ","), cap.Resource.Type, formatMatch(cap.Resource.Match))
@@ -230,7 +230,7 @@ func printSchema(w io.Writer, id string, s gateway.Schema) {
 // @return int The number of ancestors above the resource.
 //
 // @testcase TestRunCatalog indents nested resources.
-func resourceDepth(s gateway.Schema, name string) int {
+func resourceDepth(s resourceserver.Schema, name string) int {
 	parent := map[string]string{}
 	for _, r := range s.Resources {
 		parent[r.Name] = r.Parent
@@ -252,7 +252,7 @@ func resourceDepth(s gateway.Schema, name string) int {
 // @return map[string][]string Each group name mapped to its granted action names (sorted).
 //
 // @testcase TestRunCatalog expands a group to its actions.
-func groupActions(s gateway.Schema) map[string][]string {
+func groupActions(s resourceserver.Schema) map[string][]string {
 	parents := map[string][]string{}
 	for _, g := range s.Groups {
 		parents[g.Name] = g.Parents
@@ -308,16 +308,16 @@ func formatMatch(match map[string]string) string {
 }
 
 // runTemplate explores grant templates: with no name it lists every template (across the
-// requested gateways), and with a name it prints what that template actually grants — the
+// requested resource servers), and with a name it prints what that template actually grants — the
 // actions (groups expanded), the scope, the attribute conditions (fixed and parameterized),
 // the summary, and the parameters with how each is used.
 //
 // @arg ctx Context for cancellation.
 // @arg c The client SDK.
-// @arg ids An optional subset of gateway ids.
+// @arg ids An optional subset of resource server ids.
 // @arg name The template to detail, or "" to list all templates.
 // @arg w The writer for user-facing output.
-// @error error when a gateway request fails or the named template is not found.
+// @error error when a resource server request fails or the named template is not found.
 //
 // @testcase TestRunTemplate lists templates and details one by name.
 func runTemplate(ctx context.Context, c *client.Client, ids []string, name string, w io.Writer) error {
@@ -325,14 +325,14 @@ func runTemplate(ctx context.Context, c *client.Client, ids []string, name strin
 	if err != nil {
 		return err
 	}
-	gws := make([]string, 0, len(schemas))
+	rsIDs := make([]string, 0, len(schemas))
 	for id := range schemas {
-		gws = append(gws, id)
+		rsIDs = append(rsIDs, id)
 	}
-	sort.Strings(gws)
+	sort.Strings(rsIDs)
 
 	found := false
-	for _, id := range gws {
+	for _, id := range rsIDs {
 		s := schemas[id]
 		for _, t := range s.Templates {
 			if name == "" {
@@ -359,13 +359,13 @@ func runTemplate(ctx context.Context, c *client.Client, ids []string, name strin
 // its conditions, its summary, and its parameters.
 //
 // @arg w The writer for user-facing output.
-// @arg gatewayID The gateway offering the template.
+// @arg resourceServerID The resource server offering the template.
 // @arg s The schema (for expanding action groups).
 // @arg t The template to detail.
 //
 // @testcase TestRunTemplate renders a template's grants, conditions and parameters.
-func printTemplateDetail(w io.Writer, gatewayID string, s gateway.Schema, t gateway.Template) {
-	fmt.Fprintf(w, "%s — %s   [gateway %s]\n", t.Name, t.Title, gatewayID)
+func printTemplateDetail(w io.Writer, resourceServerID string, s resourceserver.Schema, t resourceserver.Template) {
+	fmt.Fprintf(w, "%s — %s   [resource server %s]\n", t.Name, t.Title, resourceServerID)
 	if t.Description != "" {
 		fmt.Fprintf(w, "\n  %s\n", t.Description)
 	}
@@ -404,7 +404,7 @@ func printTemplateDetail(w io.Writer, gatewayID string, s gateway.Schema, t gate
 	fmt.Fprintf(w, "\n  Parameters (bind with --bind name=value):\n")
 	for _, p := range t.Params {
 		if p.Fixed != "" {
-			fmt.Fprintf(w, "    %-10s pinned to %q by the gateway\n", p.Name, p.Fixed)
+			fmt.Fprintf(w, "    %-10s pinned to %q by the resource server\n", p.Name, p.Fixed)
 			continue
 		}
 		role := "scope (" + p.Field + ")"
@@ -418,7 +418,7 @@ func printTemplateDetail(w io.Writer, gatewayID string, s gateway.Schema, t gate
 		fmt.Fprintf(w, "    %s%-10s %-18s %s\n", flag, p.Name, role, p.Description)
 	}
 
-	fmt.Fprintf(w, "\n  Sign: granular sign --gateway %s --template %s%s\n\n", gatewayID, t.Name, bindHints(t))
+	fmt.Fprintf(w, "\n  Sign: granular sign --resource-server %s --template %s%s\n\n", resourceServerID, t.Name, bindHints(t))
 }
 
 // templateActions expands a template's granted actions/groups to the concrete action
@@ -429,7 +429,7 @@ func printTemplateDetail(w io.Writer, gatewayID string, s gateway.Schema, t gate
 // @return []string The concrete action names granted (sorted, deduplicated).
 //
 // @testcase TestRunTemplate expands a template's granted group to its actions.
-func templateActions(s gateway.Schema, t gateway.Template) []string {
+func templateActions(s resourceserver.Schema, t resourceserver.Template) []string {
 	expand := groupActions(s)
 	seen := map[string]bool{}
 	var out []string
@@ -450,7 +450,7 @@ func templateActions(s gateway.Schema, t gateway.Template) []string {
 }
 
 // conditionPhrase renders an attribute condition in plain language, mirroring the
-// gateway's expander.
+// resource server's expander.
 //
 // @arg attr The resource attribute.
 // @arg op The operator: eq, contains or like.
@@ -475,7 +475,7 @@ func conditionPhrase(attr, op, value string) string {
 // @return string The concatenated bind hints (empty when all params are fixed).
 //
 // @testcase TestRunTemplate includes bind hints in the sign example.
-func bindHints(t gateway.Template) string {
+func bindHints(t resourceserver.Template) string {
 	var b strings.Builder
 	for _, p := range t.Params {
 		if p.Fixed == "" {
@@ -485,20 +485,20 @@ func bindHints(t gateway.Template) string {
 	return b.String()
 }
 
-// runOp runs an operation on a gateway and prints its result, turning a denial into a
+// runOp runs an operation on a resource server and prints its result, turning a denial into a
 // clear, actionable message.
 //
 // @arg ctx Context for cancellation.
 // @arg c The client SDK.
-// @arg gatewayID The gateway to run on.
+// @arg resourceServerID The resource server to run on.
 // @arg opType The operation type.
 // @arg params The operation parameters.
 // @arg w The writer for user-facing output.
 // @error error when the operation is unauthorized or the call fails.
 //
 // @testcase TestRunOp prints the result of an authorized operation.
-func runOp(ctx context.Context, c *client.Client, gatewayID, opType string, params map[string]any, w io.Writer) error {
-	res, err := c.Run(ctx, gatewayID, gateway.OperationRequest{Type: opType, Params: params})
+func runOp(ctx context.Context, c *client.Client, resourceServerID, opType string, params map[string]any, w io.Writer) error {
+	res, err := c.Run(ctx, resourceServerID, resourceserver.OperationRequest{Type: opType, Params: params})
 	if err == client.ErrNotAuthorized {
 		fmt.Fprintf(w, "Not authorized. Sign a grant request (granular sign ...), submit it (granular propose ...), have it approved, then retry.\n")
 		return err
@@ -511,21 +511,21 @@ func runOp(ctx context.Context, c *client.Client, gatewayID, opType string, para
 	return enc.Encode(res)
 }
 
-// runSign signs a grant request against one gateway and writes the gateway-signed result
+// runSign signs a grant request against one resource server and writes the resource server-signed result
 // (as JSON) to a file, or to the output writer when no path is given, so it can be stored
 // and later submitted with the propose command.
 //
 // @arg ctx Context for cancellation.
 // @arg c The client SDK.
-// @arg gatewayID The gateway to sign against.
+// @arg resourceServerID The resource server to sign against.
 // @arg req The grant request to sign.
 // @arg outPath The file to write the signed request to, or "" for the output writer.
 // @arg w The writer for user-facing output.
 // @error error when signing or writing fails.
 //
 // @testcase TestRunSign signs a request and writes it to a file.
-func runSign(ctx context.Context, c *client.Client, gatewayID string, req gateway.GrantRequest, outPath string, w io.Writer) error {
-	signed, err := c.Sign(ctx, gatewayID, req)
+func runSign(ctx context.Context, c *client.Client, resourceServerID string, req resourceserver.GrantRequest, outPath string, w io.Writer) error {
+	signed, err := c.Sign(ctx, resourceServerID, req)
 	if err != nil {
 		return err
 	}

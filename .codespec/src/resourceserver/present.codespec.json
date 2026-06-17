@@ -1,0 +1,28 @@
+{
+	"functions": [
+		{
+			"function_name": "buildPresentation",
+			"documentation_hash": "93d55fe93921aa8f40dcd6e56356d26d7810f20962cc8b3d3371a1ae9886bf40",
+			"definition_hash": "ee2f4fe92479cea99e297673a5550e808304251a99c7adc9c7dd1e404e78ffb5",
+			"reviewed_at": "2026-06-17T14:39:59.917883468Z"
+		},
+		{
+			"function_name": "actionLabels",
+			"documentation_hash": "54c54272a25feabd64478c4988daf4f07ce5e3a0d61bb34c5f184a2afd01d113",
+			"definition_hash": "641ead6e2ee9b4a2ef11359bfe93b6f624d4f265a560ba964e300b5ec632dd98",
+			"reviewed_at": "2026-06-17T10:32:28.564830729Z"
+		},
+		{
+			"function_name": "scopeResource",
+			"documentation_hash": "fd29d078b382d2cca97ac0c2ac3b5610d7cc40964d0f8e9bd0734296305860b8",
+			"definition_hash": "4cda11c1d2c80129b5926cbe6c71e8ee555aed47416c1b248467b8f19bb3fb09",
+			"reviewed_at": "2026-06-17T10:41:39.702845896Z"
+		},
+		{
+			"function_name": "resourceTypeName",
+			"documentation_hash": "008793176e9ce2e56af950e5d9f101af59830b62d095bc524583c1ba516398d7",
+			"definition_hash": "5b521963d378a85aeddf673f82e177f53e97912899e0402c14d56fd664b28f3f",
+			"reviewed_at": "2026-06-17T10:41:39.702961515Z"
+		}
+	]
+}

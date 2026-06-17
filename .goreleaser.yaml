@@ -1,5 +1,5 @@
 # GoReleaser configuration. granular ships as four independent binaries — the
-# client CLI, the authorization server, the GitHub gateway, and the policy admin
+# client CLI, the authorization server, the GitHub resource server, and the policy admin
 # CLI — each archived on its own so a release ships one bundle per binary (per
 # OS/arch). The three deployable services/clients also get Docker images.
 # See https://goreleaser.com.
@@ -36,9 +36,9 @@ builds:
       - -X main.commit={{ .Commit }}
       - -X main.date={{ .Date }}
 
-  - id: granular-github-gateway
-    main: ./cmd/granular-github-gateway
-    binary: granular-github-gateway
+  - id: granular-github-resource-server
+    main: ./cmd/granular-github-resource-server
+    binary: granular-github-resource-server
     env:
       - CGO_ENABLED=0
     goos: [linux, darwin, windows]
@@ -81,9 +81,9 @@ archives:
         formats: [zip]
     files: [LICENSE*, README*]
 
-  - id: granular-github-gateway
-    ids: [granular-github-gateway]
-    name_template: "granular-github-gateway_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+  - id: granular-github-resource-server
+    ids: [granular-github-resource-server]
+    name_template: "granular-github-resource-server_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     formats: [tar.gz]
     format_overrides:
       - goos: windows
@@ -127,11 +127,11 @@ dockers_v2:
       org.opencontainers.image.version: "{{ .Version }}"
       org.opencontainers.image.revision: "{{ .FullCommit }}"
 
-  - id: granular-github-gateway
-    ids: [granular-github-gateway]
-    dockerfile: Dockerfile.gateway
+  - id: granular-github-resource-server
+    ids: [granular-github-resource-server]
+    dockerfile: Dockerfile.resource-server
     images:
-      - ghcr.io/clems4ever/granular-github-gateway
+      - ghcr.io/clems4ever/granular-github-resource-server
     platforms: [linux/amd64, linux/arm64]
     tags: ["{{ .Version }}", latest]
     labels:

@@ -27,8 +27,8 @@
 		{
 			"function_name": "TestApproveDeniesWrongApprover",
 			"documentation_hash": "c35a7bf0cb41360be7eb8ff62094852d4cb19c7734261670aa4f6019d5111b9c",
-			"definition_hash": "9f2855039a767fcacc732a74e84990161322ae3e8fd1d8da0e18f6bee915e75e",
-			"reviewed_at": "2026-06-17T07:17:58.981443374Z"
+			"definition_hash": "6b3681d501063443e1cfbb1e8352b9b5a186f5fd56aee7e8ea8e70a77724d183",
+			"reviewed_at": "2026-06-17T14:46:17.080485791Z"
 		},
 		{
 			"function_name": "TestHumanizeUntil",

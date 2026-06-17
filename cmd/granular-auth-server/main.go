@@ -1,5 +1,5 @@
 // Command granular-auth-server is the granular authorization server (AS): the generic
-// policy authority. It registers Gateway HMAC credentials, accepts gateway-signed
+// policy authority. It registers ResourceServer HMAC credentials, accepts resource server-signed
 // grant-request bundles (proposals) from clients, serves the human consent screen
 // (GitHub login, gated on the approver email), and verifies operations against the
 // policy attached to a token. It holds no platform credentials and understands no

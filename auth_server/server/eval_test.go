@@ -8,7 +8,7 @@ import (
 
 // These tests keep the AS evaluation honest with a deliberately domain-agnostic
 // vocabulary (Granular::Agent/Action/Resource/Collection). The AS understands no
-// platform's terms — it evaluates whatever opaque world a gateway supplies — so the
+// platform's terms — it evaluates whatever opaque world a resource server supplies — so the
 // fixtures here are made-up entities, not GitHub ones. A covering policy must allow
 // through both an action-group roll-up and a resource hierarchy edge, and a permit
 // for one resource must not leak to a sibling.

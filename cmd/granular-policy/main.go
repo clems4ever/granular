@@ -176,7 +176,7 @@ func runShow(ctx context.Context, c *client.Client, policyToken string, w io.Wri
 		return nil
 	}
 	for _, g := range grants {
-		fmt.Fprintf(w, "%s (expires %s): %s\n", g.GatewayID, g.ExpiresAt, g.Item.Presentation.Summary)
+		fmt.Fprintf(w, "%s (expires %s): %s\n", g.ResourceServerID, g.ExpiresAt, g.Item.Presentation.Summary)
 	}
 	return nil
 }

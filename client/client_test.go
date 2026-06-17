@@ -8,35 +8,35 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/clems4ever/granular/gateway"
 	"github.com/clems4ever/granular/internal/proposal"
+	"github.com/clems4ever/granular/resourceserver"
 )
 
-const gwSecret = "s3cret"
+const rsSecret = "s3cret"
 
-// fakeGateway is an httptest server mimicking a gateway: it serves a one-action schema,
-// signs grant requests with gwSecret, and executes operations subject to an allow flag.
+// fakeResourceServer is an httptest server mimicking a resource server: it serves a one-action schema,
+// signs grant requests with rsSecret, and executes operations subject to an allow flag.
 //
 // @arg t The test handle.
-// @arg id The gateway id used when signing.
+// @arg id The resource server id used when signing.
 // @arg allow Whether the operations endpoint authorizes (200) or denies (403).
-// @return *httptest.Server The running fake gateway.
+// @return *httptest.Server The running fake resource server.
 //
-// @testcase TestRunExecutesWhenAuthorized drives an allowing gateway.
-func fakeGateway(t *testing.T, id string, allow bool) *httptest.Server {
+// @testcase TestRunExecutesWhenAuthorized drives an allowing resource server.
+func fakeResourceServer(t *testing.T, id string, allow bool) *httptest.Server {
 	t.Helper()
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/schema", func(w http.ResponseWriter, r *http.Request) {
-		_ = json.NewEncoder(w).Encode(gateway.Schema{
-			Resources: []gateway.ResourceType{{Name: "t.repo", Entity: "T::Repo"}},
-			Actions:   []gateway.Action{{Name: "repo.read", Title: "Read"}},
+		_ = json.NewEncoder(w).Encode(resourceserver.Schema{
+			Resources: []resourceserver.ResourceType{{Name: "t.repo", Entity: "T::Repo"}},
+			Actions:   []resourceserver.Action{{Name: "repo.read", Title: "Read"}},
 		})
 	})
 	mux.HandleFunc("POST /api/grant-requests/sign", func(w http.ResponseWriter, r *http.Request) {
-		var req gateway.GrantRequest
+		var req resourceserver.GrantRequest
 		_ = json.NewDecoder(r.Body).Decode(&req)
 		pres := proposal.Presentation{Title: "t", Summary: req.Reason}
-		_ = json.NewEncoder(w).Encode(proposal.Sign([]byte(gwSecret), id, pres, []string{"permit;"}))
+		_ = json.NewEncoder(w).Encode(proposal.Sign([]byte(rsSecret), id, pres, []string{"permit;"}))
 	})
 	mux.HandleFunc("POST /api/operations", func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("Authorization") == "" {
@@ -71,7 +71,7 @@ func fakeAS(t *testing.T, got *proposalSubmit) *httptest.Server {
 		_ = json.NewEncoder(w).Encode(policyResult{Token: "tok"})
 	})
 	mux.HandleFunc("GET /api/policy/{token}", func(w http.ResponseWriter, r *http.Request) {
-		_ = json.NewEncoder(w).Encode(policyResult{Grants: []Grant{{GatewayID: "g1", ExpiresAt: "soon"}}})
+		_ = json.NewEncoder(w).Encode(policyResult{Grants: []Grant{{ResourceServerID: "g1", ExpiresAt: "soon"}}})
 	})
 	mux.HandleFunc("DELETE /api/policy/{token}", func(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewEncoder(w).Encode(map[string]int{"destroyed": 2})
@@ -90,22 +90,22 @@ func fakeAS(t *testing.T, got *proposalSubmit) *httptest.Server {
 
 // readCap is the capability the proposal tests request.
 //
-// @return gateway.GrantRequest A one-capability grant request.
+// @return resourceserver.GrantRequest A one-capability grant request.
 //
 // @testcase TestSubmitSendsBundle proposes this request.
-func readCap() gateway.GrantRequest {
-	return gateway.GrantRequest{Reason: "work", Capabilities: []gateway.Capability{{
+func readCap() resourceserver.GrantRequest {
+	return resourceserver.GrantRequest{Reason: "work", Capabilities: []resourceserver.Capability{{
 		Actions:  []string{"repo.read"},
-		Resource: gateway.ResourceSelector{Type: "t.repo", Match: map[string]string{"owner": "o", "name": "r"}},
+		Resource: resourceserver.ResourceSelector{Type: "t.repo", Match: map[string]string{"owner": "o", "name": "r"}},
 	}}}
 }
 
-// TestSchemasFiltersGateways fetches all configured gateways and a named subset.
-func TestSchemasFiltersGateways(t *testing.T) {
-	g1, g2 := fakeGateway(t, "g1", true), fakeGateway(t, "g2", true)
-	c := New(Config{Gateways: []Gateway{{ID: "g1", BaseURL: g1.URL + "/"}, {ID: "g2", BaseURL: g2.URL}}})
+// TestSchemasFiltersResourceServers fetches all configured resource servers and a named subset.
+func TestSchemasFiltersResourceServers(t *testing.T) {
+	g1, g2 := fakeResourceServer(t, "g1", true), fakeResourceServer(t, "g2", true)
+	c := New(Config{ResourceServers: []ResourceServer{{ID: "g1", BaseURL: g1.URL + "/"}, {ID: "g2", BaseURL: g2.URL}}})
 
-	if ids := c.GatewayIDs(); len(ids) != 2 || ids[0] != "g1" || ids[1] != "g2" {
+	if ids := c.ResourceServerIDs(); len(ids) != 2 || ids[0] != "g1" || ids[1] != "g2" {
 		t.Fatalf("ids = %v", ids)
 	}
 	all, err := c.Schemas(context.Background())
@@ -119,16 +119,16 @@ func TestSchemasFiltersGateways(t *testing.T) {
 	if err != nil || len(sub) != 1 || sub["g2"].Resources[0].Entity != "T::Repo" {
 		t.Fatalf("subset: %v %v", sub, err)
 	}
-	if _, err := c.Schemas(context.Background(), "ghost"); !errors.Is(err, ErrUnknownGateway) {
-		t.Fatalf("want ErrUnknownGateway, got %v", err)
+	if _, err := c.Schemas(context.Background(), "ghost"); !errors.Is(err, ErrUnknownResourceServer) {
+		t.Fatalf("want ErrUnknownResourceServer, got %v", err)
 	}
 }
 
-// TestRunExecutesWhenAuthorized returns the result when the gateway authorizes.
+// TestRunExecutesWhenAuthorized returns the result when the resource server authorizes.
 func TestRunExecutesWhenAuthorized(t *testing.T) {
-	g1 := fakeGateway(t, "g1", true)
-	c := New(Config{Token: "tok", Gateways: []Gateway{{ID: "g1", BaseURL: g1.URL}}})
-	res, err := c.Run(context.Background(), "g1", gateway.OperationRequest{Type: "x"})
+	g1 := fakeResourceServer(t, "g1", true)
+	c := New(Config{Token: "tok", ResourceServers: []ResourceServer{{ID: "g1", BaseURL: g1.URL}}})
+	res, err := c.Run(context.Background(), "g1", resourceserver.OperationRequest{Type: "x"})
 	if err != nil {
 		t.Fatalf("run: %v", err)
 	}
@@ -137,54 +137,54 @@ func TestRunExecutesWhenAuthorized(t *testing.T) {
 	}
 }
 
-// TestRunNotAuthorized returns ErrNotAuthorized when the gateway denies.
+// TestRunNotAuthorized returns ErrNotAuthorized when the resource server denies.
 func TestRunNotAuthorized(t *testing.T) {
-	g1 := fakeGateway(t, "g1", false)
-	c := New(Config{Token: "tok", Gateways: []Gateway{{ID: "g1", BaseURL: g1.URL}}})
-	if _, err := c.Run(context.Background(), "g1", gateway.OperationRequest{Type: "x"}); !errors.Is(err, ErrNotAuthorized) {
+	g1 := fakeResourceServer(t, "g1", false)
+	c := New(Config{Token: "tok", ResourceServers: []ResourceServer{{ID: "g1", BaseURL: g1.URL}}})
+	if _, err := c.Run(context.Background(), "g1", resourceserver.OperationRequest{Type: "x"}); !errors.Is(err, ErrNotAuthorized) {
 		t.Fatalf("want ErrNotAuthorized, got %v", err)
 	}
 }
 
-// TestRunUnknownGateway errors with ErrUnknownGateway (and ErrNoToken without a token).
-func TestRunUnknownGateway(t *testing.T) {
-	c := New(Config{Token: "tok", Gateways: []Gateway{{ID: "g1", BaseURL: "http://x"}}})
-	if _, err := c.Run(context.Background(), "ghost", gateway.OperationRequest{Type: "x"}); !errors.Is(err, ErrUnknownGateway) {
-		t.Fatalf("want ErrUnknownGateway, got %v", err)
+// TestRunUnknownResourceServer errors with ErrUnknownResourceServer (and ErrNoToken without a token).
+func TestRunUnknownResourceServer(t *testing.T) {
+	c := New(Config{Token: "tok", ResourceServers: []ResourceServer{{ID: "g1", BaseURL: "http://x"}}})
+	if _, err := c.Run(context.Background(), "ghost", resourceserver.OperationRequest{Type: "x"}); !errors.Is(err, ErrUnknownResourceServer) {
+		t.Fatalf("want ErrUnknownResourceServer, got %v", err)
 	}
-	noTok := New(Config{Gateways: []Gateway{{ID: "g1", BaseURL: "http://x"}}})
-	if _, err := noTok.Run(context.Background(), "g1", gateway.OperationRequest{Type: "x"}); !errors.Is(err, ErrNoToken) {
+	noTok := New(Config{ResourceServers: []ResourceServer{{ID: "g1", BaseURL: "http://x"}}})
+	if _, err := noTok.Run(context.Background(), "g1", resourceserver.OperationRequest{Type: "x"}); !errors.Is(err, ErrNoToken) {
 		t.Fatalf("want ErrNoToken, got %v", err)
 	}
 }
 
-// TestSignReturnsSignedRequest signs a bundle at a gateway and checks it verifies.
+// TestSignReturnsSignedRequest signs a bundle at a resource server and checks it verifies.
 func TestSignReturnsSignedRequest(t *testing.T) {
-	g1 := fakeGateway(t, "g1", true)
-	c := New(Config{Gateways: []Gateway{{ID: "g1", BaseURL: g1.URL}}})
+	g1 := fakeResourceServer(t, "g1", true)
+	c := New(Config{ResourceServers: []ResourceServer{{ID: "g1", BaseURL: g1.URL}}})
 	signed, err := c.Sign(context.Background(), "g1", readCap())
 	if err != nil {
 		t.Fatalf("sign: %v", err)
 	}
-	if signed.GatewayID != "g1" || !signed.Verify([]byte(gwSecret)) {
+	if signed.ResourceServerID != "g1" || !signed.Verify([]byte(rsSecret)) {
 		t.Fatalf("signed request invalid: %+v", signed)
 	}
 }
 
-// TestSignUnknownGateway errors when signing against an unconfigured gateway.
-func TestSignUnknownGateway(t *testing.T) {
-	c := New(Config{Gateways: []Gateway{{ID: "g1", BaseURL: "http://x"}}})
-	if _, err := c.Sign(context.Background(), "ghost", readCap()); !errors.Is(err, ErrUnknownGateway) {
-		t.Fatalf("want ErrUnknownGateway, got %v", err)
+// TestSignUnknownResourceServer errors when signing against an unconfigured resource server.
+func TestSignUnknownResourceServer(t *testing.T) {
+	c := New(Config{ResourceServers: []ResourceServer{{ID: "g1", BaseURL: "http://x"}}})
+	if _, err := c.Sign(context.Background(), "ghost", readCap()); !errors.Is(err, ErrUnknownResourceServer) {
+		t.Fatalf("want ErrUnknownResourceServer, got %v", err)
 	}
 }
 
-// TestSubmitSendsBundle submits a signed bundle (possibly spanning gateways) to the AS.
+// TestSubmitSendsBundle submits a signed bundle (possibly spanning resource servers) to the AS.
 func TestSubmitSendsBundle(t *testing.T) {
 	var got proposalSubmit
-	g1 := fakeGateway(t, "g1", true)
+	g1 := fakeResourceServer(t, "g1", true)
 	as := fakeAS(t, &got)
-	c := New(Config{ASURL: as.URL, Token: "tok", Gateways: []Gateway{{ID: "g1", BaseURL: g1.URL}}})
+	c := New(Config{ASURL: as.URL, Token: "tok", ResourceServers: []ResourceServer{{ID: "g1", BaseURL: g1.URL}}})
 
 	signed, err := c.Sign(context.Background(), "g1", readCap())
 	if err != nil {
@@ -200,11 +200,11 @@ func TestSubmitSendsBundle(t *testing.T) {
 	if got.ApproverEmail != "approver@example.com" || len(got.Items) != 1 {
 		t.Fatalf("AS received %+v", got)
 	}
-	if !got.Items[0].Verify([]byte(gwSecret)) || got.Items[0].GatewayID != "g1" {
+	if !got.Items[0].Verify([]byte(rsSecret)) || got.Items[0].ResourceServerID != "g1" {
 		t.Fatal("submitted item is not a valid g1 signature")
 	}
 
-	noTok := New(Config{ASURL: as.URL, Gateways: []Gateway{{ID: "g1", BaseURL: g1.URL}}})
+	noTok := New(Config{ASURL: as.URL, ResourceServers: []ResourceServer{{ID: "g1", BaseURL: g1.URL}}})
 	if _, err := noTok.Submit(context.Background(), "a@b.c", []proposal.SignedGrantRequest{signed}); !errors.Is(err, ErrNoToken) {
 		t.Fatalf("want ErrNoToken, got %v", err)
 	}
@@ -233,7 +233,7 @@ func TestPolicyReadsGrants(t *testing.T) {
 	as := fakeAS(t, nil)
 	c := New(Config{ASURL: as.URL, Token: "admin"})
 	grants, err := c.Policy(context.Background(), "somepolicy")
-	if err != nil || len(grants) != 1 || grants[0].GatewayID != "g1" {
+	if err != nil || len(grants) != 1 || grants[0].ResourceServerID != "g1" {
 		t.Fatalf("grants: %v %v", grants, err)
 	}
 }

@@ -1,7 +1,7 @@
 // Package store persists the authorization server's state in a bbolt database:
 // policies (each identified by a token), pending proposals awaiting human approval,
 // and the approved grants attached to a policy token. It is domain-agnostic — grants
-// carry opaque, gateway-signed policy blobs the store never interprets. The clock and
+// carry opaque, resource server-signed policy blobs the store never interprets. The clock and
 // id generator are injectable for testing.
 //
 // A token *represents a policy*: PUT mints one, grants attach to it on approval, GET
@@ -50,7 +50,7 @@ type policyRecord struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-// Proposal is a bundle of gateway-signed grant requests a holder submitted for
+// Proposal is a bundle of resource server-signed grant requests a holder submitted for
 // approval against its policy token. ApproverEmail names the human who must sign in
 // to decide it. A proposal is only approvable while pending and before ExpiresAt; past
 // that it is automatically revoked (StatusExpired).
@@ -76,7 +76,7 @@ func (p *Proposal) Expired(now time.Time) bool {
 }
 
 // Grant is one approved, time-limited grant attached to a policy token. Item carries
-// the opaque, gateway-signed policies a gateway evaluates at enforcement.
+// the opaque, resource server-signed policies a resource server evaluates at enforcement.
 type Grant struct {
 	ID         string                      `json:"id"`
 	Token      string                      `json:"token"`
@@ -167,7 +167,7 @@ func (s *Store) PolicyExists(token string) bool {
 //
 // @arg token The policy the approved grants will attach to.
 // @arg approverEmail The human who must sign in to decide the proposal.
-// @arg items The gateway-signed grant requests bundled by the client.
+// @arg items The resource server-signed grant requests bundled by the client.
 // @arg ttl How long the proposal may stay pending before it is automatically revoked.
 // @return *Proposal The stored proposal with its generated id, pending status and expiry.
 // @error error when the proposal cannot be written.

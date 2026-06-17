@@ -1,0 +1,22 @@
+{
+	"functions": [
+		{
+			"function_name": "TestDefault",
+			"documentation_hash": "68254e1bdbeeb9e5cc19c8825f42f80ea4cb6828c98d9f8ccf740510eae24cd1",
+			"definition_hash": "6697a2c995514822d63d3005820fff3d10360bd8fb11543e325e6f71c1bab282",
+			"reviewed_at": "2026-06-17T14:39:59.943595126Z"
+		},
+		{
+			"function_name": "TestLoadParsesYAML",
+			"documentation_hash": "bf9b123c0dd33b5a852d8ff8273b1e1780a4d4eab11638770576928b64b85dfb",
+			"definition_hash": "b7afeb89fe27d14188e0dcd96c34658a5e622b254056f73f452bc0ab5d603c5a",
+			"reviewed_at": "2026-06-17T14:46:17.122562676Z"
+		},
+		{
+			"function_name": "TestLoadMissingSecretFile",
+			"documentation_hash": "c8b5b99440fde07da5101e4ba8d46377c4d294ac4ad56272b780ff4a1521ade7",
+			"definition_hash": "26743d7d9ec45759cbb782b22e35b01d2e262b44cee511615623b54d43f0037c",
+			"reviewed_at": "2026-06-17T14:46:17.122863666Z"
+		}
+	]
+}

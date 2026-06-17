@@ -2,22 +2,22 @@
 	"functions": [
 		{
 			"function_name": "Canonical",
-			"documentation_hash": "e3c142cd12fa153dd033213ddf602411ac1cf7a3d1c954017c13016e89602637",
-			"definition_hash": "23fe6993d61795aa93420bc444f3c4f297316e211eb9430f99a806f89ab0b169",
-			"reviewed_at": "2026-06-17T05:59:07.712274885Z"
+			"documentation_hash": "2629fff39d722aacca5728562c6afddbe5215c9b1ed945d405f30213ce67e4a5",
+			"definition_hash": "9fb309504e54350f31f9f5e276bae7c9d0289a62e763864ebc9344c97e228a7f",
+			"reviewed_at": "2026-06-17T14:39:59.913265994Z"
 		},
 		{
 			"function_name": "Sign",
-			"documentation_hash": "74226c1810c2685de8056c37bdadbd8fdf224d60a960a8534987416851e9c531",
-			"definition_hash": "5790f22906f1518f9f3036ec3e23e9208900a589730b5f478022fc1e9f1dc34e",
-			"reviewed_at": "2026-06-17T05:59:07.712553611Z"
+			"documentation_hash": "9a848cf8a37e5bcf9acdeab4c138ff944fd8411a584cae5a6b1938b9bf5d530a",
+			"definition_hash": "a83b7fec521b9d1b31f19c6f09bd457fde626520ea730bea63b6ccc23a5632a4",
+			"reviewed_at": "2026-06-17T14:39:59.913753665Z"
 		},
 		{
 			"function_name": "Verify",
 			"receiver": "SignedGrantRequest",
-			"documentation_hash": "30420de08f039b59e2a987b1293d2301715d3b65fa21b0bb7166dcbc4c07ae49",
-			"definition_hash": "7f785560d554fcac425b4b1f7627a7efc6adefd624917de9d857122272bbe4a7",
-			"reviewed_at": "2026-06-17T05:59:07.712828094Z"
+			"documentation_hash": "9fb602cfd4b0ec49c6b936b962101266a7b83308f514eb452e1414b303999a53",
+			"definition_hash": "0bc41f3dd452766f84733a6894da3f96a1d41c0e0b887c4ec9134ec0f2aaf918",
+			"reviewed_at": "2026-06-17T14:39:59.914172913Z"
 		},
 		{
 			"function_name": "mac",

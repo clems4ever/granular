@@ -8,9 +8,9 @@
 		},
 		{
 			"function_name": "item",
-			"documentation_hash": "122dd5bdede3b1f5e94a31b56e0c8b0fe427156a8663301bbcf4fdf37ed0ea37",
-			"definition_hash": "7cd717fe6dbea0bdc7d1e2dc0cf1ff588a5b4acb44e8e4639579a24601bf0965",
-			"reviewed_at": "2026-06-17T05:58:11.059968694Z"
+			"documentation_hash": "3f97b41d006eac28d532f80caf6172b683c754276ce6d41c684eed8dabe37ae2",
+			"definition_hash": "7f0050dc449a80f6e462e3b742d274d5f2e6fe73e1777e5397546333da406aac",
+			"reviewed_at": "2026-06-17T14:46:17.083886645Z"
 		},
 		{
 			"function_name": "TestPolicyLifecycle",

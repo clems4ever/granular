@@ -12,44 +12,44 @@ import (
 	"testing"
 
 	"github.com/clems4ever/granular/client"
-	"github.com/clems4ever/granular/gateway"
 	"github.com/clems4ever/granular/internal/proposal"
+	"github.com/clems4ever/granular/resourceserver"
 )
 
-// fakeGateway is a minimal gateway server for the CLI tests.
+// fakeResourceServer is a minimal resource server server for the CLI tests.
 //
 // @arg t The test handle.
-// @return *httptest.Server The running fake gateway.
+// @return *httptest.Server The running fake resource server.
 //
-// @testcase TestRunCatalog catalogs this gateway.
-func fakeGateway(t *testing.T) *httptest.Server {
+// @testcase TestRunCatalog catalogs this resource server.
+func fakeResourceServer(t *testing.T) *httptest.Server {
 	t.Helper()
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/schema", func(w http.ResponseWriter, r *http.Request) {
-		_ = json.NewEncoder(w).Encode(gateway.Schema{
-			Resources: []gateway.ResourceType{
+		_ = json.NewEncoder(w).Encode(resourceserver.Schema{
+			Resources: []resourceserver.ResourceType{
 				{Name: "t.org", Title: "Org"},
 				{Name: "t.repo", Title: "Repo", Parent: "t.org",
-					Match: []gateway.MatchField{{Name: "owner", Type: "string", Description: "owner login"}}},
+					Match: []resourceserver.MatchField{{Name: "owner", Type: "string", Description: "owner login"}}},
 			},
-			Groups:  []gateway.Group{{Name: "read", Description: "Everything readable."}},
-			Actions: []gateway.Action{{Name: "repo.read", Title: "Read repo", Resource: "t.repo", Groups: []string{"read"}}},
-			Operations: []gateway.OperationSpec{{
+			Groups:  []resourceserver.Group{{Name: "read", Description: "Everything readable."}},
+			Actions: []resourceserver.Action{{Name: "repo.read", Title: "Read repo", Resource: "t.repo", Groups: []string{"read"}}},
+			Operations: []resourceserver.OperationSpec{{
 				Type: "t.clone", Title: "Clone", Action: "repo.read", Resource: "t.repo",
-				Params: []gateway.Param{{Name: "repo", Type: "string", Required: true, Description: "owner/name"}},
+				Params: []resourceserver.Param{{Name: "repo", Type: "string", Required: true, Description: "owner/name"}},
 			}},
-			Templates: []gateway.Template{{
+			Templates: []resourceserver.Template{{
 				Name: "read-repo", Title: "Read a repo", Scope: "t.repo", Actions: []string{"read"},
 				Summary:     "Read {owner}",
 				Description: "Read access.",
-				Params: []gateway.TemplateParam{
+				Params: []resourceserver.TemplateParam{
 					{Name: "owner", Field: "owner", Required: true, Description: "owner login"},
 					{Name: "label", Attr: "labels", Op: "contains", Description: "only labeled"},
 				},
 			}},
-			Example: gateway.GrantRequest{Capabilities: []gateway.Capability{{
+			Example: resourceserver.GrantRequest{Capabilities: []resourceserver.Capability{{
 				Actions:  []string{"repo.read"},
-				Resource: gateway.ResourceSelector{Type: "t.repo", Match: map[string]string{"owner": "o"}},
+				Resource: resourceserver.ResourceSelector{Type: "t.repo", Match: map[string]string{"owner": "o"}},
 			}}},
 		})
 	})
@@ -82,15 +82,15 @@ func fakeAS(t *testing.T) *httptest.Server {
 	return ts
 }
 
-// newClient builds an SDK client over the given gateway and AS URLs with a token.
+// newClient builds an SDK client over the given resource server and AS URLs with a token.
 //
 // @arg asURL The AS base URL.
-// @arg gwURL The gateway base URL.
+// @arg rsURL The resource server base URL.
 // @return *client.Client A configured client.
 //
 // @testcase TestRunOp builds a client for the op test.
-func newClient(asURL, gwURL string) *client.Client {
-	return client.New(client.Config{ASURL: asURL, Token: "tok", Gateways: []client.Gateway{{ID: "g1", BaseURL: gwURL}}})
+func newClient(asURL, rsURL string) *client.Client {
+	return client.New(client.Config{ASURL: asURL, Token: "tok", ResourceServers: []client.ResourceServer{{ID: "g1", BaseURL: rsURL}}})
 }
 
 // TestCommandTree checks the sub-commands are wired under the root.
@@ -112,7 +112,7 @@ func TestDefaultConfig(t *testing.T) {
 	}
 }
 
-// TestLoadParsesConfig loads gateways and resolves the token file.
+// TestLoadParsesConfig loads resource servers and resolves the token file.
 func TestLoadParsesConfig(t *testing.T) {
 	dir := t.TempDir()
 	tokFile := filepath.Join(dir, "tok")
@@ -120,7 +120,7 @@ func TestLoadParsesConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 	cfgPath := filepath.Join(dir, "client.yaml")
-	body := "as_url: http://as:9090\ntoken_file: " + tokFile + "\ngateways:\n  - id: g1\n    base_url: http://gw\n"
+	body := "as_url: http://as:9090\ntoken_file: " + tokFile + "\nresource_servers:\n  - id: g1\n    base_url: http://rs\n"
 	if err := os.WriteFile(cfgPath, []byte(body), 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -128,7 +128,7 @@ func TestLoadParsesConfig(t *testing.T) {
 	if err != nil {
 		t.Fatalf("load: %v", err)
 	}
-	if c.ASURL != "http://as:9090" || c.Token != "secret" || len(c.Gateways) != 1 || c.Gateways[0].ID != "g1" {
+	if c.ASURL != "http://as:9090" || c.Token != "secret" || len(c.ResourceServers) != 1 || c.ResourceServers[0].ID != "g1" {
 		t.Fatalf("unexpected config: %+v", c)
 	}
 }
@@ -148,7 +148,7 @@ func TestLoadMissingTokenFile(t *testing.T) {
 
 // TestToClientUsesOverride prefers the override token over the configured one.
 func TestToClientUsesOverride(t *testing.T) {
-	cfg := &Config{ASURL: "http://as", Token: "configured", Gateways: []gatewayConf{{ID: "g1", BaseURL: "http://gw"}}}
+	cfg := &Config{ASURL: "http://as", Token: "configured", ResourceServers: []resourceServerConf{{ID: "g1", BaseURL: "http://rs"}}}
 	c := cfg.toClient("override")
 	if c.Token() != "override" {
 		t.Fatalf("token = %q, want override", c.Token())
@@ -210,8 +210,8 @@ func TestBuildSignRequest(t *testing.T) {
 // TestRunCatalog prints resources (with match fields), actions and the example so an
 // agent has everything it needs to build a grant request.
 func TestRunCatalog(t *testing.T) {
-	gw := fakeGateway(t)
-	c := newClient("http://as", gw.URL)
+	rs := fakeResourceServer(t)
+	c := newClient("http://as", rs.URL)
 	var buf bytes.Buffer
 	if err := runCatalog(context.Background(), c, nil, false, &buf); err != nil {
 		t.Fatalf("catalog: %v", err)
@@ -234,8 +234,8 @@ func TestRunCatalog(t *testing.T) {
 // TestRunTemplate lists templates and details one by name, showing its expanded actions,
 // scope and conditions.
 func TestRunTemplate(t *testing.T) {
-	gw := fakeGateway(t)
-	c := newClient("http://as", gw.URL)
+	rs := fakeResourceServer(t)
+	c := newClient("http://as", rs.URL)
 
 	var list bytes.Buffer
 	if err := runTemplate(context.Background(), c, nil, "", &list); err != nil {
@@ -269,13 +269,13 @@ func TestRunTemplate(t *testing.T) {
 
 // TestRunCatalogJSON prints the raw schema as JSON for programmatic consumption.
 func TestRunCatalogJSON(t *testing.T) {
-	gw := fakeGateway(t)
-	c := newClient("http://as", gw.URL)
+	rs := fakeResourceServer(t)
+	c := newClient("http://as", rs.URL)
 	var buf bytes.Buffer
 	if err := runCatalog(context.Background(), c, nil, true, &buf); err != nil {
 		t.Fatalf("catalog --json: %v", err)
 	}
-	var got map[string]gateway.Schema
+	var got map[string]resourceserver.Schema
 	if err := json.Unmarshal(buf.Bytes(), &got); err != nil {
 		t.Fatalf("decode json: %v", err)
 	}
@@ -287,8 +287,8 @@ func TestRunCatalogJSON(t *testing.T) {
 
 // TestRunOp prints the result of an authorized operation.
 func TestRunOp(t *testing.T) {
-	gw := fakeGateway(t)
-	c := newClient("http://as", gw.URL)
+	rs := fakeResourceServer(t)
+	c := newClient("http://as", rs.URL)
 	var buf bytes.Buffer
 	if err := runOp(context.Background(), c, "g1", "github.clone", map[string]any{"repo": "o/r"}, &buf); err != nil {
 		t.Fatalf("op: %v", err)
@@ -300,8 +300,8 @@ func TestRunOp(t *testing.T) {
 
 // TestRunSign signs a request and writes it to a file, then re-reads it as valid.
 func TestRunSign(t *testing.T) {
-	gw := fakeGateway(t)
-	c := newClient("http://as", gw.URL)
+	rs := fakeResourceServer(t)
+	c := newClient("http://as", rs.URL)
 	out := filepath.Join(t.TempDir(), "req.json")
 	req := buildGrantRequest("work", []string{"repo.read"}, "t.repo", map[string]string{"owner": "o"})
 	var buf bytes.Buffer
@@ -316,15 +316,15 @@ func TestRunSign(t *testing.T) {
 		t.Fatal(err)
 	}
 	var sgr proposal.SignedGrantRequest
-	if err := json.Unmarshal(data, &sgr); err != nil || sgr.GatewayID != "g1" {
+	if err := json.Unmarshal(data, &sgr); err != nil || sgr.ResourceServerID != "g1" {
 		t.Fatalf("stored request invalid: %v %+v", err, sgr)
 	}
 }
 
 // TestRunPropose bundles signed requests from files and prints the approval URL.
 func TestRunPropose(t *testing.T) {
-	gw, as := fakeGateway(t), fakeAS(t)
-	c := newClient(as.URL, gw.URL)
+	rs, as := fakeResourceServer(t), fakeAS(t)
+	c := newClient(as.URL, rs.URL)
 
 	// Produce a stored signed request via sign.
 	f := filepath.Join(t.TempDir(), "req.json")

@@ -1,5 +1,5 @@
-// Package verify holds the generic, domain-agnostic wire types for the gateway→AS
-// authorization check (POST /api/verify). The gateway supplies the whole Cedar world
+// Package verify holds the generic, domain-agnostic wire types for the resource server→AS
+// authorization check (POST /api/verify). The resource server supplies the whole Cedar world
 // (entities + action lattice) and the questions; the AS evaluates them against the
 // opaque policies attached to a token, never interpreting their meaning.
 package verify
@@ -27,7 +27,7 @@ type Request struct {
 	Context   map[string]string `json:"context,omitempty"`
 }
 
-// Input is the body a gateway posts to POST /api/verify: the policy token plus the
+// Input is the body a resource server posts to POST /api/verify: the policy token plus the
 // questions and the entity world to evaluate them against.
 type Input struct {
 	Token    string    `json:"token"`

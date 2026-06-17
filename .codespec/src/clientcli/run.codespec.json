@@ -14,27 +14,27 @@
 		},
 		{
 			"function_name": "runCatalog",
-			"documentation_hash": "5e393b70a22eaac31f403a4ab4ed42426c0d4a4bed8e990d3b80a3b38642ae2b",
-			"definition_hash": "e791f751b56b2a5fdbefa9e76dc3a342e5b76fb648239dfa2de89d02669a3613",
-			"reviewed_at": "2026-06-17T08:07:25.699321606Z"
+			"documentation_hash": "0a35b4416d97ea97aee0399467be4b5155e785649a932b060f4e19149e100b74",
+			"definition_hash": "b21b48cecd433fd72b32cde6ab6e3362e71e06f2d14272609362b5d3b78704a4",
+			"reviewed_at": "2026-06-17T14:46:17.109232456Z"
 		},
 		{
 			"function_name": "runOp",
-			"documentation_hash": "d4bb745322c96297d22caa3ec8422b701d672ec33d42094540385f0d8ba59404",
-			"definition_hash": "8cc96b2f74078d681ca83d3fcea6c4b0e92f0cb3d9084ad214b1bf32be6d6456",
-			"reviewed_at": "2026-06-17T06:58:36.087917635Z"
+			"documentation_hash": "db24427a5966f750c55877f0d052fe2d8c161b1ff56b4a011e746acd328708fc",
+			"definition_hash": "9360764a91886508464b93296957ee558ef477cb16bc50c2953aa18c2857d246",
+			"reviewed_at": "2026-06-17T14:39:59.907816298Z"
 		},
 		{
 			"function_name": "buildGrantRequest",
-			"documentation_hash": "391b5131458b3bbaa6da1125d2c7f5146a4064242fc4493d0137486c6c55c2fb",
-			"definition_hash": "13f84e8203b10cfb0227605d83a91f80f9e2441d9b48c98958ebf446a5267868",
-			"reviewed_at": "2026-06-17T06:58:36.086728962Z"
+			"documentation_hash": "01e88569e831e2ded965f112bcbc7271dae5f848c6c909c146682561f43c9d06",
+			"definition_hash": "4c68dcd42de727626ca542c89f334f48fb09c19d3e14fec761433db069ebfb5a",
+			"reviewed_at": "2026-06-17T14:39:59.89814284Z"
 		},
 		{
 			"function_name": "runSign",
-			"documentation_hash": "e169dddd54a3b77e240ee6c29a023301030977c04f0c4db416491a73ef36324c",
-			"definition_hash": "d91527e534bce867066894e27ae488e41f1c8b248212ac9cc731d3653f4db3aa",
-			"reviewed_at": "2026-06-17T06:58:36.088918507Z"
+			"documentation_hash": "9a9e9c216a47535257afd30df70adb6e94bc311a12efbace9dfa77e3672a41ce",
+			"definition_hash": "9a39cf7ee722822f11b633131d7a3aa10353640c1c8c85aaee89d3ef3786bf26",
+			"reviewed_at": "2026-06-17T14:39:59.910491937Z"
 		},
 		{
 			"function_name": "runPropose",
@@ -50,9 +50,9 @@
 		},
 		{
 			"function_name": "printSchema",
-			"documentation_hash": "fc5ea0762fdb7db885920fff5e69b8d16a9e426ff5bcb3ca47e6e19d99fd65b2",
-			"definition_hash": "e3217833925cb773c797b22c00b62b49329822bfb57ce6018a9af9c98c6bccd4",
-			"reviewed_at": "2026-06-17T09:45:18.127433075Z"
+			"documentation_hash": "e66225b163961a2c361f50446358c5116b3e7d55d087c82312b4ff7849d07cc2",
+			"definition_hash": "55c29922e83a2d3085a30c00ec6607e9e5a9d7db2f7d7d7b4adc47fe453d4727",
+			"reviewed_at": "2026-06-17T14:39:59.899793322Z"
 		},
 		{
 			"function_name": "formatMatch",
@@ -63,20 +63,20 @@
 		{
 			"function_name": "resourceDepth",
 			"documentation_hash": "eb4d90627ca654b97415549990fbd350d4200db85e87553c7b4be34bb87eecdb",
-			"definition_hash": "b0409f07ff331efd5ea2aaf866bce79a4a918c54ac1160412c5e87c8c631607e",
-			"reviewed_at": "2026-06-17T08:23:59.741451059Z"
+			"definition_hash": "6d93dacf147706d393b5c8794958285c23bde1a1f3fef9699daa9dfd7c45da33",
+			"reviewed_at": "2026-06-17T14:39:59.900492778Z"
 		},
 		{
 			"function_name": "groupActions",
 			"documentation_hash": "1a88a5dae36b13d3023d7ef74388780b60fab5ac2580966a53d3397f9800ac73",
-			"definition_hash": "56757ff20bc5d3591b7e552a7ca8436c982b1cc53ee10bcab9a9ccf40fa5ea70",
-			"reviewed_at": "2026-06-17T08:23:59.74282932Z"
+			"definition_hash": "3d56f8877552569252755248ef6af00000e33f1f0e34abd10d4d4585721d88fd",
+			"reviewed_at": "2026-06-17T14:39:59.901483033Z"
 		},
 		{
 			"function_name": "buildSignRequest",
-			"documentation_hash": "8c82a2f70a77d977d833eaa7ffb096d17a4c65941b5df1cc6108a437e3b27527",
-			"definition_hash": "bc4f9b0bda00b25b4d75d0be35605024f17fe9e765a55a18ed3a7e347d2c4219",
-			"reviewed_at": "2026-06-17T09:30:55.688126875Z"
+			"documentation_hash": "6f14271c116ed6485f228744fda4fc1c642357be5975ec1c85ae83306b5ce484",
+			"definition_hash": "0151e972181983c2f1263ca61714694134b2437a5664d2f1680084a00e8dd854",
+			"reviewed_at": "2026-06-17T14:39:59.897325177Z"
 		},
 		{
 			"function_name": "parseBinds",
@@ -86,33 +86,33 @@
 		},
 		{
 			"function_name": "runTemplate",
-			"documentation_hash": "84a55ea0c6607ee755d66695f262d3b0842be96e4d6927adb9a58f26059f4940",
-			"definition_hash": "298cba1c51750d3ca9c9df1bdd01cb12700c502cea728548aff544941871ae6f",
-			"reviewed_at": "2026-06-17T09:45:18.129939561Z"
+			"documentation_hash": "4bd92134f121f6e19514957c73e817267201c8fb46162ce23a518537a3012d7d",
+			"definition_hash": "996b7c56049a59a02318bd0f4048787ea191b9dd0ae7b89e049fd30515522777",
+			"reviewed_at": "2026-06-17T14:46:17.112592688Z"
 		},
 		{
 			"function_name": "printTemplateDetail",
-			"documentation_hash": "c2cd51b7536b1303af973eca6f863bdd387aee473dca04ea1ff1b94d5143b535",
-			"definition_hash": "ea6f28b6e29a94e3f5c76fbb75167f4bef81f4444ce4ba6ab1c74920f821051f",
-			"reviewed_at": "2026-06-17T09:45:18.132578368Z"
+			"documentation_hash": "63a733ccfbbab3dc3092952c19bd6783b5870c04439f36dc06a2002d4c081a78",
+			"definition_hash": "8e868809721e120262798bbbcbc5f947bf795f62c82cf719a53595d414c0104e",
+			"reviewed_at": "2026-06-17T14:39:59.902415061Z"
 		},
 		{
 			"function_name": "templateActions",
 			"documentation_hash": "f9896cb9b1a24e7093d9eb1a524e9a726c6be50d6da2012d0ee9bf46ec00512a",
-			"definition_hash": "3bfa72b05c5aea8e66bbc07f334ab8bec7fb1d089a61b7535396722f9dfa5196",
-			"reviewed_at": "2026-06-17T09:45:18.135220635Z"
+			"definition_hash": "ab873c1e7c341b90a78b30519793c672e606127fd46b9d67ba5ba365ec7580f8",
+			"reviewed_at": "2026-06-17T14:39:59.903661332Z"
 		},
 		{
 			"function_name": "conditionPhrase",
-			"documentation_hash": "39f1812641ead8448ee71b2929588ad4de27497b8042dc15c10acd295c36e341",
+			"documentation_hash": "3bb54c8875eec004e1b48efd8627551631e0f2b0c41ea0d11290207813e6328b",
 			"definition_hash": "d82cfab655ba41c2687e80886e6c8f998b4b2aef7bfa22b3bd62971ffed7929c",
-			"reviewed_at": "2026-06-17T09:45:18.136234003Z"
+			"reviewed_at": "2026-06-17T14:39:59.904783144Z"
 		},
 		{
 			"function_name": "bindHints",
 			"documentation_hash": "3058190a5b5d8ef94be2efd9944a46665867810c9eb53f45f6a3cd95fa1e3152",
-			"definition_hash": "e180a92b19ce3973e310f6c8b8ca8c208f3e797c9546648262be8b230a449916",
-			"reviewed_at": "2026-06-17T09:45:18.137613441Z"
+			"definition_hash": "058fb4d9f93f863f0cb75be9787edb82807f403efa3e19382051382a42707cb0",
+			"reviewed_at": "2026-06-17T14:39:59.905913429Z"
 		}
 	]
 }

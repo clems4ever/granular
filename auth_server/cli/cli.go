@@ -91,8 +91,8 @@ func run(cfg *asconfig.Config) error {
 	}
 	defer st.Close()
 
-	gateways := cfg.GatewaySecrets()
-	srv := server.New(st, cfg.BaseURL, gateways)
+	resourceServers := cfg.ResourceServerSecrets()
+	srv := server.New(st, cfg.BaseURL, resourceServers)
 	srv.UseAdminToken(cfg.AdminToken)
 	srv.UseRequestTTL(cfg.GrantRequestTTL.Std())
 
@@ -104,10 +104,10 @@ func run(cfg *asconfig.Config) error {
 	})
 	srv.UseAuth(auth)
 
-	if len(gateways) == 0 {
-		log.Printf("warning: no gateways registered; /api/proposals and /api/verify will reject every caller until a gateway is configured")
+	if len(resourceServers) == 0 {
+		log.Printf("warning: no resource servers registered; /api/proposals and /api/verify will reject every caller until a resource server is configured")
 	} else {
-		log.Printf("%d gateway(s) registered", len(gateways))
+		log.Printf("%d resource server(s) registered", len(resourceServers))
 	}
 	if cfg.AdminToken == "" {
 		log.Printf("warning: no admin_token_file configured; policy administration (PUT/GET/DELETE /api/policy) is disabled until one is set")

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/clems4ever/granular/gateway"
 	"github.com/clems4ever/granular/internal/proposal"
+	"github.com/clems4ever/granular/resourceserver"
 )
 
 // Proposal is the AS's answer to a submitted proposal: its id, the URL the approver
@@ -31,24 +31,24 @@ type proposalResult struct {
 	Error      string `json:"error,omitempty"`
 }
 
-// Sign asks one gateway to sign a capability bundle, returning the gateway-signed grant
-// request. The gateway validates the actions against its own schema and authors the
+// Sign asks one resource server to sign a capability bundle, returning the resource server-signed grant
+// request. The resource server validates the actions against its own schema and authors the
 // human-readable description, so the caller can store the result and later submit it
-// (alone or bundled with other gateways' signed requests) without being able to tamper
+// (alone or bundled with other resource servers' signed requests) without being able to tamper
 // with it.
 //
 // @arg ctx Context for cancellation.
-// @arg gatewayID The gateway that signs (and validates) the bundle.
+// @arg resourceServerID The resource server that signs (and validates) the bundle.
 // @arg req The capability bundle to sign.
-// @return proposal.SignedGrantRequest The gateway-signed grant request.
-// @error ErrUnknownGateway when the gateway id is not configured.
-// @error error when the gateway rejects the capabilities or signing fails.
+// @return proposal.SignedGrantRequest The resource server-signed grant request.
+// @error ErrUnknownResourceServer when the resource server id is not configured.
+// @error error when the resource server rejects the capabilities or signing fails.
 //
-// @testcase TestSignReturnsSignedRequest signs a bundle at a gateway.
-// @testcase TestSignUnknownGateway errors on an unconfigured gateway.
-func (c *Client) Sign(ctx context.Context, gatewayID string, req gateway.GrantRequest) (proposal.SignedGrantRequest, error) {
+// @testcase TestSignReturnsSignedRequest signs a bundle at a resource server.
+// @testcase TestSignUnknownResourceServer errors on an unconfigured resource server.
+func (c *Client) Sign(ctx context.Context, resourceServerID string, req resourceserver.GrantRequest) (proposal.SignedGrantRequest, error) {
 	var signed proposal.SignedGrantRequest
-	base, err := c.gatewayURL(gatewayID)
+	base, err := c.resourceServerURL(resourceServerID)
 	if err != nil {
 		return signed, err
 	}
@@ -57,19 +57,19 @@ func (c *Client) Sign(ctx context.Context, gatewayID string, req gateway.GrantRe
 		return signed, err
 	}
 	if status != http.StatusOK {
-		return signed, fmt.Errorf("gateway %q rejected the grant request (status %d)", gatewayID, status)
+		return signed, fmt.Errorf("resource server %q rejected the grant request (status %d)", resourceServerID, status)
 	}
 	return signed, nil
 }
 
-// Submit packs one or more gateway-signed grant requests into a proposal and submits it
+// Submit packs one or more resource server-signed grant requests into a proposal and submits it
 // to the AS under the client's policy token, returning the proposal id and the approval
-// URL to hand to the user. The signed items may come from different gateways; the AS
+// URL to hand to the user. The signed items may come from different resource servers; the AS
 // verifies each one's signature independently.
 //
 // @arg ctx Context for cancellation.
 // @arg approverEmail The email of the human who must approve.
-// @arg items The gateway-signed grant requests to bundle.
+// @arg items The resource server-signed grant requests to bundle.
 // @return Proposal The submitted proposal's id and approval URL.
 // @error ErrNoToken when no policy token is configured.
 // @error error when the approver/items are missing or the AS rejects the proposal.

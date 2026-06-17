@@ -18,11 +18,11 @@ cleanup_interval: "2m"
 # the agent must submit a fresh one. Defaults to 15m.
 grant_request_ttl: "15m"
 
-# The GitHub gateway authenticates with this shared HMAC secret; the same secret file
-# is mounted into the gateway under the same id.
-gateways:
-  - id: "github-gateway"
-    secret_file: "/run/secrets/granular_gateway_github_secret"
+# The GitHub resource server authenticates with this shared HMAC secret; the same secret file
+# is mounted into the resource server under the same id.
+resource_servers:
+  - id: "github-resource-server"
+    secret_file: "/run/secrets/granular_resource_server_github_secret"
 
 # Gates policy administration (the granular-policy CLI mints tokens against it).
 admin_token_file: "/run/secrets/granular_auth_admin_token"

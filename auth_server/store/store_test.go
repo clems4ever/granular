@@ -27,11 +27,11 @@ func openTemp(t *testing.T) *Store {
 
 // item builds a minimal signed grant request carrying one opaque policy.
 //
-// @return proposal.SignedGrantRequest A signed item for gateway "gw".
+// @return proposal.SignedGrantRequest A signed item for resource server "rs".
 //
 // @testcase TestProposalApprovalAttachesGrants attaches this item.
 func item() proposal.SignedGrantRequest {
-	return proposal.Sign([]byte("s"), "gw", proposal.Presentation{Summary: "x"}, []string{"permit(principal, action, resource);"})
+	return proposal.Sign([]byte("s"), "rs", proposal.Presentation{Summary: "x"}, []string{"permit(principal, action, resource);"})
 }
 
 // TestPolicyLifecycle covers minting a policy token, checking existence, and destroy.

@@ -4,7 +4,7 @@
 #
 # The AS is the policy authority: it stores grants, runs the human consent screen,
 # and answers allow/deny. It holds NO platform credentials — those live on the
-# Resource-Gateways, which authenticate to the AS with the per-gateway shared secret
+# resource servers, which authenticate to the AS with the per-resource-server shared secret
 # registered below.
 
 # HTTP listen address.
@@ -28,13 +28,13 @@ cleanup_interval: "2m"
 # the agent must submit a fresh one. Defaults to 15m.
 grant_request_ttl: "15m"
 
-# Registered Resource-Gateways. Each gateway signs its grant-request and verify
+# Registered resource servers. Each resource server signs its grant-request and verify
 # calls with the shared secret loaded from secret_file (an HMAC over the request
-# body, sent in X-Gateway-Signature with the gateway id in X-Gateway-ID). A request
-# from an unregistered or wrongly-signed gateway is rejected with 401.
-gateways:
-  - id: "github-gateway"
-    secret_file: "/run/secrets/granular_gateway_github_secret"
+# body, sent in X-Resource-Server-Signature with the resource server id in X-Resource-Server-ID). A request
+# from an unregistered or wrongly-signed resource server is rejected with 401.
+resource_servers:
+  - id: "github-resource-server"
+    secret_file: "/run/secrets/granular_resource_server_github_secret"
 
 # The admin token gates the policy-administration endpoints (PUT/GET/DELETE /api/policy)
 # the granular-policy admin CLI calls to mint, inspect, and destroy policy tokens. Never

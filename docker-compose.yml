@@ -1,21 +1,21 @@
 # Example docker-compose for a local granular deployment.
 #
 # It runs the two long-lived services — the authorization server (AS) and the GitHub
-# gateway — from the published images, wired together with a per-gateway shared HMAC
+# resource server — from the published images, wired together with a per-resource-server shared HMAC
 # secret. The granular-client CLI is available as an on-demand "cli"-profile service.
 #
 # ---------------------------------------------------------------------------------
 # 1. Create the secret files (kept out of git by .gitignore's /.secrets rule):
 #
 #      mkdir -p .secrets
-#      openssl rand -hex 32           > .secrets/granular_gateway_github_secret  # shared AS<->gateway HMAC
+#      openssl rand -hex 32           > .secrets/granular_resource_server_github_secret  # shared AS<->resource server HMAC
 #      openssl rand -hex 32           > .secrets/granular_auth_admin_token       # gates policy administration
-#      printf '%s' "$GITHUB_PAT"      > .secrets/granular_github_token           # PAT the gateway uses
+#      printf '%s' "$GITHUB_PAT"      > .secrets/granular_github_token           # PAT the resource server uses
 #
 # 2. Start the services:
 #
 #      docker compose up -d
-#      # AS consent UI:  http://localhost:9090      gateway: http://localhost:8080
+#      # AS consent UI:  http://localhost:9090      resource server: http://localhost:8080
 #
 # 3. Mint a policy token (admin) and hand it to the client. Using the local CLI:
 #
@@ -23,10 +23,10 @@
 #        --admin-token "$(cat .secrets/granular_auth_admin_token)" create \
 #        > .secrets/granular_policy_token
 #
-# 4. Drive the gateway through the client (on-demand, joins the compose network):
+# 4. Drive the resource server through the client (on-demand, joins the compose network):
 #
-#      docker compose run --rm client catalog github-gateway
-#      docker compose run --rm client sign --gateway github-gateway \
+#      docker compose run --rm client catalog github-resource-server
+#      docker compose run --rm client sign --resource-server github-resource-server \
 #        --template read-repo --bind repo=clems4ever/granular --out /tmp/req.json
 #
 # To require a GitHub login on the consent screen, see deploy/compose/granular-auth.yaml
@@ -45,22 +45,22 @@ services:
       # the unprivileged process (uid 65532) can write the data_dir subdirectory.
       - auth-data:/home/nonroot
     secrets:
-      - granular_gateway_github_secret
+      - granular_resource_server_github_secret
       - granular_auth_admin_token
       # - granular_auth_oauth_client_secret   # uncomment to enable GitHub login
     restart: unless-stopped
 
-  gateway:
-    image: ghcr.io/clems4ever/granular-github-gateway:latest
-    command: ["--config", "/etc/granular/granular-github-gateway.yaml"]
+  resource-server:
+    image: ghcr.io/clems4ever/granular-github-resource-server:latest
+    command: ["--config", "/etc/granular/granular-github-resource-server.yaml"]
     depends_on:
       - auth-server
     ports:
       - "8080:8080"
     volumes:
-      - ./deploy/compose/granular-github-gateway.yaml:/etc/granular/granular-github-gateway.yaml:ro
+      - ./deploy/compose/granular-github-resource-server.yaml:/etc/granular/granular-github-resource-server.yaml:ro
     secrets:
-      - granular_gateway_github_secret
+      - granular_resource_server_github_secret
       - granular_github_token
     restart: unless-stopped
 
@@ -77,8 +77,8 @@ services:
       - granular_policy_token
 
 secrets:
-  granular_gateway_github_secret:
-    file: ./.secrets/granular_gateway_github_secret
+  granular_resource_server_github_secret:
+    file: ./.secrets/granular_resource_server_github_secret
   granular_auth_admin_token:
     file: ./.secrets/granular_auth_admin_token
   granular_github_token:

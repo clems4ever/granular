@@ -4,40 +4,40 @@
 			"function_name": "Load",
 			"documentation_hash": "20343bb9c339e0f134a2a972f5c1201d64d21b0dfff814c5f37a8939e40fb6d1",
 			"definition_hash": "a1e757fc620e66bc6d032c8d25bcdea7343e56fc997c07d1e10287843c256fa5",
-			"reviewed_at": "2026-06-17T05:59:07.70344512Z"
+			"reviewed_at": "2026-06-17T14:43:58.78112329Z"
 		},
 		{
 			"function_name": "resolveSecrets",
 			"receiver": "Config",
-			"documentation_hash": "6d102fcbc442ea684ad456810ec228af79298aebc332904f3fb14cce828088e1",
-			"definition_hash": "6c6e2d36cf137837edf23e94224c261916926b1eec7ad40c8d67288a392cd734",
-			"reviewed_at": "2026-06-17T07:17:56.952526377Z"
-		},
-		{
-			"function_name": "GatewaySecrets",
-			"receiver": "Config",
-			"documentation_hash": "3959fd04f08edb091ee1a118364db1ce7c05ff327dca8632d7bcec7a4633976b",
-			"definition_hash": "b79448dbdcd104a6a248223c035e32b38398753bec1df9bddb74dfe3d1f64224",
-			"reviewed_at": "2026-06-17T05:59:07.703682288Z"
+			"documentation_hash": "df72caaedab85f383a17b9d96995d6475239e4af68ccb0d448dbb758e6203a4b",
+			"definition_hash": "76cac05c208f0111dd673e0c16d8129d1d28a785bd717e2d0434c88718b2b1dc",
+			"reviewed_at": "2026-06-17T14:43:58.781244409Z"
 		},
 		{
 			"function_name": "readSecretFile",
 			"documentation_hash": "44dbe39bedf454c0bff692904e47717b03dcf9b9736574cd9f8af8d982bf0b95",
 			"definition_hash": "5af73927ed53baf7c6ff53112f2210a7a2ee47faeab087b68a9334ee6bbd47c7",
-			"reviewed_at": "2026-06-17T05:59:07.703801203Z"
+			"reviewed_at": "2026-06-17T14:43:58.781365846Z"
 		},
 		{
 			"function_name": "Default",
-			"documentation_hash": "d0b58baeb4ec3a613b6304f242e4d4844f02b167adb2e5886f4a2fa2ee248f96",
+			"documentation_hash": "acf344497cacb00bcf6e126b5b7d4d213d20637e1c175e3c1a36b29a2e00f170",
 			"definition_hash": "1916dd0673df771cd397f509bc35e4724e29e1870787fe40cd8cb6a48b0aed49",
-			"reviewed_at": "2026-06-17T05:59:07.703912626Z"
+			"reviewed_at": "2026-06-17T14:43:58.781482935Z"
 		},
 		{
 			"function_name": "applyDefaults",
 			"receiver": "Config",
 			"documentation_hash": "d4902345e9a87d28ee6df0db419b6bb9a53a66b421e344b0915c3c35682af3e6",
 			"definition_hash": "dabb47e6233401e86f4c2c13d7032e96f32151d15efb8c382567427f91870de0",
-			"reviewed_at": "2026-06-17T13:37:31.43454812Z"
+			"reviewed_at": "2026-06-17T14:43:58.78160818Z"
+		},
+		{
+			"function_name": "ResourceServerSecrets",
+			"receiver": "Config",
+			"documentation_hash": "8dafe9d51788529e03ea2d215d927f2cc62ce297b8bbe5eb4036ebe965076db0",
+			"definition_hash": "cff34340da52c415582476c131908ebabc5cc019c4f9b339ad270d4ced0fde6c",
+			"reviewed_at": "2026-06-17T14:43:58.781714582Z"
 		}
 	]
 }

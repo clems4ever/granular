@@ -10,19 +10,19 @@ import (
 	"github.com/clems4ever/granular/client"
 )
 
-// gatewayConf is one gateway entry in the client configuration file.
-type gatewayConf struct {
+// resourceServerConf is one resource server entry in the client configuration file.
+type resourceServerConf struct {
 	ID      string `yaml:"id"`
 	BaseURL string `yaml:"base_url"`
 }
 
 // Config is the granular client configuration: the AS base URL, an optional file holding
-// the policy token, and the known gateways. The token is never stored inline — token_file
+// the policy token, and the known resource servers. The token is never stored inline — token_file
 // names a path read at load time.
 type Config struct {
-	ASURL     string        `yaml:"as_url"`
-	TokenFile string        `yaml:"token_file"`
-	Gateways  []gatewayConf `yaml:"gateways"`
+	ASURL           string               `yaml:"as_url"`
+	TokenFile       string               `yaml:"token_file"`
+	ResourceServers []resourceServerConf `yaml:"resource_servers"`
 
 	// Token is read from TokenFile at load time (empty when no file is set).
 	Token string `yaml:"-"`
@@ -35,7 +35,7 @@ type Config struct {
 // @return *Config The parsed configuration with its token resolved.
 // @error error when the file cannot be read, is invalid YAML, or the token file cannot be read.
 //
-// @testcase TestLoadParsesConfig loads gateways and resolves the token file.
+// @testcase TestLoadParsesConfig loads resource servers and resolves the token file.
 // @testcase TestLoadMissingTokenFile errors when the token file is absent.
 func Load(path string) (*Config, error) {
 	data, err := os.ReadFile(path)
@@ -59,7 +59,7 @@ func Load(path string) (*Config, error) {
 
 // Default returns the configuration used when no file is supplied.
 //
-// @return *Config A configuration with defaults applied and no gateways.
+// @return *Config A configuration with defaults applied and no resource servers.
 //
 // @testcase TestDefaultConfig checks the built-in defaults.
 func Default() *Config {
@@ -89,9 +89,9 @@ func (c *Config) toClient(tokenOverride string) *client.Client {
 	if tokenOverride != "" {
 		token = tokenOverride
 	}
-	gws := make([]client.Gateway, len(c.Gateways))
-	for i, g := range c.Gateways {
-		gws[i] = client.Gateway{ID: g.ID, BaseURL: g.BaseURL}
+	rsIDs := make([]client.ResourceServer, len(c.ResourceServers))
+	for i, g := range c.ResourceServers {
+		rsIDs[i] = client.ResourceServer{ID: g.ID, BaseURL: g.BaseURL}
 	}
-	return client.New(client.Config{ASURL: c.ASURL, Token: token, Gateways: gws})
+	return client.New(client.Config{ASURL: c.ASURL, Token: token, ResourceServers: rsIDs})
 }

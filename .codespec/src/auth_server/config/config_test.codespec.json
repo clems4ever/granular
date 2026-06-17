@@ -2,51 +2,51 @@
 	"functions": [
 		{
 			"function_name": "TestLoadParsesYAML",
-			"documentation_hash": "7a1b580edf30801e35db627171cb2106ebb42f0f6383b3e8e558067fc233ecbf",
-			"definition_hash": "4a0492321b0c61bfa1fdb2e5cf3c87486498d6675e7f921fbca701c73df4a7c3",
-			"reviewed_at": "2026-06-17T13:34:09.711006675Z"
+			"documentation_hash": "62fed0755d589c1f405f1959125086025f517e42846e211aac63be4a38a9520e",
+			"definition_hash": "57d8b23dd0e6362a46d65137011ebb44bb83c7c7f4dceb367895d960dbfd5f15",
+			"reviewed_at": "2026-06-17T14:46:17.079302924Z"
 		},
 		{
 			"function_name": "TestLoadAppliesDefaults",
 			"documentation_hash": "74d301d6301f8bbc322841f5fd3d9d3fe8f2943e0e9c900e3dabd03ca6fd581b",
 			"definition_hash": "b8ae7aa5750ef9c75d2ad67fce60a46910bdf2aa6bbeee82fd69a361bfd81ff7",
-			"reviewed_at": "2026-06-17T13:34:09.712425809Z"
+			"reviewed_at": "2026-06-17T14:43:58.78194611Z"
 		},
 		{
 			"function_name": "TestLoadMissingFile",
 			"documentation_hash": "5c293870068be8e7b223050316c7135c7b446a618f5b79e0515a11496265566d",
 			"definition_hash": "ad1b59b8f6fd401d3a41fee6cdfe8e77640d67ce47b128620a1eff50485a5033",
-			"reviewed_at": "2026-06-17T05:58:11.065218825Z"
+			"reviewed_at": "2026-06-17T14:43:58.782058443Z"
 		},
 		{
 			"function_name": "TestLoadMissingSecretFile",
 			"documentation_hash": "c8b5b99440fde07da5101e4ba8d46377c4d294ac4ad56272b780ff4a1521ade7",
-			"definition_hash": "4e6676ff882b13b1c88a788370619ca9fb74fe1dd244513336b65164a8d17431",
-			"reviewed_at": "2026-06-17T05:58:11.065315323Z"
+			"definition_hash": "2f65ba632647735bfbe6d3d30d748b895db702bc41143a5e25aeb90cb58117ec",
+			"reviewed_at": "2026-06-17T14:46:17.079654239Z"
 		},
 		{
 			"function_name": "TestDefault",
 			"documentation_hash": "7f3646a2aff530133728d2621824bf1ad60c5a8585653647f66e8a5e1a119ec0",
 			"definition_hash": "f975d53c8f4ad981bc1d20fb5275c6bfe6ae348f85d9dde7284b531214180df1",
-			"reviewed_at": "2026-06-17T05:58:11.065415805Z"
-		},
-		{
-			"function_name": "TestGatewaySecretsSkipsIncomplete",
-			"documentation_hash": "69f31c59effff6199b990e03ff0877e8e9314a33541aa505d5b3c08a5d11eb64",
-			"definition_hash": "f5c720debb9a06414002cb39e0f320b5e8c72ba5e92e4c2c82adb273165d6a62",
-			"reviewed_at": "2026-06-17T05:58:11.065512203Z"
+			"reviewed_at": "2026-06-17T14:43:58.782345201Z"
 		},
 		{
 			"function_name": "TestDurationUnmarshalInvalid",
 			"documentation_hash": "79e056b9231e454b0d72f3bdb9d8fa5481138423b4254747fc978053faaaeb24",
 			"definition_hash": "162e5e6e3b8ae5d5036eac37fa7bb3554ea83b226c8dbdac789f7cc673c42071",
-			"reviewed_at": "2026-06-17T11:31:52.354065334Z"
+			"reviewed_at": "2026-06-17T14:43:58.782577329Z"
 		},
 		{
 			"function_name": "TestDurationStd",
 			"documentation_hash": "dacd32810b79e31cb30a32b5c157bfc66ff74b8af31eadb2c61d198a0b678937",
 			"definition_hash": "4867fc533f19c3ab696d4822bef84f323c6d52fcaef747a6a63f1bb9af8090ec",
-			"reviewed_at": "2026-06-17T11:31:52.354835226Z"
+			"reviewed_at": "2026-06-17T14:43:58.782707496Z"
+		},
+		{
+			"function_name": "TestResourceServerSecretsSkipsIncomplete",
+			"documentation_hash": "475288175a3430ee240cce709075b6f53dffc13c413a44d3366e60bad96a1e58",
+			"definition_hash": "35d3d128385891cb124161c570afa66ab1a8f2eec68d7278e4100cbf39c41246",
+			"reviewed_at": "2026-06-17T14:43:58.782823507Z"
 		}
 	]
 }

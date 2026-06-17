@@ -29,16 +29,16 @@ var ttlOptions = []ttlOption{
 	{"24 hours", "24h"},
 }
 
-// itemView is one gateway-signed grant request rendered on the consent page. Every
-// field is taken verbatim from the gateway-authored Presentation; the AS adds no
+// itemView is one resource server-signed grant request rendered on the consent page. Every
+// field is taken verbatim from the resource server-authored Presentation; the AS adds no
 // meaning of its own. Policies are the raw, opaque blobs, shown collapsed.
 type itemView struct {
-	GatewayID string
-	Title     string
-	Summary   string
-	Detail    string
-	Grants    []proposal.GrantDetail
-	Policies  []string
+	ResourceServerID string
+	Title            string
+	Summary          string
+	Detail           string
+	Grants           []proposal.GrantDetail
+	Policies         []string
 }
 
 // approvalView is the data passed to the consent page template.
@@ -62,11 +62,11 @@ type mismatchView struct {
 // ExpiresIn is the relative time until expiry (e.g. "in 12m"); ExpiresAt is the absolute
 // time shown as a tooltip.
 type grantRow struct {
-	GatewayID string
-	Summary   string
-	CreatedAt string
-	ExpiresIn string
-	ExpiresAt string
+	ResourceServerID string
+	Summary          string
+	CreatedAt        string
+	ExpiresIn        string
+	ExpiresAt        string
 }
 
 // historyRow is one past or pending proposal shown on the activity page (the request and
@@ -151,11 +151,11 @@ func buildActivity(now time.Time, grants []store.Grant, proposals []store.Propos
 	v := activityView{}
 	for _, g := range grants {
 		v.Active = append(v.Active, grantRow{
-			GatewayID: g.Item.GatewayID,
-			Summary:   g.Item.Presentation.Summary,
-			CreatedAt: fmtTime(g.CreatedAt),
-			ExpiresIn: humanizeUntil(now, g.ExpiresAt),
-			ExpiresAt: fmtTime(g.ExpiresAt),
+			ResourceServerID: g.Item.ResourceServerID,
+			Summary:          g.Item.Presentation.Summary,
+			CreatedAt:        fmtTime(g.CreatedAt),
+			ExpiresIn:        humanizeUntil(now, g.ExpiresAt),
+			ExpiresAt:        fmtTime(g.ExpiresAt),
 		})
 	}
 	for _, p := range proposals {
@@ -223,12 +223,12 @@ func viewItems(p *store.Proposal) []itemView {
 	out := make([]itemView, 0, len(p.Items))
 	for _, it := range p.Items {
 		out = append(out, itemView{
-			GatewayID: it.GatewayID,
-			Title:     it.Presentation.Title,
-			Summary:   it.Presentation.Summary,
-			Detail:    it.Presentation.Detail,
-			Grants:    it.Presentation.Grants,
-			Policies:  it.Policies,
+			ResourceServerID: it.ResourceServerID,
+			Title:            it.Presentation.Title,
+			Summary:          it.Presentation.Summary,
+			Detail:           it.Presentation.Detail,
+			Grants:           it.Presentation.Grants,
+			Policies:         it.Policies,
 		})
 	}
 	return out

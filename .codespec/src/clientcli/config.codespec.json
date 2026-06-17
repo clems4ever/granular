@@ -2,15 +2,15 @@
 	"functions": [
 		{
 			"function_name": "Load",
-			"documentation_hash": "574496675e2d2ff1de59999268a2cf852d2dd61d6703bbd3290a77584d67ba3f",
+			"documentation_hash": "b8c56ac82f41476add2dc26e6a75003991895cbd1cf948442f6439c503f5db01",
 			"definition_hash": "cb19e949d03cc70fd2b859a0589ee6a7349cdbf96d310eba4640f9851dba1cab",
-			"reviewed_at": "2026-06-17T06:46:38.142777621Z"
+			"reviewed_at": "2026-06-17T14:39:59.896365459Z"
 		},
 		{
 			"function_name": "Default",
-			"documentation_hash": "d56554767e48bac85ba80ff567e142ba0e8a260f04b66fe5b2f2c0d68f4c0e18",
+			"documentation_hash": "039535679abb0b400b13dbba16fb2301344c7d7dfaad3aaf1ed24139804e2b14",
 			"definition_hash": "1916dd0673df771cd397f509bc35e4724e29e1870787fe40cd8cb6a48b0aed49",
-			"reviewed_at": "2026-06-17T06:46:38.143752535Z"
+			"reviewed_at": "2026-06-17T14:39:59.896604715Z"
 		},
 		{
 			"function_name": "applyDefaults",
@@ -23,8 +23,8 @@
 			"function_name": "toClient",
 			"receiver": "Config",
 			"documentation_hash": "113718f52c31e28bf0fb53414e140a7c80428f455f7505cf962c7bfddb351bdb",
-			"definition_hash": "4480d5167a8a5d87300933ed4aa571f8de8e0b9fc6c697f1d79ba479a83f3da0",
-			"reviewed_at": "2026-06-17T06:46:38.144738662Z"
+			"definition_hash": "0b2256b2d405aa3a2a4366de633bbf869b765b1ae9b8ccf8e76ca46a5619fe7b",
+			"reviewed_at": "2026-06-17T14:46:17.107330908Z"
 		}
 	]
 }

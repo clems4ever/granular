@@ -26,7 +26,7 @@ func fakeAS(t *testing.T) *httptest.Server {
 		_ = json.NewEncoder(w).Encode(map[string]string{"token": "tok"})
 	})
 	mux.HandleFunc("GET /api/policy/{token}", func(w http.ResponseWriter, r *http.Request) {
-		_ = json.NewEncoder(w).Encode(map[string]any{"grants": []client.Grant{{GatewayID: "g1", ExpiresAt: "soon"}}})
+		_ = json.NewEncoder(w).Encode(map[string]any{"grants": []client.Grant{{ResourceServerID: "g1", ExpiresAt: "soon"}}})
 	})
 	mux.HandleFunc("DELETE /api/policy/{token}", func(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewEncoder(w).Encode(map[string]int{"destroyed": 3})

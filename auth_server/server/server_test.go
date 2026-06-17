@@ -17,7 +17,7 @@ import (
 	"github.com/clems4ever/granular/internal/verify"
 )
 
-const gwSecret = "s3cret"
+const rsSecret = "s3cret"
 
 // adminToken is the policy-administration bearer the test server is configured with.
 const adminToken = "admintok"
@@ -26,7 +26,7 @@ const adminToken = "admintok"
 // repo "r".
 const testPolicy = `permit(principal == Granular::Agent::"a", action == Granular::Action::"view", resource == Granular::Repo::"r");`
 
-// newServer returns a server registered with gateway "gw"/gwSecret and its handler.
+// newServer returns a server registered with resource server "rs"/rsSecret and its handler.
 //
 // @arg t The test handle.
 // @return *Server The server under test.
@@ -40,13 +40,13 @@ func newServer(t *testing.T) (*Server, http.Handler) {
 		t.Fatalf("open store: %v", err)
 	}
 	t.Cleanup(func() { st.Close() })
-	srv := New(st, "http://as.example", map[string]string{"gw": gwSecret})
+	srv := New(st, "http://as.example", map[string]string{"rs": rsSecret})
 	srv.UseAdminToken(adminToken)
 	return srv, srv.Handler()
 }
 
 // do sends a request to h and returns the response, optionally with a bearer token
-// and a gateway HMAC signature over the body.
+// and a resource server HMAC signature over the body.
 //
 // @arg t The test handle.
 // @arg h The handler.
@@ -54,7 +54,7 @@ func newServer(t *testing.T) (*Server, http.Handler) {
 // @arg path The request path.
 // @arg body The request body (may be nil).
 // @arg bearer A policy token for the Authorization header, or "".
-// @arg sign Whether to attach a valid gateway signature over the body.
+// @arg sign Whether to attach a valid resource server signature over the body.
 // @return *http.Response The response.
 //
 // @testcase TestProposalApproveFlow drives requests through here.
@@ -70,10 +70,10 @@ func do(t *testing.T, h http.Handler, method, path string, body []byte, bearer s
 		req.Header.Set("Authorization", "Bearer "+bearer)
 	}
 	if sign {
-		mac := hmac.New(sha256.New, []byte(gwSecret))
+		mac := hmac.New(sha256.New, []byte(rsSecret))
 		mac.Write(body)
-		req.Header.Set("X-Gateway-ID", "gw")
-		req.Header.Set("X-Gateway-Signature", hex.EncodeToString(mac.Sum(nil)))
+		req.Header.Set("X-Resource-Server-ID", "rs")
+		req.Header.Set("X-Resource-Server-Signature", hex.EncodeToString(mac.Sum(nil)))
 	}
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -104,13 +104,13 @@ func createPolicy(t *testing.T, h http.Handler) string {
 	return out.Token
 }
 
-// signedItem builds a gateway-signed grant request carrying testPolicy.
+// signedItem builds a resource server-signed grant request carrying testPolicy.
 //
-// @return proposal.SignedGrantRequest A valid signed item for gateway "gw".
+// @return proposal.SignedGrantRequest A valid signed item for resource server "rs".
 //
 // @testcase TestProposalApproveFlow proposes this item.
 func signedItem() proposal.SignedGrantRequest {
-	return proposal.Sign([]byte(gwSecret), "gw",
+	return proposal.Sign([]byte(rsSecret), "rs",
 		proposal.Presentation{Title: "View", Summary: "View repo r"},
 		[]string{testPolicy})
 }
@@ -206,7 +206,7 @@ func TestProposalApproveFlow(t *testing.T) {
 func TestProposalRejectsBadSignature(t *testing.T) {
 	_, h := newServer(t)
 	token := createPolicy(t, h)
-	bad := proposal.Sign([]byte("wrong"), "gw", proposal.Presentation{Summary: "x"}, []string{testPolicy})
+	bad := proposal.Sign([]byte("wrong"), "rs", proposal.Presentation{Summary: "x"}, []string{testPolicy})
 	pin, _ := json.Marshal(proposalInput{ApproverEmail: "me@example.com", Items: []proposal.SignedGrantRequest{bad}})
 	resp := do(t, h, http.MethodPost, "/api/proposals", pin, token, false)
 	defer resp.Body.Close()
@@ -226,8 +226,8 @@ func TestPolicyRejectsUnknownToken(t *testing.T) {
 	}
 }
 
-// TestVerifyRejectsUnknownGateway rejects a verify call not signed by a known gateway.
-func TestVerifyRejectsUnknownGateway(t *testing.T) {
+// TestVerifyRejectsUnknownResourceServer rejects a verify call not signed by a known resource server.
+func TestVerifyRejectsUnknownResourceServer(t *testing.T) {
 	_, h := newServer(t)
 	token := createPolicy(t, h)
 	resp := do(t, h, http.MethodPost, "/api/verify", verifyBody(token), "", false)

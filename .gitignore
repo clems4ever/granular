@@ -6,7 +6,7 @@ granular-workspace/
 
 /granular.yaml
 /granular-auth.yaml
-/granular-github-gateway.yaml
+/granular-github-resource-server.yaml
 /granular-client.yaml
 
 /.secrets

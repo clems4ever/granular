@@ -1,0 +1,22 @@
+{
+	"functions": [
+		{
+			"function_name": "TestMainIsEntryPoint",
+			"documentation_hash": "d84afff4d536ee330b34cf08fa18af4c3df3661dc6b6e625ed62fae0fffb8667",
+			"definition_hash": "f1d8b8e691cd0432ac0c194d0356aea4929fc731feb4c65c0527e533888a62f8",
+			"reviewed_at": "2026-06-17T14:48:37.726945505Z"
+		},
+		{
+			"function_name": "TestLoadConfigMissingUsesDefaults",
+			"documentation_hash": "64d846d331b0e7cb916020056c4d207c6b9cd4e91816a6c90bce498686a57d98",
+			"definition_hash": "2e9123eaccb9fd3729c14421404585e3662a174950ce2461f10b6e9e104d90ec",
+			"reviewed_at": "2026-06-17T14:48:37.727337637Z"
+		},
+		{
+			"function_name": "TestRunRejectsBadConfig",
+			"documentation_hash": "6b4a0536bb8bc0fc1322ee282866ef792e75bc0e768c64f826728847c37e708d",
+			"definition_hash": "4a0e4a40df97bbcea0a17e566749cdd2ca607252131e7275709112ff44388794",
+			"reviewed_at": "2026-06-17T14:48:37.727537386Z"
+		}
+	]
+}

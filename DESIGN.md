@@ -2,35 +2,35 @@
 
 Granular grants **fine-grained, time-limited, human-approved** permissions to act
 on third-party platforms (GitHub, and others later). Rather than handing an agent
-a broad token, every permission is frozen by the platform gateway into a
+a broad token, every permission is frozen by the platform resource server into a
 grant request, approved by a human in a browser, and expires.
 
 The defining constraint is a **separation of authority**: the component that runs
 the consent screen and stores grants (the *authorization server*) is fully
 domain-agnostic — it never holds a platform credential and understands no
 permission vocabulary — while the component that holds the credential and knows
-what a permission *means* (the *gateway*) never decides approval and never stores
+what a permission *means* (the *resource server*) never decides approval and never stores
 grants.
 
 ## Components
 
-- **`granular-client` (agent CLI)** — reads a gateway's permission schema, builds
+- **`granular-client` (agent CLI)** — reads a resource server's permission schema, builds
   grant requests, submits them to the AS for approval, and runs operations once
   authorized. It holds no platform credential and no signing secret. Operations
   and proposals are attached to a **policy token** (a bearer credential).
 
-- **`granular-github-gateway` (gateway / Resource Server)** — owns the GitHub
+- **`granular-github-resource-server` (resource server / Resource Server)** — owns the GitHub
   credential and the permission vocabulary. It serves the permission **schema**,
   **signs** grant requests (see below), and **executes** operations — but only
   after the AS confirms the operation is authorized. The GitHub specifics live in
-  `gateway-github`; the wire protocol and signing live in the generic `gateway`
+  `resourceserver-github`; the wire protocol and signing live in the generic `resourceserver`
   SDK so a second platform is a new schema + executors, not a new server.
 
 - **`granular-auth-server` (authorization server, AS)** — the generic policy
-  authority. It registers gateway HMAC credentials, accepts signed grant-request
+  authority. It registers resource server HMAC credentials, accepts signed grant-request
   bundles (**proposals**) from clients, runs the human **consent screen**, stores
   **grants**, and answers **allow/deny** at operation time. It holds no platform
-  credential, authors no policy, and renders the gateway's consent text verbatim.
+  credential, authors no policy, and renders the resource server's consent text verbatim.
 
 - **`granular-policy` (admin CLI)** — mints, inspects, and destroys **policy
   tokens** against the AS admin credential. Policy lifecycle is deliberately an
@@ -38,7 +38,7 @@ grants.
 
 ## The signed-artifact model
 
-The pivotal idea: **the gateway, not the AS, produces the consent content**, and
+The pivotal idea: **the resource server, not the AS, produces the consent content**, and
 it freezes it at sign time. A signed grant request carries two index-aligned parts
 (`internal/proposal`):
 
@@ -48,7 +48,7 @@ it freezes it at sign time. A signed grant request carries two index-aligned par
 - the **Policies** — the machine-enforced [Cedar](https://www.cedarpolicy.com/)
   rules that actually gate operations.
 
-The gateway HMAC-signs both with the per-gateway secret it shares with the AS. The
+The resource server HMAC-signs both with the per-resource-server secret it shares with the AS. The
 client cannot forge or alter either; the AS verifies the signature, stores the
 bytes, and **renders the Presentation verbatim** — it has no vocabulary with which
 to interpret, expand, or add to it. The consent screen also exposes the raw Cedar
@@ -58,14 +58,14 @@ A client builds a request two ways, both producing the same signed artifact:
 
 - **Freeform** — raw actions over a scoped resource (`sign --actions … --resource
   … --match …`). Maximum flexibility.
-- **Template** — a gateway-authored, parameterized permission shape (`sign
+- **Template** — a resource server-authored, parameterized permission shape (`sign
   --template … --bind …`), where parameters bind to scope or to a condition (or
   are fixed). Better readability on the consent screen.
 
 ## Request flow
 
 ```
-client (agent)                gateway (GitHub)              AS + human (browser)
+client (agent)                resource server (GitHub)              AS + human (browser)
   | GET /api/schema --------------> |                                |
   |<------------ schema ----------- |                                |
   | POST /api/grant-requests/sign-> | freeze Presentation + Policies |
@@ -95,14 +95,14 @@ restart, and re-running an operation after approval simply succeeds.
 | GET    | `/api/policy/{token}`    | Inspect a token's grants. **Admin-gated.**                     |
 | DELETE | `/api/policy/{token}`    | Destroy a token and its grants. **Admin-gated.**              |
 | POST   | `/api/proposals`         | Submit a signed grant-request bundle; returns approval URL + expiry. |
-| POST   | `/api/verify`            | Gateway asks whether a policy token authorizes an operation.   |
-| GET    | `/proposal/{id}`         | Human consent page (renders the gateway Presentation verbatim). |
+| POST   | `/api/verify`            | resource server asks whether a policy token authorizes an operation.   |
+| GET    | `/proposal/{id}`         | Human consent page (renders the resource server Presentation verbatim). |
 | POST   | `/proposal/{id}`         | Approve (with a grant TTL) or reject.                          |
 | GET    | `/activity`              | Active grants + request history.                              |
 | GET    | `/auth/github/{login,callback,logout}` | GitHub OAuth login for the consent pages.        |
 | GET    | `/`, `/static/…`         | Landing page and embedded assets.                             |
 
-**Gateway** (`gateway/server`):
+**resource server** (`resourceserver/server`):
 
 | Method | Path                          | Purpose                                              |
 |--------|-------------------------------|------------------------------------------------------|
@@ -119,10 +119,10 @@ There is **no global allowlist**: each proposal names an **approver email**, and
 only the human whose verified GitHub email matches may decide it. The session is
 an HMAC-signed, HttpOnly cookie.
 
-The gateway↔AS channel is authenticated by a **per-gateway HMAC secret**: the
-gateway sends its id in `X-Gateway-ID` and an HMAC over the body in
-`X-Gateway-Signature`; the AS verifies against the secret registered for that id
-and rejects an unknown or wrongly-signed gateway with `401`.
+The resource server↔AS channel is authenticated by a **per-resource-server HMAC secret**: the
+resource server sends its id in `X-Resource-Server-ID` and an HMAC over the body in
+`X-Resource-Server-Signature`; the AS verifies against the secret registered for that id
+and rejects an unknown or wrongly-signed resource server with `401`.
 
 ## Policy tokens and admin
 
@@ -149,14 +149,14 @@ Two independent clocks, both enforced:
 ## Security properties
 
 - **The AS is domain-agnostic.** It holds no permission vocabulary, authors no
-  Cedar, and ships no catalog. It stores the gateway's signed (Presentation,
+  Cedar, and ships no catalog. It stores the resource server's signed (Presentation,
   Policies) opaquely and renders the Presentation verbatim — it cannot add to or
   reinterpret what the human approves.
-- **The AS holds no platform credential.** Credentials live only on the gateway.
-- **The client holds no signing secret.** Only the gateway and the AS share the
-  per-gateway HMAC secret; the client cannot forge a grant request.
+- **The AS holds no platform credential.** Credentials live only on the resource server.
+- **The client holds no signing secret.** Only the resource server and the AS share the
+  per-resource-server HMAC secret; the client cannot forge a grant request.
 - **Secrets are never inline.** Every secret is referenced by a `*_file` path read
-  at load time (gateway HMAC secret, GitHub PAT, AS admin token, OAuth secrets).
+  at load time (resource server HMAC secret, GitHub PAT, AS admin token, OAuth secrets).
 - **Approval is bound to identity.** A proposal is decided only by the human whose
   verified GitHub email matches its named approver.
 
@@ -165,14 +165,14 @@ Two independent clocks, both enforced:
 ```
 cmd/granular-client/          agent CLI entrypoint (main.go only)
 cmd/granular-auth-server/     AS entrypoint
-cmd/granular-github-gateway/  GitHub gateway entrypoint
+cmd/granular-github-resource-server/  GitHub resource server entrypoint
 cmd/granular-policy/          policy admin CLI entrypoint
 clientcli/                    client command tree (catalog, template, op, sign, propose)
 client/                       client SDK: proposals, operations, policy admin
-gateway/                      generic gateway SDK: schema, sign, present, verify
-gateway/asclient/             gateway's client for the AS verify call
-gateway-github/               GitHub gateway: schema, templates, operation specs
-gateway-github/internal/      GitHub-only, unimportable from outside the gateway:
+resourceserver/                      generic resource server SDK: schema, sign, present, verify
+resourceserver/asclient/             resource server's client for the AS verify call
+resourceserver-github/               GitHub resource server: schema, templates, operation specs
+resourceserver-github/internal/      GitHub-only, unimportable from outside the resource server:
   catalog/                      GitHub permission vocabulary (resources, actions)
   authz/                        GitHub requirement + resource-reference primitives
   operations/                   operation framework + GitHub operation implementations
@@ -181,6 +181,6 @@ auth_server/server/           AS HTTP handlers, consent UI, GitHub-OAuth login, 
 auth_server/server/web/       embedded consent/activity templates + stylesheet
 auth_server/store/            grants + proposals store (bbolt)
 internal/proposal/            the signed (Presentation, Policies) artifact
-internal/verify/              generic, domain-agnostic gateway↔AS verify wire types
+internal/verify/              generic, domain-agnostic resource server↔AS verify wire types
 internal/api/                 shared wire types
 ```

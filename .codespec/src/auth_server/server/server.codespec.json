@@ -2,133 +2,133 @@
 	"functions": [
 		{
 			"function_name": "New",
-			"documentation_hash": "09a8da58954c5fad51be320a0f4452c2a811f95fd4f929b3453862fe1e40a3d1",
-			"definition_hash": "4e7e23f5ef3974081e2e4dc85bf804646a44771bc6ae4683c0e77d55a94d20f2",
-			"reviewed_at": "2026-06-17T10:59:41.540688989Z"
+			"documentation_hash": "e83e4bfe9d8f93da2c2d1fe45c930e8fca2284c67e72352c3c3127b8fc446cef",
+			"definition_hash": "faa88d06c2562a8e856c9ea52d4b64ca4a862a778c5f054807e8e3f1c97fedeb",
+			"reviewed_at": "2026-06-17T14:43:58.748704123Z"
 		},
 		{
 			"function_name": "UseAuth",
 			"receiver": "Server",
 			"documentation_hash": "5e99f4c0ce4317178b883f54c171f30c2a9eac11c56ce6cfc59dd69f67980324",
 			"definition_hash": "9714b9be2a27a2aa866e1cc5bdc08cffba0f3ad23e104a4dc5da89c4007da35a",
-			"reviewed_at": "2026-06-17T05:59:07.636261824Z"
+			"reviewed_at": "2026-06-17T14:43:58.749502883Z"
 		},
 		{
 			"function_name": "Handler",
 			"receiver": "Server",
 			"documentation_hash": "a3ba76f784c0bfc2c15e216672d43ba96da3a3e802605cca65641a3e28dc6b77",
-			"definition_hash": "f4d64dbce2373d861caf55d8144f41ab2ee4781f715d543dd692d11d1d2d9f4f",
-			"reviewed_at": "2026-06-17T10:21:20.960502677Z"
+			"definition_hash": "78192fd47a7ca2ceb8e8ca87755fe57a85507ad122a1162987841e9d1c2748c7",
+			"reviewed_at": "2026-06-17T14:43:58.750270812Z"
 		},
 		{
 			"function_name": "handleCreatePolicy",
 			"receiver": "Server",
 			"documentation_hash": "e1eeccea4d120398cb92cf8338af8712913219b36f0cc2b4d9ba4ff0137a6de5",
 			"definition_hash": "4d849d3f899054623f18e45a9003115e21eba0e071730aafa179ce7c9e2f04bb",
-			"reviewed_at": "2026-06-17T07:18:00.753531751Z"
+			"reviewed_at": "2026-06-17T14:43:58.75108587Z"
 		},
 		{
 			"function_name": "handleGetPolicy",
 			"receiver": "Server",
 			"documentation_hash": "27f7da9b8fd49b11d9684154449d1713410bdcfcd85fe14b7ce6d4223e286f4a",
-			"definition_hash": "e9cffe817acdc683ead6083619a8896e0cf5becd4ad19f05f6c244c9f44ee562",
-			"reviewed_at": "2026-06-17T07:18:00.755458706Z"
+			"definition_hash": "78eb045b6f79846018f087f2c4c2c805aa31f5ed3027d73eae4653e5a0cd0173",
+			"reviewed_at": "2026-06-17T14:43:58.752983138Z"
 		},
 		{
 			"function_name": "handleDestroyPolicy",
 			"receiver": "Server",
 			"documentation_hash": "355725fe87f0e49871139b55853aa6970dd7277773dae35e749c41121a0ec51d",
 			"definition_hash": "b776a54e56b5dbb1bf611029808776ae464436445b212264822a548920d5b989",
-			"reviewed_at": "2026-06-17T07:18:00.758405266Z"
+			"reviewed_at": "2026-06-17T14:43:58.754002796Z"
 		},
 		{
 			"function_name": "handleProposal",
 			"receiver": "Server",
-			"documentation_hash": "d457fb0fd03e06fbfffc9be5f3cd695a82ca5f1f9b8fc026d499f5e8951c7674",
-			"definition_hash": "a4b139d21368d016465e01cd3fe4e3b0cf9f0be8901556545bfe0bde0052d640",
-			"reviewed_at": "2026-06-17T10:59:41.546552116Z"
+			"documentation_hash": "d71ff7afe5a07184bfb6f682904cef0764e9c94dc516b83b1359cfbaefa73664",
+			"definition_hash": "26c46adef34b8e39268f06bb6effda5c4d48a375ffdf4de02f7fd04d2602a3bd",
+			"reviewed_at": "2026-06-17T14:43:58.755046536Z"
 		},
 		{
 			"function_name": "handleVerify",
 			"receiver": "Server",
-			"documentation_hash": "ca10a6d4dfcaeb4ad5d1a3ec190f5477d5b648963e12e1f313490dcc005296c1",
-			"definition_hash": "8333b2d02bb045399a63056044992d2fed16832d09cf22a419b8dea9f94b1876",
-			"reviewed_at": "2026-06-17T05:59:07.64335942Z"
+			"documentation_hash": "47636f3101e33c63396c4ade124280374beb2ca0be75aa1f69e470e6c82b9471",
+			"definition_hash": "d6fbf398014aded5cd640339c209650f672d24d4a513db7e78b735033bf601a1",
+			"reviewed_at": "2026-06-17T14:43:58.756137641Z"
 		},
 		{
 			"function_name": "bearerPolicy",
 			"receiver": "Server",
 			"documentation_hash": "7b92656dd9e774de932c03d1bfe8f40cad6f2bd7fc0077648bc33cb6550ce6d9",
 			"definition_hash": "b58c89d0d2425bbae2001497650f2a43da1884c6146aaf9e46c8d834965496ab",
-			"reviewed_at": "2026-06-17T05:59:07.644799721Z"
-		},
-		{
-			"function_name": "authenticateGateway",
-			"receiver": "Server",
-			"documentation_hash": "92eb70246ae3da28ac96acb66b3732873dc3616be2edf2791830dd8f4eec3f54",
-			"definition_hash": "a17ce979c3e6f76f2f274507e148c8da45b211cc796708adcb5cf5ade6509493",
-			"reviewed_at": "2026-06-17T05:59:07.646176951Z"
+			"reviewed_at": "2026-06-17T14:43:58.757890727Z"
 		},
 		{
 			"function_name": "protect",
 			"receiver": "Server",
 			"documentation_hash": "a8919689db5971f252a486871e7186c13197806a7d2a97b03febddac67153b30",
 			"definition_hash": "727620a1481bb0fca25eca7052fbe54f30e645b23720980ab1dcd1eddc43363d",
-			"reviewed_at": "2026-06-17T05:59:07.647209564Z"
+			"reviewed_at": "2026-06-17T14:43:58.759678776Z"
 		},
 		{
 			"function_name": "render",
 			"receiver": "Server",
 			"documentation_hash": "5dca95b6a72c13fcfecda907a28894428ff5889cc0ed31caccf17510c79fcd63",
 			"definition_hash": "b865aaa3651bfc0bdfa267c0ac888ba87496146bffa9bfc7908cfe3a2a498da1",
-			"reviewed_at": "2026-06-17T05:59:07.650251664Z"
+			"reviewed_at": "2026-06-17T14:43:58.76098613Z"
 		},
 		{
 			"function_name": "navFor",
 			"receiver": "Server",
 			"documentation_hash": "a3fe2b2537c0d88229a68fb2079318f51537ac9aef7aaf250202ca4d05223d65",
 			"definition_hash": "a2275490434c490d543f0b3b0a5adc7044ee5f639b484b8ec7ee37331bfebbc2",
-			"reviewed_at": "2026-06-17T05:59:07.652431868Z"
+			"reviewed_at": "2026-06-17T14:43:58.761961513Z"
 		},
 		{
 			"function_name": "handleIndex",
 			"receiver": "Server",
 			"documentation_hash": "1ed0e10784bf31823fe8dc89d0711ac30047dd8dd7bdfddcf0665a1c71302161",
-			"definition_hash": "857f3070d13faec88931789a16321c355ae8bbc9c13dbd0eb7a6495094d4b569",
-			"reviewed_at": "2026-06-17T10:21:20.96361917Z"
+			"definition_hash": "1c41c5ef8caaba5d182dbfd1b7488e151cbc14b1ad03bd04eaec6a0de0ccc664",
+			"reviewed_at": "2026-06-17T14:43:58.763269489Z"
 		},
 		{
 			"function_name": "writeJSON",
 			"documentation_hash": "5665953907d46eb58537b336cba1ca6d5fd75df01e5596db33dbf85b9dbe3d67",
 			"definition_hash": "7d55273efed15d1d8b9f8a9c413cfc0519a5196f46a1fecc8b851ed7beec385f",
-			"reviewed_at": "2026-06-17T05:59:07.65668862Z"
+			"reviewed_at": "2026-06-17T14:43:58.764730682Z"
 		},
 		{
 			"function_name": "itoa",
 			"documentation_hash": "13bc1898194e5124857b6bf6010b90960a8964df777a065bc1ff33826eec7268",
 			"definition_hash": "e95da048edc64a6eeb1c0ccb444dd550b038d60466e80cc7f7eb24154ec6bb3e",
-			"reviewed_at": "2026-06-17T05:59:07.658405383Z"
+			"reviewed_at": "2026-06-17T14:43:58.765923198Z"
 		},
 		{
 			"function_name": "UseAdminToken",
 			"receiver": "Server",
 			"documentation_hash": "61eb4a3f2e7ec743c51807f3cdaa01c30a0d4dea76876d6b71bdf0822f92ae83",
 			"definition_hash": "5802d745c54b5ee836c4516721cdf845b059e4359c1163340d5db9450e024188",
-			"reviewed_at": "2026-06-17T07:18:00.747600695Z"
+			"reviewed_at": "2026-06-17T14:43:58.766952979Z"
 		},
 		{
 			"function_name": "requireAdmin",
 			"receiver": "Server",
 			"documentation_hash": "7d54bc71aa1d2510aa5a55f00431754d479b686cd693c144fcb166c6782cb969",
 			"definition_hash": "bd06c7335f9dd1bf091f50d48076690440af5c851a987a436f4f6842d5e3d27b",
-			"reviewed_at": "2026-06-17T07:18:00.761843344Z"
+			"reviewed_at": "2026-06-17T14:43:58.768887732Z"
 		},
 		{
 			"function_name": "UseRequestTTL",
 			"receiver": "Server",
 			"documentation_hash": "2eb65ef141ad3d7a246951fa5632d1fa508cb00a15084d50015d962d59e88638",
 			"definition_hash": "08b70c5aa933812b20ff96259dde4690ba75f1f21079a2169ffd2e9df7726d90",
-			"reviewed_at": "2026-06-17T10:59:41.54355762Z"
+			"reviewed_at": "2026-06-17T14:43:58.772064919Z"
+		},
+		{
+			"function_name": "authenticateResourceServer",
+			"receiver": "Server",
+			"documentation_hash": "29f1384a2c4243e843413828c3f9745cef1b53466cbb57fe114233f7548bed9b",
+			"definition_hash": "b7959a5df232dddfadd623ee096daec76a7ece7bc8d7fb5edf62e954bf7bd3ff",
+			"reviewed_at": "2026-06-17T14:43:58.774571823Z"
 		}
 	]
 }

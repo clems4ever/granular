@@ -1,0 +1,10 @@
+{
+	"functions": [
+		{
+			"function_name": "operationSpecs",
+			"documentation_hash": "b8705aaf114cbb49fa922f764ca540d49ccbd0726e3102ce601b75f0e3ef638d",
+			"definition_hash": "1195048bd44df249c0b2cf470626abe6ff0c59d3782cfc8c0ea6fe5d8dbda177",
+			"reviewed_at": "2026-06-17T14:39:59.947581064Z"
+		}
+	]
+}

@@ -1,8 +1,8 @@
 # granular client configuration.
 # Copy to granular-client.yaml (the default path; override with --config) and edit.
 #
-# The client talks to one or more gateways and the authorization server (AS). It
-# catalogs the gateways' permission schemas, runs operations (executed when the policy
+# The client talks to one or more resource servers and the authorization server (AS). It
+# catalogs the resource servers' permission schemas, runs operations (executed when the policy
 # authorizes them), and builds grant requests it submits to the AS for human approval.
 
 # The authorization server base URL (where proposals are submitted and policies live).
@@ -14,8 +14,8 @@ as_url: "http://localhost:9090"
 # run unauthenticated commands like `catalog`, or pass --token.
 token_file: "/run/secrets/granular_policy_token"
 
-# The gateways this client knows about. Each has a stable id (used to target it) and the
-# base URL it is reached at. Add one block per gateway (e.g. a future gateway-gitlab).
-gateways:
-  - id: "github-gateway"
+# The resource servers this client knows about. Each has a stable id (used to target it) and the
+# base URL it is reached at. Add one block per resource server (e.g. a future resource server-gitlab).
+resource_servers:
+  - id: "github-resource-server"
     base_url: "http://localhost:8080"

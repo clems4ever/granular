@@ -30,9 +30,9 @@
 		{
 			"function_name": "CreateProposal",
 			"receiver": "Store",
-			"documentation_hash": "5a3e5becfcaa5361297ef93d7a82c56d6193e6a75e8a77dc7095cebcf8ffda0f",
+			"documentation_hash": "7893a3afad9dfef3988ae4b9720abd7910d8849bbe5d1d5efe2ad3e4b9f1e26d",
 			"definition_hash": "512bfbb4bb0bf041074e6a3ff7c70f026d6a0aec027399433e7693015b4008c2",
-			"reviewed_at": "2026-06-17T10:59:49.855658946Z"
+			"reviewed_at": "2026-06-17T14:39:59.857270949Z"
 		},
 		{
 			"function_name": "GetProposal",

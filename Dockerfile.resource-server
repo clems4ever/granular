@@ -1,0 +1,14 @@
+# syntax=docker/dockerfile:1
+#
+# Built by GoReleaser: the cross-compiled granular-github-resource-server binary is
+# provided in the build context, so this image only layers it onto a minimal
+# static base (CA certs included for the GitHub API over HTTPS). No in-container
+# compilation, no RUN steps — so the arm64 image builds without emulation.
+FROM gcr.io/distroless/static-debian12:nonroot
+# GoReleaser (dockers_v2) stages the per-platform binary under $TARGETPLATFORM.
+ARG TARGETPLATFORM
+COPY ${TARGETPLATFORM}/granular-github-resource-server /usr/local/bin/granular-github-resource-server
+# Listens on :8080. Holds the GitHub credential (loaded from the config's
+# *_file keys) and the per-resource-server HMAC secret shared with the AS.
+EXPOSE 8080
+ENTRYPOINT ["granular-github-resource-server"]

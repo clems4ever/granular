@@ -5,10 +5,10 @@
 //   - PUT/GET/DELETE /api/policy — a token represents a policy; PUT mints one, GET
 //     reads the grants attached to it, DELETE destroys it.
 //   - POST /api/proposals — a client (Bearer token) submits a bundle of
-//     gateway-signed grant requests; the AS verifies each HMAC against the gateway's
+//     resource server-signed grant requests; the AS verifies each HMAC against the resource server's
 //     shared secret and records a pending proposal, returning a review URL.
 //   - GET/POST /proposal/{id} — the human consent screen, gated on the approver email.
-//   - POST /api/verify — a gateway asks whether an operation is authorized by the
+//   - POST /api/verify — a resource server asks whether an operation is authorized by the
 //     policy attached to a token; the AS evaluates the opaque policies generically.
 package server
 
@@ -28,16 +28,16 @@ import (
 	"github.com/clems4ever/granular/internal/verify"
 )
 
-// Server wires together the store, the registered gateway HMAC secrets and the public
+// Server wires together the store, the registered resource server HMAC secrets and the public
 // base URL used to build review links. An optional authenticator guards the human
 // consent pages behind a GitHub login.
 type Server struct {
-	store      *store.Store
-	baseURL    string
-	gateways   map[string]string // gateway id -> shared HMAC secret
-	adminToken string            // bearer gating the policy-administration endpoints
-	requestTTL time.Duration     // how long a submitted proposal stays pending
-	auth       *Authenticator
+	store           *store.Store
+	baseURL         string
+	resourceServers map[string]string // resource server id -> shared HMAC secret
+	adminToken      string            // bearer gating the policy-administration endpoints
+	requestTTL      time.Duration     // how long a submitted proposal stays pending
+	auth            *Authenticator
 }
 
 // defaultRequestTTL is the pending lifetime applied to a proposal when the server is not
@@ -45,7 +45,7 @@ type Server struct {
 const defaultRequestTTL = 15 * time.Minute
 
 // proposalInput is the body a client posts to POST /api/proposals: the email of the
-// human who must approve, and the gateway-signed grant requests to bundle.
+// human who must approve, and the resource server-signed grant requests to bundle.
 type proposalInput struct {
 	ApproverEmail string                        `json:"approver_email"`
 	Items         []proposal.SignedGrantRequest `json:"items"`
@@ -68,23 +68,23 @@ type policyOutput struct {
 }
 
 // grantView is one active grant returned to the policy holder, carrying the opaque,
-// gateway-signed item the gateway re-checks at enforcement.
+// resource server-signed item the resource server re-checks at enforcement.
 type grantView struct {
-	GatewayID string                      `json:"gateway_id"`
-	ExpiresAt string                      `json:"expires_at"`
-	Item      proposal.SignedGrantRequest `json:"item"`
+	ResourceServerID string                      `json:"resource_server_id"`
+	ExpiresAt        string                      `json:"expires_at"`
+	Item             proposal.SignedGrantRequest `json:"item"`
 }
 
 // New creates a Server.
 //
 // @arg st The store consulted and updated by the handlers.
 // @arg baseURL The externally reachable base URL, used to build review links.
-// @arg gateways The registered gateway id→secret map used to verify signatures.
+// @arg resourceServers The registered resource server id→secret map used to verify signatures.
 // @return *Server A configured server whose Handler can be mounted.
 //
 // @testcase TestProposalApproveFlow constructs a server.
-func New(st *store.Store, baseURL string, gateways map[string]string) *Server {
-	return &Server{store: st, baseURL: baseURL, gateways: gateways, requestTTL: defaultRequestTTL}
+func New(st *store.Store, baseURL string, resourceServers map[string]string) *Server {
+	return &Server{store: st, baseURL: baseURL, resourceServers: resourceServers, requestTTL: defaultRequestTTL}
 }
 
 // UseRequestTTL sets how long a submitted proposal stays pending before it is
@@ -135,7 +135,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /api/policy/{token}", s.handleGetPolicy)
 	mux.HandleFunc("DELETE /api/policy/{token}", s.handleDestroyPolicy)
 
-	// Client submits a proposal (Bearer token); gateway verifies an operation.
+	// Client submits a proposal (Bearer token); resource server verifies an operation.
 	mux.HandleFunc("POST /api/proposals", s.handleProposal)
 	mux.HandleFunc("POST /api/verify", s.handleVerify)
 
@@ -203,9 +203,9 @@ func (s *Server) handleGetPolicy(w http.ResponseWriter, r *http.Request) {
 	out := policyOutput{Grants: make([]grantView, 0, len(grants))}
 	for _, g := range grants {
 		out.Grants = append(out.Grants, grantView{
-			GatewayID: g.Item.GatewayID,
-			ExpiresAt: g.ExpiresAt.UTC().Format("2006-01-02T15:04:05Z"),
-			Item:      g.Item,
+			ResourceServerID: g.Item.ResourceServerID,
+			ExpiresAt:        g.ExpiresAt.UTC().Format("2006-01-02T15:04:05Z"),
+			Item:             g.Item,
 		})
 	}
 	writeJSON(w, http.StatusOK, out)
@@ -254,8 +254,8 @@ func (s *Server) requireAdmin(w http.ResponseWriter, r *http.Request) bool {
 }
 
 // handleProposal handles POST /api/proposals: a client (authenticated by its policy
-// token) submits a bundle of gateway-signed grant requests and an approver email. The
-// AS verifies each item's HMAC against the named gateway's shared secret (so the
+// token) submits a bundle of resource server-signed grant requests and an approver email. The
+// AS verifies each item's HMAC against the named resource server's shared secret (so the
 // client cannot tamper or forge), records a pending proposal, and returns a review
 // URL for the approver.
 //
@@ -284,9 +284,9 @@ func (s *Server) handleProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	for i, item := range in.Items {
-		secret, known := s.gateways[item.GatewayID]
+		secret, known := s.resourceServers[item.ResourceServerID]
 		if !known {
-			writeJSON(w, http.StatusBadRequest, proposalOutput{Error: "unknown gateway: " + item.GatewayID})
+			writeJSON(w, http.StatusBadRequest, proposalOutput{Error: "unknown resource server: " + item.ResourceServerID})
 			return
 		}
 		if !item.Verify([]byte(secret)) {
@@ -307,19 +307,19 @@ func (s *Server) handleProposal(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// handleVerify handles POST /api/verify: a registered gateway asks whether an
+// handleVerify handles POST /api/verify: a registered resource server asks whether an
 // operation is authorized by the policy attached to a token. The AS authenticates the
-// gateway (HMAC over the body), loads the token's active policies and evaluates the
-// gateway-supplied requests against the gateway-supplied entity world, returning the
+// resource server (HMAC over the body), loads the token's active policies and evaluates the
+// resource server-supplied requests against the resource server-supplied entity world, returning the
 // decision. The AS never interprets the policies' meaning.
 //
 // @arg w The response writer.
-// @arg r The request whose body is a verifyInput, signed by the gateway.
+// @arg r The request whose body is a verifyInput, signed by the resource server.
 //
 // @testcase TestVerifyAllowsAfterApproval allows once a covering grant is live.
-// @testcase TestVerifyRejectsUnknownGateway rejects an unauthenticated caller.
+// @testcase TestVerifyRejectsUnknownResourceServer rejects an unauthenticated caller.
 func (s *Server) handleVerify(w http.ResponseWriter, r *http.Request) {
-	body, ok := s.authenticateGateway(w, r)
+	body, ok := s.authenticateResourceServer(w, r)
 	if !ok {
 		return
 	}
@@ -364,34 +364,34 @@ func (s *Server) bearerPolicy(w http.ResponseWriter, r *http.Request) (string, b
 	return token, true
 }
 
-// authenticateGateway reads the request body and verifies it carries a valid HMAC
-// signature from a registered gateway (X-Gateway-ID + X-Gateway-Signature, the hex
-// HMAC-SHA256 of the raw body keyed by the gateway's shared secret). On success it
+// authenticateResourceServer reads the request body and verifies it carries a valid HMAC
+// signature from a registered resource server (X-Resource-Server-ID + X-Resource-Server-Signature, the hex
+// HMAC-SHA256 of the raw body keyed by the resource server's shared secret). On success it
 // returns the body bytes; on failure it writes a 401 and returns ok=false.
 //
 // @arg w The response writer (used to write a 401 on failure).
-// @arg r The incoming gateway request.
+// @arg r The incoming resource server request.
 // @return []byte The raw request body when authentication succeeds.
-// @return bool True when the request is from a registered, correctly-signed gateway.
+// @return bool True when the request is from a registered, correctly-signed resource server.
 //
-// @testcase TestVerifyAllowsAfterApproval authenticates a correctly-signed gateway.
-// @testcase TestVerifyRejectsUnknownGateway rejects an unknown or missigned gateway.
-func (s *Server) authenticateGateway(w http.ResponseWriter, r *http.Request) ([]byte, bool) {
+// @testcase TestVerifyAllowsAfterApproval authenticates a correctly-signed resource server.
+// @testcase TestVerifyRejectsUnknownResourceServer rejects an unknown or missigned resource server.
+func (s *Server) authenticateResourceServer(w http.ResponseWriter, r *http.Request) ([]byte, bool) {
 	body, err := io.ReadAll(io.LimitReader(r.Body, 1<<20))
 	if err != nil {
 		writeJSON(w, http.StatusBadRequest, verify.Output{Error: "cannot read body"})
 		return nil, false
 	}
-	secret, known := s.gateways[r.Header.Get("X-Gateway-ID")]
+	secret, known := s.resourceServers[r.Header.Get("X-Resource-Server-ID")]
 	if !known {
-		writeJSON(w, http.StatusUnauthorized, verify.Output{Error: "unknown gateway"})
+		writeJSON(w, http.StatusUnauthorized, verify.Output{Error: "unknown resource server"})
 		return nil, false
 	}
 	mac := hmac.New(sha256.New, []byte(secret))
 	mac.Write(body)
 	want := hex.EncodeToString(mac.Sum(nil))
-	if !hmac.Equal([]byte(r.Header.Get("X-Gateway-Signature")), []byte(want)) {
-		writeJSON(w, http.StatusUnauthorized, verify.Output{Error: "invalid gateway signature"})
+	if !hmac.Equal([]byte(r.Header.Get("X-Resource-Server-Signature")), []byte(want)) {
+		writeJSON(w, http.StatusUnauthorized, verify.Output{Error: "invalid resource server signature"})
 		return nil, false
 	}
 	return body, true
@@ -453,8 +453,8 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 		`<main class="container narrow"><div class="card">`+
 		`<p class="eyebrow">Authorization server</p>`+
 		`<h1>granular</h1>`+
-		`<p class="lead">The generic policy authority. Clients submit gateway-signed grant requests here `+
-		`for human approval, and gateways verify operations against the approved policy before executing them.</p>`+
+		`<p class="lead">The generic policy authority. Clients submit resource server-signed grant requests here `+
+		`for human approval, and resource servers verify operations against the approved policy before executing them.</p>`+
 		`<p class="muted">Approval links are sent to you by the agent; there is nothing to do on this page.</p>`+
 		`<p><a class="btn" href="/activity">View grants &amp; activity →</a></p>`+
 		`</div></main>`)

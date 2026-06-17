@@ -15,8 +15,8 @@
 		{
 			"function_name": "TestGetPolicyReturnsGrants",
 			"documentation_hash": "80bcc6bae39a1cca94f18dfb5d95de196b1f58648e87205a376d37cd8a7769dd",
-			"definition_hash": "c8ba616b5c28db5bfb3d5a2013eee2b63d13910ac4f1bab7a00b43b50c943cae",
-			"reviewed_at": "2026-06-17T07:17:59.537274495Z"
+			"definition_hash": "af5abe439c9af0ce676872bebf53c391678166156480a489c8f79f5fae6bbd67",
+			"reviewed_at": "2026-06-17T14:46:17.080928023Z"
 		},
 		{
 			"function_name": "TestDestroyPolicyEndpoint",
@@ -63,8 +63,8 @@
 		{
 			"function_name": "TestApprovePageRendersFriendlyGrants",
 			"documentation_hash": "a32db47a6b11a6f69039406380afc4aafdaec605038a8f312556b11e07e3906e",
-			"definition_hash": "d461f01c7b55a4f394fc8bb2ed21a9f8e2b594368f26dc09efb681a400c075d3",
-			"reviewed_at": "2026-06-17T10:41:23.093583273Z"
+			"definition_hash": "c685d5457268d5a2ff7172ac1eb4afbd7fa597afedf2e9f75c8c6817cb2f1291",
+			"reviewed_at": "2026-06-17T14:46:17.081479748Z"
 		},
 		{
 			"function_name": "TestProposalExpiresViaEndpoint",

@@ -9,11 +9,11 @@
   <h3 style="margin-top:1.4rem">Active grants</h3>
   {{if .Active}}
   <table class="grid">
-    <thead><tr><th>Gateway</th><th>Grants</th><th>Granted</th><th>Expires</th></tr></thead>
+    <thead><tr><th>Resource server</th><th>Grants</th><th>Granted</th><th>Expires</th></tr></thead>
     <tbody>
       {{range .Active}}
       <tr>
-        <td><code>{{.GatewayID}}</code></td>
+        <td><code>{{.ResourceServerID}}</code></td>
         <td>{{.Summary}}</td>
         <td class="muted">{{.CreatedAt}}</td>
         <td title="{{.ExpiresAt}}">{{.ExpiresIn}}</td>

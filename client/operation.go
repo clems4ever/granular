@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/clems4ever/granular/gateway"
+	"github.com/clems4ever/granular/resourceserver"
 )
 
 // Result is the outcome of a successfully authorized and executed operation.
@@ -14,29 +14,29 @@ type Result struct {
 	Result map[string]any `json:"result,omitempty"`
 }
 
-// Run submits an operation to one gateway and returns its result. The gateway asks the
+// Run submits an operation to one resource server and returns its result. The resource server asks the
 // AS whether the client's policy token authorizes the operation; on an allow it executes
 // and Run returns the result, and on a deny Run returns ErrNotAuthorized so the caller
 // can react clearly (typically by building a grant request).
 //
 // @arg ctx Context for cancellation.
-// @arg gatewayID The gateway to run the operation on.
+// @arg resourceServerID The resource server to run the operation on.
 // @arg op The operation type and parameters.
 // @return Result The executed operation's result (on success).
 // @error ErrNoToken when no policy token is configured.
-// @error ErrUnknownGateway when the gateway id is not configured.
+// @error ErrUnknownResourceServer when the resource server id is not configured.
 // @error ErrNotAuthorized when the AS denies the operation.
-// @error error on transport failure or an unexpected gateway status.
+// @error error on transport failure or an unexpected resource server status.
 //
 // @testcase TestRunExecutesWhenAuthorized returns the result on an allow.
 // @testcase TestRunNotAuthorized returns ErrNotAuthorized on a deny.
-// @testcase TestRunUnknownGateway errors on an unconfigured gateway.
-func (c *Client) Run(ctx context.Context, gatewayID string, op gateway.OperationRequest) (Result, error) {
+// @testcase TestRunUnknownResourceServer errors on an unconfigured resource server.
+func (c *Client) Run(ctx context.Context, resourceServerID string, op resourceserver.OperationRequest) (Result, error) {
 	var res Result
 	if c.token == "" {
 		return res, ErrNoToken
 	}
-	base, err := c.gatewayURL(gatewayID)
+	base, err := c.resourceServerURL(resourceServerID)
 	if err != nil {
 		return res, err
 	}
@@ -50,6 +50,6 @@ func (c *Client) Run(ctx context.Context, gatewayID string, op gateway.Operation
 	case http.StatusForbidden:
 		return res, ErrNotAuthorized
 	default:
-		return res, fmt.Errorf("gateway %q operation: unexpected status %d", gatewayID, status)
+		return res, fmt.Errorf("resource server %q operation: unexpected status %d", resourceServerID, status)
 	}
 }

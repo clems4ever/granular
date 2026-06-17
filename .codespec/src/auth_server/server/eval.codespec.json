@@ -8,15 +8,15 @@
 		},
 		{
 			"function_name": "evaluate",
-			"documentation_hash": "3e15b5ebb867b4077ad620b8ad9fc263c3f621501ca3143e35237469675f526c",
+			"documentation_hash": "8e74fa51d6ac762f3c6498e9e23bc6056c27608ba4bb001249f4fe08e9f2bc9e",
 			"definition_hash": "e9a384a6b0435e88e1de7a40b17820efc82ee067d57c6c88022cc7c43f9e6df7",
-			"reviewed_at": "2026-06-17T11:57:21.407578994Z"
+			"reviewed_at": "2026-06-17T14:39:13.140996387Z"
 		},
 		{
 			"function_name": "buildEntities",
-			"documentation_hash": "59d6314e2e95e6d1882cbf18ed1e0e7e0ce2847a717abfce5b6de82e03b8a41e",
+			"documentation_hash": "ec3b466ec36a56c23899a909f3a472b3ff3f8912b18a3f9c90aa2a8716ab8b36",
 			"definition_hash": "9d90584df4841f87b21695da1d2fbdb7ad7556919bbb6da6ec7207d369eb11ac",
-			"reviewed_at": "2026-06-17T05:59:07.679202725Z"
+			"reviewed_at": "2026-06-17T14:39:13.141318577Z"
 		},
 		{
 			"function_name": "recordFrom",

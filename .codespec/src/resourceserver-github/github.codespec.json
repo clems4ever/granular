@@ -1,0 +1,55 @@
+{
+	"functions": [
+		{
+			"function_name": "Schema",
+			"documentation_hash": "64fe1a09d2bf29bf6cdf33f2c49f0fd9f72ecbf464a2ab89cfc19a1ca6138408",
+			"definition_hash": "1202b7c6c433afdedd71ee2609b2138a831e0da8054852ee0e45379985087d38",
+			"reviewed_at": "2026-06-17T14:39:59.944096015Z"
+		},
+		{
+			"function_name": "scope",
+			"documentation_hash": "2e62575c53fc857442eb28f44af755d869ea83669f395d5e3cfb843f9214f865",
+			"definition_hash": "9805f385396efc1076a4c1e531e1590549119140f8938c94a86beb6fc91da408",
+			"reviewed_at": "2026-06-17T14:39:59.944546544Z"
+		},
+		{
+			"function_name": "Registry",
+			"documentation_hash": "4bea9c81410eb530789f90b4ba4c0b3e625c2caf063858624a3d72ff8e7118b4",
+			"definition_hash": "7148fd8c47608ed484250be6336dc6fdb2394ed997b7e54f5fa71d1fbb4d63c1",
+			"reviewed_at": "2026-06-17T14:39:59.944941283Z"
+		},
+		{
+			"function_name": "adapt",
+			"documentation_hash": "b218f31d67d5fc99355e9060263967771dd29b18167a060d56ac295f55961f84",
+			"definition_hash": "dff1be69ff49ed788de5b2c6b21fe1034db98aef5afa002db1eb0a891c277167",
+			"reviewed_at": "2026-06-17T14:39:59.945329358Z"
+		},
+		{
+			"function_name": "Requirements",
+			"receiver": "adapted",
+			"documentation_hash": "422923cc09da97b7509d15204dac767a0ee37bb018975367324e5b3032639a5b",
+			"definition_hash": "01f6c2f666dec94e077302fa366d1fdfd9610672f50851ead8afb704c2d52b20",
+			"reviewed_at": "2026-06-17T14:39:59.945818478Z"
+		},
+		{
+			"function_name": "Describe",
+			"receiver": "adapted",
+			"documentation_hash": "d4154769727e8b8aa8945c26acc4a4733411c9b4137d2a643608526656fde2ca",
+			"definition_hash": "0193b751d2dcfcef565cf560b3c48b30d83074a1ea71c7ac93d5cb21027ec934",
+			"reviewed_at": "2026-06-17T06:22:20.737647768Z"
+		},
+		{
+			"function_name": "Execute",
+			"receiver": "adapted",
+			"documentation_hash": "6d795cb0554f45616fba4c130cceeb67567a1ca9a8bbe393c16ee3bf2e349786",
+			"definition_hash": "2bf494d8967919cea303b099dcffdc13e76d79afae0bca4571286d6c931a1185",
+			"reviewed_at": "2026-06-17T06:22:20.737820885Z"
+		},
+		{
+			"function_name": "convertRef",
+			"documentation_hash": "7b2ad6f986b707ac704838e4d6df13e2fe9fed87b42eec523565a128918aa7cc",
+			"definition_hash": "a5d77f3410cb7a7c5af3755461c4c7fad31a308d2cae635af165738b2e91e303",
+			"reviewed_at": "2026-06-17T14:39:59.946358143Z"
+		}
+	]
+}

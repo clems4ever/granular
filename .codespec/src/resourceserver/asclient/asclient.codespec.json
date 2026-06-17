@@ -1,0 +1,24 @@
+{
+	"functions": [
+		{
+			"function_name": "New",
+			"documentation_hash": "59d72e0f182a7757aaf248e8e5a84e4f407ac195d5b7dbdf8acd0a089010b6c8",
+			"definition_hash": "b57f7362c61d46ae7d5460b8f61b8ba1a808cb2e7600f1447dfd620e26277784",
+			"reviewed_at": "2026-06-17T14:39:59.914911064Z"
+		},
+		{
+			"function_name": "Verify",
+			"receiver": "Client",
+			"documentation_hash": "081b0f4103d4906b6b4d67d1751442280a813d7b64133c811cf90850642df410",
+			"definition_hash": "e82461390cac0fa4b29602be7307df7bcb1e588cbad7cd162baf1db3a3c193f0",
+			"reviewed_at": "2026-06-17T14:39:59.915512747Z"
+		},
+		{
+			"function_name": "sign",
+			"receiver": "Client",
+			"documentation_hash": "4b18ee0e39ae754db88bcee2381cbe330e606ee0569c190fab5f172996d605ef",
+			"definition_hash": "56120e1310f25e4490b8b82ed5bfec73deaa0cde08853b7900a4f1b2893ab58d",
+			"reviewed_at": "2026-06-17T14:39:59.915910027Z"
+		}
+	]
+}

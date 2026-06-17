@@ -1,5 +1,5 @@
 # Client config for the docker-compose example (used by the optional "client" service).
-# The client talks to the AS and the gateway over the compose network.
+# The client talks to the AS and the resource server over the compose network.
 
 as_url: "http://auth-server:9090"
 
@@ -8,6 +8,6 @@ as_url: "http://auth-server:9090"
 # .secrets/granular_policy_token, then run client commands.
 token_file: "/run/secrets/granular_policy_token"
 
-gateways:
-  - id: "github-gateway"
-    base_url: "http://gateway:8080"
+resource_servers:
+  - id: "github-resource-server"
+    base_url: "http://resource server:8080"

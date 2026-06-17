@@ -1,0 +1,25 @@
+# granular resource server configuration.
+# Copy to granular-github-resource-server.yaml (the default path; override with --config) and edit.
+# Every field is optional; omitted values fall back to the defaults shown here.
+#
+# The resource server owns the platform credential and the permission vocabulary. It serves
+# the permission schema, signs grant requests for clients, and verifies operations
+# against the authorization server (AS) before executing them.
+
+# HTTP listen address and externally reachable base URL (used for brokered URLs).
+addr: ":8080"
+base_url: "http://localhost:8080"
+
+# This resource server's id, registered with the AS, and the AS base URL it calls to verify
+# operations. The resource_server_id must match an entry in the AS's `resource_servers:` list.
+resource_server_id: "github-resource-server"
+as_url: "http://localhost:9090"
+
+# Secrets are never stored inline — point at a file holding each one.
+#
+# Shared HMAC secret. The AS holds the same secret under this resource_server_id; the resource server
+# signs grant requests and authenticates verify calls with it.
+secret_file: "/run/secrets/granular_resource_server_github_secret"
+
+# GitHub PAT used to execute github.* operations.
+github_token_file: "/run/secrets/granular_github_token"

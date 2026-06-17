@@ -72,7 +72,7 @@ func TestGetPolicyReturnsGrants(t *testing.T) {
 	}
 	var out policyOutput
 	_ = json.NewDecoder(resp.Body).Decode(&out)
-	if len(out.Grants) != 1 || out.Grants[0].GatewayID != "gw" {
+	if len(out.Grants) != 1 || out.Grants[0].ResourceServerID != "rs" {
 		t.Fatalf("unexpected grants: %+v", out.Grants)
 	}
 }
@@ -124,7 +124,7 @@ func TestPolicyAdminRequiresAdminToken(t *testing.T) {
 func TestApprovePageRendersFriendlyGrants(t *testing.T) {
 	_, h := newServer(t)
 	token := createPolicy(t, h)
-	item := proposal.Sign([]byte(gwSecret), "gw", proposal.Presentation{
+	item := proposal.Sign([]byte(rsSecret), "rs", proposal.Presentation{
 		Summary: "Read everything in clems4ever/granular",
 		Grants: []proposal.GrantDetail{{
 			Actions:      []string{"Everything readable: list/view, clone, read comments."},

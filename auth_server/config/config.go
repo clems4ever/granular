@@ -2,7 +2,7 @@
 // YAML file, applying built-in defaults for any omitted field. The AS is the policy
 // authority: it stores grants, runs the human consent screen, and answers
 // allow/deny. It does not hold any platform credential — those live on the
-// Gateways, which authenticate to the AS with a per-gateway shared secret registered
+// ResourceServers, which authenticate to the AS with a per-resource server shared secret registered
 // here.
 package config
 
@@ -33,10 +33,10 @@ type Config struct {
 	// automatically revoked, after which the agent must submit a fresh one.
 	GrantRequestTTL Duration `yaml:"grant_request_ttl"`
 
-	// Gateways registers the Resource-Gateways permitted to talk to the AS. Each
-	// gateway authenticates its grant-request and verify calls with the shared
+	// ResourceServers registers the resource servers permitted to talk to the AS. Each
+	// resource server authenticates its grant-request and verify calls with the shared
 	// secret loaded from its secret_file.
-	Gateways []Gateway `yaml:"gateways"`
+	ResourceServers []ResourceServer `yaml:"resource_servers"`
 
 	// AdminTokenFile holds the bearer token that gates the policy-administration
 	// endpoints (PUT/GET/DELETE /api/policy). The granular-policy admin CLI presents
@@ -50,10 +50,10 @@ type Config struct {
 	Auth Auth `yaml:"auth"`
 }
 
-// Gateway registers one Resource-Gateway and the shared secret it signs its
-// requests with. The id is sent in the X-Gateway-ID header; the secret (loaded from
+// ResourceServer registers one resource server and the shared secret it signs its
+// requests with. The id is sent in the X-Resource-Server-ID header; the secret (loaded from
 // SecretFile) keys the HMAC the AS verifies.
-type Gateway struct {
+type ResourceServer struct {
 	ID         string `yaml:"id"`
 	SecretFile string `yaml:"secret_file"`
 
@@ -105,19 +105,19 @@ func Load(path string) (*Config, error) {
 	return &c, nil
 }
 
-// resolveSecrets reads each configured secret file (the gateway secrets and the
+// resolveSecrets reads each configured secret file (the resource server secrets and the
 // OAuth/session secrets) into its resolved field. An empty path resolves to the
 // empty string; a path that cannot be read is a fatal error.
 //
 // @error error when a referenced secret file cannot be read.
 //
-// @testcase TestLoadParsesYAML resolves the gateway and auth secret files.
+// @testcase TestLoadParsesYAML resolves the resource server and auth secret files.
 // @testcase TestLoadMissingSecretFile errors on an unreadable secret file.
 func (c *Config) resolveSecrets() error {
 	var err error
-	for i := range c.Gateways {
-		if c.Gateways[i].Secret, err = readSecretFile(c.Gateways[i].SecretFile); err != nil {
-			return fmt.Errorf("gateways[%d].secret_file: %w", i, err)
+	for i := range c.ResourceServers {
+		if c.ResourceServers[i].Secret, err = readSecretFile(c.ResourceServers[i].SecretFile); err != nil {
+			return fmt.Errorf("resource_servers[%d].secret_file: %w", i, err)
 		}
 	}
 	if c.AdminToken, err = readSecretFile(c.AdminTokenFile); err != nil {
@@ -132,16 +132,16 @@ func (c *Config) resolveSecrets() error {
 	return nil
 }
 
-// GatewaySecrets returns the map of registered gateway id to shared secret, used by
-// the server to authenticate gateway requests. Gateways with an empty id or secret
+// ResourceServerSecrets returns the map of registered resource server id to shared secret, used by
+// the server to authenticate resource server requests. ResourceServers with an empty id or secret
 // are skipped (they could never authenticate anyway).
 //
-// @return map[string]string The id→secret map of registered gateways.
+// @return map[string]string The id→secret map of registered resource servers.
 //
-// @testcase TestGatewaySecretsSkipsIncomplete drops entries missing an id or secret.
-func (c *Config) GatewaySecrets() map[string]string {
-	out := make(map[string]string, len(c.Gateways))
-	for _, g := range c.Gateways {
+// @testcase TestResourceServerSecretsSkipsIncomplete drops entries missing an id or secret.
+func (c *Config) ResourceServerSecrets() map[string]string {
+	out := make(map[string]string, len(c.ResourceServers))
+	for _, g := range c.ResourceServers {
 		if g.ID != "" && g.Secret != "" {
 			out[g.ID] = g.Secret
 		}
@@ -170,7 +170,7 @@ func readSecretFile(path string) (string, error) {
 }
 
 // Default returns the configuration used when no file is supplied: every field
-// holds its built-in default and no gateways are registered.
+// holds its built-in default and no resource servers are registered.
 //
 // @return *Config A configuration with all defaults applied.
 //

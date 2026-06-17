@@ -8,12 +8,12 @@ import (
 	"github.com/clems4ever/granular/internal/proposal"
 )
 
-// Grant is one active grant attached to a policy: which gateway authored it, when it
-// expires, and the opaque gateway-signed item it carries.
+// Grant is one active grant attached to a policy: which resource server authored it, when it
+// expires, and the opaque resource server-signed item it carries.
 type Grant struct {
-	GatewayID string                      `json:"gateway_id"`
-	ExpiresAt string                      `json:"expires_at"`
-	Item      proposal.SignedGrantRequest `json:"item"`
+	ResourceServerID string                      `json:"resource_server_id"`
+	ExpiresAt        string                      `json:"expires_at"`
+	Item             proposal.SignedGrantRequest `json:"item"`
 }
 
 // policyResult is the AS response from the /api/policy endpoints.

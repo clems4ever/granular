@@ -20,12 +20,12 @@ func uidOf(r verify.EntityRef) cedar.EntityUID {
 }
 
 // evaluate reports whether the opaque policies authorize every request against the
-// gateway-supplied entity world. It is fully generic: cedar-go evaluates the
+// resource server-supplied entity world. It is fully generic: cedar-go evaluates the
 // policies, entities and requests as data, with no knowledge of any platform's
 // vocabulary. It returns false (denied) on any request that is not allowed.
 //
 // @arg policies The opaque Cedar policy texts attached to the token.
-// @arg entities The Cedar entity world supplied by the gateway.
+// @arg entities The Cedar entity world supplied by the resource server.
 // @arg requests The authorization questions; all must be allowed.
 // @return bool True when every request is allowed by the policies (and there is at least one).
 // @error error when the policy text fails to parse.
@@ -57,7 +57,7 @@ func evaluate(policies []string, entities []verify.Entity, requests []verify.Req
 
 // buildEntities turns the wire entities into a Cedar entity map.
 //
-// @arg entities The wire entities supplied by the gateway.
+// @arg entities The wire entities supplied by the resource server.
 // @return cedar.EntityMap The populated entity map.
 //
 // @testcase TestProposalApproveFlow builds the world from wire entities.
