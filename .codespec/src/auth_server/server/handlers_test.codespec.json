@@ -4,67 +4,67 @@
 			"function_name": "propose",
 			"documentation_hash": "f439f8c539f4d82347d366f4e1b8f5a814ebc7ae7d97f58ab10de8067ab4f6b1",
 			"definition_hash": "2a50ec5a8dd9b39daccac7cabd662317541d97d8c03ab8145b9f936b77785d12",
-			"reviewed_at": "2026-06-17T15:18:49.636661324Z"
+			"reviewed_at": "2026-06-17T17:53:52.364310572Z"
 		},
 		{
 			"function_name": "approve",
 			"documentation_hash": "44a5e746213e413dfd70035f2af53d025b0e8b3a21eb6e34c364ab6961adb264",
 			"definition_hash": "f492795d9805613fe95d7c5a1fe4ed5e9d246d4f559758953226ff2e2497163c",
-			"reviewed_at": "2026-06-17T15:18:49.637889938Z"
-		},
-		{
-			"function_name": "TestProposalRequiresApproverEmail",
-			"documentation_hash": "94afa8343798d66c2bb2c25c5e208ed20753b183645e39cdb3ad1fe111c6ec70",
-			"definition_hash": "3619bd8f7966c6a801e5353082264d1689446584bb4858d3534f130927cf11e3",
-			"reviewed_at": "2026-06-17T15:18:49.64932313Z"
-		},
-		{
-			"function_name": "TestVerifyAllowsAfterApproval",
-			"documentation_hash": "29e8be42ea90e39b0d1093236b4c8e0d5a76d65af947b5eda6d00521ed80bad8",
-			"definition_hash": "3209c533c342ef0bbe38f51ee116097ab1a99f0269120695d2a5429572e30067",
-			"reviewed_at": "2026-06-17T15:18:49.650619507Z"
-		},
-		{
-			"function_name": "TestIndexServesLanding",
-			"documentation_hash": "e6a445986c3a533011798dfb19b65f21b7af70a6fec7ee9bae2203c6f723db0e",
-			"definition_hash": "eb82e83774a6e3a12cf678a5f0f1b1d4ded2a28674986f1c1cb9a7106ed8a850",
-			"reviewed_at": "2026-06-17T05:58:11.058616629Z"
-		},
-		{
-			"function_name": "TestApprovePageRendersFriendlyGrants",
-			"documentation_hash": "a32db47a6b11a6f69039406380afc4aafdaec605038a8f312556b11e07e3906e",
-			"definition_hash": "9fc62a47ae19bb21d18b3caf5f4b3abcaeec56df39e6084ca3b10e28feb7f221",
-			"reviewed_at": "2026-06-17T15:18:49.642543157Z"
-		},
-		{
-			"function_name": "TestProposalExpiresViaEndpoint",
-			"documentation_hash": "c721810bffdb3edb21824e8c2c02976799c22546136eba9a8d3c7b48088a00a3",
-			"definition_hash": "3f23b78f1fbbb9a825b917a4bf6dd0962e588c72e4ed68a0d326fb26bc8b23f9",
-			"reviewed_at": "2026-06-17T15:18:49.646233572Z"
+			"reviewed_at": "2026-06-17T17:53:52.364617684Z"
 		},
 		{
 			"function_name": "TestGetSubjectReturnsGrants",
 			"documentation_hash": "7e47bbd05c1c5a15a56b46e396c96168882bb5a073226dcca233700aebaf3aa1",
 			"definition_hash": "59394e21be514c3024945a775dc7dea0968473fd8d7d50e6ffd2e5b61715b9ae",
-			"reviewed_at": "2026-06-17T15:18:49.639229727Z"
+			"reviewed_at": "2026-06-17T17:53:52.365904587Z"
 		},
 		{
 			"function_name": "TestDestroySubjectEndpoint",
 			"documentation_hash": "9548b4fbb1db5a09b05e4401150b1102ecccf49ec274b35efdd39adf8533400d",
 			"definition_hash": "0cbddaa6dac91783c173c56ce2c073f1e16461b8aae85c989d4f4a7c3fb6d277",
-			"reviewed_at": "2026-06-17T15:18:49.640277752Z"
+			"reviewed_at": "2026-06-17T17:53:52.366604723Z"
 		},
 		{
 			"function_name": "TestSubjectAdminRequiresAdminToken",
 			"documentation_hash": "20a73917b158e7b6f2a803003032c237cf59b84d50b4f0aa3fda273901795c01",
 			"definition_hash": "a1aa05b31dc0123d122f3d9029373fc99db16c38a1ab04e07377bc1946d71d89",
-			"reviewed_at": "2026-06-17T15:18:49.641329169Z"
+			"reviewed_at": "2026-06-17T17:53:52.367286074Z"
+		},
+		{
+			"function_name": "TestApprovePageRendersFriendlyGrants",
+			"documentation_hash": "a32db47a6b11a6f69039406380afc4aafdaec605038a8f312556b11e07e3906e",
+			"definition_hash": "9fc62a47ae19bb21d18b3caf5f4b3abcaeec56df39e6084ca3b10e28feb7f221",
+			"reviewed_at": "2026-06-17T17:53:52.367982422Z"
+		},
+		{
+			"function_name": "TestProposalExpiresViaEndpoint",
+			"documentation_hash": "c721810bffdb3edb21824e8c2c02976799c22546136eba9a8d3c7b48088a00a3",
+			"definition_hash": "3f23b78f1fbbb9a825b917a4bf6dd0962e588c72e4ed68a0d326fb26bc8b23f9",
+			"reviewed_at": "2026-06-17T17:53:52.368578348Z"
 		},
 		{
 			"function_name": "TestProposalRejectsUnknownSubjectToken",
 			"documentation_hash": "cede980b828d180c8e7b8245622006a507e9391ab33ebdafa421708172d0ed12",
 			"definition_hash": "22b73f435f33fee3e38b9f09136c7a18b78ef45812716884181c388d9e220c8e",
-			"reviewed_at": "2026-06-17T15:18:49.647840884Z"
+			"reviewed_at": "2026-06-17T17:53:52.369043654Z"
+		},
+		{
+			"function_name": "TestProposalRequiresApproverEmail",
+			"documentation_hash": "94afa8343798d66c2bb2c25c5e208ed20753b183645e39cdb3ad1fe111c6ec70",
+			"definition_hash": "3619bd8f7966c6a801e5353082264d1689446584bb4858d3534f130927cf11e3",
+			"reviewed_at": "2026-06-17T17:53:52.369515455Z"
+		},
+		{
+			"function_name": "TestVerifyAllowsAfterApproval",
+			"documentation_hash": "29e8be42ea90e39b0d1093236b4c8e0d5a76d65af947b5eda6d00521ed80bad8",
+			"definition_hash": "3209c533c342ef0bbe38f51ee116097ab1a99f0269120695d2a5429572e30067",
+			"reviewed_at": "2026-06-17T17:53:52.36996521Z"
+		},
+		{
+			"function_name": "TestHomeLandingWhenAuthDisabled",
+			"documentation_hash": "710a463b4aeb190a8943fadd8d065520c0bf687b0d1a3f49b571bb50c8e4a0a0",
+			"definition_hash": "8212c50d4023ec8e78e489261c51198245dee716ecd6e4b5d8f09cfb03ef807d",
+			"reviewed_at": "2026-06-17T17:53:52.370390927Z"
 		}
 	]
 }

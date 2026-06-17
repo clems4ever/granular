@@ -2,57 +2,57 @@
 	"functions": [
 		{
 			"function_name": "newAuthServer",
-			"documentation_hash": "139ec79f862569eb6dc1c55e264680a3f8a6abefae15beb3fa5307c9a990dc25",
+			"documentation_hash": "2ceb5855ebb7141cc71126a118aa282152b470dc7687dc46b5ad9e22a7af9d6a",
 			"definition_hash": "b86a53add9a0b4d65e77d1492001f1a19ba6098bcf6371765cedb637c243ce0d",
-			"reviewed_at": "2026-06-17T15:50:30.055133313Z"
+			"reviewed_at": "2026-06-17T17:53:16.27634526Z"
 		},
 		{
 			"function_name": "getWithSession",
-			"documentation_hash": "d18d97fda65adb69b0094fa03590f21431a4bf9a3e173e04bcd5a3e72f278e4a",
+			"documentation_hash": "69cf10f33b600ba20483f962206399040864f9dbb00cc8ffa791ee32d9fa5f50",
 			"definition_hash": "2de93b5dd51474df5ef7feeb73ead6048dd5021dc7885e5cd6c01891232d6049",
-			"reviewed_at": "2026-06-17T15:50:30.055376954Z"
-		},
-		{
-			"function_name": "TestActivityPageRendersApproverHistory",
-			"documentation_hash": "8a0038c3b1e8dd94cda2b9b7201bdd7d227dcfe546942851678ed06e4bd65276",
-			"definition_hash": "3dd93822402c4a72ce428983a689d0e0b963615766fb5409c137bceaf7740062",
-			"reviewed_at": "2026-06-17T15:50:30.055559365Z"
-		},
-		{
-			"function_name": "TestActivityScopedToApprover",
-			"documentation_hash": "cdeff336038a1bfee776f80bf296293620a398939bc8d34a388aba8403453d0d",
-			"definition_hash": "831eea8ecd2d374f63983829f8e88fc70976ed6a742a74adda8ca7c0c18d01b0",
-			"reviewed_at": "2026-06-17T15:50:30.055747288Z"
-		},
-		{
-			"function_name": "TestActivityUnavailableWhenAuthDisabled",
-			"documentation_hash": "2c70f9dad72390c7732f76bf5592df7ccc1d8c248a7364d7d4267d90131dc88c",
-			"definition_hash": "966ea2b8a3eea62235348d0d6c389348877112e73b0a4de5b02ce00966d5c3f3",
-			"reviewed_at": "2026-06-17T15:50:30.055937973Z"
+			"reviewed_at": "2026-06-17T17:53:16.276658034Z"
 		},
 		{
 			"function_name": "TestMySubjectReturnsOwnGrants",
 			"documentation_hash": "2a4f0b6515ef7ad26eecde6eb37ee0539281ced24f1c330cb1bd30c446e8a6b5",
 			"definition_hash": "bd5c1426472998c0c0a950986798b4e4f412d7e40e3b6339e26c5ba777f56add",
-			"reviewed_at": "2026-06-17T15:50:30.056144042Z"
+			"reviewed_at": "2026-06-17T17:53:16.277710381Z"
 		},
 		{
 			"function_name": "TestMySubjectRejectsUnknownToken",
 			"documentation_hash": "53c3225d5847ce98bf049cd079667dd9ac80cdf2f472b393ec03908d2b2caf5c",
 			"definition_hash": "f2150648d2ee32440508ab642ccd81e116b1e4f4c7a8bfaa7627d80b80a19f72",
-			"reviewed_at": "2026-06-17T15:50:30.056330729Z"
+			"reviewed_at": "2026-06-17T17:53:16.277944192Z"
 		},
 		{
 			"function_name": "TestActivityAdminRequiresAdminToken",
 			"documentation_hash": "76c63d20b4f3b29b7b25d439a198a81297917d5a1ffd0719f779be634325617e",
 			"definition_hash": "aef70dfb0f19b878ff3d83a1ee55e64d6b97fbe3a9997dc2ecf177147f193227",
-			"reviewed_at": "2026-06-17T15:50:30.056529084Z"
+			"reviewed_at": "2026-06-17T17:53:16.278158871Z"
 		},
 		{
 			"function_name": "TestActivityAdminReturnsInventory",
 			"documentation_hash": "7f0b98e4fb3480b0dc0b296bf8e79417f397ec680fd41f52107bda3d4998f070",
 			"definition_hash": "1b3b5076788c3be7e931ca1397babfe58da74888937a9b44c9b620f5ebaaf4ad",
-			"reviewed_at": "2026-06-17T15:50:30.057335836Z"
+			"reviewed_at": "2026-06-17T17:53:16.278359914Z"
+		},
+		{
+			"function_name": "TestHomeShowsApproverHistory",
+			"documentation_hash": "db6862e64883d17ed248fb7c01c269d011c938b476bc5c798c44c0ccbb4da913",
+			"definition_hash": "8e529d35f925d271e66d108993c919378f911103d817d6bfe7179efe1e1658be",
+			"reviewed_at": "2026-06-17T17:53:16.276898382Z"
+		},
+		{
+			"function_name": "TestHomeScopedToApprover",
+			"documentation_hash": "87008690a9e8f546ab77d612a8164d539c28680a9c286449c202702da18e01d3",
+			"definition_hash": "df6c01a9589e57aa564cd39e77288fa6a8e105f35fb24338409ab40d409afadd",
+			"reviewed_at": "2026-06-17T17:53:16.277120665Z"
+		},
+		{
+			"function_name": "TestHomeShowsSignInWhenAnonymous",
+			"documentation_hash": "cf4461c9f6a5e15080c3e908c9e7ec630dfb060d2040ddd4f5bc9bccf7584f25",
+			"definition_hash": "65540e9a01bbb3483c546d2b040a73fe65536c30dfe149b28bbdbee98129ff91",
+			"reviewed_at": "2026-06-17T17:53:16.277493837Z"
 		}
 	]
 }

@@ -19,7 +19,7 @@ import (
 // @return http.Handler The mounted handler.
 // @return *Authenticator The enabled authenticator.
 //
-// @testcase TestActivityPageRendersApproverHistory builds an authenticated server.
+// @testcase TestHomeShowsApproverHistory builds an authenticated server.
 func newAuthServer(t *testing.T) (http.Handler, *Authenticator) {
 	t.Helper()
 	st, err := store.Open(filepath.Join(t.TempDir(), "as.db"))
@@ -45,7 +45,7 @@ func newAuthServer(t *testing.T) (http.Handler, *Authenticator) {
 // @return int The response status code.
 // @return string The response body.
 //
-// @testcase TestActivityPageRendersApproverHistory fetches /activity with a session.
+// @testcase TestHomeShowsApproverHistory fetches / with a session.
 func getWithSession(t *testing.T, h http.Handler, auth *Authenticator, path, email string) (int, string) {
 	t.Helper()
 	ts := httptest.NewServer(h)
@@ -63,51 +63,56 @@ func getWithSession(t *testing.T, h http.Handler, auth *Authenticator, path, ema
 	return resp.StatusCode, string(b)
 }
 
-// TestActivityPageRendersApproverHistory shows the signed-in approver their own request in
+// TestHomeShowsApproverHistory shows the signed-in approver their own request in
 // the history.
-func TestActivityPageRendersApproverHistory(t *testing.T) {
+func TestHomeShowsApproverHistory(t *testing.T) {
 	h, auth := newAuthServer(t)
 	token := createSubject(t, h)
 	_ = propose(t, h, token, "me@example.com")
 
-	code, body := getWithSession(t, h, auth, "/activity", "me@example.com")
+	code, body := getWithSession(t, h, auth, "/", "me@example.com")
 	if code != http.StatusOK {
-		t.Fatalf("GET /activity = %d, want 200", code)
+		t.Fatalf("GET / = %d, want 200", code)
 	}
 	for _, want := range []string{"Your approvals", "View repo r", "badge-pending"} {
 		if !strings.Contains(body, want) {
-			t.Fatalf("/activity missing %q", want)
+			t.Fatalf("home page missing %q", want)
 		}
 	}
 }
 
-// TestActivityScopedToApprover hides requests addressed to a different approver: a user who
-// approves nothing sees an empty page even when other approvers have requests.
-func TestActivityScopedToApprover(t *testing.T) {
+// TestHomeScopedToApprover hides requests addressed to a different approver: a signed-in
+// user who approves nothing sees an empty history even when other approvers have requests.
+func TestHomeScopedToApprover(t *testing.T) {
 	h, auth := newAuthServer(t)
 	token := createSubject(t, h)
 	_ = propose(t, h, token, "other@example.com")
 
-	code, body := getWithSession(t, h, auth, "/activity", "me@example.com")
+	code, body := getWithSession(t, h, auth, "/", "me@example.com")
 	if code != http.StatusOK {
-		t.Fatalf("GET /activity = %d, want 200", code)
+		t.Fatalf("GET / = %d, want 200", code)
 	}
 	if !strings.Contains(body, "No requests addressed to you yet") {
-		t.Fatalf("/activity should be empty for a non-approver; got:\n%s", body)
+		t.Fatalf("home should be empty for a non-approver; got:\n%s", body)
 	}
 	if strings.Contains(body, "badge-") {
-		t.Fatal("/activity leaked another approver's request")
+		t.Fatal("home leaked another approver's request")
 	}
 }
 
-// TestActivityUnavailableWhenAuthDisabled returns 404 when consent authentication is off:
-// there is no approver identity to scope the page to.
-func TestActivityUnavailableWhenAuthDisabled(t *testing.T) {
-	_, h := newServer(t)
-	resp := do(t, h, http.MethodGet, "/activity", nil, "", false)
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusNotFound {
-		t.Fatalf("GET /activity = %d, want 404 when auth disabled", resp.StatusCode)
+// TestHomeShowsSignInWhenAnonymous offers a GitHub login to an anonymous visitor when
+// consent authentication is enabled, instead of any per-user data.
+func TestHomeShowsSignInWhenAnonymous(t *testing.T) {
+	h, auth := newAuthServer(t)
+	code, body := getWithSession(t, h, auth, "/", "") // no session
+	if code != http.StatusOK {
+		t.Fatalf("GET / = %d, want 200", code)
+	}
+	if !strings.Contains(body, "Sign in with GitHub") || !strings.Contains(body, "/auth/github/login") {
+		t.Fatalf("home page missing sign-in call to action:\n%s", body)
+	}
+	if strings.Contains(body, "Your approvals") {
+		t.Fatal("home leaked approver data to an anonymous visitor")
 	}
 }
 
