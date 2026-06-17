@@ -1,0 +1,22 @@
+{
+	"functions": [
+		{
+			"function_name": "TestSchemaDerivedFromCatalog",
+			"documentation_hash": "52d827335791061288e9797b644c6c105c1219974424d39075ded85171e6641f",
+			"definition_hash": "477d44e786901d394e3800e56053da4623060e1df16bf659860edfb2765280c0",
+			"reviewed_at": "2026-06-17T06:22:23.455062384Z"
+		},
+		{
+			"function_name": "TestScopeResolvesRepoAndOrg",
+			"documentation_hash": "6f67ec02b3ceb0b565fbc9fa805520de94ff3e3c6224e45060e4c163d5f9f4bf",
+			"definition_hash": "013566c1cfbef2f5e4548119cf8d4608c6142e59eb4073d55187a52279f56081",
+			"reviewed_at": "2026-06-17T06:22:23.456047207Z"
+		},
+		{
+			"function_name": "TestRegistryBuildsCloneOperation",
+			"documentation_hash": "74e1580d9f8008967e5f248cb2e3ca97a1c0cc8f2939f27e9814bb17b1575397",
+			"definition_hash": "4e5a39abd346a496cecc22a25070fa7ba2b6f9f7dc87e009b453f42b67c0d009",
+			"reviewed_at": "2026-06-17T06:22:23.456865393Z"
+		}
+	]
+}

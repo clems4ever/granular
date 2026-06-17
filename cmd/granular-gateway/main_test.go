@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	gwconfig "github.com/clems4ever/granular/gateway/config"
+	gwconfig "github.com/clems4ever/granular/gateway-github/config"
 )
 
 // TestMainIsEntryPoint is a placeholder: main only delegates to loadConfig and run.

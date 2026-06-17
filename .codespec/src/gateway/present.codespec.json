@@ -1,0 +1,16 @@
+{
+	"functions": [
+		{
+			"function_name": "buildPresentation",
+			"documentation_hash": "a4793599539ffd7d4374da74f587701119ba047e8a242b13b8177bbaead6bb79",
+			"definition_hash": "08ad688e20fbaf059b5d81d9aae17c4a2befd4386aa8ff12064d6ad8acadbedd",
+			"reviewed_at": "2026-06-17T06:20:57.782708443Z"
+		},
+		{
+			"function_name": "scopeLabel",
+			"documentation_hash": "986b44e937c29539013f9616fae4ccf4954b3e1c724608b841438328131ae173",
+			"definition_hash": "df2644e3f9801fb7e4640f4f70decd21a59e79e1414da9f7dd7394001676f5e7",
+			"reviewed_at": "2026-06-17T06:20:57.783322376Z"
+		}
+	]
+}

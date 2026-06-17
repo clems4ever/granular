@@ -1,0 +1,25 @@
+{
+	"functions": [
+		{
+			"function_name": "HasAction",
+			"receiver": "Schema",
+			"documentation_hash": "9ba2007c3a8e37fea2614c368eca14b5940e257e0b1960c9aa909b3b7a6ae359",
+			"definition_hash": "e2f14249a914289ce739b391709be387789a4b6228626b96aff3afbbeaa3dc2b",
+			"reviewed_at": "2026-06-17T06:21:00.907383989Z"
+		},
+		{
+			"function_name": "ResourceEntity",
+			"receiver": "Schema",
+			"documentation_hash": "7f1bcb6a29d02b33182baac76c99e0b468cb1bb6ccbfe46883dac3a81919758f",
+			"definition_hash": "4667e1534039cef3c9c06d686e5b4491f8c06270e523c051e1d5e362c2daad49",
+			"reviewed_at": "2026-06-17T06:21:00.907629683Z"
+		},
+		{
+			"function_name": "ActionLattice",
+			"receiver": "Schema",
+			"documentation_hash": "515a3f42e6a069c2e8228ee611baa1e21afcceaccce199153f322dee3df77c90",
+			"definition_hash": "485167f75999d04bce732f65aeb3a501fdb69ef9a0edbd6efc63ec4f7a3f25a9",
+			"reviewed_at": "2026-06-17T06:21:00.907816735Z"
+		}
+	]
+}

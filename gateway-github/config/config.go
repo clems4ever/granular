@@ -1,8 +1,9 @@
-// Package config loads the granular gateway (Resource Server) configuration from a
-// YAML file, applying built-in defaults for any omitted field. The gateway owns the
-// platform credential and the permission vocabulary; it signs grant requests for
-// clients and verifies operations against the authorization server (AS) before
-// executing them.
+// Package config loads the granular GitHub gateway configuration from a YAML file,
+// applying built-in defaults for any omitted field. It is the domain-specific
+// configuration for the GitHub gateway built on the generic gateway SDK: it adds the
+// GitHub credential the SDK itself knows nothing about. Secrets are never stored inline:
+// each *_file key names a path to a file holding the secret, read into the matching
+// resolved field at load time.
 package config
 
 import (
@@ -13,20 +14,18 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Config is the gateway configuration. Secrets are never stored inline: each *_file
-// key names a path to a file holding the secret, which Load reads into the matching
-// resolved field.
+// Config is the GitHub gateway configuration.
 type Config struct {
 	Addr    string `yaml:"addr"`
 	BaseURL string `yaml:"base_url"`
 
-	// GatewayID identifies this gateway to the AS; ASURL is the AS base URL the
-	// gateway calls to verify operations.
+	// GatewayID identifies this gateway to the AS; ASURL is the AS base URL the gateway
+	// calls to verify operations.
 	GatewayID string `yaml:"gateway_id"`
 	ASURL     string `yaml:"as_url"`
 
-	// SecretFile holds the HMAC secret shared with the AS (used to sign grant
-	// requests and authenticate verify calls).
+	// SecretFile holds the HMAC secret shared with the AS (used to sign grant requests
+	// and authenticate verify calls).
 	SecretFile string `yaml:"secret_file"`
 
 	// GitHubTokenFile holds the GitHub PAT used to execute github.* operations.
@@ -37,8 +36,8 @@ type Config struct {
 	GitHubToken string `yaml:"-"`
 }
 
-// Load reads and parses the YAML configuration file at path, fills omitted fields
-// with their defaults, and reads each configured secret file into its resolved field.
+// Load reads and parses the YAML configuration file at path, fills omitted fields with
+// their defaults, and reads each configured secret file into its resolved field.
 //
 // @arg path The path to the YAML configuration file.
 // @return *Config The parsed configuration with defaults and secrets resolved.

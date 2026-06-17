@@ -1,7 +1,8 @@
-// Command granular-gateway is the granular gateway (Resource Server): it holds the
-// platform credential and the permission vocabulary. It serves the permission schema,
-// signs grant requests for clients, and executes operations only after the
-// authorization server (AS) confirms they are authorized.
+// Command granular-gateway is the granular GitHub gateway (Resource Server): it holds
+// the GitHub credential and the permission vocabulary. It serves the permission schema,
+// signs grant requests for clients, and executes operations only after the authorization
+// server (AS) confirms they are authorized. The gateway logic is the generic gateway
+// SDK; this command wires the GitHub implementation (gateway-github) into it.
 package main
 
 import (
@@ -13,11 +14,11 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/clems4ever/granular/gateway"
+	gatewaygithub "github.com/clems4ever/granular/gateway-github"
+	gwconfig "github.com/clems4ever/granular/gateway-github/config"
 	"github.com/clems4ever/granular/gateway/asclient"
-	gwconfig "github.com/clems4ever/granular/gateway/config"
-	"github.com/clems4ever/granular/gateway/server"
 	"github.com/clems4ever/granular/internal/operations"
-	githubops "github.com/clems4ever/granular/internal/operations/github"
 )
 
 // main parses flags, loads the YAML configuration, and starts the gateway.
@@ -56,7 +57,7 @@ func loadConfig(path string) (*gwconfig.Config, error) {
 	return cfg, nil
 }
 
-// run builds the gateway from cfg and serves until the process is stopped.
+// run builds the GitHub gateway from cfg and serves until the process is stopped.
 //
 // @arg cfg The gateway configuration.
 // @error error Any error from ListenAndServe.
@@ -64,27 +65,6 @@ func loadConfig(path string) (*gwconfig.Config, error) {
 // @testcase TestRunRejectsBadConfig is a placeholder for run wiring.
 func run(cfg *gwconfig.Config) error {
 	env := operations.Env{GitHubToken: cfg.GitHubToken, BaseURL: cfg.BaseURL}
-
-	registry := operations.NewRegistry()
-	registry.Register(githubops.TypeClone, githubops.Clone)
-	registry.Register(githubops.TypeIssueList, githubops.IssueList)
-	registry.Register(githubops.TypeIssueView, githubops.IssueView)
-	registry.Register(githubops.TypeIssueComment, githubops.IssueComment)
-	registry.Register(githubops.TypeIssueCreate, githubops.IssueCreate)
-	registry.Register(githubops.TypeIssueEdit, githubops.IssueEdit)
-	registry.Register(githubops.TypeIssueClose, githubops.IssueClose)
-	registry.Register(githubops.TypeIssueReopen, githubops.IssueReopen)
-	registry.Register(githubops.TypePush, githubops.Push)
-	registry.Register(githubops.TypePullList, githubops.PullList)
-	registry.Register(githubops.TypePullView, githubops.PullView)
-	registry.Register(githubops.TypePullDiff, githubops.PullDiff)
-	registry.Register(githubops.TypePullCreate, githubops.PullCreate)
-	registry.Register(githubops.TypePullComment, githubops.PullComment)
-	registry.Register(githubops.TypePullReview, githubops.PullReview)
-	registry.Register(githubops.TypePullEdit, githubops.PullEdit)
-	registry.Register(githubops.TypePullMerge, githubops.PullMerge)
-	registry.Register(githubops.TypePullClose, githubops.PullClose)
-	registry.Register(githubops.TypePullReopen, githubops.PullReopen)
 
 	if cfg.Secret == "" {
 		log.Printf("warning: secret is empty; the AS will reject this gateway's signatures and verify calls until secret_file is set")
@@ -94,8 +74,14 @@ func run(cfg *gwconfig.Config) error {
 	}
 
 	verifier := asclient.New(cfg.ASURL, cfg.GatewayID, []byte(cfg.Secret))
-	srv := server.New(cfg.GatewayID, []byte(cfg.Secret), registry, env, verifier)
+	gw := gateway.New(gateway.Config{
+		Schema:    gatewaygithub.Schema(),
+		Registry:  gatewaygithub.Registry(env),
+		GatewayID: cfg.GatewayID,
+		Secret:    []byte(cfg.Secret),
+		Verifier:  verifier,
+	})
 
 	log.Printf("granular-gateway %q listening on %s (base URL %s, AS %s)", cfg.GatewayID, cfg.Addr, cfg.BaseURL, cfg.ASURL)
-	return fmt.Errorf("server stopped: %w", http.ListenAndServe(cfg.Addr, srv.Handler()))
+	return fmt.Errorf("server stopped: %w", http.ListenAndServe(cfg.Addr, gw.Handler()))
 }

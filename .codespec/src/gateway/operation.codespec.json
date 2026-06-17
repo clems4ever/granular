@@ -1,0 +1,24 @@
+{
+	"functions": [
+		{
+			"function_name": "NewRegistry",
+			"documentation_hash": "7e8d216b9a501f2b4c7f9a2fd7cf5bd42b9d015af9cd693932af41ddf5e04600",
+			"definition_hash": "32f524c64f50331d582bcd6d33a6a998be3146b617b5b0e4d7617f3a6984691a",
+			"reviewed_at": "2026-06-17T06:20:52.55771026Z"
+		},
+		{
+			"function_name": "Register",
+			"receiver": "Registry",
+			"documentation_hash": "c8300179b18351ed335dff2239d23aede6128039f659d14837c19ed2d5a76ad5",
+			"definition_hash": "9fad6ab7cd3de1de98c60eaaa8b2dae451fc9c451c961c5a78eeea2e585dc0c1",
+			"reviewed_at": "2026-06-17T06:20:52.558272795Z"
+		},
+		{
+			"function_name": "Build",
+			"receiver": "Registry",
+			"documentation_hash": "e3f808312327cb1f1362dbf74e864a946fb6174ea48874d1f3802e0db52485d4",
+			"definition_hash": "9ccef4e5c6494f917ac4b43acc223d750f1c74a0d4065fcaa17a05528b5c9fc6",
+			"reviewed_at": "2026-06-17T06:20:52.558684519Z"
+		}
+	]
+}
