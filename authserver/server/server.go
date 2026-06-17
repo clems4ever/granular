@@ -22,8 +22,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/clems4ever/granular/auth_server/server/web"
-	"github.com/clems4ever/granular/auth_server/store"
+	"github.com/clems4ever/granular/authserver/server/web"
+	"github.com/clems4ever/granular/authserver/store"
 	"github.com/clems4ever/granular/internal/proposal"
 	"github.com/clems4ever/granular/internal/redoc"
 	"github.com/clems4ever/granular/internal/verify"

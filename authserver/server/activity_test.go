@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/clems4ever/granular/auth_server/store"
+	"github.com/clems4ever/granular/authserver/store"
 )
 
 // newAuthServer builds a server with consent authentication enabled, returning the handler

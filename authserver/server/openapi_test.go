@@ -9,7 +9,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 
-	"github.com/clems4ever/granular/auth_server/server/web"
+	"github.com/clems4ever/granular/authserver/server/web"
 )
 
 // openapiPathParam matches an OpenAPI path templating segment, e.g. "{token}".

@@ -87,7 +87,7 @@ restart, and re-running an operation after approval simply succeeds.
 
 ## HTTP API
 
-**Authorization server** (`auth_server/server`):
+**Authorization server** (`authserver/server`):
 
 | Method | Path                     | Purpose                                                        |
 |--------|--------------------------|----------------------------------------------------------------|
@@ -116,7 +116,7 @@ restart, and re-running an operation after approval simply succeeds.
 ## Consent and authentication
 
 The consent pages can be protected by a GitHub OAuth2 authorization-code login
-(`auth_server/server/auth.go`), enabled when `auth.client_id` and
+(`authserver/server/auth.go`), enabled when `auth.client_id` and
 `auth.client_secret_file` are set (callback `<base_url>/auth/github/callback`).
 There is **no global allowlist**: each proposal names an **approver email**, and
 only the human whose verified GitHub email matches may decide it. The session is
@@ -195,10 +195,10 @@ resourceserver-github/internal/      GitHub-only, unimportable from outside the 
   catalog/                      GitHub permission vocabulary (resources, actions)
   authz/                        GitHub requirement + resource-reference primitives
   operations/                   operation framework + GitHub operation implementations
-auth_server/config/           AS YAML configuration
-auth_server/server/           AS HTTP handlers, consent UI, GitHub-OAuth login, eval
-auth_server/server/web/       embedded consent/activity templates + stylesheet
-auth_server/store/            grants + proposals store (bbolt)
+authserver/config/            AS YAML configuration
+authserver/server/            AS HTTP handlers, consent UI, GitHub-OAuth login, eval
+authserver/server/web/        embedded consent/activity templates + stylesheet
+authserver/store/             grants + proposals store (bbolt)
 internal/proposal/            the signed (Presentation, Policies) artifact
 internal/verify/              generic, domain-agnostic resource server↔AS verify wire types
 internal/api/                 shared wire types

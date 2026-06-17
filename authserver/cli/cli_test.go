@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	asconfig "github.com/clems4ever/granular/auth_server/config"
+	asconfig "github.com/clems4ever/granular/authserver/config"
 )
 
 // TestCommandTree checks NewRootCmd builds the granular-auth-server command with a

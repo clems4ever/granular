@@ -15,9 +15,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	asconfig "github.com/clems4ever/granular/auth_server/config"
-	"github.com/clems4ever/granular/auth_server/server"
-	"github.com/clems4ever/granular/auth_server/store"
+	asconfig "github.com/clems4ever/granular/authserver/config"
+	"github.com/clems4ever/granular/authserver/server"
+	"github.com/clems4ever/granular/authserver/store"
 )
 
 // callbackURLSuffix is the GitHub OAuth callback path, surfaced in the startup
