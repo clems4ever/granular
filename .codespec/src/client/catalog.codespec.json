@@ -1,0 +1,11 @@
+{
+	"functions": [
+		{
+			"function_name": "Schemas",
+			"receiver": "Client",
+			"documentation_hash": "7a7767e29ca8dfc95e85b05e665f754f67d024476450b025670dec514fcc860d",
+			"definition_hash": "da697c74338848fe97e540de36b57b85527a07e445a0671e2998ef8727333885",
+			"reviewed_at": "2026-06-17T06:46:27.046016178Z"
+		}
+	]
+}

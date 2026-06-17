@@ -1,0 +1,28 @@
+{
+	"functions": [
+		{
+			"function_name": "fakeAS",
+			"documentation_hash": "cac408bcdb1a96ab362f918bbfc847879443279eeca85abc5e2f07758bfc3ac6",
+			"definition_hash": "fdf410684fc7d4d3fec51c067d85f30e699257c67b17b03a17f5dcf2fce4f5df",
+			"reviewed_at": "2026-06-17T06:58:24.500911782Z"
+		},
+		{
+			"function_name": "TestMainIsEntryPoint",
+			"documentation_hash": "83c8bc779833cd3ae80edd5cbc63b9debc613f4337d2d284b90e870367903853",
+			"definition_hash": "8a8199edcfa724418be07d334052baef6f8857d932ba28319bd6da3ac081b18d",
+			"reviewed_at": "2026-06-17T06:58:24.501544346Z"
+		},
+		{
+			"function_name": "TestCommandTree",
+			"documentation_hash": "8b68bc5907431cd63f3b8e71aab449eaa3a1b8f82b747dc795902e0d2c1c4b04",
+			"definition_hash": "b20e551da7bd82cd48b6fd40c37325ef057b1ecbde2c87eda2b14e2f3585c1ed",
+			"reviewed_at": "2026-06-17T06:58:24.502235168Z"
+		},
+		{
+			"function_name": "TestRunPolicy",
+			"documentation_hash": "30dbb95eec3994ea2f03d71719bc002214885e5273aeae0f6886b3dd69090b0f",
+			"definition_hash": "020c3f7e951aa38b595f44cde17e3c4c15274fb0a11e1ecb7961f46ddbba203b",
+			"reviewed_at": "2026-06-17T06:58:24.502714934Z"
+		}
+	]
+}

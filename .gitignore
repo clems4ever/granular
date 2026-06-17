@@ -3,7 +3,11 @@
 *.db
 granular-workspace/
 # Local server config (may hold secrets); commit granular.example.yaml instead.
+
 /granular.yaml
+/granular-auth.yaml
+/granular-github-gateway.yaml
+/granular-client.yaml
 
 /.secrets
 /.workspace

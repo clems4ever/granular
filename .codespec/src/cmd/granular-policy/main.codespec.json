@@ -1,0 +1,69 @@
+{
+	"functions": [
+		{
+			"function_name": "main",
+			"documentation_hash": "57c9ca6f0af4fb3dfe5a022eb105f3dc9ba83a7c1d0dea4501463d43b6cc6e39",
+			"definition_hash": "515d2588ad9a7485688cb9db661635701adbc34c1326b21653e1519f5773b50e",
+			"reviewed_at": "2026-06-17T06:58:20.746367106Z"
+		},
+		{
+			"function_name": "newRootCmd",
+			"documentation_hash": "ae0019d472133d2251fd44a526246165b2400142d02c17bb75ec1d2438089fc9",
+			"definition_hash": "3532fd0d46839e2b8228268c39a6e827c1b3238ef6b55e8379a30f496a925ee9",
+			"reviewed_at": "2026-06-17T06:58:20.746938544Z"
+		},
+		{
+			"function_name": "client",
+			"receiver": "admin",
+			"documentation_hash": "b8fd2819493c16087861a552b22632ed64f876a79294d679c5e3e2ef2519b225",
+			"definition_hash": "445c9e138c0546d49d7abf934e295341ff5e207ab379ffcbfe1daa40d6e0c1ac",
+			"reviewed_at": "2026-06-17T06:58:20.747471111Z"
+		},
+		{
+			"function_name": "createCmd",
+			"receiver": "admin",
+			"documentation_hash": "e0d5435521ae8f3cfb7e966860abc0530693c79bdf91a7afde6260ea1429d455",
+			"definition_hash": "176edfe3c0b33f059789ab20d36f5344c8daf41f6a737447e97d8ffae3ae9817",
+			"reviewed_at": "2026-06-17T06:58:20.747990361Z"
+		},
+		{
+			"function_name": "showCmd",
+			"receiver": "admin",
+			"documentation_hash": "e6b851c17f3f6f9150a2c353315be091f16f56255f9d3f48c659334c43808192",
+			"definition_hash": "329c68ba6bec711bd9bfebd51e10a1210adab4cfe89582782dbcfd0e5c881b21",
+			"reviewed_at": "2026-06-17T06:58:20.748515739Z"
+		},
+		{
+			"function_name": "destroyCmd",
+			"receiver": "admin",
+			"documentation_hash": "ab2e40be72a0d8cf93f88fb5f982bc87ed8e3af508477929fe4ed5a777ec5bef",
+			"definition_hash": "f3ac97417f48d19f712b2b9292d304485fda2709cee7fd19ce78a59dac4ea7fc",
+			"reviewed_at": "2026-06-17T06:58:20.749157626Z"
+		},
+		{
+			"function_name": "run",
+			"receiver": "admin",
+			"documentation_hash": "0b56e7b2e5471651911f56aabd20e93035863a207008734a72560665b6345480",
+			"definition_hash": "bf8453d88fafc4bf88e009a289230f9fa2b1d3d25e24e41f02076b5a33768ed6",
+			"reviewed_at": "2026-06-17T06:58:20.749748302Z"
+		},
+		{
+			"function_name": "runCreate",
+			"documentation_hash": "ec4a382c93d1d753a7d24f5f0f88d73970d668d9a38eeb30e017c6a8c43d313b",
+			"definition_hash": "2164a0cd927a8e9306bc04de6cfcecc201e784109bc19f0f7902ee70774d58fe",
+			"reviewed_at": "2026-06-17T06:58:20.750491576Z"
+		},
+		{
+			"function_name": "runShow",
+			"documentation_hash": "c526f6de0f6dd1171f4d84cf80ab636a8ae7b7e52ac3333a8e474d7fe2d2324f",
+			"definition_hash": "fb517f48f7de9673d92665c14db79fe9de74e0658fcb91d2dd32ced7f1405fdd",
+			"reviewed_at": "2026-06-17T06:58:20.751430426Z"
+		},
+		{
+			"function_name": "runDestroy",
+			"documentation_hash": "b35801efa0611695f851edf6f5a2d2d235f8ba5bb53d392f014851789bcdafa6",
+			"definition_hash": "0fc6180f9c70a619abd6946789f8446226c8049ff2031b5dafe80dc9b63173d4",
+			"reviewed_at": "2026-06-17T06:58:20.752327825Z"
+		}
+	]
+}

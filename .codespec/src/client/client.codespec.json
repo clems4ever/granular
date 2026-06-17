@@ -1,0 +1,44 @@
+{
+	"functions": [
+		{
+			"function_name": "New",
+			"documentation_hash": "3c1f3b660bc920a1e5e786376f42106bb71e8a4491376e442b27495ed24f217d",
+			"definition_hash": "f3cb638c31127694d6c4df0690f95de41b1e27f8793f1c62a113dcbf34ac547f",
+			"reviewed_at": "2026-06-17T06:46:27.456788137Z"
+		},
+		{
+			"function_name": "GatewayIDs",
+			"receiver": "Client",
+			"documentation_hash": "6bfa2facfaae33fdb3b82819543da1063b8235e3c88717352c4a09795649f463",
+			"definition_hash": "e670625f1118fe1a47a790ca813ccd9c74de870eedc2adf2fad1b880070fcf2a",
+			"reviewed_at": "2026-06-17T06:46:27.458064509Z"
+		},
+		{
+			"function_name": "gatewayURL",
+			"receiver": "Client",
+			"documentation_hash": "24ef915d834a659d7a5dc4115e8928337f174ea3c14e0f4acbad379716861687",
+			"definition_hash": "6a4fff7fda81d891b598b6be5069e9e9b7168c80eeb7cf6f88834b8c6ebcf97a",
+			"reviewed_at": "2026-06-17T06:46:27.45902248Z"
+		},
+		{
+			"function_name": "resolveTargets",
+			"receiver": "Client",
+			"documentation_hash": "dd9ec6625f0c93e01f8d2b8906a64828b64e3d328ec584dcb7cff5a2be3870cd",
+			"definition_hash": "fe2308cea27c51bda859b78c167bf80d8405898896617d7bc4e7b1028035fdc8",
+			"reviewed_at": "2026-06-17T06:46:27.459984487Z"
+		},
+		{
+			"function_name": "doJSON",
+			"receiver": "Client",
+			"documentation_hash": "deaf8f9743d7b4de79a7e09bf6c4e84ce17cd357c3c6b01c75a91a8e3a63b188",
+			"definition_hash": "8ec7de1810df6c2a2cecefe5ff2d72f8d55947222ee726ea46dfef7d4ab1c25e",
+			"reviewed_at": "2026-06-17T06:46:27.460733014Z"
+		},
+		{
+			"function_name": "trimSlash",
+			"documentation_hash": "86cd435d3649499ef492f8837a8f82b9d9aff419992370e5154a9a070a6608fc",
+			"definition_hash": "755291c64a7d8fe69ce3dcecd04f3d62dd25a9ffadcd490e9cb6d5d093072c49",
+			"reviewed_at": "2026-06-17T06:46:27.461178451Z"
+		}
+	]
+}

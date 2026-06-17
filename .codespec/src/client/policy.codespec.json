@@ -1,0 +1,32 @@
+{
+	"functions": [
+		{
+			"function_name": "Token",
+			"receiver": "Client",
+			"documentation_hash": "fea8a578b5470c2ce82ed80da68f78d5025778e5a4248c939d192b9aa672b504",
+			"definition_hash": "7e20341bafb5547ba2d8128cf8f367a061d3cbd7acb60bba1e5046a22b252af5",
+			"reviewed_at": "2026-06-17T06:46:33.407780282Z"
+		},
+		{
+			"function_name": "CreatePolicy",
+			"receiver": "Client",
+			"documentation_hash": "caaa7906638dbfe3f52b4495f1ce39299290353d7b5ace2d32f488ed1b63a78a",
+			"definition_hash": "bfba9fa5a7f6831be56cfe129feff73e4d1119e03aead6ed020481fadbe4ef57",
+			"reviewed_at": "2026-06-17T06:46:33.407967587Z"
+		},
+		{
+			"function_name": "Policy",
+			"receiver": "Client",
+			"documentation_hash": "ab123bd3469b80b658c9ec65907b5dfa058b89493deb1ce6210ea852f8d42ec2",
+			"definition_hash": "9c864cb02ccbee74ccc86d8d4b2f3837dc816b218521f4f258f69f8092f847d5",
+			"reviewed_at": "2026-06-17T06:46:33.408088209Z"
+		},
+		{
+			"function_name": "DestroyPolicy",
+			"receiver": "Client",
+			"documentation_hash": "56465682b0f6ddb9cea247c521f944045b3c3e83f3b5d8da4fe6a51820a6a79d",
+			"definition_hash": "3d2f8663e63d940e4c78b9760fbe174beaf855cfddfe946d1d8d4bc7d3560a19",
+			"reviewed_at": "2026-06-17T06:46:33.408223746Z"
+		}
+	]
+}
