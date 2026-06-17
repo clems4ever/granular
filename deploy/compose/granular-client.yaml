@@ -1,0 +1,13 @@
+# Client config for the docker-compose example (used by the optional "client" service).
+# The client talks to the AS and the gateway over the compose network.
+
+as_url: "http://auth-server:9090"
+
+# The policy token the client attaches proposals and operations to. Mint it first with
+# the granular-policy CLI (see docker-compose.yml header), write it to
+# .secrets/granular_policy_token, then run client commands.
+token_file: "/run/secrets/granular_policy_token"
+
+gateways:
+  - id: "github-gateway"
+    base_url: "http://gateway:8080"

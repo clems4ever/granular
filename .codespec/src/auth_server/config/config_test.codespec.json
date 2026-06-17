@@ -3,14 +3,14 @@
 		{
 			"function_name": "TestLoadParsesYAML",
 			"documentation_hash": "7a1b580edf30801e35db627171cb2106ebb42f0f6383b3e8e558067fc233ecbf",
-			"definition_hash": "f9829abec164db21ecdd4fa534d3ec6e72f3574188d8bd4c4741de26355f8336",
-			"reviewed_at": "2026-06-17T11:31:52.35316427Z"
+			"definition_hash": "4a0492321b0c61bfa1fdb2e5cf3c87486498d6675e7f921fbca701c73df4a7c3",
+			"reviewed_at": "2026-06-17T13:34:09.711006675Z"
 		},
 		{
 			"function_name": "TestLoadAppliesDefaults",
 			"documentation_hash": "74d301d6301f8bbc322841f5fd3d9d3fe8f2943e0e9c900e3dabd03ca6fd581b",
-			"definition_hash": "8c3ed78c9dc99ff208f612b7423eff057264695c9b459f541e0ae7d1aac80063",
-			"reviewed_at": "2026-06-17T10:59:34.503058507Z"
+			"definition_hash": "b8ae7aa5750ef9c75d2ad67fce60a46910bdf2aa6bbeee82fd69a361bfd81ff7",
+			"reviewed_at": "2026-06-17T13:34:09.712425809Z"
 		},
 		{
 			"function_name": "TestLoadMissingFile",

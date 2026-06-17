@@ -140,7 +140,7 @@ Two independent clocks, both enforced:
 
 - **Grants** carry a TTL chosen by the approver; a background **janitor**
   (`cleanup_interval`) purges expired grants.
-- **Proposals** (pending grant requests) carry a `request_ttl`: a request not
+- **Proposals** (pending grant requests) carry a `grant_request_ttl`: a request not
   acted on within that window is automatically revoked and the agent must request
   again. Expiry is enforced authoritatively at approve/reject time, reflected
   lazily in the consent and activity views, and persisted by the janitor for

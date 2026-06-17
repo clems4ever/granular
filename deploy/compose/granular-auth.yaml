@@ -1,0 +1,37 @@
+# Authorization-server config for the docker-compose example.
+# Secrets are mounted by compose under /run/secrets (see docker-compose.yml).
+
+addr: ":9090"
+# Externally reachable URL (approval links + OAuth callback). For a local run this is
+# the host where port 9090 is published.
+base_url: "http://localhost:9090"
+
+# The bbolt database lives here. The volume is mounted over the image's nonroot home
+# (/home/nonroot, owned by uid 65532), so this subdirectory is writable by the
+# unprivileged process. The db defaults to <workspace>/granular-auth.db.
+workspace: "/home/nonroot/data"
+
+cleanup_interval: "2m"
+
+# The time to live of a grant request before it expires: how long a submitted grant
+# request (proposal) may stay pending before it is automatically revoked, after which
+# the agent must submit a fresh one. Defaults to 15m.
+grant_request_ttl: "15m"
+
+# The GitHub gateway authenticates with this shared HMAC secret; the same secret file
+# is mounted into the gateway under the same id.
+gateways:
+  - id: "github-gateway"
+    secret_file: "/run/secrets/granular_gateway_github_secret"
+
+# Gates policy administration (the granular-policy CLI mints tokens against it).
+admin_token_file: "/run/secrets/granular_auth_admin_token"
+
+# Optional: require a "log in with GitHub" on the consent screen. Register an OAuth
+# app with callback <base_url>/auth/github/callback, drop its client secret in
+# .secrets/granular_auth_oauth_client_secret, uncomment the matching secret in
+# docker-compose.yml, and fill this in. Left unset, the consent UI is open (the
+# server logs a warning).
+# auth:
+#   client_id: "Iv1_xxxxxxxx"
+#   client_secret_file: "/run/secrets/granular_auth_oauth_client_secret"

@@ -22,7 +22,7 @@ func TestLoadParsesYAML(t *testing.T) {
 	cfgPath := filepath.Join(dir, "as.yaml")
 	body := "addr: \":7000\"\n" +
 		"base_url: \"http://as.example\"\n" +
-		"request_ttl: \"30m\"\n" +
+		"grant_request_ttl: \"30m\"\n" +
 		"admin_token_file: " + adminTok + "\n" +
 		"gateways:\n" +
 		"  - id: github-gateway\n" +
@@ -38,8 +38,8 @@ func TestLoadParsesYAML(t *testing.T) {
 	if cfg.Addr != ":7000" || cfg.BaseURL != "http://as.example" {
 		t.Fatalf("unexpected addr/base: %q %q", cfg.Addr, cfg.BaseURL)
 	}
-	if cfg.RequestTTL.Std() != 30*time.Minute {
-		t.Fatalf("request TTL = %s, want parsed 30m", cfg.RequestTTL.Std())
+	if cfg.GrantRequestTTL.Std() != 30*time.Minute {
+		t.Fatalf("grant-request TTL = %s, want parsed 30m", cfg.GrantRequestTTL.Std())
 	}
 	if got := cfg.GatewaySecrets()["github-gateway"]; got != "s3cret" {
 		t.Fatalf("gateway secret = %q, want trimmed s3cret", got)
@@ -66,8 +66,8 @@ func TestLoadAppliesDefaults(t *testing.T) {
 	if cfg.DBPath == "" || cfg.CleanupInterval == 0 {
 		t.Fatalf("defaults not applied: %+v", cfg)
 	}
-	if cfg.RequestTTL.Std() != 15*time.Minute {
-		t.Fatalf("default request TTL = %s, want 15m", cfg.RequestTTL.Std())
+	if cfg.GrantRequestTTL.Std() != 15*time.Minute {
+		t.Fatalf("default grant-request TTL = %s, want 15m", cfg.GrantRequestTTL.Std())
 	}
 }
 

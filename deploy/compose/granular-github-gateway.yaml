@@ -1,0 +1,18 @@
+# GitHub-gateway config for the docker-compose example.
+# Secrets are mounted by compose under /run/secrets (see docker-compose.yml).
+
+addr: ":8080"
+# Externally reachable URL of the gateway (used for brokered URLs handed to clients).
+base_url: "http://localhost:8080"
+
+# This gateway's id must match an entry in the AS's `gateways:` list, and as_url points
+# at the AS over the compose network (service name "auth-server").
+gateway_id: "github-gateway"
+as_url: "http://auth-server:9090"
+
+# Shared HMAC secret — the SAME secret the AS holds for this gateway_id. The gateway
+# signs grant requests and authenticates verify calls with it.
+secret_file: "/run/secrets/granular_gateway_github_secret"
+
+# GitHub personal access token used to execute github.* operations.
+github_token_file: "/run/secrets/granular_github_token"

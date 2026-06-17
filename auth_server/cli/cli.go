@@ -94,7 +94,7 @@ func run(cfg *asconfig.Config) error {
 	gateways := cfg.GatewaySecrets()
 	srv := server.New(st, cfg.BaseURL, gateways)
 	srv.UseAdminToken(cfg.AdminToken)
-	srv.UseRequestTTL(cfg.RequestTTL.Std())
+	srv.UseRequestTTL(cfg.GrantRequestTTL.Std())
 
 	auth := server.NewAuthenticator(server.AuthConfig{
 		ClientID:      cfg.Auth.ClientID,
@@ -123,7 +123,7 @@ func run(cfg *asconfig.Config) error {
 	st.StartCleanup(stop, cfg.CleanupInterval.Std(), func(n int) {
 		log.Printf("cleaned up %d expired item(s)", n)
 	})
-	log.Printf("janitor purging expired grants and revoking lapsed requests every %s (request TTL %s)", cfg.CleanupInterval.Std(), cfg.RequestTTL.Std())
+	log.Printf("janitor purging expired grants and revoking lapsed requests every %s (grant-request TTL %s)", cfg.CleanupInterval.Std(), cfg.GrantRequestTTL.Std())
 
 	log.Printf("granular-auth-server listening on %s (base URL %s, workspace %s)", cfg.Addr, cfg.BaseURL, cfg.Workspace)
 	return http.ListenAndServe(cfg.Addr, srv.Handler())

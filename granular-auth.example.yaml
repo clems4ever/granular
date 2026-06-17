@@ -23,9 +23,10 @@ db: ""
 # How often expired grants are purged and lapsed requests revoked in the background.
 cleanup_interval: "2m"
 
-# How long a submitted grant request (proposal) may stay pending before it is
-# automatically revoked and the agent must request again. Defaults to 15m.
-request_ttl: "15m"
+# The time to live of a grant request before it expires: how long a submitted grant
+# request (proposal) may stay pending before it is automatically revoked, after which
+# the agent must submit a fresh one. Defaults to 15m.
+grant_request_ttl: "15m"
 
 # Registered Resource-Gateways. Each gateway signs its grant-request and verify
 # calls with the shared secret loaded from secret_file (an HMAC over the request
