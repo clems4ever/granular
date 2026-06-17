@@ -1,0 +1,124 @@
+{
+	"functions": [
+		{
+			"function_name": "Principal",
+			"documentation_hash": "d560597747d57ba42422e0cf6f6e136695add96c887a38254c24c6ce68fe7150",
+			"definition_hash": "03b7f2b0e08b943df0f19247baae10f9c0223e15b2c01bf2cac5e824a28b0584",
+			"reviewed_at": "2026-06-17T12:43:18.758358202Z"
+		},
+		{
+			"function_name": "OrgRef",
+			"documentation_hash": "d48e7bed0132173bd06cf7acc2bb9422e9f634cc78934d7ae104f7a9e509c893",
+			"definition_hash": "e16eb48d58aa85c864d6891b21d6cfcd17b6ee91f6cc71d8051df9837fcc34b4",
+			"reviewed_at": "2026-06-17T12:43:18.762732614Z"
+		},
+		{
+			"function_name": "RepoRef",
+			"documentation_hash": "cb0709606de863c1d74289a7a2a31afe8abaa6da9f8dcc23e531d6e528e56d89",
+			"definition_hash": "be0c44f6e0e0d9133a120c7ac855f0a8ef14618076b136b8ad2bee47ceace944",
+			"reviewed_at": "2026-06-17T12:43:18.764538478Z"
+		},
+		{
+			"function_name": "IssueRef",
+			"documentation_hash": "c11a402a23e750d3890ae90e3ba2df222d18ea58cf7e69bcfef076a512a79bdc",
+			"definition_hash": "f6dcf3f38c490e67f471937fd3a1dd3e7417fc107823e36b1e9b7643711ac61f",
+			"reviewed_at": "2026-06-17T12:43:18.766330155Z"
+		},
+		{
+			"function_name": "PullRef",
+			"documentation_hash": "c3857161c01d4a2e0837fe8f0cd5c265ba291d63ed787addfa4f1c224113be8d",
+			"definition_hash": "c9b1f7db86a9d00aec90accaa774251642cd6be8a96c85be739ffa18ed28923e",
+			"reviewed_at": "2026-06-17T12:43:18.76809408Z"
+		},
+		{
+			"function_name": "BranchRef",
+			"documentation_hash": "6d2e09f7dbd1d03ff14c587ce3308f597ec56c5332588c2eb1873b6d9fbf621b",
+			"definition_hash": "225dbaacdc6f837d741300960c6cc09cf1ce63ccbaff59ce20735b06147803ce",
+			"reviewed_at": "2026-06-17T12:43:18.768687892Z"
+		},
+		{
+			"function_name": "AllowsAll",
+			"documentation_hash": "b170dff78332e6acec309ce0b06100f68b9c249d44a037e2f1a97edcd8d30cd4",
+			"definition_hash": "f4bcbbe3ef100401403f0c02834418122b408add5d400495dde4c4e801616896",
+			"reviewed_at": "2026-06-17T12:43:18.769269577Z"
+		},
+		{
+			"function_name": "MinimalPermits",
+			"documentation_hash": "c18ca9775551fb0dc8d44833d7027a8e6281686728d2083fee9f9f5a57922321",
+			"definition_hash": "badea13a4bfcdd6fd93a71a89f873d84e485783396d82f45abb096d0e19bf684",
+			"reviewed_at": "2026-06-17T12:43:18.769634727Z"
+		},
+		{
+			"function_name": "PoliciesFromCapabilities",
+			"documentation_hash": "fb767f471e910439cbdc7903e792bb1a1e3c6aba09c8be4a76b6b33af5af83d1",
+			"definition_hash": "49f659f2f8229236debeb8409523d293f2b7f05fef7cd72c982fe93620da8ebd",
+			"reviewed_at": "2026-06-17T12:43:18.769969939Z"
+		},
+		{
+			"function_name": "entitiesFor",
+			"documentation_hash": "97bd4190ffb84f2c1e759865e5fd302d585d8ba07d0f927829891f9ce250ebf3",
+			"definition_hash": "800d0a725cdaf4d935e315e49002818453076eec605fe54a1e60670a97a33b54",
+			"reviewed_at": "2026-06-17T12:43:18.770381974Z"
+		},
+		{
+			"function_name": "addRef",
+			"documentation_hash": "6e82ae9853db24e2c0b0d00172b19fd899b1d48eaa7c108f2c80c903197669e6",
+			"definition_hash": "05bdce891605d1842375b16f5b625593b0c8673d0d042567d0be4c1e99f13ddc",
+			"reviewed_at": "2026-06-17T12:43:18.77077613Z"
+		},
+		{
+			"function_name": "refUID",
+			"documentation_hash": "02e4a929610a13f9ef768943494386e3e4814689494b2aa1fdad6b978fdd2f6b",
+			"definition_hash": "063e975b43e4fcd50bf49cf8da60d86d4ee3ae432f27e0b8da1259db140ee5fc",
+			"reviewed_at": "2026-06-17T12:43:18.771543434Z"
+		},
+		{
+			"function_name": "recordFromAttrs",
+			"documentation_hash": "d45dad1c70284eac6e54e8c7a87e9de0fb5b9e41508a6cd2e97da5836518481f",
+			"definition_hash": "64cc65559573880aca9da457599f0b90813bd5ced5a7e0cf65e0d281ae1f2948",
+			"reviewed_at": "2026-06-17T12:43:18.772225861Z"
+		},
+		{
+			"function_name": "contextRecord",
+			"documentation_hash": "02899b60f1b34d63c70302622dc9e8316db6a51aa35366f5a057a4ebb2ac1588",
+			"definition_hash": "0bfc432e18992cdbf999e04a4c4f8c476ceec8ee830a3185798a0149b825e8d1",
+			"reviewed_at": "2026-06-17T12:43:18.773098373Z"
+		},
+		{
+			"function_name": "minimalPermit",
+			"documentation_hash": "8ccaf54041bd6525340a5a4daa6724cba1ab1753c280bc096ab85a41e6ec1b3d",
+			"definition_hash": "9843ecd571e1f016a19ab1a4a97b8dfc734841a9c270570b0280e6eec5cb928c",
+			"reviewed_at": "2026-06-17T12:43:18.775038021Z"
+		},
+		{
+			"function_name": "scopeLiteral",
+			"documentation_hash": "c49a4b18a629e72bc059efb86bbf8a7b8e037d9a8518ff9231cebb0c61edfc4e",
+			"definition_hash": "31fa684d40c3cda2a39dff1276bac0588eb74f0984d0c70b32884153f9d60f42",
+			"reviewed_at": "2026-06-17T12:43:18.777227856Z"
+		},
+		{
+			"function_name": "actionListLiteral",
+			"documentation_hash": "5cf5cc77a9c44a02528f6b6c07e7e3adafe3fce60d4ee62021a59748d5cbf68a",
+			"definition_hash": "cc59e6fb7380e46ed3f9eb907671681eee1abd89bb5dff1fb0a8f51fb9df73ec",
+			"reviewed_at": "2026-06-17T12:43:18.7798364Z"
+		},
+		{
+			"function_name": "uidLiteral",
+			"documentation_hash": "0b6ba5e9b724adbb1a31b6008571f8238f03ed5d45ac12e22bd5f80be0e979f6",
+			"definition_hash": "fdcd38558b4766f9fbb36cf4ccae47bccc6a65b40806a0c77632b5ed82f2f9c6",
+			"reviewed_at": "2026-06-17T12:43:18.780668899Z"
+		},
+		{
+			"function_name": "actionLiteral",
+			"documentation_hash": "5ec34d98bf1eef7d2d47069a6357bfa4ee0e3717f365bdf507e940e3d78d9b08",
+			"definition_hash": "8871ae7f6d3792495241dc2fce06bbc0897278dd3f8ac9d4eb8f4e7589fb763a",
+			"reviewed_at": "2026-06-17T12:43:18.78122723Z"
+		},
+		{
+			"function_name": "entityLiteral",
+			"documentation_hash": "69321bad19480aaa9d36e7d0007e78c74a093745aea8dfdc9d5d5c2b07def86a",
+			"definition_hash": "ed0601792059a17b71852d023785b10fd3a6e6af8ec3a0bb07204950cd45cb8d",
+			"reviewed_at": "2026-06-17T12:43:18.781632989Z"
+		}
+	]
+}

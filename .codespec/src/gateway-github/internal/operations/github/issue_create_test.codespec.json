@@ -1,0 +1,28 @@
+{
+	"functions": [
+		{
+			"function_name": "TestIssueCreateFactoryValidatesParams",
+			"documentation_hash": "d09d4a1cbf338301a2122eb8a928c8b81f33207d471a9b3a29e877ddb508824c",
+			"definition_hash": "cd65cad502ea210ab0fa6c0ea23b4fb69fa3248f56e4a9076b378f98a241b4eb",
+			"reviewed_at": "2026-06-17T12:43:18.808263618Z"
+		},
+		{
+			"function_name": "TestIssueCreateRequirementsAreContentScoped",
+			"documentation_hash": "00037e0c68c17ada81c0968ad8d6e72341aea74e2b32d857ad9078b6cbf664ee",
+			"definition_hash": "1fb3cfd3a961d8e46f28ab77e4e5d7a8a52bc2949d60510106a0745f9d6d0d06",
+			"reviewed_at": "2026-06-17T12:43:18.808357059Z"
+		},
+		{
+			"function_name": "TestIssueCreateDescribe",
+			"documentation_hash": "4b3a496770f30fc6e3c55292a278ace385b1de427400907ec5f28ec536fe54db",
+			"definition_hash": "d900f32e06f3d2987df3b97834ea439f8425fd2b43f346861042be8d273f93a2",
+			"reviewed_at": "2026-06-17T12:43:18.808443845Z"
+		},
+		{
+			"function_name": "TestIssueCreateExecutePosts",
+			"documentation_hash": "50c3e56c69c0242267df8a9c5fda8044a35bb1005cb16f0168c08ec5dac04037",
+			"definition_hash": "8661cba975dc7bfc894ffdb14e06644cee600107ff09e0a2618c6ef48cee5b6a",
+			"reviewed_at": "2026-06-17T12:43:18.808528002Z"
+		}
+	]
+}

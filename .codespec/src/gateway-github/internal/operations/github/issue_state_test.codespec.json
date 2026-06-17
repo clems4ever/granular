@@ -1,0 +1,52 @@
+{
+	"functions": [
+		{
+			"function_name": "TestIssueCloseFactoryValidatesParams",
+			"documentation_hash": "450e3b51b4e48aa4684d7b2ada068f2751a251688834fb4e525e309acb195bbe",
+			"definition_hash": "8abfbf726776a9eedf45a21336679c838a25f46d9a6bfc141ae5b4de7ad0a6af",
+			"reviewed_at": "2026-06-17T12:43:18.815940676Z"
+		},
+		{
+			"function_name": "TestIssueCloseRequirements",
+			"documentation_hash": "2abb5f15c288f1730423a0e4ec88572487873427f3d3760573d223593d9e83a5",
+			"definition_hash": "7989df2e131226b09b12ac082da145132fc7efe3ea5be684c917a0d074777ece",
+			"reviewed_at": "2026-06-17T12:43:18.816335755Z"
+		},
+		{
+			"function_name": "TestIssueCloseDescribe",
+			"documentation_hash": "0f3dd8c23d87e0bc8e52df0f31e0fea9210562e33b21d1485b89c63c85d5fc27",
+			"definition_hash": "c8409174e616f35507a4639ff7fc807d76768a28613155b3337c61dbad890c70",
+			"reviewed_at": "2026-06-17T12:43:18.81660291Z"
+		},
+		{
+			"function_name": "TestIssueCloseExecutePatches",
+			"documentation_hash": "8388c207e11cf1f810dfbc65c7ad7d89ff627ab55e114d21aba533270138b4d2",
+			"definition_hash": "322e2eddb277e94b5345c0652fbcbbb1eea33c840cf1d2b67ce19be44dfab941",
+			"reviewed_at": "2026-06-17T12:43:18.816844046Z"
+		},
+		{
+			"function_name": "TestIssueReopenFactoryValidatesParams",
+			"documentation_hash": "f888759302b1da0480daad84ac3a49c175bf181ce840d268fca487d904a988ed",
+			"definition_hash": "f220c8835be0f9d928d5d686ce251b643cfedb6cb8c01ef8c0abc45163061b8a",
+			"reviewed_at": "2026-06-17T12:43:18.817093993Z"
+		},
+		{
+			"function_name": "TestIssueReopenRequirements",
+			"documentation_hash": "c91f3ed80f8fc66b872197a085af10f7c13f6ab1019a55e879f7ad005360c473",
+			"definition_hash": "bb2d7fb26d42c2f1d7d2e26dfcf1391dcc345bd4dd9451731368fca58b8545e2",
+			"reviewed_at": "2026-06-17T12:43:18.817327918Z"
+		},
+		{
+			"function_name": "TestIssueReopenDescribe",
+			"documentation_hash": "c0b743d58f68c38a83cc6870e658218e5d4eac18ec22ae1e8e83c75d322e4c53",
+			"definition_hash": "d94156e73b3794fc0ba176d5ac43c045b66b0353ed0f3355122d8235aa989518",
+			"reviewed_at": "2026-06-17T12:43:18.817563577Z"
+		},
+		{
+			"function_name": "TestIssueReopenExecutePatches",
+			"documentation_hash": "3eb748cbc34ac70bb97a416b628d825009002f480fb5ee3629b99bef3f01e849",
+			"definition_hash": "6303ec24755eee3460ea9eb8d31da26bc788498d17ae3a18d8cfa258a9a6ff33",
+			"reviewed_at": "2026-06-17T12:43:18.817797729Z"
+		}
+	]
+}

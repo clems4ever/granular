@@ -1,0 +1,38 @@
+{
+	"functions": [
+		{
+			"function_name": "IssueComment",
+			"documentation_hash": "b2359158c4dddf9e27301c0cc3c67d7556e8763251a9b3cdc18ebeadb9b91f9a",
+			"definition_hash": "02c09ee08bc773eb7135351c5f9dbc6b67ded7d213a814c5b4e7e22d15dbe394",
+			"reviewed_at": "2026-06-17T12:43:18.806449409Z"
+		},
+		{
+			"function_name": "Type",
+			"receiver": "IssueCommentOperation",
+			"documentation_hash": "4397fc8542cbdc68c77ec1d4528f666351e088fa3cf7a0672fd7398ad6763d3d",
+			"definition_hash": "45e5618a71f7a674282120300649055b702a81a8875046e08c80017acc2b2212",
+			"reviewed_at": "2026-06-17T12:43:18.806539748Z"
+		},
+		{
+			"function_name": "Requirements",
+			"receiver": "IssueCommentOperation",
+			"documentation_hash": "8f1c7cfd4a3700cd0696306fab0042b61279fb367962406010ff16f93e61cbe9",
+			"definition_hash": "349ace32ee1c5d6da4ffbead1a17814046cedd99edf0da926c458f01dbf81ea3",
+			"reviewed_at": "2026-06-17T12:43:18.806625025Z"
+		},
+		{
+			"function_name": "Describe",
+			"receiver": "IssueCommentOperation",
+			"documentation_hash": "9f89bb809ca0caeff7e9e9bdaa6aacc5f1eff4ed1411254f20d06aa6304f993e",
+			"definition_hash": "5853f222ec0040211b60d427bdaf47bbdf0b2cfdc930c9de02e483d955caf702",
+			"reviewed_at": "2026-06-17T12:43:18.806711777Z"
+		},
+		{
+			"function_name": "Execute",
+			"receiver": "IssueCommentOperation",
+			"documentation_hash": "df6ad6ea981913a1015f803271264df5786bc16c15f25a497979be3497fad636",
+			"definition_hash": "95d56ccb319ab3e18efe0c394cfcd1a82548da2a9fe3133ae10c7272249b82b4",
+			"reviewed_at": "2026-06-17T12:43:18.80679888Z"
+		}
+	]
+}

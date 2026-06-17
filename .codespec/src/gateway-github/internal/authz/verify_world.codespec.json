@@ -1,0 +1,22 @@
+{
+	"functions": [
+		{
+			"function_name": "VerifyRequests",
+			"documentation_hash": "4883e47e4e8c9b40d4c20f92ae676b9d55a283e3a567d56049e274ec04ff450b",
+			"definition_hash": "7ea17ed50dd3360d37080ed8a0deae4950f354bd766c6255d77b4f720a68dfa4",
+			"reviewed_at": "2026-06-17T12:43:18.781790804Z"
+		},
+		{
+			"function_name": "VerifyWorld",
+			"documentation_hash": "77458d993353a7a040aa3c40f2b66d8cac664e76ea9da1d727868692b0928cc9",
+			"definition_hash": "d707a58c3e36b526488a637668d41feedf300f3cb980caa94fa1cb47c56e548d",
+			"reviewed_at": "2026-06-17T12:43:18.78189163Z"
+		},
+		{
+			"function_name": "addResource",
+			"documentation_hash": "95a73ceff13327e5eef8b012a7bc443dd292306b7e18eef56b753a4e9a293f3c",
+			"definition_hash": "52dd164d0dcb6518188364d8f7834fd1d6f9b689b6eed092bc00e0fc0d9c9047",
+			"reviewed_at": "2026-06-17T12:43:18.781981513Z"
+		}
+	]
+}

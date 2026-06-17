@@ -1,0 +1,50 @@
+{
+	"functions": [
+		{
+			"function_name": "Clone",
+			"documentation_hash": "aaabc718e1b41a6b3fbc433f2eeea43940d37833dc4fa636b83e9b9cabc4e4e3",
+			"definition_hash": "fedc27bc1751fa683bf00b7eea69975e3a42c8069567c1a867070db48327fffb",
+			"reviewed_at": "2026-06-17T12:43:18.805284411Z"
+		},
+		{
+			"function_name": "Type",
+			"receiver": "CloneOperation",
+			"documentation_hash": "a5a244e605d24b74015ccab7ab964449c7428b07b59308c0db367a1737654917",
+			"definition_hash": "5751861017db5f5087c6ca4fd1bdce22560ad117f318f97e8370a70afeb40b93",
+			"reviewed_at": "2026-06-17T12:43:18.805412429Z"
+		},
+		{
+			"function_name": "Requirements",
+			"receiver": "CloneOperation",
+			"documentation_hash": "967e17a5d47a004f6e986e057880c256364ed404fc8de4c5e0fab083212836c7",
+			"definition_hash": "8e07a221d6d16dd1e40902690ed9344ef6bf43752900247a853e489f3c6b29d8",
+			"reviewed_at": "2026-06-17T12:43:18.805524618Z"
+		},
+		{
+			"function_name": "Describe",
+			"receiver": "CloneOperation",
+			"documentation_hash": "c201aae90b2c4a9e3658089cc9d62051ee260eadd3adcb33c08bd99001975070",
+			"definition_hash": "61ee4ff6d06f037276def160e186870da6d5318e5e7beff65f684c6afb874c46",
+			"reviewed_at": "2026-06-17T12:43:18.805632277Z"
+		},
+		{
+			"function_name": "Execute",
+			"receiver": "CloneOperation",
+			"documentation_hash": "e4943ea49a5991cfdef13b9a25f3d04584e89910f322c42eb747f4925530a581",
+			"definition_hash": "27359338acba9249049816318d3abf966435e6472f230359a27aaa70e9d6ac02",
+			"reviewed_at": "2026-06-17T12:43:18.805740206Z"
+		},
+		{
+			"function_name": "NormalizeRepo",
+			"documentation_hash": "6545b3255385df878dd9cbbedaacc61e24426107c02ebb29960daa0f7ca50115",
+			"definition_hash": "bf6a42d4a4e57070ad238dbbda0ad2a770fe971bd96370897e699c89ae965bc7",
+			"reviewed_at": "2026-06-17T12:43:18.805845746Z"
+		},
+		{
+			"function_name": "stringParam",
+			"documentation_hash": "bc8cf63ba0803a46d987aadbafd958d5417ed7c82478889589093338a2b392ff",
+			"definition_hash": "992d7669bc4dd918608a0a1e76f31faf88431cc57214b66124ebad90d5ece7aa",
+			"reviewed_at": "2026-06-17T12:43:18.805952415Z"
+		}
+	]
+}

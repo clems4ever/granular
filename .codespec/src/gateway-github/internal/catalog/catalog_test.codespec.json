@@ -1,0 +1,34 @@
+{
+	"functions": [
+		{
+			"function_name": "TestCatalogIsConsistent",
+			"documentation_hash": "0a763d80d8261c2aad83201d489a8b055bb07b20b3cf51558090f3c3d082af50",
+			"definition_hash": "e2c77cebf705a109fd71f551d6543dc7195d72dde8a472dbb96328292205677b",
+			"reviewed_at": "2026-06-17T12:43:18.748049436Z"
+		},
+		{
+			"function_name": "TestResourceTreeOrder",
+			"documentation_hash": "51690c3a97f0ce3abe98f467c4813e58c8d10f94d591a548115b3b14845bfa0c",
+			"definition_hash": "0660f5c0126326fb0f06533d3affc86e867a3d30b9a0d8c7100193ba027763ea",
+			"reviewed_at": "2026-06-17T12:43:18.74936928Z"
+		},
+		{
+			"function_name": "TestHasActionAndResourceEntity",
+			"documentation_hash": "d81d672f21f4ddbe815b16d273f85d61d35895d8305d7ffd4da0f920a68f96c2",
+			"definition_hash": "69dc1f3ba8da3ed48a067410364fdf9b7c91776d6448dc65e9e4cb61f36d0de5",
+			"reviewed_at": "2026-06-17T12:43:18.750002876Z"
+		},
+		{
+			"function_name": "TestActionLatticeCoversGroupsAndActions",
+			"documentation_hash": "0de32bb1b60a7c17ccb8b946d2180c1c3c3af4af68246b68bfc0f2a82356046a",
+			"definition_hash": "38aba4a0ff2c3038a3adc1eee224d7feec133b749ee84b4e76ec2b7e39b2f66f",
+			"reviewed_at": "2026-06-17T12:43:18.750450491Z"
+		},
+		{
+			"function_name": "TestVerbGroupsExpand",
+			"documentation_hash": "924be7e55c30ecda763d8a31a870d2b345cbe34f4a0ebf55774147742dfbe258",
+			"definition_hash": "d15be04ab19864015ff4e8316b66ad3adc1d621c33d47af584b1b122a597cca6",
+			"reviewed_at": "2026-06-17T12:43:18.750871983Z"
+		}
+	]
+}

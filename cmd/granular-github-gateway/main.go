@@ -18,7 +18,6 @@ import (
 	gatewaygithub "github.com/clems4ever/granular/gateway-github"
 	gwconfig "github.com/clems4ever/granular/gateway-github/config"
 	"github.com/clems4ever/granular/gateway/asclient"
-	"github.com/clems4ever/granular/internal/operations"
 )
 
 // main parses flags, loads the YAML configuration, and starts the gateway.
@@ -64,8 +63,6 @@ func loadConfig(path string) (*gwconfig.Config, error) {
 //
 // @testcase TestRunRejectsBadConfig is a placeholder for run wiring.
 func run(cfg *gwconfig.Config) error {
-	env := operations.Env{GitHubToken: cfg.GitHubToken, BaseURL: cfg.BaseURL}
-
 	if cfg.Secret == "" {
 		log.Printf("warning: secret is empty; the AS will reject this gateway's signatures and verify calls until secret_file is set")
 	}
@@ -76,7 +73,7 @@ func run(cfg *gwconfig.Config) error {
 	verifier := asclient.New(cfg.ASURL, cfg.GatewayID, []byte(cfg.Secret))
 	gw := gateway.New(gateway.Config{
 		Schema:    gatewaygithub.Schema(),
-		Registry:  gatewaygithub.Registry(env),
+		Registry:  gatewaygithub.Registry(cfg.GitHubToken, cfg.BaseURL),
 		GatewayID: cfg.GatewayID,
 		Secret:    []byte(cfg.Secret),
 		Verifier:  verifier,

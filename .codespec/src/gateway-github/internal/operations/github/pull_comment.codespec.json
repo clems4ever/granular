@@ -1,0 +1,38 @@
+{
+	"functions": [
+		{
+			"function_name": "PullComment",
+			"documentation_hash": "9efb077e094c1e5ed51612c100f677e5c8a8f8cdf7c4c161decc3bfdeb80a661",
+			"definition_hash": "1e08a89627ae73c5c3410e4293ee8522ec53708d8bd7a2097732a5e26820041a",
+			"reviewed_at": "2026-06-17T12:43:18.821465529Z"
+		},
+		{
+			"function_name": "Type",
+			"receiver": "PullCommentOperation",
+			"documentation_hash": "1c740c143a77fe6ae4d6313c9787132a04ffda02d0c7c6249a92569b2443ffbc",
+			"definition_hash": "4034c7f28bcc02c81aa10838a62c1b0f76cd5027908d920108977ea47329c195",
+			"reviewed_at": "2026-06-17T12:43:18.821669103Z"
+		},
+		{
+			"function_name": "Requirements",
+			"receiver": "PullCommentOperation",
+			"documentation_hash": "c3afd428ff4db6a45fda18c5c2b8089f8740ab4ad0ff772f4bcc64426a660c81",
+			"definition_hash": "8f98c35c488b4b7816088cec9246fed652565776ed05ac7030d0b71e653c7d98",
+			"reviewed_at": "2026-06-17T12:43:18.821853704Z"
+		},
+		{
+			"function_name": "Describe",
+			"receiver": "PullCommentOperation",
+			"documentation_hash": "244ae744a27bcbf0e5a2d3282c8d048ec13e58c6e1ed32279da011f593bfa1dd",
+			"definition_hash": "2e1fa1b125f6bbcec24e7dc5a3f9930c7b644c44ab79738c3a0c664fb7d10fc8",
+			"reviewed_at": "2026-06-17T12:43:18.822034677Z"
+		},
+		{
+			"function_name": "Execute",
+			"receiver": "PullCommentOperation",
+			"documentation_hash": "dc70642a51beeb678a0493f8755aa4abc955a330382e988f1a48f6ed1abe0e4a",
+			"definition_hash": "43f45e053b1afa2954b3a0080899078a663423e0649913058622254a209917c3",
+			"reviewed_at": "2026-06-17T12:43:18.82222384Z"
+		}
+	]
+}

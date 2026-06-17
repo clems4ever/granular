@@ -1,0 +1,40 @@
+{
+	"functions": [
+		{
+			"function_name": "TestAllowsAllDeniesWithoutPolicy",
+			"documentation_hash": "1397c653c5a76ba1cbb34463028565736c6cb432f3ace801ce51a1e7ea5ac304",
+			"definition_hash": "10748039d0f6feb40ff7b0b533cc781763718163dd2c5a6992c17e437b799bf1",
+			"reviewed_at": "2026-06-17T12:43:18.802821024Z"
+		},
+		{
+			"function_name": "TestAllowsAllWithMinimalPermit",
+			"documentation_hash": "0f41d788dd4fd68c7929586087ad04dc98eaccae25c287f49b0fac7d9ed58661",
+			"definition_hash": "e0069cb8cf06bce216b95c3e62de38192dfde318cd3793cc879a0a4e8a23a9ec",
+			"reviewed_at": "2026-06-17T12:43:18.802955974Z"
+		},
+		{
+			"function_name": "TestMinimalPermitContextScopesWrites",
+			"documentation_hash": "62d7e25f86c182c93c5830dfc6dba902164053704c65a92019460ec86308f881",
+			"definition_hash": "8dd71bb55b705374de12073ba404572c29c3d727167fd54cb00a8298474a359f",
+			"reviewed_at": "2026-06-17T12:43:18.803075241Z"
+		},
+		{
+			"function_name": "TestPoliciesFromCapabilities",
+			"documentation_hash": "0581405bfdfe980eb60f3a2869d8c41cbc2433ed30ab1814a6a07f76ab181ec4",
+			"definition_hash": "b62f35f7200d009a90bbb5a94b2a2f90cc45d99af6f943b03697ae802d669a8b",
+			"reviewed_at": "2026-06-17T12:43:18.803192418Z"
+		},
+		{
+			"function_name": "TestPoliciesFromCapabilitiesRejectsUnknownAction",
+			"documentation_hash": "fb802e8715a0338a9d44ea1e1180941ac52a7ca80cb668b16fdce5e9f55a40e0",
+			"definition_hash": "3fea156cec3e215e7e7720caffa4430eff7e4f56d071877de150092d57d968d0",
+			"reviewed_at": "2026-06-17T12:43:18.80330346Z"
+		},
+		{
+			"function_name": "TestPullAndBranchRefs",
+			"documentation_hash": "1916c07e45372d455359d5e599cb06b27c954d9274cfdc6fae428a8a577ede2e",
+			"definition_hash": "8458cbe88b042ecb4fc015e2aa881953ebb81a26c2863a583a283e0b735d9987",
+			"reviewed_at": "2026-06-17T12:43:18.803413538Z"
+		}
+	]
+}

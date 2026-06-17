@@ -2,15 +2,15 @@
 	"functions": [
 		{
 			"function_name": "uidOf",
-			"documentation_hash": "245abefbdd555f7a692211add14754819c2a807f287fce0b3f90b98790b38e8d",
+			"documentation_hash": "f33a5e8c65056af3ced2a444f632f34f2c6ac05ec9dd7b188977d7fc7b8dd51c",
 			"definition_hash": "d24033025692bf89ab231aee55e831cac1d82e3655d3a8f523da44a3701b1f4f",
-			"reviewed_at": "2026-06-17T05:59:07.67875838Z"
+			"reviewed_at": "2026-06-17T11:57:21.405961005Z"
 		},
 		{
 			"function_name": "evaluate",
-			"documentation_hash": "f51dd2390d043d8c91a8da8d9f1542428fac58384902d610f0cc6a9f54ce05fd",
+			"documentation_hash": "3e15b5ebb867b4077ad620b8ad9fc263c3f621501ca3143e35237469675f526c",
 			"definition_hash": "e9a384a6b0435e88e1de7a40b17820efc82ee067d57c6c88022cc7c43f9e6df7",
-			"reviewed_at": "2026-06-17T05:59:07.678996727Z"
+			"reviewed_at": "2026-06-17T11:57:21.407578994Z"
 		},
 		{
 			"function_name": "buildEntities",

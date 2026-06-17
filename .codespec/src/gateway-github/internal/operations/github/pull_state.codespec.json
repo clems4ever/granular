@@ -1,0 +1,72 @@
+{
+	"functions": [
+		{
+			"function_name": "PullClose",
+			"documentation_hash": "4448f469281dfa7b98b13c163bd8a9ffde8c6ba47ebc4c27782343646fd9ee5b",
+			"definition_hash": "e2f1bbf712a608c59e3abe6f95a08311f454ca961c3f7f5f253a5433a7faa96d",
+			"reviewed_at": "2026-06-17T12:43:18.832190411Z"
+		},
+		{
+			"function_name": "Type",
+			"receiver": "PullCloseOperation",
+			"documentation_hash": "26b5073bf7980ee0f89b6f8c850982fdb798fa89a13510708948dd05549ce9f0",
+			"definition_hash": "11309f3965316cf867c077813d50b0b12c8dc6c1a5d8f7675a29c31e9c21b7eb",
+			"reviewed_at": "2026-06-17T12:43:18.833036177Z"
+		},
+		{
+			"function_name": "Requirements",
+			"receiver": "PullCloseOperation",
+			"documentation_hash": "48dfb7f23f6a5cb642bd894f95786315092930acddf73bb623884fdbc76f861d",
+			"definition_hash": "21fa53cfbc00d6c42087da5847f575df3026f470be7eb9f5d09eeb9994580d2f",
+			"reviewed_at": "2026-06-17T12:43:18.833944239Z"
+		},
+		{
+			"function_name": "Describe",
+			"receiver": "PullCloseOperation",
+			"documentation_hash": "80ffa390eda707fa2183c06fee808fda59ede910fb37e0069c37c10aa164d243",
+			"definition_hash": "1ef704e8c5f570f0e0e607f0a00e9266059ce9676c1d9b1a74d275432d3dbc9c",
+			"reviewed_at": "2026-06-17T12:43:18.834920586Z"
+		},
+		{
+			"function_name": "Execute",
+			"receiver": "PullCloseOperation",
+			"documentation_hash": "dca8b64c885c7ddd72c23c302f84d8c8b83d13b0c9d399ad57b9d34fc609ef63",
+			"definition_hash": "6ca96f454130ff416ab87aadaf5037ba1dfbdf9430639f718a1f5875d8686155",
+			"reviewed_at": "2026-06-17T12:43:18.835902434Z"
+		},
+		{
+			"function_name": "PullReopen",
+			"documentation_hash": "741718cba33f83cd52cc51756b06c16505a4180794d347a6398c19728cfdb3f5",
+			"definition_hash": "f17fff28829e40d562e1ec3a8d61f951fb1fb689dc391d6913fb0a92509e5fe4",
+			"reviewed_at": "2026-06-17T12:43:18.836948752Z"
+		},
+		{
+			"function_name": "Type",
+			"receiver": "PullReopenOperation",
+			"documentation_hash": "598ce10caeb17e40a4f26b44585943a6c7beb231377d40d4bb1c4ebfef7210f1",
+			"definition_hash": "bde344882448df3d93cc874227b50b5a231f952af3ecb17dcdfbb3051219c2e4",
+			"reviewed_at": "2026-06-17T12:43:18.837907571Z"
+		},
+		{
+			"function_name": "Requirements",
+			"receiver": "PullReopenOperation",
+			"documentation_hash": "7eb83dc72a970ad69c9fa06c4d2ca40dfca250173023d7101a9505edb8da59b3",
+			"definition_hash": "0943297949f2db8c6a03e961d25d5791de6d00796619bd5e5ad0e5ef0d196093",
+			"reviewed_at": "2026-06-17T12:43:18.838177434Z"
+		},
+		{
+			"function_name": "Describe",
+			"receiver": "PullReopenOperation",
+			"documentation_hash": "61bf76247986297e2d2fc71109a9ff1907391e01386a2a8fd3ec348e5feacc3d",
+			"definition_hash": "f82013088988d2a2e7420596cb78296e727354e6b55909391829d23937811b66",
+			"reviewed_at": "2026-06-17T12:43:18.838434884Z"
+		},
+		{
+			"function_name": "Execute",
+			"receiver": "PullReopenOperation",
+			"documentation_hash": "76fe0d7b4e3405cc51dcd9fb5fda1506b23f7442f91ba488adecde8c6215052e",
+			"definition_hash": "44f228b6489af39d8c1d768ba3458577b5c675073a74a93574de436fc3165e5a",
+			"reviewed_at": "2026-06-17T12:43:18.83869496Z"
+		}
+	]
+}

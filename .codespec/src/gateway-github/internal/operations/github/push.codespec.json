@@ -1,0 +1,38 @@
+{
+	"functions": [
+		{
+			"function_name": "Push",
+			"documentation_hash": "5bde0c4cf547e0982963f0fc764d380d080eb50ee6ce76c397c7a27db3812a36",
+			"definition_hash": "eabf926a193088fb86bf939757ae84189fa0bf5802e606f8e8c424e648d949c0",
+			"reviewed_at": "2026-06-17T12:43:18.85047975Z"
+		},
+		{
+			"function_name": "Type",
+			"receiver": "PushOperation",
+			"documentation_hash": "29dcfe5a1b14cf290c31ea55c7a079dd093a4d1ca0aaf96537117623c3308f59",
+			"definition_hash": "9ee78bb6435bc1e96992e8a839736a44fad68a7b03dd04d72d606e370878f177",
+			"reviewed_at": "2026-06-17T12:43:18.850696847Z"
+		},
+		{
+			"function_name": "Requirements",
+			"receiver": "PushOperation",
+			"documentation_hash": "850965355615e6f2ee0f1bc493c1223d2a81e53a614f91282f181327f9e16115",
+			"definition_hash": "fc239b3e1560f934b04ed2a5c1004ab271c34a377bf0374267d3355af8cad899",
+			"reviewed_at": "2026-06-17T12:43:18.850892136Z"
+		},
+		{
+			"function_name": "Describe",
+			"receiver": "PushOperation",
+			"documentation_hash": "fd8ecbf6ce99598c464835883aa4daadafb712c363e46c292e06c74c0538ef2c",
+			"definition_hash": "5ea88a6c2fd1972cacb961596b5b6dc7e897e326b1c3f07670c2125dfc416590",
+			"reviewed_at": "2026-06-17T12:43:18.851092041Z"
+		},
+		{
+			"function_name": "Execute",
+			"receiver": "PushOperation",
+			"documentation_hash": "899f4be66d07c86f0e5e8774ef69b8f642688abd81aad8b4cdd1e3dc32a841d8",
+			"definition_hash": "80a78060a660a1cc05f13af4205e7929091b821f7d370a99880cf91e2eb3fd13",
+			"reviewed_at": "2026-06-17T12:43:18.851312703Z"
+		}
+	]
+}

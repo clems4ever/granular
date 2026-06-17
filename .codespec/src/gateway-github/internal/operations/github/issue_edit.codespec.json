@@ -1,0 +1,57 @@
+{
+	"functions": [
+		{
+			"function_name": "IssueEdit",
+			"documentation_hash": "173823d4008f5a00e5d8397e4a6124f4fce098a37b99f284a454f3954e32ee1f",
+			"definition_hash": "95017a0e8d7ded94f9c892f1dc9938ba0db743681f611fa1b741f05523916005",
+			"reviewed_at": "2026-06-17T12:43:18.808690198Z"
+		},
+		{
+			"function_name": "hasChanges",
+			"receiver": "IssueEditOperation",
+			"documentation_hash": "9ca3f6d7d8a4cc6cd78f09a74272798b2d836e0c36e07967b349a07b15fe6fb8",
+			"definition_hash": "f39aa5ff52830f5908b5f896cded404c153bfe34de40054a30a01dffc60cc81c",
+			"reviewed_at": "2026-06-17T12:43:18.808905326Z"
+		},
+		{
+			"function_name": "Type",
+			"receiver": "IssueEditOperation",
+			"documentation_hash": "281e03e1b7944237db678fbc60a9ede7dfa99ce8aae7fa7f760b3197967deba7",
+			"definition_hash": "01b5898c0bdbe53c763c69895abfdfd614e8cf4b5b989a407741a6ca4cbe36ae",
+			"reviewed_at": "2026-06-17T12:43:18.809102264Z"
+		},
+		{
+			"function_name": "Requirements",
+			"receiver": "IssueEditOperation",
+			"documentation_hash": "d28c81378d894960a639a408ee93911ef4ea4615da39f971b8505cb00d458966",
+			"definition_hash": "c5c5ebd20c766fa9a60d5022247d1e16de9ea984d0a13a05c075c9f66eca7d6e",
+			"reviewed_at": "2026-06-17T12:43:18.809292975Z"
+		},
+		{
+			"function_name": "Describe",
+			"receiver": "IssueEditOperation",
+			"documentation_hash": "b67acca8863c8682dc06597f356f4678f75e7fe5b6c7729fed8288c34f750cb8",
+			"definition_hash": "84c13c7c9089db6aa9ffd5105d84b9cf1a6c436dce8457c10c9091fb56a8e42e",
+			"reviewed_at": "2026-06-17T12:43:18.809494478Z"
+		},
+		{
+			"function_name": "Execute",
+			"receiver": "IssueEditOperation",
+			"documentation_hash": "01091643f1540f5f4433dac15dfb9740d6532a61a20e06fbe56f58d2513eea0d",
+			"definition_hash": "0038f2dac57cd2b2d1b71396df695ce20c56c141dbe20b25a193fec528e64c64",
+			"reviewed_at": "2026-06-17T12:43:18.809712988Z"
+		},
+		{
+			"function_name": "namesFrom",
+			"documentation_hash": "0f4ca4de5d8f2e561c038ce1970f44bdf969a954dc110e458325aecfd59f96c6",
+			"definition_hash": "6e6048336e6e1625b53e405c40f9f8e62478a50101763f1ead9de66015df40f2",
+			"reviewed_at": "2026-06-17T12:43:18.80993626Z"
+		},
+		{
+			"function_name": "applyAddRemove",
+			"documentation_hash": "d904925efef2ff140cc3e9c030ff41623ec97bf8e8fae24978ddc9e29b840cb5",
+			"definition_hash": "435479df50af2402bf0840c8913feb6c198f99dd7b8eb85161ec419209752e6e",
+			"reviewed_at": "2026-06-17T12:43:18.810169609Z"
+		}
+	]
+}

@@ -1,0 +1,28 @@
+{
+	"functions": [
+		{
+			"function_name": "TestPullCommentDescribe",
+			"documentation_hash": "a96d8001b7c65b2518fe1142442ff21b2af8bb01b628f5a8560a419ed4bb13e6",
+			"definition_hash": "d39664c395e84bcad69592554d5a7ed91076917aae1ae3e10fb6bc4aca100566",
+			"reviewed_at": "2026-06-17T12:43:18.822822409Z"
+		},
+		{
+			"function_name": "TestPullCommentExecutePosts",
+			"documentation_hash": "91bc66862e518aaa732e530a30e4514212c96e05b5bb6537a7cb2116bd0e6901",
+			"definition_hash": "586c41c599988c12903bf430e5fc63ecc9be3651c2f46a74c5f0c6681ff69c06",
+			"reviewed_at": "2026-06-17T12:43:18.823019263Z"
+		},
+		{
+			"function_name": "TestPullCommentFactoryValidatesParams",
+			"documentation_hash": "bd9116f05b8f250fc5a7d47828499c62f9c8cc808e32571f6f84ee96ff418132",
+			"definition_hash": "4dd7384d3f71fc43849de7bcd424040ef545c26ab2e04a70c1580ec6adca208f",
+			"reviewed_at": "2026-06-17T12:43:18.822407127Z"
+		},
+		{
+			"function_name": "TestPullCommentRequirementsAreContentScoped",
+			"documentation_hash": "bb370e4d3d604d1bc03194741676cb6d32626184cd78babbc557778380b41b6b",
+			"definition_hash": "b9b452d74b9e2d43bb397b66a78e4576882235a8a3b2ed9ae1cb5b092caf916b",
+			"reviewed_at": "2026-06-17T12:43:18.822624221Z"
+		}
+	]
+}

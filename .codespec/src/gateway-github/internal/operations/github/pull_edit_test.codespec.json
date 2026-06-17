@@ -1,0 +1,28 @@
+{
+	"functions": [
+		{
+			"function_name": "TestPullEditDescribe",
+			"documentation_hash": "773cc01480c43856d23a203f2454b258a0cbf95eef93a9b431225c7feea494ca",
+			"definition_hash": "4571b589d4e304c606dea4b096bef1caa46d504ce16b71b43d90a609d4bad72f",
+			"reviewed_at": "2026-06-17T12:43:18.825548277Z"
+		},
+		{
+			"function_name": "TestPullEditExecutePatches",
+			"documentation_hash": "2e7d68c06315a588d962794ac253a626a5929a40886b2e14c07e482721225c3d",
+			"definition_hash": "ddc949e75a8c6d78559008a1a794bfdcd8c1b10b462b492612e058d5ecb37fe9",
+			"reviewed_at": "2026-06-17T12:43:18.82563873Z"
+		},
+		{
+			"function_name": "TestPullEditFactoryValidatesParams",
+			"documentation_hash": "0bdadafdd6dd94327322ea11b15a3f80ae186bc805a4f842b82f733cf3249f24",
+			"definition_hash": "4b3b5775089d74afd5ea876e1cdbf51a6aad3ba416896b8cac9ebd86c84d6f3b",
+			"reviewed_at": "2026-06-17T12:43:18.82534431Z"
+		},
+		{
+			"function_name": "TestPullEditRequirementsAreContentScoped",
+			"documentation_hash": "986440cdae74f6b32be669a2c75f2d1dafe5e17ee1d0b8f4dbb3e157ef806794",
+			"definition_hash": "fa57793f08be0443c6c8981bdde81128f70a1b518d27380232d28b15b3e2268a",
+			"reviewed_at": "2026-06-17T12:43:18.825452531Z"
+		}
+	]
+}

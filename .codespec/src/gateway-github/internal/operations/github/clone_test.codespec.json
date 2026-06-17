@@ -1,0 +1,34 @@
+{
+	"functions": [
+		{
+			"function_name": "TestCloneFactoryRequiresRepo",
+			"documentation_hash": "0097e7ad233339b9ae1caf6faaa3810d7434999cb8baf3befb8e6e5c48432de7",
+			"definition_hash": "2ff3b09bd4c2f03cb02b176736ccd080e48ddd6827578f477595c23994650eb4",
+			"reviewed_at": "2026-06-17T12:43:18.806043685Z"
+		},
+		{
+			"function_name": "TestCloneRequirements",
+			"documentation_hash": "279fc4fa7b5f34c53a5e3fce78b4498ddb345047ac7afc5825e559056a7b39ce",
+			"definition_hash": "383779c44d450265342482cecf0b243ffba6ffb42547e36628463fe736bdd5bf",
+			"reviewed_at": "2026-06-17T12:43:18.806140781Z"
+		},
+		{
+			"function_name": "TestCloneDescribe",
+			"documentation_hash": "1e1fb38ea41471703f462ff7b39910104f3c20a7e789696aacbbe7cf8c31d1c4",
+			"definition_hash": "c9bc0187d2028fd979759b75178043dd58d6d6a7846b6848708c3b00ae1252ef",
+			"reviewed_at": "2026-06-17T12:43:18.806221903Z"
+		},
+		{
+			"function_name": "TestExecuteReturnsProxyCloneURL",
+			"documentation_hash": "214cf64f8a72cee9aa4dca94e5509147c70b772a9863cb40494d966393d06268",
+			"definition_hash": "70a7c370db8f198a0285f41bc05f451951adb01a80ead98cfa161cd6c05f06b1",
+			"reviewed_at": "2026-06-17T12:43:18.806297588Z"
+		},
+		{
+			"function_name": "TestNormalizeRepo",
+			"documentation_hash": "deef9e8d861dabe9e5eaa078cdc96c04fbc55f643cceba86990338626d382b2d",
+			"definition_hash": "5e84d716ad8a51f6ca62a164b3dd9030248a2f5ce4a720622ea5ed75f31fa192",
+			"reviewed_at": "2026-06-17T12:43:18.806373439Z"
+		}
+	]
+}

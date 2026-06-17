@@ -1,0 +1,44 @@
+{
+	"functions": [
+		{
+			"function_name": "PullMerge",
+			"documentation_hash": "0c696bad6afbd968cbef7a5846355002312cadd41491e92adf1fa88683884fdc",
+			"definition_hash": "a944f295afae97756e4e2a10d4fb8b11c2166938c0c361a3de1de388e69a8693",
+			"reviewed_at": "2026-06-17T12:43:18.825739698Z"
+		},
+		{
+			"function_name": "Type",
+			"receiver": "PullMergeOperation",
+			"documentation_hash": "d169a0e9b7ab215ac6237d8db7756e7ae7d7bfe162943787fff1ed5324af2116",
+			"definition_hash": "ddf792e10fa7006737c6d0a7cbb7318ac9e2bc962918c35cc977759ae3e21720",
+			"reviewed_at": "2026-06-17T12:43:18.82583558Z"
+		},
+		{
+			"function_name": "Requirements",
+			"receiver": "PullMergeOperation",
+			"documentation_hash": "0d54ed0a72cab90425b9407410e823bd3064c9a98a8a088729e4aaa6fe11bc4e",
+			"definition_hash": "ab390a11af30814601fcc120dabfe58d57be06da3de097247608765440b6a6a6",
+			"reviewed_at": "2026-06-17T12:43:18.825932728Z"
+		},
+		{
+			"function_name": "Describe",
+			"receiver": "PullMergeOperation",
+			"documentation_hash": "6dc9890cfb042830565ad25993d9e8a0758741d969d6284a07a8f9498bf86a83",
+			"definition_hash": "098b37757d215b8b7a4cda57057d7858b93ca945074edba61eee4a5f3c9c598e",
+			"reviewed_at": "2026-06-17T12:43:18.82603Z"
+		},
+		{
+			"function_name": "Execute",
+			"receiver": "PullMergeOperation",
+			"documentation_hash": "98c51b0e835867dd4bb208cc1c0f9f4e62a701162b95ad3c8ed3e0a3ab01d7af",
+			"definition_hash": "01c16f14a61fb05ff19007f0ff44e968bf30586835a86ab761d1977f93203761",
+			"reviewed_at": "2026-06-17T12:43:18.826132561Z"
+		},
+		{
+			"function_name": "normalizeMergeMethod",
+			"documentation_hash": "cf415695dd37ba65113b5612d7c9929be151a1f83bac91f93d311d35caee49e2",
+			"definition_hash": "7b5717581ec23015049f8fea4715c465c84f6da45f245694f5476de27c4f1999",
+			"reviewed_at": "2026-06-17T12:43:18.826233012Z"
+		}
+	]
+}

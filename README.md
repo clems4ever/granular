@@ -160,8 +160,8 @@ granular-policy                            # admin: --admin-token[-file]
   generic `gateway` SDK in a new `cmd/granular-<platform>-gateway`. See
   `gateway-github/` for the GitHub reference implementation.
 - **A new GitHub operation** implements `operations.Operation` under
-  `internal/operations/github/`, is registered in the gateway's schema, and is
-  invoked with `granular op github-gateway <type>`.
+  `gateway-github/internal/operations/github/`, is registered in the gateway's
+  schema, and is invoked with `granular op github-gateway <type>`.
 
 ## Repository layout
 
@@ -171,12 +171,13 @@ clientcli/                 client CLI command tree (catalog, template, op, sign,
 client/                    client SDK (proposals, operations, policy admin)
 gateway/                   generic gateway SDK (schema, sign, present, verify, asclient)
 gateway-github/            GitHub gateway implementation (schema, templates, operations)
+gateway-github/internal/   GitHub-only concerns, unimportable from outside the gateway:
+  catalog/                   GitHub permission vocabulary (resources, actions)
+  authz/                     Cedar GitHub entity world + capability→policy
+  operations/                operation framework + GitHub operation implementations
 auth_server/               authorization server: config, store (bbolt), HTTP + consent UI
 internal/proposal/         the signed (presentation + policy) artifact shared on the wire
-internal/authz/            Cedar policy world + evaluation
-internal/verify/           grant-request verification helpers
-internal/catalog/          GitHub permission vocabulary (resources, actions)
-internal/operations/       Operation interface + GitHub operation implementations
+internal/verify/           generic, domain-agnostic gateway↔AS verify wire types
 internal/api/              shared wire types
 ```
 

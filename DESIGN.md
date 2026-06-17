@@ -172,14 +172,15 @@ client/                       client SDK: proposals, operations, policy admin
 gateway/                      generic gateway SDK: schema, sign, present, verify
 gateway/asclient/             gateway's client for the AS verify call
 gateway-github/               GitHub gateway: schema, templates, operation specs
+gateway-github/internal/      GitHub-only, unimportable from outside the gateway:
+  catalog/                      GitHub permission vocabulary (resources, actions)
+  authz/                        Cedar GitHub entity world + capability→policy
+  operations/                   operation framework + GitHub operation implementations
 auth_server/config/           AS YAML configuration
 auth_server/server/           AS HTTP handlers, consent UI, GitHub-OAuth login, eval
 auth_server/server/web/       embedded consent/activity templates + stylesheet
 auth_server/store/            grants + proposals store (bbolt)
 internal/proposal/            the signed (Presentation, Policies) artifact
-internal/authz/               Cedar policy world + evaluation
-internal/verify/              grant-request verification helpers
-internal/catalog/             GitHub permission vocabulary (resources, actions)
-internal/operations/github/   GitHub operation implementations
+internal/verify/              generic, domain-agnostic gateway↔AS verify wire types
 internal/api/                 shared wire types
 ```

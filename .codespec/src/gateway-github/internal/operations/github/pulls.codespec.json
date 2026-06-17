@@ -1,0 +1,38 @@
+{
+	"functions": [
+		{
+			"function_name": "PullList",
+			"documentation_hash": "fdc2d85f509586ab222284fe3a7d4a6c116b2f63a6e973f0c4bf29a36f18a1a4",
+			"definition_hash": "ad831e71febb69a1927eb8ca0f1ca1fcefbbbc065295e99447e11a64edcd1b64",
+			"reviewed_at": "2026-06-17T12:43:18.829538798Z"
+		},
+		{
+			"function_name": "Type",
+			"receiver": "PullListOperation",
+			"documentation_hash": "b22b86384aab51d494afcec893b689c001a9bee79abcc852575f2d2b758b677f",
+			"definition_hash": "af6bd118276fcde6671a0ba7a1891565301258dacdd7bf9bd7a0dc6322089cb8",
+			"reviewed_at": "2026-06-17T12:43:18.829760337Z"
+		},
+		{
+			"function_name": "Requirements",
+			"receiver": "PullListOperation",
+			"documentation_hash": "b05beb6a1e75612650d11ec5f6017d521b961d901051ce8e7053236cd5806f6f",
+			"definition_hash": "e767ebefa03fe9250994be91168d7be88cf9fefc874978a78145ea3d92f2656d",
+			"reviewed_at": "2026-06-17T12:43:18.829983047Z"
+		},
+		{
+			"function_name": "Describe",
+			"receiver": "PullListOperation",
+			"documentation_hash": "92507a592c8c5d4bbbb69b80f172411e266b4b0efac112f886a3873e7edeea8a",
+			"definition_hash": "729df04abed874cb71fa52faf3213c5a2d055b92d16a992dabbe2518d90c76cc",
+			"reviewed_at": "2026-06-17T12:43:18.830732446Z"
+		},
+		{
+			"function_name": "Execute",
+			"receiver": "PullListOperation",
+			"documentation_hash": "5e6fb42fabe7b7e74853af51b7c30ce703cbf4de77f7ba29baaf7d8e60975f92",
+			"definition_hash": "deafebd851c43c015aa5d17ee3bf5d7caa0c3da641b5dd527f7cb850b1f40617",
+			"reviewed_at": "2026-06-17T12:43:18.83145121Z"
+		}
+	]
+}

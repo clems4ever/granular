@@ -1,0 +1,78 @@
+{
+	"functions": [
+		{
+			"function_name": "IssueClose",
+			"documentation_hash": "2081d0cdefbaf422b2efae40fed8261cde90759d3071eea12a95456637a3ce39",
+			"definition_hash": "6d7864377c665bc49966b398d0d881c350eaec0838b22616c03fa615d83f4be6",
+			"reviewed_at": "2026-06-17T12:43:18.812608729Z"
+		},
+		{
+			"function_name": "Type",
+			"receiver": "IssueCloseOperation",
+			"documentation_hash": "524ce73ee250eae3e0aa354b417f225fd034d42aa1bcc3ebf118f8121a511218",
+			"definition_hash": "95acb5db5492e26f3b562b9ce012a4af43e1e9ee5f34b7301477fa0804285fd7",
+			"reviewed_at": "2026-06-17T12:43:18.812790608Z"
+		},
+		{
+			"function_name": "Requirements",
+			"receiver": "IssueCloseOperation",
+			"documentation_hash": "60002a85fdd01af2d9613607568f6844de0c5ed285a8358d6baa2f62a15d4055",
+			"definition_hash": "b9627cb25b5d3d37dc4141ac914e662d2b65e1e407c519cb8add024ce1e60f99",
+			"reviewed_at": "2026-06-17T12:43:18.812971278Z"
+		},
+		{
+			"function_name": "Describe",
+			"receiver": "IssueCloseOperation",
+			"documentation_hash": "4e5af3bda58bb8ee08de01069b20854e073e4cbdf24e86cd9a7acb5da16656c1",
+			"definition_hash": "f4b688d2a36c0a27dde91211a70192d90fbd322d2f4e10f950ad6b7ab6567df1",
+			"reviewed_at": "2026-06-17T12:43:18.813172362Z"
+		},
+		{
+			"function_name": "Execute",
+			"receiver": "IssueCloseOperation",
+			"documentation_hash": "c38ea27101b4b86425d1407aed18013047215f9e574e71e630e030aa2890b4c5",
+			"definition_hash": "6fcd92f8056ca41ab2d7a654461b84bb4758ad7c9223660250f563120466451b",
+			"reviewed_at": "2026-06-17T12:43:18.813401482Z"
+		},
+		{
+			"function_name": "IssueReopen",
+			"documentation_hash": "51f7a33a520eaf1822fecc1173db586460a9a76fd6b05d60412926e7055aaee6",
+			"definition_hash": "d496bc196c41225c9b3427800474b0c1cd9c10bf52c895d8ea267346e48afbe6",
+			"reviewed_at": "2026-06-17T12:43:18.813604706Z"
+		},
+		{
+			"function_name": "Type",
+			"receiver": "IssueReopenOperation",
+			"documentation_hash": "08e5db30dfd89fa526563f27177246d77b2da3b335797a8b2a7de8c3c0627e9c",
+			"definition_hash": "0ee6f155c6e4b644c684d0fa3e1e79e1036c2469581b7998669cf01839f8a275",
+			"reviewed_at": "2026-06-17T12:43:18.813801349Z"
+		},
+		{
+			"function_name": "Requirements",
+			"receiver": "IssueReopenOperation",
+			"documentation_hash": "d521f3668afb9088cc459ee0ab2469715bf272d8410947b50497dac2c0deef12",
+			"definition_hash": "6971913526d6a676a7294db1207453d721adbdd2ed513d49be0cf0b6ea370e63",
+			"reviewed_at": "2026-06-17T12:43:18.814223548Z"
+		},
+		{
+			"function_name": "Describe",
+			"receiver": "IssueReopenOperation",
+			"documentation_hash": "2e37658a09364ff27427dfa841310a20ad32a078398a3ca182898c4b5cd7c19b",
+			"definition_hash": "b8900955d36a591bd99f7ed6bfa9ab66e56917cc74a67a31b9415c3ef3035a99",
+			"reviewed_at": "2026-06-17T12:43:18.814679433Z"
+		},
+		{
+			"function_name": "Execute",
+			"receiver": "IssueReopenOperation",
+			"documentation_hash": "703e9c4263be0a2a318729e63d8fc33e480c8356852943daa1b914def66e14fd",
+			"definition_hash": "33643e1742406918654cf2dbc4dc6e21a34f949771210be818a035e92bdbd174",
+			"reviewed_at": "2026-06-17T12:43:18.81512748Z"
+		},
+		{
+			"function_name": "normalizeCloseReason",
+			"documentation_hash": "9bb072e2115e0dc24b675ccdb692a51e668d6dcc7367bb63e9ca05e4bb6819a0",
+			"definition_hash": "076ffa7d83278fd1a21985c2d989cf1884c9ab1968d727cc9ff23efd1a4ce485",
+			"reviewed_at": "2026-06-17T12:43:18.81556549Z"
+		}
+	]
+}

@@ -22,10 +22,10 @@ import (
 // Secrets are never stored inline: each *_file key names a path to a file holding
 // the secret, which Load reads into the matching resolved field.
 type Config struct {
-	Addr            string          `yaml:"addr"`
-	BaseURL         string          `yaml:"base_url"`
-	Workspace       string          `yaml:"workspace"`
-	DBPath          string          `yaml:"db"`
+	Addr            string   `yaml:"addr"`
+	BaseURL         string   `yaml:"base_url"`
+	Workspace       string   `yaml:"workspace"`
+	DBPath          string   `yaml:"db"`
 	CleanupInterval Duration `yaml:"cleanup_interval"`
 
 	// RequestTTL is how long a submitted grant request (proposal) may stay pending

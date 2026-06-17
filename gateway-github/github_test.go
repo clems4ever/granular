@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/clems4ever/granular/gateway"
-	"github.com/clems4ever/granular/internal/operations"
 	"github.com/clems4ever/granular/internal/proposal"
 )
 
@@ -53,7 +52,7 @@ func TestScopeResolvesRepoAndOrg(t *testing.T) {
 // TestRegistryBuildsCloneOperation builds an adapted github.clone operation and checks
 // its converted requirements, description and executed result.
 func TestRegistryBuildsCloneOperation(t *testing.T) {
-	reg := Registry(operations.Env{BaseURL: "http://gw", GitHubToken: "x"})
+	reg := Registry("x", "http://gw")
 	op, err := reg.Build(gateway.OperationRequest{Type: "github.clone", Params: map[string]any{"repo": "octocat/Hello-World"}})
 	if err != nil {
 		t.Fatalf("build: %v", err)
@@ -82,9 +81,8 @@ func TestRegistryBuildsCloneOperation(t *testing.T) {
 // TestTemplatesExpand checks every authored template is exposed in the schema and signs
 // into a verifiable grant request with the expected scope and conditions.
 func TestTemplatesExpand(t *testing.T) {
-	env := operations.Env{BaseURL: "http://gw", GitHubToken: "x"}
 	gw := gateway.New(gateway.Config{
-		Schema: Schema(), Registry: Registry(env),
+		Schema: Schema(), Registry: Registry("x", "http://gw"),
 		GatewayID: "github-gateway", Secret: []byte("s"),
 	})
 
@@ -147,7 +145,7 @@ func TestTemplatesExpand(t *testing.T) {
 func TestOperationSpecsCoverRegistry(t *testing.T) {
 	specs := operationSpecs()
 	registered := map[string]bool{}
-	for _, ty := range Registry(operations.Env{}).Types() {
+	for _, ty := range Registry("", "").Types() {
 		registered[ty] = true
 	}
 	if len(specs) != len(registered) {

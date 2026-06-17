@@ -2,8 +2,11 @@
 // SDK. It supplies the three domain-specific things the SDK needs — the GitHub
 // permission Schema (derived from the capability catalog), the scope resolver that maps
 // a capability selector to a Cedar GitHub entity, and the GitHub action implementations
-// (adapted from internal/operations/github) wired into a Registry. Anyone wanting a
-// different platform writes a sibling of this package against the same SDK.
+// (adapted from gateway-github/internal/operations/github) wired into a Registry. All
+// GitHub-specific concerns — the catalog vocabulary, the Cedar entity world, and the
+// operation implementations — live under gateway-github/internal, so nothing outside
+// this gateway can import them. Anyone wanting a different platform writes a sibling of
+// this package against the same SDK.
 package gatewaygithub
 
 import (
@@ -11,10 +14,10 @@ import (
 	"fmt"
 
 	"github.com/clems4ever/granular/gateway"
-	"github.com/clems4ever/granular/internal/authz"
-	"github.com/clems4ever/granular/internal/catalog"
-	"github.com/clems4ever/granular/internal/operations"
-	githubops "github.com/clems4ever/granular/internal/operations/github"
+	"github.com/clems4ever/granular/gateway-github/internal/authz"
+	"github.com/clems4ever/granular/gateway-github/internal/catalog"
+	"github.com/clems4ever/granular/gateway-github/internal/operations"
+	githubops "github.com/clems4ever/granular/gateway-github/internal/operations/github"
 )
 
 // Schema returns the GitHub permission vocabulary for the gateway SDK, derived from the
@@ -81,14 +84,17 @@ func scope(sel gateway.ResourceSelector) (string, string, string, error) {
 }
 
 // Registry builds the SDK operation registry for all GitHub actions, binding each
-// factory to the supplied execution environment (the GitHub token and the public base
-// URL the operations need).
+// factory to the execution environment built from the GitHub token and the public
+// base URL the operations need. Taking primitives (rather than an operations.Env)
+// keeps the GitHub operation packages internal to this gateway.
 //
-// @arg env The execution environment carrying the GitHub token and base URL.
+// @arg githubToken The GitHub personal access token operations authenticate with.
+// @arg baseURL The gateway's externally reachable base URL.
 // @return *gateway.Registry A registry with every GitHub operation registered.
 //
 // @testcase TestRegistryBuildsCloneOperation builds a github.clone operation.
-func Registry(env operations.Env) *gateway.Registry {
+func Registry(githubToken, baseURL string) *gateway.Registry {
+	env := operations.Env{GitHubToken: githubToken, BaseURL: baseURL}
 	reg := gateway.NewRegistry()
 	register := func(opType string, factory operations.Factory) {
 		reg.Register(opType, adapt(factory, env))

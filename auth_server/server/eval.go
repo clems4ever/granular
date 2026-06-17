@@ -14,7 +14,7 @@ import (
 // @arg r The wire entity reference.
 // @return cedar.EntityUID The Cedar uid.
 //
-// @testcase TestEvaluateWithAuthzWorld resolves uids from refs.
+// @testcase TestEvaluateAllowsCoveringPolicy resolves uids from refs.
 func uidOf(r verify.EntityRef) cedar.EntityUID {
 	return cedar.NewEntityUID(cedar.EntityType(r.Type), cedar.String(r.ID))
 }
@@ -30,7 +30,7 @@ func uidOf(r verify.EntityRef) cedar.EntityUID {
 // @return bool True when every request is allowed by the policies (and there is at least one).
 // @error error when the policy text fails to parse.
 //
-// @testcase TestEvaluateWithAuthzWorld allows under a covering policy.
+// @testcase TestEvaluateAllowsCoveringPolicy allows under a covering policy.
 // @testcase TestEvaluateDeniesUnrelated denies an unrelated resource.
 func evaluate(policies []string, entities []verify.Entity, requests []verify.Request) (bool, error) {
 	if len(policies) == 0 || len(requests) == 0 {
