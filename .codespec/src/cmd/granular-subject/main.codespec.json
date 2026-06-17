@@ -9,8 +9,8 @@
 		{
 			"function_name": "newRootCmd",
 			"documentation_hash": "1648d06de187e039010420a32f29c4cd24e9651aaf38b6fcacfc3e9c0e95fa57",
-			"definition_hash": "4b6d3fa2eca85c8bd5cd8a18a8442d7ce695f23f9fbe07896cbed3128b14dc4c",
-			"reviewed_at": "2026-06-17T15:18:49.732333846Z"
+			"definition_hash": "936d3d4cbdb04c029203165590c47aea58f407b72ff46d19881ce1cdd65e38e3",
+			"reviewed_at": "2026-06-17T15:49:45.82154474Z"
 		},
 		{
 			"function_name": "client",
@@ -57,6 +57,19 @@
 			"documentation_hash": "fd80e41210e1c7488fbc62cb9f03ff2c50b0982d34ed3068771de7f564a20c34",
 			"definition_hash": "54d0cbc7a612f62ebe2b9c5ab0876ca2e14309a83e16b6bcbe2671694fd074c6",
 			"reviewed_at": "2026-06-17T15:18:49.738767554Z"
+		},
+		{
+			"function_name": "activityCmd",
+			"receiver": "admin",
+			"documentation_hash": "b2eae1d2e7b386ea0477988c7727d776dda3c375cea196d2c110c53af62e0960",
+			"definition_hash": "8dc23377949e1ded96d97f79cecf22662818bd589b22f5e49b2bd0f1d8a732c2",
+			"reviewed_at": "2026-06-17T15:49:45.821964352Z"
+		},
+		{
+			"function_name": "runActivity",
+			"documentation_hash": "84dcd6b47ce599865d6f439085c7767ff44525715ff2ed78bde979e34ae4da53",
+			"definition_hash": "b003ab0b590d05e9cbbe8c2742381cb3dcf912cde593479eca04aadb0301daac",
+			"reviewed_at": "2026-06-17T15:49:45.822332587Z"
 		}
 	]
 }

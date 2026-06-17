@@ -17,8 +17,8 @@
 			"function_name": "Handler",
 			"receiver": "Server",
 			"documentation_hash": "e4b02e73163179adebe24952b4c53b8e12572f93e4e80c270e803c18dc358c33",
-			"definition_hash": "1aa9be6dde023a61c054e986fbad694cce5520a3ee26fc22425ad42a85067293",
-			"reviewed_at": "2026-06-17T15:18:49.653376323Z"
+			"definition_hash": "4eddef31be57fd7beecacd35932dce36b2022403485fde29c2f1a69132f785a0",
+			"reviewed_at": "2026-06-17T15:49:45.810124361Z"
 		},
 		{
 			"function_name": "handleProposal",
@@ -59,8 +59,8 @@
 			"function_name": "handleIndex",
 			"receiver": "Server",
 			"documentation_hash": "1ed0e10784bf31823fe8dc89d0711ac30047dd8dd7bdfddcf0665a1c71302161",
-			"definition_hash": "1c41c5ef8caaba5d182dbfd1b7488e151cbc14b1ad03bd04eaec6a0de0ccc664",
-			"reviewed_at": "2026-06-17T14:43:58.763269489Z"
+			"definition_hash": "bc822b6868feb74ba400bdcedad816f8f9149a64c51a571e0f9e67f79cc784f0",
+			"reviewed_at": "2026-06-17T15:49:45.814280941Z"
 		},
 		{
 			"function_name": "writeJSON",
@@ -113,8 +113,8 @@
 			"function_name": "handleGetSubject",
 			"receiver": "Server",
 			"documentation_hash": "60685f869dd533189c84b10d3c5c538dc8ae40445c00ace5d7aa8cbd90ad0868",
-			"definition_hash": "5b136ff671413ee048a86bd5d9ad6691c94221e0fd79592717c79e9a698a537c",
-			"reviewed_at": "2026-06-17T15:18:49.658589064Z"
+			"definition_hash": "00b3ab669818cea6fe3a7a6cc744f9bec675a31c14b1a90369180ad4f4aa380e",
+			"reviewed_at": "2026-06-17T15:49:45.810895328Z"
 		},
 		{
 			"function_name": "handleDestroySubject",
@@ -129,6 +129,26 @@
 			"documentation_hash": "7fa4f02c06a32aa233b1ea867bdb91d269b70fa39a68a32b17845b48f0a09f9a",
 			"definition_hash": "250b2293e46d6ee81fdae987b4b07db4cead70c075b55c1c1f89ccc5ef76791b",
 			"reviewed_at": "2026-06-17T15:18:49.666548082Z"
+		},
+		{
+			"function_name": "handleGetMySubject",
+			"receiver": "Server",
+			"documentation_hash": "c3c741a64cd9a4de05dead59ddf70f9b8936199b184334653a0d36768846e2f3",
+			"definition_hash": "03d7f2de43630e2dace21129510808d67b65079ccc898db86cf938dbb40468a6",
+			"reviewed_at": "2026-06-17T15:49:45.811459584Z"
+		},
+		{
+			"function_name": "grantViews",
+			"documentation_hash": "c85231ad7d7b1e8810602df0e918e311cd4853f6a6abbc939e1dfdf8508170df",
+			"definition_hash": "167502c844d1294b5423f4d865531cb89fd6eb673c784b2e7941d81fbcb37b34",
+			"reviewed_at": "2026-06-17T15:49:45.812052324Z"
+		},
+		{
+			"function_name": "handleActivityAdmin",
+			"receiver": "Server",
+			"documentation_hash": "8e89897b838ff4e8fbb12ce276ad567b926613012c7ded6de4963a93ed4fa16d",
+			"definition_hash": "ad7f726e64282928d24a570dbba7753a00c450adc6bc23dcb427e147a5c582a4",
+			"reviewed_at": "2026-06-17T15:49:45.813236053Z"
 		}
 	]
 }

@@ -55,7 +55,7 @@ func newRootCmd(out io.Writer) *cobra.Command {
 	root.PersistentFlags().StringVar(&a.asURL, "as", "http://localhost:9090", "authorization server base URL")
 	root.PersistentFlags().StringVar(&a.adminToken, "admin-token", "", "AS admin token (gates subject administration)")
 	root.PersistentFlags().StringVar(&a.adminTokenFile, "admin-token-file", "", "file holding the AS admin token")
-	root.AddCommand(a.createCmd(), a.showCmd(), a.destroyCmd())
+	root.AddCommand(a.createCmd(), a.showCmd(), a.destroyCmd(), a.activityCmd())
 	return root
 }
 
@@ -138,6 +138,57 @@ func (a *admin) destroyCmd() *cobra.Command {
 			return runDestroy(context.Background(), c, args[0], a.out)
 		},
 	}
+}
+
+// activityCmd builds the "activity" command: print the cross-subject grant inventory and
+// the request/decision history (the operator view).
+//
+// @return *cobra.Command The activity command.
+//
+// @testcase TestCommandTree checks the activity command is present.
+func (a *admin) activityCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "activity",
+		Short: "Show all active grants and the request/decision history across every subject",
+		RunE: func(*cobra.Command, []string) error {
+			c, err := a.client()
+			if err != nil {
+				return err
+			}
+			return runActivity(context.Background(), c, a.out)
+		},
+	}
+}
+
+// runActivity prints the operator view: every active grant (with its subject token) and
+// the full request/decision history.
+//
+// @arg ctx Context for cancellation.
+// @arg c The client SDK (authenticated with the admin token).
+// @arg w The writer for output.
+// @error error when the AS call fails.
+//
+// @testcase TestRunActivity prints grants and history.
+func runActivity(ctx context.Context, c *client.Client, w io.Writer) error {
+	act, err := c.Activity(ctx)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintln(w, "Active grants:")
+	if len(act.Grants) == 0 {
+		fmt.Fprintln(w, "  (none)")
+	}
+	for _, g := range act.Grants {
+		fmt.Fprintf(w, "  [%s] %s (expires %s): %s\n", g.SubjectToken, g.ResourceServerID, g.ExpiresAt, g.Item.Presentation.Summary)
+	}
+	fmt.Fprintln(w, "Request history:")
+	if len(act.History) == 0 {
+		fmt.Fprintln(w, "  (none)")
+	}
+	for _, h := range act.History {
+		fmt.Fprintf(w, "  %-9s %s [%s] %s (%d item(s)) %s\n", h.Status, h.Approver, h.SubjectToken, h.Summary, h.Items, h.CreatedAt)
+	}
+	return nil
 }
 
 // runCreate mints a subject token and prints it for the administrator to distribute.

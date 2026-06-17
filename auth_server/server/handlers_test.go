@@ -158,33 +158,6 @@ func TestApprovePageRendersFriendlyGrants(t *testing.T) {
 	}
 }
 
-// TestActivityPageRendersGrants renders the active grants and the request history on the
-// /activity page after a proposal is approved.
-func TestActivityPageRendersGrants(t *testing.T) {
-	_, h := newServer(t)
-	token := createSubject(t, h)
-	id := propose(t, h, token, "me@example.com")
-	approve(t, h, id)
-
-	resp := do(t, h, http.MethodGet, "/activity", nil, "", false)
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		t.Fatalf("GET /activity = %d, want 200", resp.StatusCode)
-	}
-	body, _ := io.ReadAll(resp.Body)
-	html := string(body)
-	for _, want := range []string{
-		"Active grants", "Request history",
-		"View repo r",    // grant + proposal summary (from signedItem)
-		"me@example.com", // approver in history
-		"badge-approved", // status badge
-	} {
-		if !strings.Contains(html, want) {
-			t.Fatalf("/activity missing %q", want)
-		}
-	}
-}
-
 // TestProposalExpiresViaEndpoint checks a proposal with a short request TTL is shown as
 // expired on the consent page and can no longer be approved through the endpoint.
 func TestProposalExpiresViaEndpoint(t *testing.T) {

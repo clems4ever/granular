@@ -94,11 +94,13 @@ restart, and re-running an operation after approval simply succeeds.
 | PUT    | `/api/subject`            | Mint a subject token. **Admin-gated.**                          |
 | GET    | `/api/subject/{token}`    | Inspect a token's grants. **Admin-gated.**                     |
 | DELETE | `/api/subject/{token}`    | Destroy a token and its grants. **Admin-gated.**              |
+| GET    | `/api/subject/me`         | A subject reads its OWN grants, authenticated by its subject token. |
 | POST   | `/api/proposals`         | Submit a signed grant-request bundle; returns approval URL + expiry. |
 | POST   | `/api/verify`            | resource server asks whether a subject token authorizes an operation.   |
+| GET    | `/api/activity`          | Full cross-subject grant inventory + history. **Admin-gated.**  |
 | GET    | `/proposal/{id}`         | Human consent page (renders the resource server Presentation verbatim). |
 | POST   | `/proposal/{id}`         | Approve (with a grant TTL) or reject.                          |
-| GET    | `/activity`              | Active grants + request history.                              |
+| GET    | `/activity`              | The signed-in approver's OWN request/decision history (login required). |
 | GET    | `/auth/github/{login,callback,logout}` | GitHub OAuth login for the consent pages.        |
 | GET    | `/`, `/static/…`         | Landing page and embedded assets.                             |
 
@@ -133,6 +135,22 @@ inspecting, and destroying tokens is gated by the AS **admin token**
 disabled (`503`); a wrong token is `401`. An administrator mints a token, hands it
 to a client (via the client's `token_file`), and the client then submits proposals
 and runs operations under it without any admin credential.
+
+### Who sees what
+
+Visibility is scoped to three distinct audiences — no single view exposes everything
+to everyone:
+
+- **A subject** reads only its OWN grants, at `GET /api/subject/me`, authenticated by
+  its subject token (the bearer it already holds — no admin credential). A sandboxed
+  agent can introspect what it currently holds and nothing else.
+- **An approver** (human, GitHub login) sees only the requests that name them: their
+  own pending requests and decision history at `/activity`. They never see other
+  approvers' history or the global grant inventory. When consent authentication is
+  disabled there is no approver identity, so the page is unavailable (`404`).
+- **An operator** (admin token) gets the full cross-subject grant inventory and
+  history at `GET /api/activity` (the `granular-subject activity` command). This is the
+  only view that spans subjects, and it is admin-gated like the rest of `/api/subject`.
 
 ## Expiry
 

@@ -113,6 +113,12 @@
 			"documentation_hash": "3058190a5b5d8ef94be2efd9944a46665867810c9eb53f45f6a3cd95fa1e3152",
 			"definition_hash": "058fb4d9f93f863f0cb75be9787edb82807f403efa3e19382051382a42707cb0",
 			"reviewed_at": "2026-06-17T14:39:59.905913429Z"
+		},
+		{
+			"function_name": "runGrants",
+			"documentation_hash": "8d49b573bd6520f76532cd11f4b41ffd0f6e50b117cfcc3a7194762f82dc92be",
+			"definition_hash": "6e9a4c7134c47c7779c95b0bb2f4d26f83df3018c330f963ced471d164cf9884",
+			"reviewed_at": "2026-06-17T15:49:45.820951108Z"
 		}
 	]
 }

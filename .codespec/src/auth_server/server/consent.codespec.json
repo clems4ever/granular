@@ -35,28 +35,28 @@
 		},
 		{
 			"function_name": "fmtTime",
-			"documentation_hash": "14d0a6e9eef001f63421acb1a38bc7bedd847c31c3cfbac0f5d0ab605714c52b",
+			"documentation_hash": "c0bfae8cfdaf52705bfdd6c716163dcb52152dcf61c6a850a2f5b55a3c8ca7a9",
 			"definition_hash": "9bdc98a0a87f407206df6da27afcfc61796c0b2cb2e4284466303f030bf6eb6f",
-			"reviewed_at": "2026-06-17T10:21:16.656640154Z"
+			"reviewed_at": "2026-06-17T15:49:45.808398248Z"
 		},
 		{
 			"function_name": "firstSummary",
-			"documentation_hash": "391ff875651bc6af8252ec62e41c7098df6940863480a941a9b5c34031cc9323",
+			"documentation_hash": "5eb6b77cd826fce77ab83bb33954fe4004f4928e0a766c2fc70a07c45d5aa77f",
 			"definition_hash": "ad092b3d351c6641bc5010f4b5de48706509d560da26e30f3829a08f39897f44",
-			"reviewed_at": "2026-06-17T10:21:16.658466355Z"
+			"reviewed_at": "2026-06-17T15:49:45.808729763Z"
 		},
 		{
 			"function_name": "buildActivity",
-			"documentation_hash": "b679a4b0f38989d9cd6a1c5e73b97f54019e8e3b9a18ad6a2e4595c2e934482f",
-			"definition_hash": "7d7a76af9415f9807e0385ca3a4b750f5d9c6db406c8025aa71ce49069370ab9",
-			"reviewed_at": "2026-06-17T14:39:13.140030563Z"
+			"documentation_hash": "446886106162f847564163eda00afc097094ea5b3544c051569e9fda3dffb349",
+			"definition_hash": "52259096fd4bbaa0f09cc7f54a9ed2305596fbfba12bcc0f37402efaa7974138",
+			"reviewed_at": "2026-06-17T15:49:45.809509479Z"
 		},
 		{
 			"function_name": "handleActivity",
 			"receiver": "Server",
-			"documentation_hash": "fcc71944a3d9a0d2643d3c68d8bc22b934cca136f233b5c494ec8bbfa60b2c3f",
-			"definition_hash": "9861a8ecdd61d00da2993464ac6822223a43b3c96df2bf24e7b6f46bc58d99e0",
-			"reviewed_at": "2026-06-17T10:41:18.935273649Z"
+			"documentation_hash": "8d613319608f1a6a67f6361e13a575bfab072322eaf7da8e56c02a757e2f8d03",
+			"definition_hash": "3e02f1e8ffd09a5f9ffb876b8b7fdf304d96f1afaf686e2d15bc3cd30b0929e9",
+			"reviewed_at": "2026-06-17T15:49:45.809743741Z"
 		},
 		{
 			"function_name": "humanizeUntil",

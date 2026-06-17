@@ -3,8 +3,8 @@
 		{
 			"function_name": "fakeAS",
 			"documentation_hash": "01bd443d4abc18852beaef2c22ff8d1cee19dc9363b4e1b982574ad409490eab",
-			"definition_hash": "7f5f4fc8816f98c314fb4e07f5ce6804089831909490d28e0dad977030cdef16",
-			"reviewed_at": "2026-06-17T15:18:49.725330131Z"
+			"definition_hash": "c3ebd4d9777b81387b842c759b24623837b9aab442096d690bfc8cd8c3677a26",
+			"reviewed_at": "2026-06-17T15:49:45.81502779Z"
 		},
 		{
 			"function_name": "readCap",
@@ -77,6 +77,18 @@
 			"documentation_hash": "363f2c8fe381bc7377da1e581824b1ecdd2cef35692f2ab887d9744b63d3ae0a",
 			"definition_hash": "858eab36e15b494a85aa9798e57dc6b8a3a91a8fff83b3e33c7323bf67e4913a",
 			"reviewed_at": "2026-06-17T15:18:49.728393411Z"
+		},
+		{
+			"function_name": "TestMySubjectReturnsOwnGrants",
+			"documentation_hash": "d61ae41da2c0229052ea5f8fffe3c83cfc399c33e31d88724aabbf020b714911",
+			"definition_hash": "d69d1fc0fddaeb25f0b9b863a2d3042a87f6fe45a1288fa88df6635deb296408",
+			"reviewed_at": "2026-06-17T15:49:45.815643Z"
+		},
+		{
+			"function_name": "TestActivityReturnsInventory",
+			"documentation_hash": "28842832cb63b8a1f49d1f490782463b1af26e32148527f7c10b2f999d048bfc",
+			"definition_hash": "9493f7cfdb9866a0bb3e68e539e8ec30fcccc6d4e7e0746e2d6cb8a806f7af7a",
+			"reviewed_at": "2026-06-17T15:49:45.816062998Z"
 		}
 	]
 }

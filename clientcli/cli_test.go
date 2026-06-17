@@ -77,6 +77,9 @@ func fakeAS(t *testing.T) *httptest.Server {
 		w.WriteHeader(http.StatusAccepted)
 		_ = json.NewEncoder(w).Encode(map[string]string{"proposal_id": "p1", "url": "http://as/proposal/p1"})
 	})
+	mux.HandleFunc("GET /api/subject/me", func(w http.ResponseWriter, r *http.Request) {
+		_ = json.NewEncoder(w).Encode(map[string]any{"grants": []client.Grant{{ResourceServerID: "g1", ExpiresAt: "soon"}}})
+	})
 	ts := httptest.NewServer(mux)
 	t.Cleanup(ts.Close)
 	return ts
@@ -96,12 +99,25 @@ func newClient(asURL, rsURL string) *client.Client {
 // TestCommandTree checks the sub-commands are wired under the root.
 func TestCommandTree(t *testing.T) {
 	root := NewRootCmd(&bytes.Buffer{})
-	want := map[string]bool{"catalog": true, "template": true, "op": true, "sign": true, "propose": true}
+	want := map[string]bool{"catalog": true, "template": true, "op": true, "sign": true, "propose": true, "grants": true}
 	for _, c := range root.Commands() {
 		delete(want, c.Name())
 	}
 	if len(want) != 0 {
 		t.Fatalf("missing commands: %v", want)
+	}
+}
+
+// TestRunGrants lists the grants attached to the caller's own subject token.
+func TestRunGrants(t *testing.T) {
+	as := fakeAS(t)
+	c := newClient(as.URL, "")
+	var buf bytes.Buffer
+	if err := runGrants(context.Background(), c, &buf); err != nil {
+		t.Fatalf("grants: %v", err)
+	}
+	if !strings.Contains(buf.String(), "g1") {
+		t.Fatalf("grants output missing g1: %q", buf.String())
 	}
 }
 

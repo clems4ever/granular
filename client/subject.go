@@ -9,8 +9,10 @@ import (
 )
 
 // Grant is one active grant attached to a subject: which resource server authored it, when it
-// expires, and the opaque resource server-signed item it carries.
+// expires, and the opaque resource server-signed item it carries. SubjectToken is set only
+// in the operator activity view (which spans subjects); the per-subject reads omit it.
 type Grant struct {
+	SubjectToken     string                      `json:"subject_token,omitempty"`
 	ResourceServerID string                      `json:"resource_server_id"`
 	ExpiresAt        string                      `json:"expires_at"`
 	Item             proposal.SignedGrantRequest `json:"item"`
@@ -21,6 +23,25 @@ type subjectResult struct {
 	Token  string  `json:"token,omitempty"`
 	Grants []Grant `json:"grants,omitempty"`
 	Error  string  `json:"error,omitempty"`
+}
+
+// HistoryEntry is one proposal in the operator activity view: which subject it was
+// submitted for, the approver it named, its decision status and a one-line summary.
+type HistoryEntry struct {
+	SubjectToken string `json:"subject_token"`
+	Approver     string `json:"approver"`
+	Status       string `json:"status"`
+	Summary      string `json:"summary"`
+	Items        int    `json:"items"`
+	CreatedAt    string `json:"created_at"`
+}
+
+// Activity is the AS operator view: the full grant inventory and the request/decision
+// history across every subject.
+type Activity struct {
+	Grants  []Grant        `json:"grants"`
+	History []HistoryEntry `json:"history"`
+	Error   string         `json:"error,omitempty"`
 }
 
 // Token returns the client's configured bearer token (empty when none is set). For a
@@ -81,6 +102,57 @@ func (c *Client) Subject(ctx context.Context, subjectToken string) ([]Grant, err
 		return nil, fmt.Errorf("read subject: status %d: %s", status, res.Error)
 	}
 	return res.Grants, nil
+}
+
+// MySubject returns the active grants attached to the client's OWN subject token. Unlike
+// Subject, this is not an administrative call: it authenticates with the subject token the
+// client already holds (GET /api/subject/me), so a sandboxed agent can introspect what it
+// currently holds without any privileged credential.
+//
+// @arg ctx Context for cancellation.
+// @return []Grant The active grants on the caller's own subject.
+// @error ErrNoToken when no subject token is configured.
+// @error error on transport failure or an unexpected AS status.
+//
+// @testcase TestMySubjectReturnsOwnGrants lists the caller's own grants.
+func (c *Client) MySubject(ctx context.Context) ([]Grant, error) {
+	if c.token == "" {
+		return nil, ErrNoToken
+	}
+	var res subjectResult
+	status, err := c.doJSON(ctx, http.MethodGet, c.asURL+"/api/subject/me", c.token, nil, &res)
+	if err != nil {
+		return nil, err
+	}
+	if status != http.StatusOK {
+		return nil, fmt.Errorf("read own subject: status %d: %s", status, res.Error)
+	}
+	return res.Grants, nil
+}
+
+// Activity returns the operator view: the full grant inventory and request/decision
+// history across all subjects (GET /api/activity). This is an administrative call
+// authenticated with the client's admin token.
+//
+// @arg ctx Context for cancellation.
+// @return Activity The cross-subject grant inventory and history.
+// @error ErrNoToken when no admin token is configured.
+// @error error on transport failure or an unexpected AS status.
+//
+// @testcase TestActivityReturnsInventory reads the cross-subject activity.
+func (c *Client) Activity(ctx context.Context) (Activity, error) {
+	if c.token == "" {
+		return Activity{}, ErrNoToken
+	}
+	var res Activity
+	status, err := c.doJSON(ctx, http.MethodGet, c.asURL+"/api/activity", c.token, nil, &res)
+	if err != nil {
+		return Activity{}, err
+	}
+	if status != http.StatusOK {
+		return Activity{}, fmt.Errorf("read activity: status %d: %s", status, res.Error)
+	}
+	return res, nil
 }
 
 // DestroySubject destroys a subject and all grants attached to it, returning how many

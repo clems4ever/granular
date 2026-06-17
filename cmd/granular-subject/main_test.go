@@ -31,6 +31,12 @@ func fakeAS(t *testing.T) *httptest.Server {
 	mux.HandleFunc("DELETE /api/subject/{token}", func(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewEncoder(w).Encode(map[string]int{"destroyed": 3})
 	})
+	mux.HandleFunc("GET /api/activity", func(w http.ResponseWriter, r *http.Request) {
+		_ = json.NewEncoder(w).Encode(client.Activity{
+			Grants:  []client.Grant{{SubjectToken: "subj1", ResourceServerID: "g1", ExpiresAt: "soon"}},
+			History: []client.HistoryEntry{{SubjectToken: "subj1", Approver: "me@example.com", Status: "approved", Summary: "do x", Items: 1}},
+		})
+	})
 	ts := httptest.NewServer(mux)
 	t.Cleanup(ts.Close)
 	return ts
@@ -39,10 +45,10 @@ func fakeAS(t *testing.T) *httptest.Server {
 // TestMainIsEntryPoint is a placeholder: main only builds and executes the tree.
 func TestMainIsEntryPoint(t *testing.T) { _ = main }
 
-// TestCommandTree checks the create/show/destroy sub-commands are wired.
+// TestCommandTree checks the create/show/destroy/activity sub-commands are wired.
 func TestCommandTree(t *testing.T) {
 	root := newRootCmd(&bytes.Buffer{})
-	want := map[string]bool{"create": true, "show": true, "destroy": true}
+	want := map[string]bool{"create": true, "show": true, "destroy": true, "activity": true}
 	for _, c := range root.Commands() {
 		delete(want, c.Name())
 	}
@@ -79,5 +85,22 @@ func TestRunSubject(t *testing.T) {
 	buf.Reset()
 	if err := runDestroy(context.Background(), c, "somesubject", &buf); err != nil || !strings.Contains(buf.String(), "destroyed 3") {
 		t.Fatalf("destroy: %v %q", err, buf.String())
+	}
+}
+
+// TestRunActivity prints the cross-subject grant inventory and request history.
+func TestRunActivity(t *testing.T) {
+	as := fakeAS(t)
+	c := client.New(client.Config{ASURL: as.URL, Token: "admin"})
+
+	var buf bytes.Buffer
+	if err := runActivity(context.Background(), c, &buf); err != nil {
+		t.Fatalf("activity: %v", err)
+	}
+	out := buf.String()
+	for _, want := range []string{"subj1", "g1", "me@example.com", "approved"} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("activity output missing %q:\n%s", want, out)
+		}
 	}
 }

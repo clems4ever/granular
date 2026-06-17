@@ -116,6 +116,30 @@ func buildGrantRequest(reason string, actions []string, resType string, match ma
 	}
 }
 
+// runGrants lists the active grants currently attached to the caller's own subject token,
+// authenticated by that token (GET /api/subject/me) — no admin credential needed.
+//
+// @arg ctx Context for cancellation.
+// @arg c The client SDK (authenticated with the subject token).
+// @arg w The writer for user-facing output.
+// @error error when the AS call fails.
+//
+// @testcase TestRunGrants lists the caller's own grants.
+func runGrants(ctx context.Context, c *client.Client, w io.Writer) error {
+	grants, err := c.MySubject(ctx)
+	if err != nil {
+		return err
+	}
+	if len(grants) == 0 {
+		fmt.Fprintln(w, "no active grants")
+		return nil
+	}
+	for _, g := range grants {
+		fmt.Fprintf(w, "%s (expires %s): %s\n", g.ResourceServerID, g.ExpiresAt, g.Item.Presentation.Summary)
+	}
+	return nil
+}
+
 // runCatalog fetches the schemas of the requested resource servers (or all of them) and prints
 // everything an agent needs to build a grant request: the resource types with their
 // match fields and hierarchy, the action groups, every action with the resource type it

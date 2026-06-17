@@ -27,6 +27,20 @@
 			"documentation_hash": "364a616848fa87ac5662637d03398badb434e8261da68b11f7ca915bf270d4f5",
 			"definition_hash": "19c63b49b71525013489a5d5be43cf94f5810894bfaf33a6f116f1b0a2de4cd8",
 			"reviewed_at": "2026-06-17T15:18:49.730375637Z"
+		},
+		{
+			"function_name": "MySubject",
+			"receiver": "Client",
+			"documentation_hash": "ed1a671478fcdf0f609c356aec24602433cf9f669935124d4785c7dec2b1d3f5",
+			"definition_hash": "b727b2da1ca4edb1eb0718349eb466be4c61730ac3e96eb598315c57b639530d",
+			"reviewed_at": "2026-06-17T15:49:45.81632044Z"
+		},
+		{
+			"function_name": "Activity",
+			"receiver": "Client",
+			"documentation_hash": "1808c080c4e051ac09fafb80934b24d7b4ff42a00ce0d0e9b5bfbdc14e741bf5",
+			"definition_hash": "b2539b7b1169f47dfe2c64eb508eba8bbd85ca2c8ec1bf853f220cb5595a57b3",
+			"reviewed_at": "2026-06-17T15:49:45.816502044Z"
 		}
 	]
 }

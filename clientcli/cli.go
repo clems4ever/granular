@@ -49,7 +49,7 @@ func NewRootCmd(out io.Writer) *cobra.Command {
 	}
 	root.PersistentFlags().StringVar(&a.configPath, "config", "granular-client.yaml", "path to the YAML configuration file")
 	root.PersistentFlags().StringVar(&a.token, "token", "", "subject token (overrides the configured token_file)")
-	root.AddCommand(a.catalogCmd(), a.templateCmd(), a.opCmd(), a.signCmd(), a.proposeCmd())
+	root.AddCommand(a.catalogCmd(), a.templateCmd(), a.opCmd(), a.signCmd(), a.proposeCmd(), a.grantsCmd())
 	return root
 }
 
@@ -174,6 +174,22 @@ func (a *app) signCmd() *cobra.Command {
 	cmd.Flags().StringVar(&match, "match", "", "resource match fields, key=value,key=value")
 	_ = cmd.MarkFlagRequired("resource-server")
 	return cmd
+}
+
+// grantsCmd builds the "grants" command: list the grants currently attached to the
+// configured subject token, letting an agent introspect what it holds.
+//
+// @return *cobra.Command The grants command.
+//
+// @testcase TestCommandTree checks the grants command is present.
+func (a *app) grantsCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "grants",
+		Short: "List the grants currently attached to your subject token",
+		RunE: func(*cobra.Command, []string) error {
+			return runGrants(context.Background(), a.c, a.out)
+		},
+	}
 }
 
 // proposeCmd builds the "propose" command: pack one or more signed grant requests into a

@@ -3,8 +3,8 @@
 		{
 			"function_name": "fakeAS",
 			"documentation_hash": "d3862888d20b382addfc51515cd15c77864dfae8e45bde01178494a860981512",
-			"definition_hash": "73a9681763df961df2fcd55a2f1b7fa63bed2c34036dd0e16a1f5791da97ddbd",
-			"reviewed_at": "2026-06-17T14:43:58.79142648Z"
+			"definition_hash": "4f8257066311bea820a05205475ee406c4363913eb8b43aa6e632a838479ce1a",
+			"reviewed_at": "2026-06-17T15:49:45.817427365Z"
 		},
 		{
 			"function_name": "newClient",
@@ -15,8 +15,8 @@
 		{
 			"function_name": "TestCommandTree",
 			"documentation_hash": "c1e57b04f868fea558432ff202043079b936f719387449ac16995f9492655d9e",
-			"definition_hash": "a632169e2a212dc4fe4fab17d25ef001fce4f8be7a84001d475e5dda6ef8317e",
-			"reviewed_at": "2026-06-17T14:43:58.794857997Z"
+			"definition_hash": "48c9484934f3c067c3a19c63846d804e260bc149b9b6c7b9b60dd7af38368267",
+			"reviewed_at": "2026-06-17T15:49:45.818433366Z"
 		},
 		{
 			"function_name": "TestDefaultConfig",
@@ -107,6 +107,12 @@
 			"documentation_hash": "c78fe4208ec8f786f1235ccaf2e63d7d4df8ac6c18aa928a87c88c76f1f7fd74",
 			"definition_hash": "d21ed25cead07181eaa4ecff8f8ea63818228712b31c8a92d42d7b650f774e9d",
 			"reviewed_at": "2026-06-17T14:43:58.8265003Z"
+		},
+		{
+			"function_name": "TestRunGrants",
+			"documentation_hash": "ab6888895196d84ba93734c2f7ae38a42d4923966e50159524bf188cec1a1e8b",
+			"definition_hash": "54d0ebfd98c1adb247b357806a58115e120f59969cac2801468058294908b3bd",
+			"reviewed_at": "2026-06-17T15:49:45.819814253Z"
 		}
 	]
 }

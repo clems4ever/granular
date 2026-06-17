@@ -70,9 +70,29 @@ type subjectOutput struct {
 // grantView is one active grant returned to the subject-token holder, carrying the opaque,
 // resource server-signed item the resource server re-checks at enforcement.
 type grantView struct {
+	SubjectToken     string                      `json:"subject_token,omitempty"`
 	ResourceServerID string                      `json:"resource_server_id"`
 	ExpiresAt        string                      `json:"expires_at"`
 	Item             proposal.SignedGrantRequest `json:"item"`
+}
+
+// activityOutput is returned by GET /api/activity (admin-gated): the full grant inventory
+// and the request/decision history across every subject.
+type activityOutput struct {
+	Grants  []grantView    `json:"grants"`
+	History []historyEntry `json:"history"`
+	Error   string         `json:"error,omitempty"`
+}
+
+// historyEntry is one proposal in the admin activity history, including the subject it was
+// submitted for and the approver it named.
+type historyEntry struct {
+	SubjectToken string `json:"subject_token"`
+	Approver     string `json:"approver"`
+	Status       string `json:"status"`
+	Summary      string `json:"summary"`
+	Items        int    `json:"items"`
+	CreatedAt    string `json:"created_at"`
 }
 
 // New creates a Server.
@@ -134,10 +154,16 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("PUT /api/subject", s.handleCreateSubject)
 	mux.HandleFunc("GET /api/subject/{token}", s.handleGetSubject)
 	mux.HandleFunc("DELETE /api/subject/{token}", s.handleDestroySubject)
+	// A subject reads its OWN grants, authenticated by its subject token (not the admin
+	// token). More specific than /api/subject/{token}, so it takes precedence.
+	mux.HandleFunc("GET /api/subject/me", s.handleGetMySubject)
 
 	// Client submits a proposal (Bearer token); resource server verifies an operation.
 	mux.HandleFunc("POST /api/proposals", s.handleProposal)
 	mux.HandleFunc("POST /api/verify", s.handleVerify)
+
+	// Operator view (admin-gated): the full cross-subject grant inventory and history.
+	mux.HandleFunc("GET /api/activity", s.handleActivityAdmin)
 
 	mux.Handle("GET /static/", web.Static())
 
@@ -200,12 +226,101 @@ func (s *Server) handleGetSubject(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusInternalServerError, subjectOutput{Error: err.Error()})
 		return
 	}
-	out := subjectOutput{Grants: make([]grantView, 0, len(grants))}
+	writeJSON(w, http.StatusOK, subjectOutput{Grants: grantViews(grants)})
+}
+
+// handleGetMySubject handles GET /api/subject/me: a subject reads its OWN active grants,
+// authenticated by its subject token (the bearer it already holds) rather than the admin
+// token. This lets a sandboxed agent introspect what it currently holds without any
+// privileged credential, and it can never see another subject's grants.
+//
+// @arg w The response writer.
+// @arg r The request carrying the subject token as a bearer.
+//
+// @testcase TestMySubjectReturnsOwnGrants returns the bearer's own grants.
+// @testcase TestMySubjectRejectsUnknownToken rejects a missing or unknown bearer token.
+func (s *Server) handleGetMySubject(w http.ResponseWriter, r *http.Request) {
+	token, ok := s.bearerSubject(w, r)
+	if !ok {
+		return
+	}
+	grants, err := s.store.SubjectForToken(token)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, subjectOutput{Error: err.Error()})
+		return
+	}
+	writeJSON(w, http.StatusOK, subjectOutput{Grants: grantViews(grants)})
+}
+
+// grantViews renders store grants as API grant views, omitting the subject token: callers
+// of GET /api/subject/{token} and /api/subject/me already identify the subject, so the
+// token is not echoed back. The admin activity view sets it explicitly instead.
+//
+// @arg grants The active grants to render.
+// @return []grantView One view per grant.
+//
+// @testcase TestGetSubjectReturnsGrants renders a subject's grants.
+func grantViews(grants []store.Grant) []grantView {
+	out := make([]grantView, 0, len(grants))
 	for _, g := range grants {
-		out.Grants = append(out.Grants, grantView{
+		out = append(out, grantView{
 			ResourceServerID: g.Item.ResourceServerID,
 			ExpiresAt:        g.ExpiresAt.UTC().Format("2006-01-02T15:04:05Z"),
 			Item:             g.Item,
+		})
+	}
+	return out
+}
+
+// handleActivityAdmin handles GET /api/activity: an administrator (admin token) retrieves
+// the full grant inventory and the request/decision history across ALL subjects. This is
+// the privileged operator view; a human approver only ever sees their own history at
+// /activity, and a subject only its own grants at /api/subject/me.
+//
+// @arg w The response writer.
+// @arg r The request carrying the admin bearer token.
+//
+// @testcase TestActivityAdminRequiresAdminToken rejects calls without the admin token.
+// @testcase TestActivityAdminReturnsInventory returns grants and history after approval.
+func (s *Server) handleActivityAdmin(w http.ResponseWriter, r *http.Request) {
+	if !s.requireAdmin(w, r) {
+		return
+	}
+	grants, err := s.store.AllGrants()
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, activityOutput{Error: err.Error()})
+		return
+	}
+	proposals, err := s.store.AllProposals()
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, activityOutput{Error: err.Error()})
+		return
+	}
+	now := time.Now()
+	out := activityOutput{
+		Grants:  make([]grantView, 0, len(grants)),
+		History: make([]historyEntry, 0, len(proposals)),
+	}
+	for _, g := range grants {
+		out.Grants = append(out.Grants, grantView{
+			SubjectToken:     g.Token,
+			ResourceServerID: g.Item.ResourceServerID,
+			ExpiresAt:        g.ExpiresAt.UTC().Format("2006-01-02T15:04:05Z"),
+			Item:             g.Item,
+		})
+	}
+	for _, p := range proposals {
+		status := p.Status
+		if p.Expired(now) {
+			status = store.StatusExpired
+		}
+		out.History = append(out.History, historyEntry{
+			SubjectToken: p.Token,
+			Approver:     p.ApproverEmail,
+			Status:       string(status),
+			Summary:      firstSummary(p.Items),
+			Items:        len(p.Items),
+			CreatedAt:    fmtTime(p.CreatedAt),
 		})
 	}
 	writeJSON(w, http.StatusOK, out)
@@ -448,6 +563,12 @@ func (s *Server) navFor(r *http.Request) web.Nav {
 // @testcase TestIndexServesLanding renders the landing page.
 func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	// The activity page shows the signed-in approver their own history, so only link to it
+	// when consent authentication is enabled (otherwise there is no approver to scope to).
+	activityLink := ""
+	if s.auth != nil && s.auth.Enabled() {
+		activityLink = `<p><a class="btn" href="/activity">Your approvals &amp; history →</a></p>`
+	}
 	_, _ = io.WriteString(w, `<!doctype html><meta charset="utf-8"><title>granular · authorization server</title>`+
 		`<link rel="stylesheet" href="/static/style.css">`+
 		`<main class="container narrow"><div class="card">`+
@@ -456,7 +577,7 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 		`<p class="lead">The generic policy authority. Clients submit resource server-signed grant requests here `+
 		`for human approval, and resource servers verify operations against the approved policy before executing them.</p>`+
 		`<p class="muted">Approval links are sent to you by the agent; there is nothing to do on this page.</p>`+
-		`<p><a class="btn" href="/activity">View grants &amp; activity →</a></p>`+
+		activityLink+
 		`</div></main>`)
 }
 

@@ -145,12 +145,14 @@ granular (granular-client)
 ├── sign --resource-server <id> [--out f]          # freeze a grant request via the resource server
 │     ├── --template <name> --bind k=v     #   from a template
 │     └── --reason --actions --resource --match   # or freeform
-└── propose <signed-file ...> --approver <email>   # submit a proposal for approval
+├── propose <signed-file ...> --approver <email>   # submit a proposal for approval
+└── grants                                  # list the grants on your own subject token
 
 granular-subject                            # admin: --admin-token[-file]
 ├── create                                 # mint a subject token
 ├── show <subject-token>                    # inspect a token's grants
-└── destroy <subject-token>                 # revoke a token and its grants
+├── destroy <subject-token>                 # revoke a token and its grants
+└── activity                                # all subjects' grants + history (operator view)
 ```
 
 ## Adding a resource server or operation

@@ -76,6 +76,15 @@ func fakeAS(t *testing.T, got *proposalSubmit) *httptest.Server {
 	mux.HandleFunc("DELETE /api/subject/{token}", func(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewEncoder(w).Encode(map[string]int{"destroyed": 2})
 	})
+	mux.HandleFunc("GET /api/subject/me", func(w http.ResponseWriter, r *http.Request) {
+		_ = json.NewEncoder(w).Encode(subjectResult{Grants: []Grant{{ResourceServerID: "g1", ExpiresAt: "soon"}}})
+	})
+	mux.HandleFunc("GET /api/activity", func(w http.ResponseWriter, r *http.Request) {
+		_ = json.NewEncoder(w).Encode(Activity{
+			Grants:  []Grant{{SubjectToken: "tok", ResourceServerID: "g1", ExpiresAt: "soon"}},
+			History: []HistoryEntry{{SubjectToken: "tok", Approver: "me@example.com", Status: "approved", Summary: "do x", Items: 1}},
+		})
+	})
 	mux.HandleFunc("POST /api/proposals", func(w http.ResponseWriter, r *http.Request) {
 		if got != nil {
 			_ = json.NewDecoder(r.Body).Decode(got)
@@ -245,5 +254,35 @@ func TestDestroySubject(t *testing.T) {
 	n, err := c.DestroySubject(context.Background(), "somesubject")
 	if err != nil || n != 2 {
 		t.Fatalf("destroy: %d %v", n, err)
+	}
+}
+
+// TestMySubjectReturnsOwnGrants lists the caller's own grants via the subject token.
+func TestMySubjectReturnsOwnGrants(t *testing.T) {
+	as := fakeAS(t, nil)
+	c := New(Config{ASURL: as.URL, Token: "subjecttok"})
+	grants, err := c.MySubject(context.Background())
+	if err != nil || len(grants) != 1 || grants[0].ResourceServerID != "g1" {
+		t.Fatalf("grants: %v %v", grants, err)
+	}
+	// Without a subject token there is nothing to introspect.
+	if _, err := New(Config{ASURL: as.URL}).MySubject(context.Background()); !errors.Is(err, ErrNoToken) {
+		t.Fatalf("want ErrNoToken, got %v", err)
+	}
+}
+
+// TestActivityReturnsInventory reads the cross-subject grant inventory and history.
+func TestActivityReturnsInventory(t *testing.T) {
+	as := fakeAS(t, nil)
+	c := New(Config{ASURL: as.URL, Token: "admin"})
+	act, err := c.Activity(context.Background())
+	if err != nil {
+		t.Fatalf("activity: %v", err)
+	}
+	if len(act.Grants) != 1 || act.Grants[0].SubjectToken != "tok" {
+		t.Fatalf("grants: %+v", act.Grants)
+	}
+	if len(act.History) != 1 || act.History[0].Approver != "me@example.com" {
+		t.Fatalf("history: %+v", act.History)
 	}
 }

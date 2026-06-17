@@ -58,30 +58,19 @@ type mismatchView struct {
 	Approver   string
 }
 
-// grantRow is one active grant shown on the activity page. No subject token is shown.
-// ExpiresIn is the relative time until expiry (e.g. "in 12m"); ExpiresAt is the absolute
-// time shown as a tooltip.
-type grantRow struct {
-	ResourceServerID string
-	Summary          string
-	CreatedAt        string
-	ExpiresIn        string
-	ExpiresAt        string
-}
-
-// historyRow is one past or pending proposal shown on the activity page (the request and
-// decision history).
+// historyRow is one past or pending proposal shown on the approver's activity page: the
+// status, a one-line summary and when it was submitted. The approver is implicit (always
+// the signed-in user), so it is not repeated per row.
 type historyRow struct {
-	Approver  string
 	Status    store.Status
 	Summary   string
 	Items     int
 	CreatedAt string
 }
 
-// activityView is the data passed to the activity page template.
+// activityView is the data passed to the activity page template: the signed-in approver's
+// own request/decision history.
 type activityView struct {
-	Active  []grantRow
 	History []historyRow
 }
 
@@ -90,7 +79,7 @@ type activityView struct {
 // @arg t The timestamp to render.
 // @return string The formatted UTC timestamp.
 //
-// @testcase TestActivityPageRendersGrants renders grant timestamps.
+// @testcase TestActivityPageRendersApproverHistory renders proposal timestamps.
 func fmtTime(t time.Time) string {
 	if t.IsZero() {
 		return "—"
@@ -126,7 +115,7 @@ func humanizeUntil(now, t time.Time) string {
 // @arg items The signed grant requests in a proposal.
 // @return string A one-line summary for the bundle.
 //
-// @testcase TestActivityPageRendersGrants summarises a multi-item proposal.
+// @testcase TestActivityPageRendersApproverHistory summarises a multi-item proposal.
 func firstSummary(items []proposal.SignedGrantRequest) string {
 	if len(items) == 0 {
 		return ""
@@ -138,33 +127,22 @@ func firstSummary(items []proposal.SignedGrantRequest) string {
 	return s
 }
 
-// buildActivity assembles the observability view from the active grants and the proposal
-// history, expressing each grant's expiry relative to now.
+// buildActivity assembles the signed-in approver's activity view from their own proposals:
+// one history row each, with lapsed pending requests shown as expired.
 //
-// @arg now The reference time for relative expiry.
-// @arg grants The active (non-expired) grants.
-// @arg proposals The recorded proposals (request/decision history).
+// @arg now The reference time used to mark lapsed pending requests as expired.
+// @arg proposals The approver's own proposals (already filtered by handleActivity).
 // @return activityView The view rendered by the activity page.
 //
-// @testcase TestActivityPageRendersGrants builds the active and history sections.
-func buildActivity(now time.Time, grants []store.Grant, proposals []store.Proposal) activityView {
+// @testcase TestActivityPageRendersApproverHistory builds the history section.
+func buildActivity(now time.Time, proposals []store.Proposal) activityView {
 	v := activityView{}
-	for _, g := range grants {
-		v.Active = append(v.Active, grantRow{
-			ResourceServerID: g.Item.ResourceServerID,
-			Summary:          g.Item.Presentation.Summary,
-			CreatedAt:        fmtTime(g.CreatedAt),
-			ExpiresIn:        humanizeUntil(now, g.ExpiresAt),
-			ExpiresAt:        fmtTime(g.ExpiresAt),
-		})
-	}
 	for _, p := range proposals {
 		status := p.Status
 		if p.Expired(now) {
 			status = store.StatusExpired
 		}
 		v.History = append(v.History, historyRow{
-			Approver:  p.ApproverEmail,
 			Status:    status,
 			Summary:   firstSummary(p.Items),
 			Items:     len(p.Items),
@@ -174,17 +152,26 @@ func buildActivity(now time.Time, grants []store.Grant, proposals []store.Propos
 	return v
 }
 
-// handleActivity handles GET /activity: it renders the active grants and the proposal
-// history so an operator can observe what is granted and what was decided.
+// handleActivity handles GET /activity: it renders the signed-in approver's OWN request
+// and decision history — only the proposals that name them. It requires an authenticated
+// approver: when consent authentication is disabled there is no identity to scope to, so
+// the page is unavailable. The cross-subject inventory is the operator's view, served
+// admin-gated at GET /api/activity; a subject sees its own grants at GET /api/subject/me.
 //
 // @arg w The response writer.
 // @arg r The incoming request.
 //
-// @testcase TestActivityPageRendersGrants renders active grants and history.
+// @testcase TestActivityPageRendersApproverHistory shows the approver their own history.
+// @testcase TestActivityScopedToApprover hides another approver's requests.
+// @testcase TestActivityUnavailableWhenAuthDisabled is not found when auth is off.
 func (s *Server) handleActivity(w http.ResponseWriter, r *http.Request) {
-	grants, err := s.store.AllGrants()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	if s.auth == nil || !s.auth.Enabled() {
+		http.Error(w, "activity is unavailable when consent authentication is disabled", http.StatusNotFound)
+		return
+	}
+	email, ok := s.auth.CurrentEmail(r)
+	if !ok || email == "" {
+		http.Error(w, "authentication required", http.StatusForbidden)
 		return
 	}
 	proposals, err := s.store.AllProposals()
@@ -192,7 +179,13 @@ func (s *Server) handleActivity(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	_ = s.render(w, r, "activity", buildActivity(time.Now(), grants, proposals))
+	mine := make([]store.Proposal, 0, len(proposals))
+	for _, p := range proposals {
+		if p.ApproverEmail == email {
+			mine = append(mine, p)
+		}
+	}
+	_ = s.render(w, r, "activity", buildActivity(time.Now(), mine))
 }
 
 // parseTTL converts a consent-form duration value into a time.Duration, falling back

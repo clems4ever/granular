@@ -3,8 +3,8 @@
 		{
 			"function_name": "NewRootCmd",
 			"documentation_hash": "a7e0c969dcf98016fb51b807576a6203f477365fe4606b6473a7c38f8bde66eb",
-			"definition_hash": "49b95be30010021eef1bf7cfe97ae15087a6ff1f0ec99e42442302d7641232dd",
-			"reviewed_at": "2026-06-17T15:18:49.731280561Z"
+			"definition_hash": "e32b799859e40b5a728eb108e355efe41b937cc193884987a96cf8a7b8e8abb9",
+			"reviewed_at": "2026-06-17T15:49:45.81669453Z"
 		},
 		{
 			"function_name": "load",
@@ -47,6 +47,13 @@
 			"documentation_hash": "3133f56620c53536ae54c1f3b8a18da406e33ba784e7ca579cda5b5b4fa35d5b",
 			"definition_hash": "b7e6698b6c92b751ec31cb35cd0aa2bee20325c96671815f5c9a061f15551442",
 			"reviewed_at": "2026-06-17T14:39:59.878533672Z"
+		},
+		{
+			"function_name": "grantsCmd",
+			"receiver": "app",
+			"documentation_hash": "7dac6430d337a19b712314428a118f64e3d00d2bf6b910c002e999105dbe9815",
+			"definition_hash": "cc377a89d83dc3c0ed64c28b95c785acd6cf631f2f9d5a5db4dea1a1eb8d6dc0",
+			"reviewed_at": "2026-06-17T15:49:45.816984375Z"
 		}
 	]
 }

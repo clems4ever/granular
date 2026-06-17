@@ -31,12 +31,6 @@
 			"reviewed_at": "2026-06-17T05:58:11.058616629Z"
 		},
 		{
-			"function_name": "TestActivityPageRendersGrants",
-			"documentation_hash": "415bec29a95bbf8cba81d2d1f468c41f2962e945978ae31d6a67b92b26c471b9",
-			"definition_hash": "12c19c347f5d0825d5ec08ef921af5d36bc1dfb656f7e02a946e5909c2dacdf6",
-			"reviewed_at": "2026-06-17T15:18:49.644107824Z"
-		},
-		{
 			"function_name": "TestApprovePageRendersFriendlyGrants",
 			"documentation_hash": "a32db47a6b11a6f69039406380afc4aafdaec605038a8f312556b11e07e3906e",
 			"definition_hash": "9fc62a47ae19bb21d18b3caf5f4b3abcaeec56df39e6084ca3b10e28feb7f221",
