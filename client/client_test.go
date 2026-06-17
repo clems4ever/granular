@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/clems4ever/granular/internal/proposal"
@@ -152,6 +153,26 @@ func TestRunNotAuthorized(t *testing.T) {
 	c := New(Config{Token: "tok", ResourceServers: []ResourceServer{{ID: "g1", BaseURL: g1.URL}}})
 	if _, err := c.Run(context.Background(), "g1", resourceserver.OperationRequest{Type: "x"}); !errors.Is(err, ErrNotAuthorized) {
 		t.Fatalf("want ErrNotAuthorized, got %v", err)
+	}
+}
+
+// TestRunSurfacesErrorBody checks an unexpected status surfaces the resource
+// server's {"error": ...} body (e.g. a failed authorization check) in the error.
+func TestRunSurfacesErrorBody(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("POST /api/operations", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusBadGateway)
+		_ = json.NewEncoder(w).Encode(map[string]any{"error": "authorization check failed: connection refused"})
+	})
+	ts := httptest.NewServer(mux)
+	t.Cleanup(ts.Close)
+	c := New(Config{Token: "tok", ResourceServers: []ResourceServer{{ID: "g1", BaseURL: ts.URL}}})
+	_, err := c.Run(context.Background(), "g1", resourceserver.OperationRequest{Type: "x"})
+	if err == nil {
+		t.Fatal("expected an error on 502")
+	}
+	if !strings.Contains(err.Error(), "authorization check failed: connection refused") {
+		t.Fatalf("error should surface the body, got %v", err)
 	}
 }
 

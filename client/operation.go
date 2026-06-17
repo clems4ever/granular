@@ -26,30 +26,40 @@ type Result struct {
 // @error ErrNoToken when no subject token is configured.
 // @error ErrUnknownResourceServer when the resource server id is not configured.
 // @error ErrNotAuthorized when the AS denies the operation.
-// @error error on transport failure or an unexpected resource server status.
+// @error error on transport failure or an unexpected resource server status; the resource server's error body (e.g. a failed authorization check) is included when present.
 //
 // @testcase TestRunExecutesWhenAuthorized returns the result on an allow.
 // @testcase TestRunNotAuthorized returns ErrNotAuthorized on a deny.
 // @testcase TestRunUnknownResourceServer errors on an unconfigured resource server.
+// @testcase TestRunSurfacesErrorBody includes the resource server's error message on an unexpected status.
 func (c *Client) Run(ctx context.Context, resourceServerID string, op resourceserver.OperationRequest) (Result, error) {
-	var res Result
 	if c.token == "" {
-		return res, ErrNoToken
+		return Result{}, ErrNoToken
 	}
 	base, err := c.resourceServerURL(resourceServerID)
 	if err != nil {
-		return res, err
+		return Result{}, err
+	}
+	// Decode the result and a possible error body together: an unexpected status
+	// (e.g. 502 when the resource server can't reach the AS) carries the reason in
+	// an {"error": ...} body the caller otherwise never sees.
+	var res struct {
+		Result
+		Error string `json:"error,omitempty"`
 	}
 	status, err := c.doJSON(ctx, http.MethodPost, base+"/api/operations", c.token, op, &res)
 	if err != nil {
-		return res, err
+		return Result{}, err
 	}
 	switch status {
 	case http.StatusOK:
-		return res, nil
+		return res.Result, nil
 	case http.StatusForbidden:
-		return res, ErrNotAuthorized
+		return Result{}, ErrNotAuthorized
 	default:
-		return res, fmt.Errorf("resource server %q operation: unexpected status %d", resourceServerID, status)
+		if res.Error != "" {
+			return Result{}, fmt.Errorf("resource server %q operation: status %d: %s", resourceServerID, status, res.Error)
+		}
+		return Result{}, fmt.Errorf("resource server %q operation: unexpected status %d", resourceServerID, status)
 	}
 }
