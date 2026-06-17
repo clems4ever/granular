@@ -1,30 +1,37 @@
 # Makefile for granular
 
 BIN_DIR := bin
-GRANULAR := $(BIN_DIR)/granular
-GRANULAR_SERVER := $(BIN_DIR)/granular-server
+
+# The four binaries that make up granular:
+#   granular-client          agent CLI (builds proposals, runs operations)
+#   granular-auth-server     authorization server (policy authority + consent UI)
+#   granular-github-gateway  GitHub gateway (holds the credential, executes ops)
+#   granular-policy          admin CLI for policy-token lifecycle
+CMDS := granular-client granular-auth-server granular-github-gateway granular-policy
+BINS := $(addprefix $(BIN_DIR)/,$(CMDS))
 
 GO ?= go
 
 .DEFAULT_GOAL := build
 
-.PHONY: all build run-server fmt vet test test-race check codespec tidy clean install help
+.PHONY: all build run-auth-server run-gateway fmt vet test test-race check codespec tidy clean install help
 
 ## all: tidy, check and build
 all: tidy check build
 
-## build: compile both binaries into ./bin
-build: $(GRANULAR) $(GRANULAR_SERVER)
+## build: compile all binaries into ./bin
+build: $(BINS)
 
-$(GRANULAR): $(shell find . -name '*.go' -not -name '*_test.go')
-	$(GO) build -o $(GRANULAR) ./cmd/granular
+$(BIN_DIR)/%: $(shell find . -name '*.go' -not -name '*_test.go')
+	$(GO) build -o $@ ./cmd/$*
 
-$(GRANULAR_SERVER): $(shell find . -name '*.go' -not -name '*_test.go')
-	$(GO) build -o $(GRANULAR_SERVER) ./cmd/granular-server
+## run-auth-server: build and run the authorization server (loads ./granular-auth.yaml)
+run-auth-server: $(BIN_DIR)/granular-auth-server
+	./$(BIN_DIR)/granular-auth-server
 
-## run-server: build and run granular-server (override vars, e.g. GRANULAR_GITHUB_TOKEN=...)
-run-server: $(GRANULAR_SERVER)
-	./$(GRANULAR_SERVER)
+## run-gateway: build and run the GitHub gateway (loads ./granular-github-gateway.yaml)
+run-gateway: $(BIN_DIR)/granular-github-gateway
+	./$(BIN_DIR)/granular-github-gateway
 
 ## fmt: format all Go sources
 fmt:
@@ -53,9 +60,9 @@ check: fmt vet codespec test
 tidy:
 	$(GO) mod tidy
 
-## install: install both binaries into GOBIN/GOPATH
+## install: install all binaries into GOBIN/GOPATH
 install:
-	$(GO) install ./cmd/granular ./cmd/granular-server
+	$(GO) install $(addprefix ./cmd/,$(CMDS))
 
 ## clean: remove build artifacts
 clean:

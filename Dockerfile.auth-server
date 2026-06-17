@@ -1,0 +1,14 @@
+# syntax=docker/dockerfile:1
+#
+# Built by GoReleaser: the cross-compiled granular-auth-server binary is provided
+# in the build context, so this image only layers it onto a minimal static base
+# (CA certs included for GitHub OAuth HTTPS). No in-container compilation, no RUN
+# steps — so the arm64 image builds without emulation.
+FROM gcr.io/distroless/static-debian12:nonroot
+# GoReleaser (dockers_v2) stages the per-platform binary under $TARGETPLATFORM.
+ARG TARGETPLATFORM
+COPY ${TARGETPLATFORM}/granular-auth-server /usr/local/bin/granular-auth-server
+# Listens on :9090; stores grants in a bbolt DB under the configured workspace.
+# Mount a writable volume and point the config's workspace/db at it to persist.
+EXPOSE 9090
+ENTRYPOINT ["granular-auth-server"]

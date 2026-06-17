@@ -1,0 +1,18 @@
+{
+	"functions": [
+		{
+			"function_name": "UnmarshalYAML",
+			"receiver": "Duration",
+			"documentation_hash": "d060cc34d3cbcb373caae4cc540c08429b52501f4feea98d4100d81d20ccb1ba",
+			"definition_hash": "fa4f0fb6774a78fad3348af1485f6f3851a2be4f43789c7dbaf62e3e5763bde0",
+			"reviewed_at": "2026-06-17T11:31:52.352251099Z"
+		},
+		{
+			"function_name": "Std",
+			"receiver": "Duration",
+			"documentation_hash": "4abe3958bccb7200f1784970d2266ae8559ed930c99ad8caf192a052b15b371f",
+			"definition_hash": "60807c7c486143c15b38500ed20d9fbf8ade1dc540d85dca07bf675d2d874fd5",
+			"reviewed_at": "2026-06-17T11:31:52.352509592Z"
+		}
+	]
+}

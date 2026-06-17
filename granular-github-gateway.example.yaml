@@ -1,5 +1,5 @@
 # granular gateway (Resource Server) configuration.
-# Copy to granular-gateway.yaml (the default path; override with --config) and edit.
+# Copy to granular-github-gateway.yaml (the default path; override with --config) and edit.
 # Every field is optional; omitted values fall back to the defaults shown here.
 #
 # The gateway owns the platform credential and the permission vocabulary. It serves

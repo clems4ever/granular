@@ -22,6 +22,7 @@ func TestLoadParsesYAML(t *testing.T) {
 	cfgPath := filepath.Join(dir, "as.yaml")
 	body := "addr: \":7000\"\n" +
 		"base_url: \"http://as.example\"\n" +
+		"request_ttl: \"30m\"\n" +
 		"admin_token_file: " + adminTok + "\n" +
 		"gateways:\n" +
 		"  - id: github-gateway\n" +
@@ -36,6 +37,9 @@ func TestLoadParsesYAML(t *testing.T) {
 	}
 	if cfg.Addr != ":7000" || cfg.BaseURL != "http://as.example" {
 		t.Fatalf("unexpected addr/base: %q %q", cfg.Addr, cfg.BaseURL)
+	}
+	if cfg.RequestTTL.Std() != 30*time.Minute {
+		t.Fatalf("request TTL = %s, want parsed 30m", cfg.RequestTTL.Std())
 	}
 	if got := cfg.GatewaySecrets()["github-gateway"]; got != "s3cret" {
 		t.Fatalf("gateway secret = %q, want trimmed s3cret", got)
@@ -105,5 +109,24 @@ func TestGatewaySecretsSkipsIncomplete(t *testing.T) {
 	got := cfg.GatewaySecrets()
 	if len(got) != 1 || got["a"] != "x" {
 		t.Fatalf("got %v, want only a", got)
+	}
+}
+
+// TestDurationUnmarshalInvalid checks an invalid duration string is rejected.
+func TestDurationUnmarshalInvalid(t *testing.T) {
+	dir := t.TempDir()
+	cfgPath := filepath.Join(dir, "as.yaml")
+	if err := os.WriteFile(cfgPath, []byte("cleanup_interval: \"not-a-duration\"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Load(cfgPath); err == nil {
+		t.Fatal("expected an error for an invalid duration")
+	}
+}
+
+// TestDurationStd checks Std returns the underlying time.Duration.
+func TestDurationStd(t *testing.T) {
+	if Duration(90*time.Second).Std() != 90*time.Second {
+		t.Fatal("Std should round-trip the duration")
 	}
 }

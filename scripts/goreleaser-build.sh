@@ -5,11 +5,12 @@
 # .github/workflows/ci.yml runs on a tag, letting you validate the build before
 # pushing one.
 #
-# By default it runs `goreleaser build` (compiles the granular and
-# granular-server binaries for every target into ./dist). Pass --release to run
-# the full `goreleaser release` instead, which also produces the archives,
-# checksums and Docker images (multi-arch images need a docker-container buildx
-# builder — see the hint printed below).
+# By default it runs `goreleaser build` (compiles the granular-client,
+# granular-auth-server, granular-github-gateway and granular-policy binaries for
+# every target into ./dist). Pass --release to run the full `goreleaser release`
+# instead, which also produces the archives, checksums and Docker images
+# (multi-arch images need a docker-container buildx builder — see the hint printed
+# below).
 #
 # Usage:
 #   scripts/goreleaser-build.sh                      # build all targets

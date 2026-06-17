@@ -1,327 +1,185 @@
 # Granular — design
 
-Granular grants **fine-grained, time-limited, human-approved** permissions to
-perform individual operations on third-party platforms (GitHub, Google
-Calendar, Google Drive, …). Rather than handing an automated agent a broad token,
-each concrete operation must be approved by a human, and the approval expires.
+Granular grants **fine-grained, time-limited, human-approved** permissions to act
+on third-party platforms (GitHub, and others later). Rather than handing an agent
+a broad token, every permission is frozen by the platform gateway into a
+grant request, approved by a human in a browser, and expires.
+
+The defining constraint is a **separation of authority**: the component that runs
+the consent screen and stores grants (the *authorization server*) is fully
+domain-agnostic — it never holds a platform credential and understands no
+permission vocabulary — while the component that holds the credential and knows
+what a permission *means* (the *gateway*) never decides approval and never stores
+grants.
 
 ## Components
 
-- **`granular` (CLI client)** — exposes one sub-command per granular operation.
-  It does **not** hold any platform credentials. It asks the server to perform an
-  operation; if the operation is not yet approved it shows the user an approval
-  URL and waits.
+- **`granular-client` (agent CLI)** — reads a gateway's permission schema, builds
+  grant requests, submits them to the AS for approval, and runs operations once
+  authorized. It holds no platform credential and no signing secret. Operations
+  and proposals are attached to a **policy token** (a bearer credential).
 
-- **`granular-server` (HTTP server)** — holds the platform credentials (for now a
-  GitHub PAT supplied through the `github_token_file` key of the YAML config file).
-  It decides whether an operation is allowed, mints **grant requests**,
-  serves a small approval web page, records **grants**, and executes the
-  operation when a live grant exists.
+- **`granular-github-gateway` (gateway / Resource Server)** — owns the GitHub
+  credential and the permission vocabulary. It serves the permission **schema**,
+  **signs** grant requests (see below), and **executes** operations — but only
+  after the AS confirms the operation is authorized. The GitHub specifics live in
+  `gateway-github`; the wire protocol and signing live in the generic `gateway`
+  SDK so a second platform is a new schema + executors, not a new server.
 
-The server is **stateless with respect to the client**: it never makes the client
-wait. Grant requests and grants are persisted to a **bbolt** database on disk,
-so a decision is made entirely **out-of-band** (in the browser) and survives a
-server restart. The CLI does **not** poll — it submits, and either gets the result
-(if already granted) or an approval URL to open, after which the user simply
-re-runs the command.
+- **`granular-auth-server` (authorization server, AS)** — the generic policy
+  authority. It registers gateway HMAC credentials, accepts signed grant-request
+  bundles (**proposals**) from clients, runs the human **consent screen**, stores
+  **grants**, and answers **allow/deny** at operation time. It holds no platform
+  credential, authors no policy, and renders the gateway's consent text verbatim.
 
-## Authorization (Cedar)
+- **`granular-policy` (admin CLI)** — mints, inspects, and destroys **policy
+  tokens** against the AS admin credential. Policy lifecycle is deliberately an
+  administrative concern, separate from the grant lifecycle the client drives.
 
-Authorization is decided by the [Cedar](https://www.cedarpolicy.com/) policy engine
-(`internal/authz`), not by exact-string key matching:
+## The signed-artifact model
 
-- Each **operation** declares its **requirements** — `(action, resource, context)`
-  checks that must all pass (e.g. `issue.view` on `GitHub::Issue::"owner/name#7"`;
-  a `--comments` view adds a second `comment.read` requirement). Resources, actions
-  (and their roll-up groups like `read`/`issues.read`) come from the single
-  `internal/catalog` manifest.
-- A **grant** is one or more **Cedar policies** stored with an expiry
-  (`internal/grants`, bbolt). An agent has two verbs:
-  - **Run now**: POST an `Operation` to `POST /api/operations`. The server loads the
-    active (non-expired) policies and asks the engine `AllowsAll(requirements)`. If
-    allowed → execute. If not → mint **minimal permits** (one per requirement, scoped
-    to the exact resource + content hash), create a pending grant request, and return
-    its approval URL; once the human approves, a re-run of the same operation executes.
-  - **Pre-approve for later**: POST a `GrantRequest` carrying `capabilities` to
-    `POST /api/grant-requests`. The capabilities are translated to broader Cedar
-    policies (e.g. `permit(action in [issues.read], resource in
-    GitHub::Repo::"owner/name")`). One approval then covers every concrete operation
-    the policy allows — `list` *and* `view`, across the repo — while writes outside
-    the grant still require their own approval. Nothing is executed.
+The pivotal idea: **the gateway, not the AS, produces the consent content**, and
+it freezes it at sign time. A signed grant request carries two index-aligned parts
+(`internal/proposal`):
 
-Both verbs converge on the same lifecycle: a pending grant request a human approves,
-whose proposed policies become time-limited grants.
+- a **Presentation** — the human-readable consent: a title, summary, and per-grant
+  detail (friendly action labels, a typed resource label, and any conditions). It
+  is what the approver reads.
+- the **Policies** — the machine-enforced [Cedar](https://www.cedarpolicy.com/)
+  rules that actually gate operations.
 
-Writes stay content-scoped under Cedar via a `context` condition
-(`when { context.body_hash == "…" }`) on the minimal permit, so re-running the same
-write reuses the grant but a different payload needs fresh approval.
+The gateway HMAC-signs both with the per-gateway secret it shares with the AS. The
+client cannot forge or alter either; the AS verifies the signature, stores the
+bytes, and **renders the Presentation verbatim** — it has no vocabulary with which
+to interpret, expand, or add to it. The consent screen also exposes the raw Cedar
+policies behind a disclosure, so a human can inspect exactly what is enforced.
 
-## Core concepts
+A client builds a request two ways, both producing the same signed artifact:
 
-- **Operation** — a concrete, parameterised action, e.g. `github.clone` with
-  params `{repo}`. Each operation knows how to (a) declare its **requirements**
-  (Cedar `action`/`resource`/`context` checks) and (b) execute itself server-side.
-
-- **Requirement** — one authorization check, e.g. `issue.view` on
-  `GitHub::Issue::"owner/name#7"`. See [Authorization (Cedar)](#authorization-cedar).
-
-- **Grant request** — a pending approval. It is created two ways: automatically,
-  when an `Operation` submitted to `/api/operations` is not yet authorized by the
-  active policies (scoped to that operation's minimal requirements); or explicitly,
-  when an agent submits a `GrantRequest` (capability bundle) to `/api/grant-requests`.
-  Either way it captures the proposed Cedar policies, a generated id, and a `pending`
-  status. The id is embedded in the approval URL `…/approve/{id}`.
-
-- **Grant** — one or more Cedar policies stored on approval, each with an expiry.
-  An operation is allowed iff the active (non-expired) policies authorize all of
-  its requirements.
+- **Freeform** — raw actions over a scoped resource (`sign --actions … --resource
+  … --match …`). Maximum flexibility.
+- **Template** — a gateway-authored, parameterized permission shape (`sign
+  --template … --bind …`), where parameters bind to scope or to a condition (or
+  are fixed). Better readability on the consent screen.
 
 ## Request flow
 
 ```
-CLI                         server                         human (browser)
- |   POST /api/operations      |                                |
- |---------------------------->|  Cedar: AllowsAll(reqs)?       |
- |                             |  - no -> persist request, 202  |
- |<----------------------------|  {status:pending, approval_url}|
- |  print approval_url, EXIT   |                                |
- |                             |          GET /approve/{id} --> | shows operation
- |                             |          POST /approve/{id} <--| picks expiry, approves
- |                             |  persist grant (bbolt)         |
- |   POST /api/operations      |   (user re-runs the command)   |
- |---------------------------->|  live grant -> 200 {clone_url} |
- |<----------------------------|  brokered git-proxy URL        |
- |   git clone <clone_url>     |                                |
- |---------------------------->|  /git/... : re-check grant,    |
- |   (clone runs LOCALLY,      |  inject PAT, proxy to github   |
- |    files land on the CLI)   |======> github.com              |
- |<============================|  streamed pack data            |
+client (agent)                gateway (GitHub)              AS + human (browser)
+  | GET /api/schema --------------> |                                |
+  |<------------ schema ----------- |                                |
+  | POST /api/grant-requests/sign-> | freeze Presentation + Policies |
+  |<-- signed (HMAC over both) ---- | sign with shared secret        |
+  | POST /api/proposals ----------------------------------------->   | verify sig,
+  |<----------- approval_url, expires_at ------------------------    | store pending
+  |   (print URL, exit)                                              |
+  |                                  GET  /proposal/{id} ----------> | login, render
+  |                                  POST /proposal/{id} <---------- | pick TTL, approve
+  |                                                                  | grant -> token
+  | POST /api/operations ---------> | POST /api/verify ------------> | authorized?
+  |                                  |<--------- allow/deny --------- |
+  |<----------- result ------------ | execute with credential        |
 ```
 
-The approval happens out-of-band; the CLI never blocks waiting for it. The clone
-itself runs **on the client** — the server is only a credential-injecting git
-proxy, so the working tree lands wherever the user pointed the CLI, and the PAT
-never leaves the server. Because the grant is persisted, **re-running the CLI
-command** after approval performs the clone.
+Approval happens **out-of-band**: the client submits and exits; it does not poll.
+Grants and proposals are persisted in a **bbolt** database, so decisions survive a
+restart, and re-running an operation after approval simply succeeds.
 
 ## HTTP API
 
-| Method | Path                  | Purpose                                                       |
-|--------|-----------------------|---------------------------------------------------------------|
-| POST   | `/api/operations`     | Submit an `Operation` to run now: `200` with result if granted, or `202` pending with an approval URL. |
-| POST   | `/api/grant-requests` | Submit a `GrantRequest` (capability bundle) to pre-approve: `202` pending. |
-| GET    | `/api/grant-requests/{id}` | Inspect a pending grant request's status.            |
-| GET    | `/api/grants`         | List active grants and the request history.                  |
-| POST   | `/api/grants/{id}/revoke` | Revoke a grant (by grant id) or a request's grants (by request id). |
-| GET    | `/approve/{id}`       | Human-facing approval page (HTML form).                       |
-| POST   | `/approve/{id}`       | Submit approval (decision + expiry) or rejection.             |
-| any    | `/git/{owner}/{repo}.git/...` | Authenticating git proxy. Re-checks the repo's grant, injects the PAT, forwards read (upload-pack, repo.clone grant) and write (receive-pack, repo.push grant) traffic to github.com. |
-| GET    | `/`                   | Landing page.                                               |
-| GET    | `/catalog`            | HTML capability catalog: resource hierarchy, verb lattice, CLI operations. |
-| GET    | `/api/catalog`        | JSON capability manifest (for the agent).                   |
-| GET    | `/auth/login`         | Start the GitHub OAuth login (when auth is enabled).        |
-| GET    | `/auth/callback`      | GitHub OAuth callback; sets the session on success.         |
-| GET    | `/auth/logout`        | Clear the session.                                          |
-| GET    | `/static/…`           | Embedded CSS/static assets.                                 |
+**Authorization server** (`auth_server/server`):
 
-### Web authentication
+| Method | Path                     | Purpose                                                        |
+|--------|--------------------------|----------------------------------------------------------------|
+| PUT    | `/api/policy`            | Mint a policy token. **Admin-gated.**                          |
+| GET    | `/api/policy/{token}`    | Inspect a token's grants. **Admin-gated.**                     |
+| DELETE | `/api/policy/{token}`    | Destroy a token and its grants. **Admin-gated.**              |
+| POST   | `/api/proposals`         | Submit a signed grant-request bundle; returns approval URL + expiry. |
+| POST   | `/api/verify`            | Gateway asks whether a policy token authorizes an operation.   |
+| GET    | `/proposal/{id}`         | Human consent page (renders the gateway Presentation verbatim). |
+| POST   | `/proposal/{id}`         | Approve (with a grant TTL) or reject.                          |
+| GET    | `/activity`              | Active grants + request history.                              |
+| GET    | `/auth/github/{login,callback,logout}` | GitHub OAuth login for the consent pages.        |
+| GET    | `/`, `/static/…`         | Landing page and embedded assets.                             |
 
-The **human-facing pages** (`/`, `/catalog`, `/grants`, `/approve/{id}` GET+POST,
-`/grants/{id}/revoke`) can be protected behind a "log in with GitHub" flow
-(`internal/server/auth.go`). It is the OAuth2 authorization-code flow — GitHub does
-not offer browser OIDC/id_tokens for user login — and admits only an **allowlist of
-GitHub usernames**. The session is kept in an HMAC-signed, HttpOnly cookie.
+**Gateway** (`gateway/server`):
 
-Protection is enabled when `auth.client_id` and `auth.client_secret_file` are set
-in the config file (register a GitHub OAuth App with the callback URL
-`<base_url>/auth/callback`). Secrets are referenced by file path, never stored
-inline; `config.Load` reads each `*_file` into its resolved field:
+| Method | Path                          | Purpose                                              |
+|--------|-------------------------------|------------------------------------------------------|
+| GET    | `/api/schema`                 | The permission schema (resources, actions, templates, operations). |
+| POST   | `/api/grant-requests/sign`    | Freeze a grant request into a signed (Presentation, Policies). |
+| POST   | `/api/operations`             | Run an operation: verify with the AS, then execute.  |
 
-| Config key | Purpose |
-|------------|---------|
-| `auth.client_id` | OAuth App client id (public, inline). |
-| `auth.client_secret_file` | Path to a file holding the OAuth App client secret; web auth is enabled once both this and `client_id` are set. |
-| `auth.allowed_users` | List of GitHub logins permitted to sign in. Empty ⇒ everyone is denied (fail closed). |
-| `auth.session_secret_file` | Optional path to a file holding the HMAC key for session cookies; a random one is generated per start if unset (sessions reset on restart). |
-| `github_token_file` | Path to a file holding the GitHub PAT used for `github.*` operations and the git proxy. |
+## Consent and authentication
 
-The **agent/CLI API** (`/api/*`) and the **git proxy** (`/git/...`) are deliberately
-*not* behind the browser login: the agent submits requests programmatically and git
-authenticates per-grant. When the OAuth keys are unset the pages stay open and the
-server logs a warning.
+The consent pages can be protected by a GitHub OAuth2 authorization-code login
+(`auth_server/server/auth.go`), enabled when `auth.client_id` and
+`auth.client_secret_file` are set (callback `<base_url>/auth/github/callback`).
+There is **no global allowlist**: each proposal names an **approver email**, and
+only the human whose verified GitHub email matches may decide it. The session is
+an HMAC-signed, HttpOnly cookie.
 
-`POST /api/operations` request body — an operation to run just-in-time:
+The gateway↔AS channel is authenticated by a **per-gateway HMAC secret**: the
+gateway sends its id in `X-Gateway-ID` and an HMAC over the body in
+`X-Gateway-Signature`; the AS verifies against the secret registered for that id
+and rejects an unknown or wrongly-signed gateway with `401`.
 
-```json
-{ "type": "github.clone", "params": { "repo": "github.com/owner/name" } }
-```
+## Policy tokens and admin
 
-`POST /api/grant-requests` request body — a capability bundle to pre-approve:
+A **policy token** is the bearer credential that grants attach to. Minting,
+inspecting, and destroying tokens is gated by the AS **admin token**
+(`admin_token_file`), which the `granular-policy` CLI presents. The gate is
+**fail-closed**: when no admin token is configured, policy administration is
+disabled (`503`); a wrong token is `401`. An administrator mints a token, hands it
+to a client (via the client's `token_file`), and the client then submits proposals
+and runs operations under it without any admin credential.
 
-```json
-{ "reason": "work on the repo", "capabilities": [ { "actions": ["issues.read"], "resource": { "type": "github.repo", "match": { "owner": "owner", "name": "name" } } } ] }
-```
+## Expiry
 
-Pending response (`202`):
+Two independent clocks, both enforced:
 
-```json
-{ "status": "pending", "request_id": "…", "approval_url": "http://host/approve/…" }
-```
+- **Grants** carry a TTL chosen by the approver; a background **janitor**
+  (`cleanup_interval`) purges expired grants.
+- **Proposals** (pending grant requests) carry a `request_ttl`: a request not
+  acted on within that window is automatically revoked and the agent must request
+  again. Expiry is enforced authoritatively at approve/reject time, reflected
+  lazily in the consent and activity views, and persisted by the janitor for
+  requests no one ever opened.
 
-Authorized response (`200`) — the result carries the brokered proxy URL the client
-clones from, not a server-side result:
+## Security properties
 
-```json
-{ "status": "completed", "result": { "clone_url": "http://host/git/owner/name.git", "repo": "owner/name" } }
-```
-
-## First operation: `github.clone`
-
-`granular github clone <repo> <dest> [--ref <ref>]` clones a GitHub repository
-**on the client**, with the server acting as a credential-injecting git proxy:
-
-1. The CLI calls `POST /api/operations` with the clone operation. With a live grant
-   the server returns a `clone_url` pointing at its own `/git/owner/name.git` proxy
-   endpoint.
-2. The CLI runs a local `git clone <clone_url> <dest>` (plus `--branch <ref>` when
-   `--ref` is given).
-3. git's smart-HTTP requests hit the server proxy, which re-checks the grant for
-   the repository, sets `Authorization` from the server-held PAT, and forwards to
-   `https://github.com`. Pack data streams back to the client's git process.
-
-The PAT never leaves the server and is never placed on a command line. The clone
-is repo-scoped (see below). Push (`git-receive-pack`) is refused by the proxy.
-
-## Second operation: `github.issue.list`
-
-`granular github issue list <repo> [--state open|closed|all] [--limit N]` lists a
-repository's issues. Unlike clone, this is **server-executed**: once a grant
-exists, the server calls the GitHub REST API (`GET /repos/{repo}/issues`) with the
-PAT and returns GitHub's response **verbatim** (every attribute, every item — note
-GitHub's issues endpoint also includes pull requests) under `result.issues`; the
-CLI text view shows a one-line summary, and `--json` emits the raw array. Nothing
-is proxied because the result is structured data, not a stream the client owns.
-
-The grant is scoped to the repository **and the requested state**
-(`github.issue.list:owner/name?state=open`), so approving "list open issues" does
-not authorise listing closed ones — a concrete example of the granular model.
-
-## Third operation: `github.issue.view`
-
-`granular github issue view <repo> <number> [--comments]` shows a single issue's
-details (`gh issue view`). Also server-executed: on a live grant the server calls
-`GET /repos/{repo}/issues/{number}` with the PAT and returns GitHub's issue object
-**verbatim**. The CLI text view renders a few fields; `--json` emits the full raw
-object. The grant is scoped to the **specific issue**
-(`github.issue.view:owner/name#7`), so approving one issue does not authorise
-viewing another.
-
-`--comments` makes the server additionally call
-`GET /repos/{repo}/issues/{number}/comments` and fold the raw comments array into
-the result under the synthetic `comments_list` key. It is a **separate
-requirement** (`comment.read`), authorized independently from `issue.view`, so
-reading an issue's discussion is approved separately from its metadata while the CLI
-surface still matches `gh issue view --comments`.
-
-## Write operations: `github.issue.comment` and `github.issue.create`
-
-`granular github issue comment <repo> <number> --body …` posts a comment
-(`gh issue comment`); `granular github issue create <repo> --title … [--body …]
-[--label …] [--assignee …]` opens an issue (`gh issue create`). Both are
-server-executed `POST`s and return GitHub's created object verbatim.
-
-Because they **mutate**, two things differ from the read operations:
-
-- **Content-scoped grants.** The requirement carries a `context` hash of the
-  submitted content (`body_hash`, `content_hash`, `change_hash`), and the minimal
-  permit conditions on it (`when { context.body_hash == "…" }`). So the approver
-  authorises *exactly* what gets written; changing the text requires a fresh
-  approval. The approval page shows the full body/title and the Cedar policies.
-- **Write scope required.** The server PAT (`github_token_file`) needs write
-  access to the repository, unlike the read-only list/view which work on public
-  repos even unauthenticated.
-
-The body can come from `--body` or `--body-file` (`-` reads stdin), mirroring `gh`.
-
-## Edit and status operations: `issue edit` / `close` / `reopen`
-
-Mirroring `gh issue edit` / `close` / `reopen`, but as **three separate operation
-types** so the grants are independent — a grant to change status cannot edit the
-issue's content, and vice-versa:
-
-- **`github.issue.edit`** — `PATCH` of fields (`--title`, `--body`,
-  `--add-label`/`--remove-label`, `--add-assignee`/`--remove-assignee`). Label and
-  assignee changes are add/remove sets, so `Execute` first `GET`s the issue to merge
-  against its current values. Content-scoped grant (hash of the requested changes).
-- **`github.issue.close`** — `PATCH {state: closed}` with an optional
-  `--reason` (`completed` / `not planned` → `state_reason`). Grant scoped to the
-  issue (and reason).
-- **`github.issue.reopen`** — `PATCH {state: open}`. Grant scoped to the issue.
-
-Status changes (`close`/`reopen`) deliberately do **not** accept a `--comment` or
-touch any field — posting a comment is its own `github.issue.comment` grant. This
-keeps "change status" a strictly separate, minimal permission from "edit content".
-
-### Raw pass-through
-
-Both issue operations decode GitHub's response into generic JSON (`[]any` /
-`map[string]any`) and return it unchanged, rather than projecting a curated subset.
-So `--json` matches what the GitHub API returns. The text renderers read GitHub's
-native field names (`user.login`, `html_url`, `labels[].name`). Trade-off: a
-delegated caller with `--json` sees every attribute GitHub returns — broaden the
-operation if you need to *narrow* what a grant exposes.
-
-## Two execution models
-
-The `Operation.Execute` contract is the same, but operations fall into two shapes:
-
-- **Server-executed** (e.g. `github.issue.list`): `Execute` does the work using the
-  PAT and returns the result, which the CLI renders.
-- **Client-fulfilled / brokered** (e.g. `github.clone`): `Execute` does no real
-  work; it returns a brokered URL (the git proxy) and the CLI performs the action
-  locally through it. Used when the client must own the output (a working tree) or
-  the protocol is a stream.
-
-## Decisions taken for this first iteration (and why)
-
-- **bbolt on-disk store** for approved Cedar policies and grant requests (two
-  buckets: `requests`, `policies`). This keeps the server stateless toward the
-  client and lets approvals happen out-of-band and survive restarts. Path via
-  the `db` config key (default `<workspace>/granular.db`).
-- **Cedar for authorization** (`internal/authz`), with `internal/catalog` as the
-  single source for resources, actions and the verb lattice — shared by the engine,
-  the `/catalog` page, and the `/api/catalog` manifest. Principal identity is a
-  fixed `GitHub::Agent::"agent"` for now (per-agent identity is future work).
-- **Server is a git proxy, not a git client.** The clone runs on the CLI (shelling
-  out to the user's `git`) so the working tree lands on the client; the server only
-  brokers credentials. This keeps the token server-side and avoids shipping repo
-  bytes back through the API.
-- **PAT via secret file** (`github_token_file`) — "on the server for now", per the
-  brief. Per-user / OAuth credential brokering is future work.
-- **CLI does not poll.** It prints the approval URL and exits; the user approves
-  out-of-band and re-runs the command. This keeps the server stateless and avoids
-  long-lived client connections.
-- **Clone grants are repo-scoped** (`github.clone:owner/name`). A `git clone`
-  negotiates all refs in one exchange, so per-ref enforcement at the proxy is not
-  meaningful; `--ref` only controls the client-side checkout. The destination path
-  is purely client-side and never reaches the server.
+- **The AS is domain-agnostic.** It holds no permission vocabulary, authors no
+  Cedar, and ships no catalog. It stores the gateway's signed (Presentation,
+  Policies) opaquely and renders the Presentation verbatim — it cannot add to or
+  reinterpret what the human approves.
+- **The AS holds no platform credential.** Credentials live only on the gateway.
+- **The client holds no signing secret.** Only the gateway and the AS share the
+  per-gateway HMAC secret; the client cannot forge a grant request.
+- **Secrets are never inline.** Every secret is referenced by a `*_file` path read
+  at load time (gateway HMAC secret, GitHub PAT, AS admin token, OAuth secrets).
+- **Approval is bound to identity.** A proposal is decided only by the human whose
+  verified GitHub email matches its named approver.
 
 ## Layout
 
 ```
-cmd/granular/          thin CLI entrypoint (main.go only)
-cmd/granular-server/   server entrypoint (registers operations)
-internal/cli/          CLI command tree (one file per command) + request.go (request/catalog)
-internal/api/          wire types shared by client & server (GrantRequest, Grant, …)
-internal/config/       YAML server configuration (loaded by granular-server)
-internal/catalog/      single-source capability manifest (resources, actions, lattice)
-internal/authz/        Cedar engine: requirements, policy generation, evaluation
-internal/operations/   Operation interface, registry
-internal/operations/github/  clone.go, api.go (REST helpers), issues.go (issue.list),
-                             issue_view.go, issue_comment.go, issue_create.go,
-                             issue_edit.go, issue_state.go (close/reopen)
-internal/grants/       delegation-request + Cedar-policy store (bbolt)
-internal/server/       HTTP handlers, approval UI, GitHub-OAuth login (auth.go), git proxy, /api/operations, /api/grant-requests, /grants, /catalog
-internal/server/web/   embedded templates (layout + pages) and stylesheet (//go:embed)
-internal/client/       HTTP client used by the CLI
+cmd/granular-client/          agent CLI entrypoint (main.go only)
+cmd/granular-auth-server/     AS entrypoint
+cmd/granular-github-gateway/  GitHub gateway entrypoint
+cmd/granular-policy/          policy admin CLI entrypoint
+clientcli/                    client command tree (catalog, template, op, sign, propose)
+client/                       client SDK: proposals, operations, policy admin
+gateway/                      generic gateway SDK: schema, sign, present, verify
+gateway/asclient/             gateway's client for the AS verify call
+gateway-github/               GitHub gateway: schema, templates, operation specs
+auth_server/config/           AS YAML configuration
+auth_server/server/           AS HTTP handlers, consent UI, GitHub-OAuth login, eval
+auth_server/server/web/       embedded consent/activity templates + stylesheet
+auth_server/store/            grants + proposals store (bbolt)
+internal/proposal/            the signed (Presentation, Policies) artifact
+internal/authz/               Cedar policy world + evaluation
+internal/verify/              grant-request verification helpers
+internal/catalog/             GitHub permission vocabulary (resources, actions)
+internal/operations/github/   GitHub operation implementations
+internal/api/                 shared wire types
 ```

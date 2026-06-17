@@ -1,235 +1,183 @@
 # granular
 
 Fine-grained, time-limited, **human-approved** permissions for operations on
-third-party platforms (GitHub, Google Calendar, Google Drive, …).
+third-party platforms (GitHub, and others later).
 
-Instead of handing an agent a broad token, every concrete operation must be
-approved by a human in a browser, and the approval **expires**. See
-[DESIGN.md](DESIGN.md) for the architecture.
+Instead of handing an agent a broad token, every permission is **frozen into a
+grant request by the platform gateway, approved by a human in a browser, and
+expires**. The authorization server that runs the consent screen is fully
+domain-agnostic: it never sees a platform credential and understands no
+permission vocabulary. See [DESIGN.md](DESIGN.md) for the architecture.
 
 ## Components
 
-- **`granular`** — the CLI client. One sub-command per granular operation. Holds
-  no credentials. For `github clone` it runs `git clone` **locally**, pointed at
-  the server's git proxy.
-- **`granular-server`** — the HTTP server. Holds the platform credentials, decides
-  whether an operation is allowed, serves the approval page, and acts as a
-  **credential-injecting git proxy** (it adds the PAT to git traffic but the clone
-  runs on the client). State (grant requests + grants) is persisted in a
-  bbolt file, so the server is stateless toward the client and approvals happen
-  out-of-band.
+granular is four binaries:
+
+- **`granular-client`** — the agent CLI. Reads a gateway's permission schema,
+  builds grant requests (freeform or from a template), submits them to the
+  authorization server for approval, and runs operations once they are
+  authorized. Holds **no** platform credential and **no** signing secret.
+- **`granular-github-gateway`** — the GitHub **gateway** (Resource Server). Owns
+  the GitHub credential and the permission vocabulary (resources, actions,
+  templates, operations). It **signs** each grant request — freezing the exact
+  human-readable consent text and the machine-enforced policy — and executes an
+  operation only after the AS confirms it is authorized. The gateway logic is the
+  generic `gateway` SDK; this binary wires the GitHub implementation into it.
+- **`granular-auth-server`** — the **authorization server** (AS): the generic
+  policy authority. It stores grants, runs the human consent screen (GitHub
+  login, gated on the approver's email), and answers allow/deny. It holds **no**
+  platform credential and renders the gateway-signed consent text **verbatim** —
+  it cannot interpret or add to it.
+- **`granular-policy`** — the admin CLI for the **policy token** lifecycle. An
+  administrator mints a token against the AS admin credential, hands it to a
+  client, and can later inspect or destroy it.
+
+## How it works
+
+```
+admin            client (agent)              gateway (GitHub)         AS + human
+  |  mint policy token ----------------------------------------------> |
+  |<------------------ token --------------------------------------- (PUT /api/policy)
+            | catalog / template (GET /api/schema) -----> |
+            | sign grant request -----------------------> | freeze consent text
+            |<----- signed (presentation + policy) ------ | + Cedar policy, HMAC-sign
+            | propose (POST /api/proposals) -------------------------> | store, render
+            |                                                          | consent VERBATIM
+            |                                          human approves ->| grant attached
+            | op (POST /api/operations) --> | verify (POST /api/verify)>| allow?
+            |<--------- result ------------ | execute with credential   |
+```
+
+1. **Mint a policy token** (admin): `granular-policy create`. The token is the
+   bearer credential the client attaches grant requests and operations to.
+2. **Explore** (client): `granular catalog` / `granular template` print what a
+   gateway can grant.
+3. **Sign** (client → gateway): the gateway freezes the request into a
+   *presentation* (the human-readable consent text) plus a *policy* (the
+   machine-enforced Cedar rule) and HMAC-signs them.
+4. **Propose** (client → AS): the signed request is packed into a proposal and
+   submitted; the AS returns an approval URL and the request **expires** if not
+   acted on.
+5. **Approve** (human): open the URL, log in with GitHub (only the human whose
+   verified email matches the named approver may decide), pick how long the grant
+   lasts, approve. The grant attaches to the policy token with a TTL.
+6. **Run** (client → gateway → AS): `granular op …` calls the gateway, which asks
+   the AS to verify the policy token authorizes it before executing with the
+   GitHub credential.
 
 ## Build
 
 ```sh
-go build -o bin/granular        ./cmd/granular
-go build -o bin/granular-server ./cmd/granular-server
+make build                 # builds all four binaries into ./bin
+# or individually:
+go build -o bin/granular-client         ./cmd/granular-client
+go build -o bin/granular-auth-server    ./cmd/granular-auth-server
+go build -o bin/granular-github-gateway ./cmd/granular-github-gateway
+go build -o bin/granular-policy         ./cmd/granular-policy
 ```
 
-## Run the server
+## Configure and run
 
-The server is configured by a YAML file. Copy the example and edit it:
+Each binary is configured by a YAML file (copy the matching `*.example.yaml`).
+**Secrets are never inline** — every `*_file` key names a path to a file holding
+the secret, read at load time.
 
 ```sh
-cp granular.example.yaml granular.yaml
-$EDITOR granular.yaml
-bin/granular-server                 # loads ./granular.yaml by default
-# or: bin/granular-server --config /etc/granular/config.yaml
+# 1. Authorization server (the policy authority + consent UI), listens on :9090
+cp granular-auth.example.yaml granular-auth.yaml && $EDITOR granular-auth.yaml
+bin/granular-auth-server                          # --config to override the path
+
+# 2. GitHub gateway (holds the PAT + vocabulary), listens on :8080
+cp granular-github-gateway.example.yaml granular-github-gateway.yaml && $EDITOR ...
+bin/granular-github-gateway
+
+# 3. Client
+cp granular-client.example.yaml granular-client.yaml && $EDITOR granular-client.yaml
 ```
 
-```yaml
-# granular.yaml
-addr: ":8080"
-base_url: "http://localhost:8080"   # used to build approval links + OAuth callback
-workspace: "/var/lib/granular"      # holds the bbolt database
-cleanup_interval: "2m"
+The gateway and the AS share a **per-gateway HMAC secret** (`secret_file` on each
+side, under the same `gateway_id`); the gateway signs grant requests with it and
+the AS verifies them. The AS's policy-administration endpoints are gated by an
+**admin token** (`admin_token_file`); when unset, policy administration is
+disabled (fail closed). The consent pages can require a **GitHub login**
+(`auth.client_id` + `auth.client_secret_file`); each proposal names its approver
+and only that verified email may decide it.
 
-# Secrets are not stored inline — point at a file that holds each one (e.g. a
-# Docker/Kubernetes secret mount). The PAT is used for github.* operations + git proxy.
-github_token_file: "/run/secrets/granular_github_token"
-
-# Optional: protect the web pages behind a "log in with GitHub" flow. Register a
-# GitHub OAuth App with callback URL <base_url>/auth/callback.
-auth:
-  client_id: "Iv1_xxx"                                  # public, so inline
-  client_secret_file: "/run/secrets/granular_oauth_secret"
-  allowed_users: [clems4ever, alice]                    # GitHub logins allowed to sign in
-  session_secret_file: ""                               # random per restart if empty
-```
-
-Every field is optional and falls back to a default (see `granular.example.yaml`);
-if no config file is found the server starts with built-in defaults. **Secrets live
-in separate files** named by the `*_file` keys, never in the config itself. When
-`auth.client_id` and `auth.client_secret_file` are set, the human pages (approval,
-grants, catalog, landing) require a GitHub login and admit only `auth.allowed_users`;
-the CLI API and git proxy are unaffected. When they are unset, the pages stay open
-and the server logs a warning.
-
-## Use the CLI
+## Use the client
 
 ```sh
-# First attempt: not yet approved -> prints an approval URL and exits.
-bin/granular github clone clems4ever/granular ./granular
-#  Approval required. Open this URL to approve or deny:
-#    http://localhost:8080/approve/<id>
-#  Once approved, re-run the same command to perform the operation.
+# Mint a policy token (admin, against the AS admin token) and give it to the client.
+bin/granular-policy create --admin-token-file admin.token
+#   -> prints a policy token; put its path in granular-client.yaml's token_file
 
-# Open the URL, pick an expiration, click Approve. Then re-run:
-bin/granular github clone clems4ever/granular ./granular
-#  Authorized. Cloning clems4ever/granular into ./granular via the granular proxy...
-#  Cloning into './granular'...
-#  Clone completed.
+# Explore what the gateway can grant.
+bin/granular catalog
+bin/granular template                          # list templates
+bin/granular template read-repo                # what a template grants
+
+# Build a grant request and have the gateway sign it — from a template …
+bin/granular sign --gateway github-gateway \
+  --template read-repo --bind repo=clems4ever/granular --out req.json
+
+# … or freeform from raw actions + a scoped resource.
+bin/granular sign --gateway github-gateway \
+  --reason "work on granular" \
+  --actions repo.read,issues.read \
+  --resource github.repo --match owner=clems4ever,name=granular --out req.json
+
+# Submit signed requests as one proposal for approval.
+bin/granular propose req.json --approver you@example.com
+#   -> prints an approval URL; open it, log in, pick a duration, approve.
+
+# Once approved, run operations under the policy token.
+bin/granular op github-gateway repo.clone -p repo=clems4ever/granular
 ```
 
-The clone runs locally (`./granular` is created on your machine); the server only
-proxies the git traffic and injects the PAT. `--server` points the CLI at a
-non-default server URL. `github clone` accepts `--ref <branch-or-tag>` to control
-the checked-out branch. The grant is **repo-scoped** and lasts for the expiration
-chosen at approval time. Requires `git` on the client's PATH.
+Observe active grants and the request history in the AS web UI at `/activity`.
 
-### List issues
-
-```sh
-bin/granular github issue list octocat/Hello-World            # open issues (default)
-bin/granular github issue list octocat/Hello-World --state closed --limit 50
-#  Approval required. Open this URL ...   (first time, then re-run after approving)
-#  #9822  open   🚨 New article published 😫  (rididbxeuebb)
-#  ...
-```
-
-Listing is **server-executed**: once approved, the server calls the GitHub API
-with the PAT and returns GitHub's response verbatim (every attribute; the GitHub
-issues endpoint also includes pull requests). The grant is scoped to the
-repository **and** the `--state`, so approving "open" issues does not also
-authorise "closed" ones.
-
-### View an issue
-
-```sh
-bin/granular github issue view octocat/Hello-World 1
-#  Approval required. Open this URL ...   (first time, then re-run after approving)
-#  #1  Edited README via GitHub
-#  State:    closed
-#  Author:   unoju
-#  ...
-```
-
-Also server-executed. The grant is scoped to the **specific issue**
-(`github.issue.view:owner/name#1`), so approving one issue does not authorise
-viewing another.
-
-Add `--comments` (like `gh issue view --comments`) to also fetch the issue's
-comments:
-
-```sh
-bin/granular github issue view octocat/Hello-World 1 --comments
-bin/granular github issue view octocat/Hello-World 1 --comments --json | jq '.comments_list[].body'
-```
-
-`--comments` is approved as a **separate grant** (`…#1+comments`), so reading the
-discussion is a distinct permission from viewing the issue's metadata. The raw
-comments array is returned under the `comments_list` key.
-
-### Comment on an issue
-
-```sh
-bin/granular github issue comment octocat/Hello-World 1 --body "Thanks, on it"
-bin/granular github issue comment octocat/Hello-World 1 --body-file note.md   # "-" for stdin
-```
-
-### Create an issue
-
-```sh
-bin/granular github issue create octocat/Hello-World \
-  --title "Something is broken" --body "Steps to reproduce…" \
-  --label bug --label p1 --assignee octocat
-```
-
-### Edit fields / change status
-
-```sh
-bin/granular github issue edit octocat/Hello-World 1 --title "New title" --add-label bug
-bin/granular github issue close octocat/Hello-World 1 --reason "not planned"
-bin/granular github issue reopen octocat/Hello-World 1
-```
-
-`edit`, `close`, and `reopen` are **three separate operations/grants** — approving
-a status change (`close`/`reopen`) does **not** authorise editing the issue's
-fields, and vice-versa. `edit` supports `--title`, `--body`/`--body-file`,
-`--add-label`/`--remove-label`, and `--add-assignee`/`--remove-assignee` (label and
-assignee changes are merged against the issue's current values).
-
-`comment`, `create`, `edit`, `close` and `reopen` are **writes**:
-
-- Grants for content-creating writes (`comment`, `create`, `edit`) are
-  **content-scoped** — the approval covers exactly the text/changes you submitted,
-  so changing them requires a new approval. `close`/`reopen` grants are scoped to
-  the issue. Either way the approval page shows what will happen.
-- The server PAT (`GRANULAR_GITHUB_TOKEN`) must have **write** access to the repo.
-
-### JSON output
-
-The issue commands accept `--json` to emit GitHub's **raw** result (every
-attribute, unmodified) instead of formatted text, for piping into tools like `jq`
-(for `comment`/`create` this is the created object):
-
-```sh
-bin/granular github issue list octocat/Hello-World --json | jq '.[].title'
-bin/granular github issue view octocat/Hello-World 1 --json | jq '{number,title,state}'
-```
-
-`--json` is a persistent flag on `github issue`, so every issue sub-command (now
-and future) inherits it. It is not offered on `clone`, whose output is git's.
-
-## Pre-approving a scoped set of permissions
-
-Instead of approving one operation at a time, request a **bundle** up front.
-Authorization is decided by [Cedar](https://www.cedarpolicy.com/) policies, so a
-single broad grant covers every concrete operation it allows.
-
-```sh
-bin/granular catalog          # see resources, actions, verb groups, and the request schema
-
-cat > req.json <<'JSON'
-{ "reason": "work on granular",
-  "capabilities": [
-    { "actions": ["repo.clone", "issues.read", "comment.read", "pulls.read"],
-      "resource": { "type": "github.repo", "match": {"owner": "clems4ever", "name": "granular"} } }
-  ] }
-JSON
-bin/granular request -f req.json     # prints an approval URL; approve once
-```
-
-After approving, `github issue list`, `github issue view` (incl. `--comments`),
-clone, etc. all work under that one grant — no per-operation prompts. A write or a
-repo outside the bundle still triggers its own approval. `match` `name: "*"` widens a
-capability to every repo under the owner.
-
-The vocabulary in `catalog` (resource types, actions, verb groups like `issues.read`)
-is exactly what an agent reads to build a `request`.
-
-## Command tree
+## Command trees
 
 ```
-granular
-├── catalog                       # print the capability manifest (vocabulary + request schema)
-├── request -f req.json           # pre-approve a custom scoped capability bundle
-└── github
-    ├── clone <repo> <dest> [--ref]
-    └── issue
-        ├── list <repo> [--state] [--limit]
-        ├── view <repo> <number> [--comments]
-        ├── comment <repo> <number> --body|--body-file
-        ├── create <repo> --title [--body] [--label] [--assignee]
-        ├── edit <repo> <number> [--title] [--body] [--add-label] [--remove-label] [--add-assignee] [--remove-assignee]
-        ├── close <repo> <number> [--reason]
-        └── reopen <repo> <number>
+granular (granular-client)
+├── catalog [gateway-id ...] [--json]      # print a gateway's permission schema
+├── template [name] [--gateway]            # list templates, or detail one
+├── op <gateway-id> <type> [-p k=v ...]    # run an operation (executes when authorized)
+├── sign --gateway <id> [--out f]          # freeze a grant request via the gateway
+│     ├── --template <name> --bind k=v     #   from a template
+│     └── --reason --actions --resource --match   # or freeform
+└── propose <signed-file ...> --approver <email>   # submit a proposal for approval
+
+granular-policy                            # admin: --admin-token[-file]
+├── create                                 # mint a policy token
+├── show <policy-token>                    # inspect a token's grants
+└── destroy <policy-token>                 # revoke a token and its grants
 ```
 
-## Adding an operation
+## Adding a gateway or operation
 
-1. Implement `operations.Operation` (and a matching `operations.Factory`) in a new
-   package under `internal/operations/`.
-2. Register it in `cmd/granular-server` with `registry.Register(type, factory)`.
-3. Add a CLI sub-command in `cmd/granular` that builds an `api.Operation` and
-   submits it with `client.SubmitOperation` (which wraps it in a `GrantRequest`).
+- **A new platform gateway** implements the `gateway.Schema` (resources, actions,
+  templates, operations) and the operation executors, then wires them into the
+  generic `gateway` SDK in a new `cmd/granular-<platform>-gateway`. See
+  `gateway-github/` for the GitHub reference implementation.
+- **A new GitHub operation** implements `operations.Operation` under
+  `internal/operations/github/`, is registered in the gateway's schema, and is
+  invoked with `granular op github-gateway <type>`.
+
+## Repository layout
+
+```
+cmd/                       the four binary entrypoints (main.go + tests only)
+clientcli/                 client CLI command tree (catalog, template, op, sign, propose)
+client/                    client SDK (proposals, operations, policy admin)
+gateway/                   generic gateway SDK (schema, sign, present, verify, asclient)
+gateway-github/            GitHub gateway implementation (schema, templates, operations)
+auth_server/               authorization server: config, store (bbolt), HTTP + consent UI
+internal/proposal/         the signed (presentation + policy) artifact shared on the wire
+internal/authz/            Cedar policy world + evaluation
+internal/verify/           grant-request verification helpers
+internal/catalog/          GitHub permission vocabulary (resources, actions)
+internal/operations/       Operation interface + GitHub operation implementations
+internal/api/              shared wire types
+```
+
+See [DESIGN.md](DESIGN.md) for the full architecture, HTTP API, and security model.

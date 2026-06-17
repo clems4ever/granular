@@ -3,8 +3,8 @@
 		{
 			"function_name": "TestLoadParsesYAML",
 			"documentation_hash": "7a1b580edf30801e35db627171cb2106ebb42f0f6383b3e8e558067fc233ecbf",
-			"definition_hash": "e84d6dd49bcc10152ff4f35f84fe858c28f80127456086e0e6ee3854d533bb9d",
-			"reviewed_at": "2026-06-17T07:17:58.171646205Z"
+			"definition_hash": "f9829abec164db21ecdd4fa534d3ec6e72f3574188d8bd4c4741de26355f8336",
+			"reviewed_at": "2026-06-17T11:31:52.35316427Z"
 		},
 		{
 			"function_name": "TestLoadAppliesDefaults",
@@ -35,6 +35,18 @@
 			"documentation_hash": "69f31c59effff6199b990e03ff0877e8e9314a33541aa505d5b3c08a5d11eb64",
 			"definition_hash": "f5c720debb9a06414002cb39e0f320b5e8c72ba5e92e4c2c82adb273165d6a62",
 			"reviewed_at": "2026-06-17T05:58:11.065512203Z"
+		},
+		{
+			"function_name": "TestDurationUnmarshalInvalid",
+			"documentation_hash": "79e056b9231e454b0d72f3bdb9d8fa5481138423b4254747fc978053faaaeb24",
+			"definition_hash": "162e5e6e3b8ae5d5036eac37fa7bb3554ea83b226c8dbdac789f7cc673c42071",
+			"reviewed_at": "2026-06-17T11:31:52.354065334Z"
+		},
+		{
+			"function_name": "TestDurationStd",
+			"documentation_hash": "dacd32810b79e31cb30a32b5c157bfc66ff74b8af31eadb2c61d198a0b678937",
+			"definition_hash": "4867fc533f19c3ab696d4822bef84f323c6d52fcaef747a6a63f1bb9af8090ec",
+			"reviewed_at": "2026-06-17T11:31:52.354835226Z"
 		}
 	]
 }

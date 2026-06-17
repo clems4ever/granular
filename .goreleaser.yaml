@@ -1,6 +1,8 @@
-# GoReleaser configuration: builds two independent artifacts — the granular CLI
-# and the granular server — each archived on its own so a release ships one
-# bundle per binary (per OS/arch). See https://goreleaser.com.
+# GoReleaser configuration. granular ships as four independent binaries — the
+# client CLI, the authorization server, the GitHub gateway, and the policy admin
+# CLI — each archived on its own so a release ships one bundle per binary (per
+# OS/arch). The three deployable services/clients also get Docker images.
+# See https://goreleaser.com.
 version: 2
 
 before:
@@ -8,36 +10,52 @@ before:
     - go mod tidy
 
 builds:
-  - id: granular
-    main: ./cmd/granular
-    binary: granular
+  - id: granular-client
+    main: ./cmd/granular-client
+    binary: granular-client
     env:
       - CGO_ENABLED=0
-    goos:
-      - linux
-      - darwin
-      - windows
-    goarch:
-      - amd64
-      - arm64
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
     ldflags:
       - -s -w
       - -X main.version={{ .Version }}
       - -X main.commit={{ .Commit }}
       - -X main.date={{ .Date }}
 
-  - id: granular-server
-    main: ./cmd/granular-server
-    binary: granular-server
+  - id: granular-auth-server
+    main: ./cmd/granular-auth-server
+    binary: granular-auth-server
     env:
       - CGO_ENABLED=0
-    goos:
-      - linux
-      - darwin
-      - windows
-    goarch:
-      - amd64
-      - arm64
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    ldflags:
+      - -s -w
+      - -X main.version={{ .Version }}
+      - -X main.commit={{ .Commit }}
+      - -X main.date={{ .Date }}
+
+  - id: granular-github-gateway
+    main: ./cmd/granular-github-gateway
+    binary: granular-github-gateway
+    env:
+      - CGO_ENABLED=0
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    ldflags:
+      - -s -w
+      - -X main.version={{ .Version }}
+      - -X main.commit={{ .Commit }}
+      - -X main.date={{ .Date }}
+
+  - id: granular-policy
+    main: ./cmd/granular-policy
+    binary: granular-policy
+    env:
+      - CGO_ENABLED=0
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
     ldflags:
       - -s -w
       - -X main.version={{ .Version }}
@@ -45,67 +63,77 @@ builds:
       - -X main.date={{ .Date }}
 
 archives:
-  - id: granular
-    ids:
-      - granular
-    name_template: "granular_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-    formats:
-      - tar.gz
+  - id: granular-client
+    ids: [granular-client]
+    name_template: "granular-client_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    formats: [tar.gz]
     format_overrides:
       - goos: windows
-        formats:
-          - zip
-    files:
-      - LICENSE*
-      - README*
+        formats: [zip]
+    files: [LICENSE*, README*]
 
-  - id: granular-server
-    ids:
-      - granular-server
-    name_template: "granular-server_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-    formats:
-      - tar.gz
+  - id: granular-auth-server
+    ids: [granular-auth-server]
+    name_template: "granular-auth-server_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    formats: [tar.gz]
     format_overrides:
       - goos: windows
-        formats:
-          - zip
-    files:
-      - LICENSE*
-      - README*
+        formats: [zip]
+    files: [LICENSE*, README*]
+
+  - id: granular-github-gateway
+    ids: [granular-github-gateway]
+    name_template: "granular-github-gateway_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    files: [LICENSE*, README*]
+
+  - id: granular-policy
+    ids: [granular-policy]
+    name_template: "granular-policy_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    files: [LICENSE*, README*]
 
 # Docker images reuse the binaries built above (one per OS/arch) — they are not
 # recompiled. dockers_v2 builds each image for both platforms and pushes a
 # multi-arch manifest automatically.
 dockers_v2:
-  - id: granular
-    ids:
-      - granular
-    dockerfile: Dockerfile.cli
+  - id: granular-client
+    ids: [granular-client]
+    dockerfile: Dockerfile.client
     images:
-      - ghcr.io/clems4ever/granular
-    platforms:
-      - linux/amd64
-      - linux/arm64
-    tags:
-      - "{{ .Version }}"
-      - latest
+      - ghcr.io/clems4ever/granular-client
+    platforms: [linux/amd64, linux/arm64]
+    tags: ["{{ .Version }}", latest]
     labels:
       org.opencontainers.image.source: https://github.com/clems4ever/granular
       org.opencontainers.image.version: "{{ .Version }}"
       org.opencontainers.image.revision: "{{ .FullCommit }}"
 
-  - id: granular-server
-    ids:
-      - granular-server
-    dockerfile: Dockerfile.server
+  - id: granular-auth-server
+    ids: [granular-auth-server]
+    dockerfile: Dockerfile.auth-server
     images:
-      - ghcr.io/clems4ever/granular-server
-    platforms:
-      - linux/amd64
-      - linux/arm64
-    tags:
-      - "{{ .Version }}"
-      - latest
+      - ghcr.io/clems4ever/granular-auth-server
+    platforms: [linux/amd64, linux/arm64]
+    tags: ["{{ .Version }}", latest]
+    labels:
+      org.opencontainers.image.source: https://github.com/clems4ever/granular
+      org.opencontainers.image.version: "{{ .Version }}"
+      org.opencontainers.image.revision: "{{ .FullCommit }}"
+
+  - id: granular-github-gateway
+    ids: [granular-github-gateway]
+    dockerfile: Dockerfile.gateway
+    images:
+      - ghcr.io/clems4ever/granular-github-gateway
+    platforms: [linux/amd64, linux/arm64]
+    tags: ["{{ .Version }}", latest]
     labels:
       org.opencontainers.image.source: https://github.com/clems4ever/granular
       org.opencontainers.image.version: "{{ .Version }}"

@@ -1,0 +1,11 @@
+# syntax=docker/dockerfile:1
+#
+# Built by GoReleaser: the cross-compiled granular-client binary is provided in
+# the build context. The client talks to the gateway and AS over HTTP only (no
+# local git), so it sits on a minimal static base with CA certs. No in-container
+# compilation, no RUN steps — so the arm64 image builds without emulation.
+FROM gcr.io/distroless/static-debian12:nonroot
+# GoReleaser (dockers_v2) stages the per-platform binary under $TARGETPLATFORM.
+ARG TARGETPLATFORM
+COPY ${TARGETPLATFORM}/granular-client /usr/local/bin/granular-client
+ENTRYPOINT ["granular-client"]

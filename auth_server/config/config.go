@@ -13,7 +13,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/clems4ever/granular/internal/config"
 	"gopkg.in/yaml.v3"
 )
 
@@ -27,11 +26,11 @@ type Config struct {
 	BaseURL         string          `yaml:"base_url"`
 	Workspace       string          `yaml:"workspace"`
 	DBPath          string          `yaml:"db"`
-	CleanupInterval config.Duration `yaml:"cleanup_interval"`
+	CleanupInterval Duration `yaml:"cleanup_interval"`
 
 	// RequestTTL is how long a submitted grant request (proposal) may stay pending
 	// before it is automatically revoked and a new request is needed.
-	RequestTTL config.Duration `yaml:"request_ttl"`
+	RequestTTL Duration `yaml:"request_ttl"`
 
 	// Gateways registers the Resource-Gateways permitted to talk to the AS. Each
 	// gateway authenticates its grant-request and verify calls with the shared
@@ -201,9 +200,9 @@ func (c *Config) applyDefaults() {
 		c.DBPath = filepath.Join(c.Workspace, "granular-auth.db")
 	}
 	if c.CleanupInterval == 0 {
-		c.CleanupInterval = config.Duration(30 * time.Second)
+		c.CleanupInterval = Duration(30 * time.Second)
 	}
 	if c.RequestTTL == 0 {
-		c.RequestTTL = config.Duration(15 * time.Minute)
+		c.RequestTTL = Duration(15 * time.Minute)
 	}
 }
