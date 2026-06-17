@@ -1,7 +1,8 @@
-# GoReleaser configuration. granular ships as four independent binaries — the
-# client CLI, the authorization server, the GitHub resource server, and the subject admin
-# CLI — each archived on its own so a release ships one bundle per binary (per
-# OS/arch). The three deployable services/clients also get Docker images.
+# GoReleaser configuration. granular ships as five independent binaries — the
+# client CLI, the authorization server, the GitHub resource server, the subject admin
+# CLI, and the GitHub resource-server CLI — each archived on its own so a release
+# ships one bundle per binary (per OS/arch). The three deployable services/clients
+# also get Docker images.
 # See https://goreleaser.com.
 version: 2
 
@@ -62,6 +63,19 @@ builds:
       - -X main.commit={{ .Commit }}
       - -X main.date={{ .Date }}
 
+  - id: granular-github
+    main: ./cmd/granular-github
+    binary: granular-github
+    env:
+      - CGO_ENABLED=0
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    ldflags:
+      - -s -w
+      - -X main.version={{ .Version }}
+      - -X main.commit={{ .Commit }}
+      - -X main.date={{ .Date }}
+
 archives:
   - id: granular-client
     ids: [granular-client]
@@ -93,6 +107,15 @@ archives:
   - id: granular-subject
     ids: [granular-subject]
     name_template: "granular-subject_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    files: [LICENSE*, README*]
+
+  - id: granular-github
+    ids: [granular-github]
+    name_template: "granular-github_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     formats: [tar.gz]
     format_overrides:
       - goos: windows
