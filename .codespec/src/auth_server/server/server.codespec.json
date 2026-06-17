@@ -59,8 +59,8 @@
 			"function_name": "handleIndex",
 			"receiver": "Server",
 			"documentation_hash": "1ed0e10784bf31823fe8dc89d0711ac30047dd8dd7bdfddcf0665a1c71302161",
-			"definition_hash": "bc822b6868feb74ba400bdcedad816f8f9149a64c51a571e0f9e67f79cc784f0",
-			"reviewed_at": "2026-06-17T15:49:45.814280941Z"
+			"definition_hash": "9f6adc04d4071a7e1cc4909e57bcbec2483b185f0f32e7b3caf6dbff32b50769",
+			"reviewed_at": "2026-06-17T15:57:58.587985807Z"
 		},
 		{
 			"function_name": "writeJSON",

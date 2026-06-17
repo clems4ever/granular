@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="granular">
+  <defs>
+    <linearGradient id="g-tile" x1="4" y1="2" x2="28" y2="30" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6d6af6"/>
+      <stop offset="1" stop-color="#9333ea"/>
+    </linearGradient>
+    <linearGradient id="g-sheen" x1="16" y1="1.5" x2="16" y2="19" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".28"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <!-- rounded gradient tile with a soft top sheen -->
+  <rect x="1.5" y="1.5" width="29" height="29" rx="8.5" fill="url(#g-tile)"/>
+  <rect x="1.5" y="1.5" width="29" height="29" rx="8.5" fill="url(#g-sheen)"/>
+  <!-- shield + approval check, centred in the tile (group spans y 7.6–24.4, centre 16) -->
+  <g transform="translate(0 1.7)">
+    <path d="M16 5.9l6.7 2.5v4.9c0 4.95-3.1 7.98-6.7 9.4-3.6-1.42-6.7-4.45-6.7-9.4V8.4z" fill="#ffffff" fill-opacity=".16"/>
+    <path d="M16 5.9l6.7 2.5v4.9c0 4.95-3.1 7.98-6.7 9.4-3.6-1.42-6.7-4.45-6.7-9.4V8.4z" fill="none" stroke="#ffffff" stroke-width="1.9" stroke-linejoin="round"/>
+    <path d="M12.6 13.9l2.55 2.55 4.4-4.8" fill="none" stroke="#ffffff" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

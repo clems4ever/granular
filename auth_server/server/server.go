@@ -570,8 +570,10 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 		activityLink = `<p><a class="btn" href="/activity">Your approvals &amp; history →</a></p>`
 	}
 	_, _ = io.WriteString(w, `<!doctype html><meta charset="utf-8"><title>granular · authorization server</title>`+
+		`<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">`+
 		`<link rel="stylesheet" href="/static/style.css">`+
 		`<main class="container narrow"><div class="card">`+
+		`<img src="/static/favicon.svg" width="46" height="46" alt="" style="display:block;margin-bottom:.7rem;filter:drop-shadow(0 5px 12px rgba(99,102,241,.4))">`+
 		`<p class="eyebrow">Authorization server</p>`+
 		`<h1>granular</h1>`+
 		`<p class="lead">The generic policy authority. Clients submit resource server-signed grant requests here `+

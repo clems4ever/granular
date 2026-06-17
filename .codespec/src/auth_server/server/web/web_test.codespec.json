@@ -17,6 +17,12 @@
 			"documentation_hash": "502dee7dd0fe3ac6c36d0f01fae2f41013eb0d5af05221d03f6b126aa58d2e77",
 			"definition_hash": "8e974066a5465d291d379791677876a683f26af171df1aa4726375ba5d190147",
 			"reviewed_at": "2026-06-17T10:21:32.671886928Z"
+		},
+		{
+			"function_name": "TestStaticServesFavicon",
+			"documentation_hash": "fff3f02a2a36dfab40ca2063aa4efa73774b179b82ef2db8200a12c780d4858a",
+			"definition_hash": "b1b083779a063a91162babff367a34055dcd3340734fb86e6e0949c585032174",
+			"reviewed_at": "2026-06-17T15:57:58.588292779Z"
 		}
 	]
 }

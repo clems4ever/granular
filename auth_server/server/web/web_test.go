@@ -52,3 +52,21 @@ func TestStaticServesCSS(t *testing.T) {
 		t.Fatal("empty stylesheet")
 	}
 }
+
+// TestStaticServesFavicon serves the embedded SVG favicon/logo through the static handler.
+func TestStaticServesFavicon(t *testing.T) {
+	ts := httptest.NewServer(Static())
+	defer ts.Close()
+	resp, err := http.Get(ts.URL + "/static/favicon.svg")
+	if err != nil {
+		t.Fatalf("get favicon: %v", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status = %d, want 200", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	if !strings.Contains(string(body), "<svg") {
+		t.Fatalf("favicon is not an SVG: %q", string(body))
+	}
+}

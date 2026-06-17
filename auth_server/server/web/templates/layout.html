@@ -4,12 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{block "title" .Page}}granular · authorization server{{end}}</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
   <header class="topbar">
     <div class="topbar-inner">
-      <a class="brand" href="/"><span class="brand-mark"></span> granular <span class="muted" style="font-weight:500">· authorization</span></a>
+      <a class="brand" href="/"><img class="brand-logo" src="/static/favicon.svg" width="24" height="24" alt=""> granular <span class="muted" style="font-weight:500">· authorization</span></a>
       <nav class="nav">
         {{if .Nav.AuthEnabled}}
         {{if .Nav.User}}<span class="nav-user" title="Signed in">{{.Nav.User}}</span>{{end}}
