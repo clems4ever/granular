@@ -100,9 +100,10 @@ restart, and re-running an operation after approval simply succeeds.
 | GET    | `/api/activity`          | Full cross-subject grant inventory + history. **Admin-gated.**  |
 | GET    | `/proposal/{id}`         | Human consent page (renders the resource server Presentation verbatim). |
 | POST   | `/proposal/{id}`         | Approve (with a grant TTL) or reject.                          |
-| GET    | `/activity`              | The signed-in approver's OWN request/decision history (login required). |
 | GET    | `/auth/github/{login,callback,logout}` | GitHub OAuth login for the consent pages.        |
-| GET    | `/`, `/static/…`         | Landing page and embedded assets.                             |
+| GET    | `/`                      | The single main page: a signed-in approver's own request/decision history, else a landing. |
+| GET    | `/openapi.yaml`, `/docs` | The OpenAPI spec and its Redoc-rendered API reference. |
+| GET    | `/static/…`              | Embedded assets.                                              |
 
 **resource server** (`resourceserver/server`):
 

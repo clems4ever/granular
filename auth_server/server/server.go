@@ -25,6 +25,7 @@ import (
 	"github.com/clems4ever/granular/auth_server/server/web"
 	"github.com/clems4ever/granular/auth_server/store"
 	"github.com/clems4ever/granular/internal/proposal"
+	"github.com/clems4ever/granular/internal/redoc"
 	"github.com/clems4ever/granular/internal/verify"
 )
 
@@ -167,6 +168,7 @@ func (s *Server) Handler() http.Handler {
 
 	mux.Handle("GET /static/", web.Static())
 	mux.HandleFunc("GET /openapi.yaml", s.handleOpenAPI)
+	redoc.Register(mux, "granular authorization server API", "/openapi.yaml")
 
 	// GitHub OAuth login endpoints (public, only registered when enabled).
 	if s.auth != nil && s.auth.Enabled() {

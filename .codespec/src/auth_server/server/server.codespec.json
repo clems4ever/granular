@@ -17,8 +17,8 @@
 			"function_name": "Handler",
 			"receiver": "Server",
 			"documentation_hash": "e4b02e73163179adebe24952b4c53b8e12572f93e4e80c270e803c18dc358c33",
-			"definition_hash": "7b4ec028a6b9fdd189bd0d5d34facdb06639945cc199f45e79018a0d61d6a90b",
-			"reviewed_at": "2026-06-17T17:52:09.881256775Z"
+			"definition_hash": "d18206d2f96ae0187fe6a6104c5a390fe74430ae844685586ba96f568ea870c3",
+			"reviewed_at": "2026-06-17T19:06:15.618223955Z"
 		},
 		{
 			"function_name": "handleProposal",
