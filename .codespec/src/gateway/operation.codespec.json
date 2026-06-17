@@ -19,6 +19,13 @@
 			"documentation_hash": "e3f808312327cb1f1362dbf74e864a946fb6174ea48874d1f3802e0db52485d4",
 			"definition_hash": "9ccef4e5c6494f917ac4b43acc223d750f1c74a0d4065fcaa17a05528b5c9fc6",
 			"reviewed_at": "2026-06-17T06:20:52.558684519Z"
+		},
+		{
+			"function_name": "Types",
+			"receiver": "Registry",
+			"documentation_hash": "e91009c4ffb7dd8a2e27cd7e38915e11079c13c057faac56242679f4cfeb350a",
+			"definition_hash": "fa25271250f1780446ffc236f5715e6224463619fd2d2135399240cb0e364ec8",
+			"reviewed_at": "2026-06-17T08:25:01.682744287Z"
 		}
 	]
 }

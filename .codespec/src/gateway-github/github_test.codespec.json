@@ -17,6 +17,18 @@
 			"documentation_hash": "74e1580d9f8008967e5f248cb2e3ca97a1c0cc8f2939f27e9814bb17b1575397",
 			"definition_hash": "4e5a39abd346a496cecc22a25070fa7ba2b6f9f7dc87e009b453f42b67c0d009",
 			"reviewed_at": "2026-06-17T06:22:23.456865393Z"
+		},
+		{
+			"function_name": "TestOperationSpecsCoverRegistry",
+			"documentation_hash": "8c1faedbce8f0b55258afb7694402120df9a9bd43456ac7e7ad76085ad93f8f2",
+			"definition_hash": "ba311c0f85fd75a5c9d72ac62475cfff18f8a7a8a0ef6e5d5821db536929a53d",
+			"reviewed_at": "2026-06-17T08:24:23.642401596Z"
+		},
+		{
+			"function_name": "TestTemplatesExpand",
+			"documentation_hash": "ad52258a8c4bf864ee9463014daa765b94746bd2dc60d3652cd33c258b7d8a57",
+			"definition_hash": "6ec825321374eb8775c63cf93c2af28697f8e107fac956567be7390d493ab79b",
+			"reviewed_at": "2026-06-17T09:31:24.374787119Z"
 		}
 	]
 }

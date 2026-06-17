@@ -31,10 +31,11 @@ import (
 // base URL used to build review links. An optional authenticator guards the human
 // consent pages behind a GitHub login.
 type Server struct {
-	store    *store.Store
-	baseURL  string
-	gateways map[string]string // gateway id -> shared HMAC secret
-	auth     *Authenticator
+	store      *store.Store
+	baseURL    string
+	gateways   map[string]string // gateway id -> shared HMAC secret
+	adminToken string            // bearer gating the policy-administration endpoints
+	auth       *Authenticator
 }
 
 // proposalInput is the body a client posts to POST /api/proposals: the email of the
@@ -89,6 +90,17 @@ func (s *Server) UseAuth(auth *Authenticator) {
 	s.auth = auth
 }
 
+// UseAdminToken sets the bearer token that gates the policy-administration endpoints
+// (PUT/GET/DELETE /api/policy). When it is empty those endpoints are disabled (they
+// fail closed), so an administrator must configure one to manage policies.
+//
+// @arg token The admin bearer token; empty disables policy administration.
+//
+// @testcase TestPolicyAdminRequiresAdminToken rejects calls without the admin token.
+func (s *Server) UseAdminToken(token string) {
+	s.adminToken = token
+}
+
 // Handler builds the HTTP routing for the AS.
 //
 // @return http.Handler A mux routing the policy/proposal/verify API and consent UI.
@@ -97,10 +109,12 @@ func (s *Server) UseAuth(auth *Authenticator) {
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 
-	// Policy resource: a token represents a policy.
+	// Policy resource: a token represents a policy. These are administrative endpoints
+	// gated by the admin token; the policy itself is identified by the path for
+	// inspection and destruction.
 	mux.HandleFunc("PUT /api/policy", s.handleCreatePolicy)
-	mux.HandleFunc("GET /api/policy", s.handleGetPolicy)
-	mux.HandleFunc("DELETE /api/policy", s.handleDestroyPolicy)
+	mux.HandleFunc("GET /api/policy/{token}", s.handleGetPolicy)
+	mux.HandleFunc("DELETE /api/policy/{token}", s.handleDestroyPolicy)
 
 	// Client submits a proposal (Bearer token); gateway verifies an operation.
 	mux.HandleFunc("POST /api/proposals", s.handleProposal)
@@ -122,14 +136,19 @@ func (s *Server) Handler() http.Handler {
 	return mux
 }
 
-// handleCreatePolicy handles PUT /api/policy: it mints a new policy and returns its
-// token. The holder presents the token as a bearer credential thereafter.
+// handleCreatePolicy handles PUT /api/policy: an administrator (authenticated by the
+// admin token) mints a new policy and receives its token, which it hands to a client to
+// present as a bearer credential thereafter.
 //
 // @arg w The response writer.
-// @arg r The incoming request.
+// @arg r The incoming request carrying the admin bearer token.
 //
 // @testcase TestProposalApproveFlow creates a policy token.
+// @testcase TestPolicyAdminRequiresAdminToken rejects creation without the admin token.
 func (s *Server) handleCreatePolicy(w http.ResponseWriter, r *http.Request) {
+	if !s.requireAdmin(w, r) {
+		return
+	}
 	token, err := s.store.CreatePolicy()
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, policyOutput{Error: err.Error()})
@@ -138,16 +157,21 @@ func (s *Server) handleCreatePolicy(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusCreated, policyOutput{Token: token})
 }
 
-// handleGetPolicy handles GET /api/policy: it returns the active grants attached to
-// the bearer token, so the holder (or its gateway) can inspect the policy.
+// handleGetPolicy handles GET /api/policy/{token}: an administrator inspects the active
+// grants attached to the policy named in the path.
 //
 // @arg w The response writer.
-// @arg r The request carrying the bearer token.
+// @arg r The request carrying the admin bearer token and the policy token in the path.
 //
 // @testcase TestGetPolicyReturnsGrants returns the attached grants after approval.
+// @testcase TestPolicyRejectsUnknownToken returns 404 for an unknown policy token.
 func (s *Server) handleGetPolicy(w http.ResponseWriter, r *http.Request) {
-	token, ok := s.bearerPolicy(w, r)
-	if !ok {
+	if !s.requireAdmin(w, r) {
+		return
+	}
+	token := r.PathValue("token")
+	if !s.store.PolicyExists(token) {
+		writeJSON(w, http.StatusNotFound, policyOutput{Error: "unknown policy token"})
 		return
 	}
 	grants, err := s.store.PolicyForToken(token)
@@ -166,24 +190,46 @@ func (s *Server) handleGetPolicy(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, out)
 }
 
-// handleDestroyPolicy handles DELETE /api/policy: it destroys the bearer token's
-// policy and all grants attached to it.
+// handleDestroyPolicy handles DELETE /api/policy/{token}: an administrator destroys the
+// policy named in the path and all grants attached to it.
 //
 // @arg w The response writer.
-// @arg r The request carrying the bearer token.
+// @arg r The request carrying the admin bearer token and the policy token in the path.
 //
 // @testcase TestDestroyPolicyEndpoint destroys a policy via the endpoint.
 func (s *Server) handleDestroyPolicy(w http.ResponseWriter, r *http.Request) {
-	token, ok := s.bearerPolicy(w, r)
-	if !ok {
+	if !s.requireAdmin(w, r) {
 		return
 	}
-	n, err := s.store.DestroyPolicy(token)
+	n, err := s.store.DestroyPolicy(r.PathValue("token"))
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, policyOutput{Error: err.Error()})
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]int{"destroyed": n})
+}
+
+// requireAdmin authenticates a policy-administration request against the configured
+// admin token. It fails closed: when no admin token is configured the endpoints are
+// disabled (503), and a missing or wrong token is rejected (401). The comparison is
+// constant-time.
+//
+// @arg w The response writer (used to write the error on failure).
+// @arg r The incoming request carrying the admin bearer token.
+// @return bool True when the request presents the configured admin token.
+//
+// @testcase TestPolicyAdminRequiresAdminToken rejects missing, wrong, and unconfigured tokens.
+func (s *Server) requireAdmin(w http.ResponseWriter, r *http.Request) bool {
+	if s.adminToken == "" {
+		writeJSON(w, http.StatusServiceUnavailable, policyOutput{Error: "policy administration is disabled (no admin token configured)"})
+		return false
+	}
+	got := strings.TrimSpace(strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer "))
+	if got == "" || !hmac.Equal([]byte(got), []byte(s.adminToken)) {
+		writeJSON(w, http.StatusUnauthorized, policyOutput{Error: "invalid admin token"})
+		return false
+	}
+	return true
 }
 
 // handleProposal handles POST /api/proposals: a client (authenticated by its policy

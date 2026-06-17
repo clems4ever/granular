@@ -27,17 +27,16 @@
       <p class="hint">This grant is tied to this exact text — changing it later requires a new approval.</p>
       {{end}}
 
-      {{if .Permissions}}
+      {{if .Grants}}
       <p class="block-label" style="margin-top:.9rem">This grants the agent permission to</p>
       <ul class="grant-list">
-        {{range .Permissions}}<li><span class="grant-title">{{.}}</span></li>{{end}}
-      </ul>
-      {{end}}
-
-      {{if .Scopes}}
-      <p class="block-label" style="margin-top:.9rem">Limited to</p>
-      <ul class="scope-list">
-        {{range .Scopes}}<li><code>{{.}}</code></li>{{end}}
+        {{range .Grants}}
+        <li>
+          <span class="grant-title">{{range $i, $a := .Actions}}{{if $i}}, {{end}}{{$a}}{{end}}</span>
+          {{if .Resource}}<span class="muted">on</span> <code>{{.Resource}}</code>{{end}}
+          {{if .Conditions}}<div class="hint">when {{range $i, $c := .Conditions}}{{if $i}} · {{end}}{{$c}}{{end}}</div>{{end}}
+        </li>
+        {{end}}
       </ul>
       {{end}}
 

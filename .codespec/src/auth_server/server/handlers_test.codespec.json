@@ -15,14 +15,14 @@
 		{
 			"function_name": "TestGetPolicyReturnsGrants",
 			"documentation_hash": "80bcc6bae39a1cca94f18dfb5d95de196b1f58648e87205a376d37cd8a7769dd",
-			"definition_hash": "09779c642e0b9b473209bfd80289f649f5587d1140a0750f7e3ce869bfb216b2",
-			"reviewed_at": "2026-06-17T05:58:11.057058784Z"
+			"definition_hash": "c8ba616b5c28db5bfb3d5a2013eee2b63d13910ac4f1bab7a00b43b50c943cae",
+			"reviewed_at": "2026-06-17T07:17:59.537274495Z"
 		},
 		{
 			"function_name": "TestDestroyPolicyEndpoint",
-			"documentation_hash": "415da846a556298ad6de9a6cb984c238d8b0393b4a3246f9c25e278eac2f3f8d",
-			"definition_hash": "895cb5e96a580ecf1f33a4c57c5b52e8bb7c7410abe47bcb5306dd401f7de137",
-			"reviewed_at": "2026-06-17T05:58:11.057431816Z"
+			"documentation_hash": "4c27af1eda7eebcde03b05e09c148131e51f26866a7b14195ecf2fb38cebe27a",
+			"definition_hash": "4c036eb77e9ca7991a0d1b3210a414d0a707f3f91d517b8e24585404000cd451",
+			"reviewed_at": "2026-06-17T07:17:59.537748353Z"
 		},
 		{
 			"function_name": "TestProposalRequiresApproverEmail",
@@ -41,6 +41,12 @@
 			"documentation_hash": "e6a445986c3a533011798dfb19b65f21b7af70a6fec7ee9bae2203c6f723db0e",
 			"definition_hash": "eb82e83774a6e3a12cf678a5f0f1b1d4ded2a28674986f1c1cb9a7106ed8a850",
 			"reviewed_at": "2026-06-17T05:58:11.058616629Z"
+		},
+		{
+			"function_name": "TestPolicyAdminRequiresAdminToken",
+			"documentation_hash": "fab9251846edb0e9838d0399d003d20ee5ad8c04e9a7cf6cf6d9e797fc4ac361",
+			"definition_hash": "a56648404bd489650793ae510a2ea41cf35d23e2545f37a322b313452437c221",
+			"reviewed_at": "2026-06-17T07:17:59.53816061Z"
 		}
 	]
 }

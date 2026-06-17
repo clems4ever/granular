@@ -6,58 +6,30 @@ import (
 	"github.com/clems4ever/granular/internal/proposal"
 )
 
-// buildPresentation authors the human-readable description for a capability bundle,
-// resolving action names to their schema titles and descriptions and rendering each
-// resource scope with the schema's ScopeFunc. The gateway — not the client — produces
-// this text, so the consent screen shows trustworthy descriptions the client cannot
-// have crafted.
+// buildPresentation authors the human-readable description for a capability bundle: one
+// GrantDetail per capability (its actions and its resolved resource scope), index-aligned
+// with the policies. The gateway — not the client — produces this, so the consent screen
+// shows trustworthy descriptions the client cannot have crafted.
 //
-// @arg s The schema supplying action titles/descriptions and the scope labeler.
+// @arg s The schema supplying the scope labeler.
 // @arg reason The client's stated reason, used as the summary when present.
 // @arg caps The requested capabilities.
 // @return proposal.Presentation The presentation the AS displays verbatim.
 //
-// @testcase TestPresentation resolves action titles and renders scope labels.
+// @testcase TestPresentation renders one grant detail per capability with its scope.
 func buildPresentation(s Schema, reason string, caps []Capability) proposal.Presentation {
-	title := map[string]string{}
-	desc := map[string]string{}
-	for _, a := range s.Actions {
-		title[a.Name], desc[a.Name] = a.Title, a.Description
-	}
-	for _, g := range s.Groups {
-		title[g.Name], desc[g.Name] = g.Title, g.Description
-	}
-
-	seen := map[string]bool{}
-	var permissions, scopes []string
+	grants := make([]proposal.GrantDetail, 0, len(caps))
 	for _, c := range caps {
-		for _, act := range c.Actions {
-			if seen[act] {
-				continue
-			}
-			seen[act] = true
-			label := title[act]
-			if label == "" {
-				label = act
-			}
-			if d := desc[act]; d != "" {
-				label += " — " + d
-			}
-			permissions = append(permissions, label)
-		}
-		scopes = append(scopes, scopeLabel(s, c.Resource))
+		grants = append(grants, proposal.GrantDetail{
+			Actions:  c.Actions,
+			Resource: scopeLabel(s, c.Resource),
+		})
 	}
-
-	summary := fmt.Sprintf("Grant %d permission(s) across %d scope(s).", len(permissions), len(scopes))
+	summary := fmt.Sprintf("Grant %d permission set(s).", len(grants))
 	if reason != "" {
 		summary = reason
 	}
-	return proposal.Presentation{
-		Title:       "Access request",
-		Summary:     summary,
-		Permissions: permissions,
-		Scopes:      scopes,
-	}
+	return proposal.Presentation{Title: "Access request", Summary: summary, Grants: grants}
 }
 
 // scopeLabel renders a resource selector in plain language using the schema's ScopeFunc,

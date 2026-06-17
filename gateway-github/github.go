@@ -49,6 +49,8 @@ func Schema() gateway.Schema {
 	for _, a := range cat.Actions {
 		s.Actions = append(s.Actions, gateway.Action{Name: a.Name, Title: a.Title, Resource: a.Resource, Groups: a.Groups, Description: a.Description})
 	}
+	s.Operations = operationSpecs()
+	s.Templates = templates()
 	return s
 }
 

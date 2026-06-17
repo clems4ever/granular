@@ -9,61 +9,54 @@
 		{
 			"function_name": "newRootCmd",
 			"documentation_hash": "ae0019d472133d2251fd44a526246165b2400142d02c17bb75ec1d2438089fc9",
-			"definition_hash": "3532fd0d46839e2b8228268c39a6e827c1b3238ef6b55e8379a30f496a925ee9",
-			"reviewed_at": "2026-06-17T06:58:20.746938544Z"
+			"definition_hash": "7cd79278ccf2f29a3c419236d40796dfec3dde667caf650e9021e8c0beef63bf",
+			"reviewed_at": "2026-06-17T07:18:34.667184638Z"
 		},
 		{
 			"function_name": "client",
 			"receiver": "admin",
-			"documentation_hash": "b8fd2819493c16087861a552b22632ed64f876a79294d679c5e3e2ef2519b225",
-			"definition_hash": "445c9e138c0546d49d7abf934e295341ff5e207ab379ffcbfe1daa40d6e0c1ac",
-			"reviewed_at": "2026-06-17T06:58:20.747471111Z"
+			"documentation_hash": "3cb5b0482f2079f770868d9092515d297fc35d04260cd9d1691ccaa96636db70",
+			"definition_hash": "f530420994bf3f785a1f7538e11ed8f96b10f0bf975ac6845d0ec32dea60ede8",
+			"reviewed_at": "2026-06-17T07:18:34.668441429Z"
 		},
 		{
 			"function_name": "createCmd",
 			"receiver": "admin",
 			"documentation_hash": "e0d5435521ae8f3cfb7e966860abc0530693c79bdf91a7afde6260ea1429d455",
-			"definition_hash": "176edfe3c0b33f059789ab20d36f5344c8daf41f6a737447e97d8ffae3ae9817",
-			"reviewed_at": "2026-06-17T06:58:20.747990361Z"
+			"definition_hash": "0cb2611f4c2bdfdf752c1d57c8a77a4bed71ba5efabf7123ab44cbb9183fdb2a",
+			"reviewed_at": "2026-06-17T07:18:34.670367778Z"
 		},
 		{
 			"function_name": "showCmd",
 			"receiver": "admin",
-			"documentation_hash": "e6b851c17f3f6f9150a2c353315be091f16f56255f9d3f48c659334c43808192",
-			"definition_hash": "329c68ba6bec711bd9bfebd51e10a1210adab4cfe89582782dbcfd0e5c881b21",
-			"reviewed_at": "2026-06-17T06:58:20.748515739Z"
+			"documentation_hash": "8244830ebfbbf720c4565f6bafb9636f8220debccd87223f6af37c496f7a0980",
+			"definition_hash": "50c7a1a4ee5ddf2c06a154e964984b0b71eaf99d52d743350ac7fa4d21c275ac",
+			"reviewed_at": "2026-06-17T07:18:34.671312284Z"
 		},
 		{
 			"function_name": "destroyCmd",
 			"receiver": "admin",
-			"documentation_hash": "ab2e40be72a0d8cf93f88fb5f982bc87ed8e3af508477929fe4ed5a777ec5bef",
-			"definition_hash": "f3ac97417f48d19f712b2b9292d304485fda2709cee7fd19ce78a59dac4ea7fc",
-			"reviewed_at": "2026-06-17T06:58:20.749157626Z"
-		},
-		{
-			"function_name": "run",
-			"receiver": "admin",
-			"documentation_hash": "0b56e7b2e5471651911f56aabd20e93035863a207008734a72560665b6345480",
-			"definition_hash": "bf8453d88fafc4bf88e009a289230f9fa2b1d3d25e24e41f02076b5a33768ed6",
-			"reviewed_at": "2026-06-17T06:58:20.749748302Z"
+			"documentation_hash": "0db53885e5b6a5a6232bec11fa2689822c397060b751c468ec16e54a979fcafa",
+			"definition_hash": "1992ea1712a8fa7f93431522a094564cdaa65da7ddc364817c29efdd7e871983",
+			"reviewed_at": "2026-06-17T07:18:34.672277899Z"
 		},
 		{
 			"function_name": "runCreate",
-			"documentation_hash": "ec4a382c93d1d753a7d24f5f0f88d73970d668d9a38eeb30e017c6a8c43d313b",
+			"documentation_hash": "d92865d3fc8fe44fcf47bc9f7861f09386eb4a7b073b406a4ae9abe6c2e3b4ea",
 			"definition_hash": "2164a0cd927a8e9306bc04de6cfcecc201e784109bc19f0f7902ee70774d58fe",
-			"reviewed_at": "2026-06-17T06:58:20.750491576Z"
+			"reviewed_at": "2026-06-17T07:18:34.673263009Z"
 		},
 		{
 			"function_name": "runShow",
-			"documentation_hash": "c526f6de0f6dd1171f4d84cf80ab636a8ae7b7e52ac3333a8e474d7fe2d2324f",
-			"definition_hash": "fb517f48f7de9673d92665c14db79fe9de74e0658fcb91d2dd32ced7f1405fdd",
-			"reviewed_at": "2026-06-17T06:58:20.751430426Z"
+			"documentation_hash": "c67333e9fba0540b02ca918632f7ab874fd402661f6d25b3da4d4809a0ad74a7",
+			"definition_hash": "2d3461ac885bc34e9f7e1319620fc9a63bc70003b2aa6697fc6f981b99bf0345",
+			"reviewed_at": "2026-06-17T07:18:34.67421458Z"
 		},
 		{
 			"function_name": "runDestroy",
-			"documentation_hash": "b35801efa0611695f851edf6f5a2d2d235f8ba5bb53d392f014851789bcdafa6",
-			"definition_hash": "0fc6180f9c70a619abd6946789f8446226c8049ff2031b5dafe80dc9b63173d4",
-			"reviewed_at": "2026-06-17T06:58:20.752327825Z"
+			"documentation_hash": "b4181041abbc062c33e53d701c7d65bae203eb3d0c1743835830250ae1f275da",
+			"definition_hash": "7eda6e96aac07f53ebbe0d899fd1f40f90de3c0b8198d49f0675656a0ca8d0f7",
+			"reviewed_at": "2026-06-17T07:18:34.675114662Z"
 		}
 	]
 }

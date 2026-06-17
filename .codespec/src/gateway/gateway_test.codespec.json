@@ -3,8 +3,8 @@
 		{
 			"function_name": "testSchema",
 			"documentation_hash": "4b432be5c204f1d7cc123eae8c5fc6e7d67c4737eb23a2a3b64a9c5bf058014e",
-			"definition_hash": "b13a60a5e68b72d020214ad07d631ede01bfe8f9cad5ffd4308afa03bcd7e42a",
-			"reviewed_at": "2026-06-17T06:20:49.527229105Z"
+			"definition_hash": "5af895740367bac66b6b68c5d1419857509de04012560b7ee11ce3ac242e15d5",
+			"reviewed_at": "2026-06-17T09:31:47.043045583Z"
 		},
 		{
 			"function_name": "repoRef",
@@ -67,8 +67,8 @@
 		{
 			"function_name": "TestRegistry",
 			"documentation_hash": "a985628eed292c7e8fe68f3e6ccfb3a48d1451bf7ad8577c94aa71a70a935012",
-			"definition_hash": "a7cfed05316f4c365b19fa05a8d514b5e8b08cdd9f224b1d6bde5f5f1202b968",
-			"reviewed_at": "2026-06-17T06:20:50.080190083Z"
+			"definition_hash": "3ee519c1f4dca5321fb50e4d043835cd991a3e729ad58c30fb2270312cb22d01",
+			"reviewed_at": "2026-06-17T08:24:47.800769601Z"
 		},
 		{
 			"function_name": "TestPoliciesFromCapabilities",
@@ -84,9 +84,9 @@
 		},
 		{
 			"function_name": "TestPresentation",
-			"documentation_hash": "fe115bd9bee5b37e7846b513930d9bdc1763fc504ff3b6e0d36a050d169951e3",
-			"definition_hash": "52e7d7879cca5d54d72b0964f119dbd3f4e06d0c377608e609234ec0b7480505",
-			"reviewed_at": "2026-06-17T06:20:50.085718523Z"
+			"documentation_hash": "5fbae5fbfa464aea9bd1f0666a2454876068cc9f93bb98e8f77e9747f07e5352",
+			"definition_hash": "7e5461262f5a05962d1b26fa2bae2b6358fcb57c4d46558a45db7eb634907321",
+			"reviewed_at": "2026-06-17T09:31:47.043809966Z"
 		},
 		{
 			"function_name": "TestSchemaServed",
@@ -117,6 +117,36 @@
 			"documentation_hash": "f1fba6bbf4750e9deae6360893eec4b0bd94e37718915006db4bfbd9ee35d1e4",
 			"definition_hash": "cdcd3bf5d848dfb4b96cc4fe4681af26c2d8a99337ef2ea092a147cc34117e2c",
 			"reviewed_at": "2026-06-17T06:20:50.094711977Z"
+		},
+		{
+			"function_name": "TestExpandTemplate",
+			"documentation_hash": "76afb04d7a0a370b706a39312ed1123958de5496d96cc9c3d3935a7b965ffd63",
+			"definition_hash": "11d9aedff2f5e41489b560de231733703aaa49dd487df7363c5e78b435a8b43d",
+			"reviewed_at": "2026-06-17T09:31:47.044498478Z"
+		},
+		{
+			"function_name": "TestExpandTemplateRequiredParam",
+			"documentation_hash": "caf92d8acde0a48ea103606a9c28c0a03130cb3375d0c17d7909c1fe45043fa5",
+			"definition_hash": "c160d0a6a3efec7fd2181ef1d00c760ba8aa1b10e5ee7a06fa61d2be188da039",
+			"reviewed_at": "2026-06-17T09:31:47.045835216Z"
+		},
+		{
+			"function_name": "TestExpandTemplateUnknown",
+			"documentation_hash": "3b4dfa54ba239195ee02c13bb95dd3f9ab70ec77f67d1631a5bea06ae021918b",
+			"definition_hash": "c2c7a4414624b2655ea1c1e0b80e81c78888da3b9c3bccac4945559113890440",
+			"reviewed_at": "2026-06-17T09:31:47.046838832Z"
+		},
+		{
+			"function_name": "TestSignTemplate",
+			"documentation_hash": "b6016d70323012de7e3ef2a35ffa5c4afa8f5b1ddafa9d224fe9622f6f02ea55",
+			"definition_hash": "c1d7f4cff5f290c60c846c4df8925f8e098068b7fce22af4e618534636065311",
+			"reviewed_at": "2026-06-17T09:31:47.047631008Z"
+		},
+		{
+			"function_name": "TestSignRejectsBothOrNeither",
+			"documentation_hash": "41699cbb6c788059c17ca8d26d337b0aa3989467825e70319fe516ce6635b41d",
+			"definition_hash": "1d1157f3caae029058896868fec6d35be17daaf3d1bf178116d54dc5f2942287",
+			"reviewed_at": "2026-06-17T09:31:47.048386844Z"
 		}
 	]
 }

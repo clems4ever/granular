@@ -31,6 +31,11 @@ gateways:
   - id: "github-gateway"
     secret_file: "/run/secrets/granular_gateway_github_secret"
 
+# The admin token gates the policy-administration endpoints (PUT/GET/DELETE /api/policy)
+# the granular-policy admin CLI calls to mint, inspect, and destroy policy tokens. Never
+# inline — point at a file holding it. When unset, policy administration is disabled.
+admin_token_file: "/run/secrets/granular_auth_admin_token"
+
 # Consent-screen authentication (GitHub login, for now). When client_id and the
 # client-secret file are both set, the consent pages (/proposal/{id}) require a "log
 # in with GitHub". There is no global allowlist: each proposal names an approver

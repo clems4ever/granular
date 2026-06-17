@@ -1,0 +1,52 @@
+{
+	"functions": [
+		{
+			"function_name": "NewRootCmd",
+			"documentation_hash": "a7e0c969dcf98016fb51b807576a6203f477365fe4606b6473a7c38f8bde66eb",
+			"definition_hash": "6e5292b1dcc58a56f0d58313ffd08df6ed305bdc961156804d53a25f0c8edb6e",
+			"reviewed_at": "2026-06-17T09:45:01.883432681Z"
+		},
+		{
+			"function_name": "load",
+			"receiver": "app",
+			"documentation_hash": "9b78ed61ada2b1eb2855cba93cb98805f101be6c50b2eae0cad52da30a56e697",
+			"definition_hash": "9da50640136855b8faf954dfc3b8f3dcd5d3326b63efb956be55331018b82c39",
+			"reviewed_at": "2026-06-17T07:27:11.058297774Z"
+		},
+		{
+			"function_name": "catalogCmd",
+			"receiver": "app",
+			"documentation_hash": "6277b6c85295a3590edcd8896e3934a839d22f503f25955760d8cd7ea903a9b7",
+			"definition_hash": "4e3698cd4a409614d4d2f8325033bb148c66855279ffd071ef28576553c1125b",
+			"reviewed_at": "2026-06-17T08:07:11.508180485Z"
+		},
+		{
+			"function_name": "opCmd",
+			"receiver": "app",
+			"documentation_hash": "25591cbd939a1cc82bd77c6b09afd0cc0f3602e30105e2429587863503cbcc08",
+			"definition_hash": "412f842aabc5fdf389db21824d832240efadd09fa1aac8914f27a681fe7f9800",
+			"reviewed_at": "2026-06-17T07:27:11.058821678Z"
+		},
+		{
+			"function_name": "signCmd",
+			"receiver": "app",
+			"documentation_hash": "3af5173de9480ea83d7e99412ec59db5bfe4ed11abab1506a3150821b3b2df76",
+			"definition_hash": "6045b242b8ff46ba0737a6369b9dd67f499e1878981cae6994bafc29087a8b5b",
+			"reviewed_at": "2026-06-17T09:30:39.664669402Z"
+		},
+		{
+			"function_name": "proposeCmd",
+			"receiver": "app",
+			"documentation_hash": "9939e94154ff7d0315fdea72bef591cb49bf0e01eb94ffab6201005e508f4f03",
+			"definition_hash": "45dd1a13ac739c01466490981481f08476f7a9108100166bcb548321697c60e2",
+			"reviewed_at": "2026-06-17T07:27:11.059342204Z"
+		},
+		{
+			"function_name": "templateCmd",
+			"receiver": "app",
+			"documentation_hash": "3133f56620c53536ae54c1f3b8a18da406e33ba784e7ca579cda5b5b4fa35d5b",
+			"definition_hash": "21ad4390345afee4edf8c1556925f6cf55f9378867ab2d4fc5470790e7f0ab12",
+			"reviewed_at": "2026-06-17T09:45:01.884752399Z"
+		}
+	]
+}

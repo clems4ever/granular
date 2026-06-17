@@ -3,8 +3,8 @@
 		{
 			"function_name": "Schema",
 			"documentation_hash": "299589098ac37de86883e325473c7162afb14ad16f058388c5bfb96eef6ae2d2",
-			"definition_hash": "8a352c952baad5f3d2eedabb49c5d56a5c8cff778bcbab8315168f9b6881652a",
-			"reviewed_at": "2026-06-17T06:22:20.73614116Z"
+			"definition_hash": "adf301e9a054ee19cc6c07f42dc7ce6d4a586109fc4d7e002de65ac11c3c57b1",
+			"reviewed_at": "2026-06-17T09:31:10.85639772Z"
 		},
 		{
 			"function_name": "scope",

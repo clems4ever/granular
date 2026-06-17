@@ -3,49 +3,8 @@
 		{
 			"function_name": "main",
 			"documentation_hash": "57c9ca6f0af4fb3dfe5a022eb105f3dc9ba83a7c1d0dea4501463d43b6cc6e39",
-			"definition_hash": "515d2588ad9a7485688cb9db661635701adbc34c1326b21653e1519f5773b50e",
-			"reviewed_at": "2026-06-17T06:46:40.516226492Z"
-		},
-		{
-			"function_name": "newRootCmd",
-			"documentation_hash": "27c637f0660a9f2e11cf27d3cde590dbc3a29de02436da574c3cffae915c37ea",
-			"definition_hash": "a803e0c4c688e90bf1c4df3d319a361476e1969b3c73de1d86415cc90df565d7",
-			"reviewed_at": "2026-06-17T06:58:28.101191592Z"
-		},
-		{
-			"function_name": "load",
-			"receiver": "app",
-			"documentation_hash": "9b78ed61ada2b1eb2855cba93cb98805f101be6c50b2eae0cad52da30a56e697",
-			"definition_hash": "9da50640136855b8faf954dfc3b8f3dcd5d3326b63efb956be55331018b82c39",
-			"reviewed_at": "2026-06-17T06:46:40.518364397Z"
-		},
-		{
-			"function_name": "catalogCmd",
-			"receiver": "app",
-			"documentation_hash": "6277b6c85295a3590edcd8896e3934a839d22f503f25955760d8cd7ea903a9b7",
-			"definition_hash": "b5e428db55dffe6ed956c7161b95b4d794dc9a30fb4697839946f8ba8311291d",
-			"reviewed_at": "2026-06-17T06:46:40.519414245Z"
-		},
-		{
-			"function_name": "opCmd",
-			"receiver": "app",
-			"documentation_hash": "25591cbd939a1cc82bd77c6b09afd0cc0f3602e30105e2429587863503cbcc08",
-			"definition_hash": "412f842aabc5fdf389db21824d832240efadd09fa1aac8914f27a681fe7f9800",
-			"reviewed_at": "2026-06-17T06:46:40.520386788Z"
-		},
-		{
-			"function_name": "signCmd",
-			"receiver": "app",
-			"documentation_hash": "3af5173de9480ea83d7e99412ec59db5bfe4ed11abab1506a3150821b3b2df76",
-			"definition_hash": "e4c9194754e231bc61f2c47f248d0d226c9a4a95a5b4678475b312080b751bc0",
-			"reviewed_at": "2026-06-17T06:58:28.102253803Z"
-		},
-		{
-			"function_name": "proposeCmd",
-			"receiver": "app",
-			"documentation_hash": "9939e94154ff7d0315fdea72bef591cb49bf0e01eb94ffab6201005e508f4f03",
-			"definition_hash": "45dd1a13ac739c01466490981481f08476f7a9108100166bcb548321697c60e2",
-			"reviewed_at": "2026-06-17T06:58:28.103026682Z"
+			"definition_hash": "4015896d2a7d79c6aa8fecc222fb6a5d9e9ad7be7da31f84ebd6e032acb91d42",
+			"reviewed_at": "2026-06-17T07:27:33.18465754Z"
 		}
 	]
 }

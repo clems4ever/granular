@@ -1,0 +1,118 @@
+{
+	"functions": [
+		{
+			"function_name": "parseParams",
+			"documentation_hash": "5f95ce4e7fd43c5fffe36a34ab86428ebdac2fed5ae9dcabe185cb519fe9e9a6",
+			"definition_hash": "a8ae510d6c6d378dd8317f97b2f4a6209b1609f3fb1eca4c91fd905deff632b1",
+			"reviewed_at": "2026-06-17T06:46:54.823079371Z"
+		},
+		{
+			"function_name": "parseMatch",
+			"documentation_hash": "6cc5e88948efe59d56a0665289e3e1ac206915b4626c4e324183d10a05f535cb",
+			"definition_hash": "0ec2f7ce2658d1abed7722360caf50d8a84ca590ede77d0571ef1f6613251020",
+			"reviewed_at": "2026-06-17T06:46:54.823905543Z"
+		},
+		{
+			"function_name": "runCatalog",
+			"documentation_hash": "5e393b70a22eaac31f403a4ab4ed42426c0d4a4bed8e990d3b80a3b38642ae2b",
+			"definition_hash": "e791f751b56b2a5fdbefa9e76dc3a342e5b76fb648239dfa2de89d02669a3613",
+			"reviewed_at": "2026-06-17T08:07:25.699321606Z"
+		},
+		{
+			"function_name": "runOp",
+			"documentation_hash": "d4bb745322c96297d22caa3ec8422b701d672ec33d42094540385f0d8ba59404",
+			"definition_hash": "8cc96b2f74078d681ca83d3fcea6c4b0e92f0cb3d9084ad214b1bf32be6d6456",
+			"reviewed_at": "2026-06-17T06:58:36.087917635Z"
+		},
+		{
+			"function_name": "buildGrantRequest",
+			"documentation_hash": "391b5131458b3bbaa6da1125d2c7f5146a4064242fc4493d0137486c6c55c2fb",
+			"definition_hash": "13f84e8203b10cfb0227605d83a91f80f9e2441d9b48c98958ebf446a5267868",
+			"reviewed_at": "2026-06-17T06:58:36.086728962Z"
+		},
+		{
+			"function_name": "runSign",
+			"documentation_hash": "e169dddd54a3b77e240ee6c29a023301030977c04f0c4db416491a73ef36324c",
+			"definition_hash": "d91527e534bce867066894e27ae488e41f1c8b248212ac9cc731d3653f4db3aa",
+			"reviewed_at": "2026-06-17T06:58:36.088918507Z"
+		},
+		{
+			"function_name": "runPropose",
+			"documentation_hash": "e07a290daebb9274f0544d2791cdf2c9185f5ca171f72d564d1f0a4362556d25",
+			"definition_hash": "b956409ae318619c8813565a30ddc31d4c1ec38a7609932065f48b5e0761f9cd",
+			"reviewed_at": "2026-06-17T06:58:36.089854891Z"
+		},
+		{
+			"function_name": "readSignedRequests",
+			"documentation_hash": "8265461108e291fa2fc473f5516e7a0003cf545c8a85bfdac9476f82b8546662",
+			"definition_hash": "a072ad73cf3596484596394b549cb66dedf348052facf945ad4127fabbebb0b2",
+			"reviewed_at": "2026-06-17T06:58:36.090903312Z"
+		},
+		{
+			"function_name": "printSchema",
+			"documentation_hash": "fc5ea0762fdb7db885920fff5e69b8d16a9e426ff5bcb3ca47e6e19d99fd65b2",
+			"definition_hash": "e3217833925cb773c797b22c00b62b49329822bfb57ce6018a9af9c98c6bccd4",
+			"reviewed_at": "2026-06-17T09:45:18.127433075Z"
+		},
+		{
+			"function_name": "formatMatch",
+			"documentation_hash": "d1c36baf19b3473c848512b2f703d126decdd38e7805b6d09900ad687a129a3a",
+			"definition_hash": "a825e028bfcb7bb1d9ed82e4e462cfdebb4456633f5716d05ef22110f68a64fb",
+			"reviewed_at": "2026-06-17T08:07:25.700528192Z"
+		},
+		{
+			"function_name": "resourceDepth",
+			"documentation_hash": "eb4d90627ca654b97415549990fbd350d4200db85e87553c7b4be34bb87eecdb",
+			"definition_hash": "b0409f07ff331efd5ea2aaf866bce79a4a918c54ac1160412c5e87c8c631607e",
+			"reviewed_at": "2026-06-17T08:23:59.741451059Z"
+		},
+		{
+			"function_name": "groupActions",
+			"documentation_hash": "1a88a5dae36b13d3023d7ef74388780b60fab5ac2580966a53d3397f9800ac73",
+			"definition_hash": "56757ff20bc5d3591b7e552a7ca8436c982b1cc53ee10bcab9a9ccf40fa5ea70",
+			"reviewed_at": "2026-06-17T08:23:59.74282932Z"
+		},
+		{
+			"function_name": "buildSignRequest",
+			"documentation_hash": "8c82a2f70a77d977d833eaa7ffb096d17a4c65941b5df1cc6108a437e3b27527",
+			"definition_hash": "bc4f9b0bda00b25b4d75d0be35605024f17fe9e765a55a18ed3a7e347d2c4219",
+			"reviewed_at": "2026-06-17T09:30:55.688126875Z"
+		},
+		{
+			"function_name": "parseBinds",
+			"documentation_hash": "60a1d537a82656f2bd94ee097bcf12884478f88a9a67cfe0d96a4847231aba18",
+			"definition_hash": "7cf910e0b4311763a2786808e22dd7c6203edddd054d4d0eeaeecfbeb9d1121b",
+			"reviewed_at": "2026-06-17T09:30:55.689429693Z"
+		},
+		{
+			"function_name": "runTemplate",
+			"documentation_hash": "84a55ea0c6607ee755d66695f262d3b0842be96e4d6927adb9a58f26059f4940",
+			"definition_hash": "298cba1c51750d3ca9c9df1bdd01cb12700c502cea728548aff544941871ae6f",
+			"reviewed_at": "2026-06-17T09:45:18.129939561Z"
+		},
+		{
+			"function_name": "printTemplateDetail",
+			"documentation_hash": "c2cd51b7536b1303af973eca6f863bdd387aee473dca04ea1ff1b94d5143b535",
+			"definition_hash": "ea6f28b6e29a94e3f5c76fbb75167f4bef81f4444ce4ba6ab1c74920f821051f",
+			"reviewed_at": "2026-06-17T09:45:18.132578368Z"
+		},
+		{
+			"function_name": "templateActions",
+			"documentation_hash": "f9896cb9b1a24e7093d9eb1a524e9a726c6be50d6da2012d0ee9bf46ec00512a",
+			"definition_hash": "3bfa72b05c5aea8e66bbc07f334ab8bec7fb1d089a61b7535396722f9dfa5196",
+			"reviewed_at": "2026-06-17T09:45:18.135220635Z"
+		},
+		{
+			"function_name": "conditionPhrase",
+			"documentation_hash": "39f1812641ead8448ee71b2929588ad4de27497b8042dc15c10acd295c36e341",
+			"definition_hash": "d82cfab655ba41c2687e80886e6c8f998b4b2aef7bfa22b3bd62971ffed7929c",
+			"reviewed_at": "2026-06-17T09:45:18.136234003Z"
+		},
+		{
+			"function_name": "bindHints",
+			"documentation_hash": "3058190a5b5d8ef94be2efd9944a46665867810c9eb53f45f6a3cd95fa1e3152",
+			"definition_hash": "e180a92b19ce3973e310f6c8b8ca8c208f3e797c9546648262be8b230a449916",
+			"reviewed_at": "2026-06-17T09:45:18.137613441Z"
+		}
+	]
+}

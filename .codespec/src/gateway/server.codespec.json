@@ -23,9 +23,9 @@
 		{
 			"function_name": "handleSign",
 			"receiver": "Gateway",
-			"documentation_hash": "8a0741569a562de94566a95ec057ed2949cfbd3574242dc3999109539018e783",
-			"definition_hash": "392e8612be1d901cd56dc28c3121e6ddbb7ca1592d482a0a591f57479ba99e60",
-			"reviewed_at": "2026-06-17T06:21:04.169153766Z"
+			"documentation_hash": "15e5078eca00a6ae5cbd3fae0961c328f83ee44aaeb08151a761f7716cd8ad0c",
+			"definition_hash": "90b8284b0f6d624c5c24ca3c19c9247609a815efa4215c1f69c75342f08b7893",
+			"reviewed_at": "2026-06-17T09:32:13.421606564Z"
 		},
 		{
 			"function_name": "handleOperation",

@@ -15,8 +15,8 @@
 		{
 			"function_name": "newServer",
 			"documentation_hash": "b7669ecfa58b7cd6eb0ed3f21b491565bc1cdbeb9c470bb7a859e4a30bf8429e",
-			"definition_hash": "74f38cc37fa1424b87bf676c6b46be31c2b6c8655de53bb128db9ba6e0675049",
-			"reviewed_at": "2026-06-17T05:58:11.066157255Z"
+			"definition_hash": "36083cb332edd96d161bc17f3eef7abb3a0eb502f0e7ecc94151402fc87a4fa8",
+			"reviewed_at": "2026-06-17T07:18:06.182371516Z"
 		},
 		{
 			"function_name": "do",
@@ -27,8 +27,8 @@
 		{
 			"function_name": "createPolicy",
 			"documentation_hash": "5dbe2fd9d0b96abc5f3d1042e79a8cd6bba48dbc4fdbe8fc1a6354eed866e5ae",
-			"definition_hash": "5f79685c6e2eebfa295043202e7cc134ff70d85810f0f7725776ead75ed38da1",
-			"reviewed_at": "2026-06-17T05:58:11.066509959Z"
+			"definition_hash": "0dbc6440d75c116a61cccf638d7ee0ca71149ad3d7191aa3fb3f1e2bf62ade5a",
+			"reviewed_at": "2026-06-17T07:18:06.183922346Z"
 		},
 		{
 			"function_name": "signedItem",
@@ -50,9 +50,9 @@
 		},
 		{
 			"function_name": "TestPolicyRejectsUnknownToken",
-			"documentation_hash": "f6454bf715311bbb7baff73cce98e09db3d1a9a70590ce4bee2ecd3ab43e156d",
-			"definition_hash": "cf31e0a0fe1d1ae739ddda0be651a014f50edb27949982734f76109fdd251299",
-			"reviewed_at": "2026-06-17T05:58:11.067822302Z"
+			"documentation_hash": "76f42c12b24cdf39cf6ff88852a5af52f27ce6d7a961671b278aa247772921e3",
+			"definition_hash": "29fde38dcf4177d84825f4f3bd6a2c5f1d40ac8521a06570a950a3dc9437754a",
+			"reviewed_at": "2026-06-17T07:18:06.188172878Z"
 		},
 		{
 			"function_name": "TestVerifyRejectsUnknownGateway",

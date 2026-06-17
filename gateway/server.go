@@ -87,18 +87,37 @@ func (g *Gateway) handleSchema(w http.ResponseWriter, r *http.Request) {
 //
 // @testcase TestSignProducesVerifiableRequest signs a capability bundle.
 // @testcase TestSignRejectsUnknownAction rejects a capability naming an unknown action.
+// @testcase TestSignTemplate signs a template instantiation.
+// @testcase TestSignRejectsBothOrNeither rejects a request with both or neither form.
 func (g *Gateway) handleSign(w http.ResponseWriter, r *http.Request) {
 	var req GrantRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeJSON(w, http.StatusBadRequest, errBody("invalid request body"))
 		return
 	}
-	policies, err := policiesFromCapabilities(g.schema, req.Capabilities)
+
+	hasTemplate := req.Template != ""
+	hasCaps := len(req.Capabilities) > 0
+	if hasTemplate == hasCaps {
+		writeJSON(w, http.StatusBadRequest, errBody("provide exactly one of capabilities or template"))
+		return
+	}
+
+	var (
+		policies []string
+		pres     proposal.Presentation
+		err      error
+	)
+	if hasTemplate {
+		policies, pres, err = expandTemplate(g.schema, req.Template, req.Bindings)
+	} else {
+		policies, err = policiesFromCapabilities(g.schema, req.Capabilities)
+		pres = buildPresentation(g.schema, req.Reason, req.Capabilities)
+	}
 	if err != nil {
 		writeJSON(w, http.StatusBadRequest, errBody(err.Error()))
 		return
 	}
-	pres := buildPresentation(g.schema, req.Reason, req.Capabilities)
 	signed := proposal.Sign(g.secret, g.id, pres, policies)
 	writeJSON(w, http.StatusOK, signed)
 }

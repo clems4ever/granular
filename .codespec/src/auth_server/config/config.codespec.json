@@ -10,8 +10,8 @@
 			"function_name": "resolveSecrets",
 			"receiver": "Config",
 			"documentation_hash": "6d102fcbc442ea684ad456810ec228af79298aebc332904f3fb14cce828088e1",
-			"definition_hash": "a29a95c593e895a7c6f4faac70e0cfa5681c9004a2e9feeba66dada29f301d21",
-			"reviewed_at": "2026-06-17T05:59:07.703566782Z"
+			"definition_hash": "6c6e2d36cf137837edf23e94224c261916926b1eec7ad40c8d67288a392cd734",
+			"reviewed_at": "2026-06-17T07:17:56.952526377Z"
 		},
 		{
 			"function_name": "GatewaySecrets",

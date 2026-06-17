@@ -19,6 +19,9 @@ import (
 
 const gwSecret = "s3cret"
 
+// adminToken is the policy-administration bearer the test server is configured with.
+const adminToken = "admintok"
+
 // The Cedar policy and matching world used by the verify tests: agent "a" may view
 // repo "r".
 const testPolicy = `permit(principal == Granular::Agent::"a", action == Granular::Action::"view", resource == Granular::Repo::"r");`
@@ -38,6 +41,7 @@ func newServer(t *testing.T) (*Server, http.Handler) {
 	}
 	t.Cleanup(func() { st.Close() })
 	srv := New(st, "http://as.example", map[string]string{"gw": gwSecret})
+	srv.UseAdminToken(adminToken)
 	return srv, srv.Handler()
 }
 
@@ -87,7 +91,7 @@ func do(t *testing.T, h http.Handler, method, path string, body []byte, bearer s
 // @testcase TestProposalApproveFlow mints a token through here.
 func createPolicy(t *testing.T, h http.Handler) string {
 	t.Helper()
-	resp := do(t, h, http.MethodPut, "/api/policy", nil, "", false)
+	resp := do(t, h, http.MethodPut, "/api/policy", nil, adminToken, false)
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusCreated {
 		t.Fatalf("PUT /api/policy = %d, want 201", resp.StatusCode)
@@ -211,13 +215,14 @@ func TestProposalRejectsBadSignature(t *testing.T) {
 	}
 }
 
-// TestPolicyRejectsUnknownToken rejects bearer access with an unregistered token.
+// TestPolicyRejectsUnknownToken returns 404 when an admin inspects an unregistered
+// policy token.
 func TestPolicyRejectsUnknownToken(t *testing.T) {
 	_, h := newServer(t)
-	resp := do(t, h, http.MethodGet, "/api/policy", nil, "nope", false)
+	resp := do(t, h, http.MethodGet, "/api/policy/nope", nil, adminToken, false)
 	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusUnauthorized {
-		t.Fatalf("status = %d, want 401", resp.StatusCode)
+	if resp.StatusCode != http.StatusNotFound {
+		t.Fatalf("status = %d, want 404", resp.StatusCode)
 	}
 }
 

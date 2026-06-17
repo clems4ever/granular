@@ -46,13 +46,19 @@ type Operation struct {
 	Params map[string]any `json:"params,omitempty"`
 }
 
-// GrantRequest is an agent's explicit request, submitted to POST /api/grant-requests,
-// to be granted a bundle of capabilities for later use. It names the actions and
-// resources to pre-approve; unlike an Operation it never executes anything, it only
-// asks a human to authorise the scope.
+// GrantRequest is an agent's explicit request to be granted access for later use. It
+// names the actions and resources to pre-approve; unlike an Operation it never executes
+// anything, it only asks a human to authorise the scope. It is built either freeform
+// (Capabilities) or by instantiating a gateway Template (Template + Bindings); a gateway
+// rejects a request that sets both or neither.
 type GrantRequest struct {
 	Reason       string       `json:"reason,omitempty"`
-	Capabilities []Capability `json:"capabilities"`
+	Capabilities []Capability `json:"capabilities,omitempty"`
+
+	// Template names a gateway-defined template to instantiate; Bindings supplies its
+	// parameter values. When Template is set, Capabilities must be empty.
+	Template string            `json:"template,omitempty"`
+	Bindings map[string]string `json:"bindings,omitempty"`
 }
 
 // RequestResponse is returned by both POST /api/operations and POST

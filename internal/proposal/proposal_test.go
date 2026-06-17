@@ -4,7 +4,7 @@ import "testing"
 
 // samplePresentation returns a presentation used across the tests.
 func samplePresentation() Presentation {
-	return Presentation{Title: "View issue", Summary: "View issue octocat/Hello-World#1", Permissions: []string{"Read one issue"}}
+	return Presentation{Title: "View issue", Summary: "View issue octocat/Hello-World#1", Grants: []GrantDetail{{Actions: []string{"issue.view"}, Resource: "octocat/Hello-World#1"}}}
 }
 
 // TestSignVerifyRoundTrip signs a request and verifies it with the same secret.

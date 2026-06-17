@@ -77,6 +77,7 @@ func run(cfg *asconfig.Config) error {
 
 	gateways := cfg.GatewaySecrets()
 	srv := server.New(st, cfg.BaseURL, gateways)
+	srv.UseAdminToken(cfg.AdminToken)
 
 	auth := server.NewAuthenticator(server.AuthConfig{
 		ClientID:      cfg.Auth.ClientID,
@@ -90,6 +91,9 @@ func run(cfg *asconfig.Config) error {
 		log.Printf("warning: no gateways registered; /api/proposals and /api/verify will reject every caller until a gateway is configured")
 	} else {
 		log.Printf("%d gateway(s) registered", len(gateways))
+	}
+	if cfg.AdminToken == "" {
+		log.Printf("warning: no admin_token_file configured; policy administration (PUT/GET/DELETE /api/policy) is disabled until one is set")
 	}
 	if !auth.Enabled() {
 		log.Printf("warning: consent UI is UNAUTHENTICATED; set auth.client_id and auth.client_secret_file to require a GitHub login (OAuth app callback URL: %s%s)", cfg.BaseURL, callbackURLSuffix)

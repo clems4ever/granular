@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/clems4ever/granular/internal/proposal"
@@ -34,6 +35,16 @@ func testSchema() Schema {
 		Actions: []Action{
 			{Name: "repo.read", Title: "Read repository", Resource: "t.repo", Groups: []string{"read"}, Description: "Read a repo."},
 		},
+		Templates: []Template{{
+			Name: "comment", Title: "Comment", Summary: "Comment on {owner}/{name}",
+			Actions: []string{"repo.read"}, Scope: "t.repo",
+			Params: []TemplateParam{
+				{Name: "owner", Field: "owner", Required: true},
+				{Name: "name", Field: "name"},
+				{Name: "state", Attr: "state", Op: "eq", Fixed: "open"},
+				{Name: "label", Attr: "labels", Op: "contains"},
+			},
+		}},
 		Scope: func(sel ResourceSelector) (string, string, string, error) {
 			if sel.Type != "t.repo" {
 				return "", "", "", fmt.Errorf("unsupported %q", sel.Type)
@@ -190,6 +201,9 @@ func TestRegistry(t *testing.T) {
 	if err != nil || op == nil {
 		t.Fatalf("build: %v", err)
 	}
+	if types := reg.Types(); len(types) != 1 || types[0] != "t.read" {
+		t.Fatalf("types = %v", types)
+	}
 }
 
 // TestPoliciesFromCapabilities builds a permit and rejects an unknown action.
@@ -232,14 +246,103 @@ func TestVerifyWorld(t *testing.T) {
 	}
 }
 
-// TestPresentation resolves action titles and renders the scope label.
+// TestPresentation renders one grant detail per capability with its actions and scope.
 func TestPresentation(t *testing.T) {
 	p := buildPresentation(testSchema(), "", []Capability{readCap()})
-	if len(p.Permissions) != 1 || !bytes.Contains([]byte(p.Permissions[0]), []byte("Read repository")) {
-		t.Fatalf("permissions = %v", p.Permissions)
+	if len(p.Grants) != 1 {
+		t.Fatalf("grants = %v", p.Grants)
 	}
-	if len(p.Scopes) != 1 || p.Scopes[0] != "octo/hello" {
-		t.Fatalf("scopes = %v", p.Scopes)
+	g := p.Grants[0]
+	if len(g.Actions) != 1 || g.Actions[0] != "repo.read" || g.Resource != "octo/hello" {
+		t.Fatalf("grant detail = %+v", g)
+	}
+}
+
+// TestExpandTemplate expands a template's scope and condition params into a single permit
+// with the right Cedar literals/conditions and a rendered, conditioned presentation.
+func TestExpandTemplate(t *testing.T) {
+	s := testSchema()
+	policies, pres, err := expandTemplate(s, "comment", map[string]string{"owner": "octo", "name": "hello", "label": "bug"})
+	if err != nil || len(policies) != 1 {
+		t.Fatalf("expand: %v %v", policies, err)
+	}
+	for _, want := range []string{
+		`Test::Agent::"agent"`, `Test::Action::"repo.read"`, `Test::Repo::"octo/hello"`,
+		`resource.state == "open"`, `resource.labels.contains("bug")`,
+	} {
+		if !strings.Contains(policies[0], want) {
+			t.Fatalf("policy %q missing %q", policies[0], want)
+		}
+	}
+	if pres.Summary != "Comment on octo/hello" {
+		t.Fatalf("summary = %q", pres.Summary)
+	}
+	if len(pres.Grants) != 1 || pres.Grants[0].Resource != "octo/hello" {
+		t.Fatalf("grants = %+v", pres.Grants)
+	}
+	conds := pres.Grants[0].Conditions
+	if len(conds) != 2 || conds[0] != "state is open" || conds[1] != "labels contains bug" {
+		t.Fatalf("conditions = %v", conds)
+	}
+
+	// Optional condition param omitted → no label condition.
+	_, pres2, err := expandTemplate(s, "comment", map[string]string{"owner": "octo", "name": "hello"})
+	if err != nil || len(pres2.Grants[0].Conditions) != 1 {
+		t.Fatalf("omitted label: %v %+v", err, pres2.Grants[0].Conditions)
+	}
+
+	// conditionLiteral operator coverage.
+	if _, _, err := conditionLiteral("x", "bogus", "v"); err == nil {
+		t.Fatal("expected error for unknown operator")
+	}
+	if pred, _, _ := conditionLiteral("name", "like", "feature/*"); pred != `resource.name like "feature/*"` {
+		t.Fatalf("like predicate = %q", pred)
+	}
+}
+
+// TestExpandTemplateRequiredParam errors when a required parameter is unbound.
+func TestExpandTemplateRequiredParam(t *testing.T) {
+	if _, _, err := expandTemplate(testSchema(), "comment", map[string]string{"name": "hello"}); err == nil {
+		t.Fatal("expected error for missing required owner")
+	}
+}
+
+// TestExpandTemplateUnknown errors on an unknown template name.
+func TestExpandTemplateUnknown(t *testing.T) {
+	if _, _, err := expandTemplate(testSchema(), "nope", nil); err == nil {
+		t.Fatal("expected error for unknown template")
+	}
+}
+
+// TestSignTemplate signs a template instantiation through the sign endpoint.
+func TestSignTemplate(t *testing.T) {
+	g, _ := newGateway(true)
+	body, _ := json.Marshal(GrantRequest{Template: "comment", Bindings: map[string]string{"owner": "octo", "name": "hello"}})
+	resp := post(t, g.Handler(), "/api/grant-requests/sign", body, "")
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status = %d", resp.StatusCode)
+	}
+	var sgr proposal.SignedGrantRequest
+	if err := json.NewDecoder(resp.Body).Decode(&sgr); err != nil {
+		t.Fatalf("decode: %v", err)
+	}
+	if !sgr.Verify([]byte(gwSecret)) || len(sgr.Policies) != 1 || sgr.Presentation.Summary != "Comment on octo/hello" {
+		t.Fatalf("bad signed template: %+v", sgr)
+	}
+}
+
+// TestSignRejectsBothOrNeither rejects a sign request that sets both forms or neither.
+func TestSignRejectsBothOrNeither(t *testing.T) {
+	g, _ := newGateway(true)
+	both, _ := json.Marshal(GrantRequest{Template: "comment", Capabilities: []Capability{readCap()}})
+	neither, _ := json.Marshal(GrantRequest{})
+	for _, body := range [][]byte{both, neither} {
+		resp := post(t, g.Handler(), "/api/grant-requests/sign", body, "")
+		resp.Body.Close()
+		if resp.StatusCode != http.StatusBadRequest {
+			t.Fatalf("status = %d, want 400", resp.StatusCode)
+		}
 	}
 }
 

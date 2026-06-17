@@ -1,0 +1,34 @@
+{
+	"functions": [
+		{
+			"function_name": "samplePresentation",
+			"documentation_hash": "4a34684ba6ec1089abaf1dea40ce4cfd3f570edb4727a9a54d2f1f7806b39104",
+			"definition_hash": "9ae214a57fbe3ab025af9c074f674a452934c713db802b60e74e778bb8caebd9",
+			"reviewed_at": "2026-06-17T09:32:42.482214346Z"
+		},
+		{
+			"function_name": "TestSignVerifyRoundTrip",
+			"documentation_hash": "b4e93f9646d4c9449d0021f98748304c12e4803f698696bdc7c7f1af804d7829",
+			"definition_hash": "d4e1a6abc45c90185c47d0aa324d14b78677131d0fecd421950bbca22de22acc",
+			"reviewed_at": "2026-06-17T09:32:42.482363433Z"
+		},
+		{
+			"function_name": "TestVerifyRejectsTamperedPresentation",
+			"documentation_hash": "138b7765f40a2e977f76ddd10f106bf584defa2f0fe90d198f422848d5f41af3",
+			"definition_hash": "8769618070b08e88121d80195d4966147caf3ed328c44de4e9aa51b9ac885142",
+			"reviewed_at": "2026-06-17T09:32:42.482455498Z"
+		},
+		{
+			"function_name": "TestVerifyRejectsTamperedPolicies",
+			"documentation_hash": "e05d97d438c6d15fc66ad529b73666a1ec9cd5d2e2940e783154e4ef7acab0c8",
+			"definition_hash": "e1f3382f1a4621f6c0147b69be836ad5e6eeef1d58443ac2f326374c4974751b",
+			"reviewed_at": "2026-06-17T09:32:42.482547818Z"
+		},
+		{
+			"function_name": "TestVerifyRejectsWrongSecret",
+			"documentation_hash": "c84708e120852dbdf59d860ff6fa456ba23a2f87e29e96859ca0c61e1da4cc3e",
+			"definition_hash": "15541c32ecaabeb24fd8ae94a710118ca387adeaf394658ab7addeccebadc93f",
+			"reviewed_at": "2026-06-17T09:32:42.482638535Z"
+		}
+	]
+}

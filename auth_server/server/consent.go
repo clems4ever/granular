@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/clems4ever/granular/auth_server/store"
+	"github.com/clems4ever/granular/internal/proposal"
 )
 
 // defaultTTL is the grant lifetime used when the approval form omits or sends an
@@ -30,13 +31,12 @@ var ttlOptions = []ttlOption{
 // field is taken verbatim from the gateway-authored Presentation; the AS adds no
 // meaning of its own. Policies are the raw, opaque blobs, shown collapsed.
 type itemView struct {
-	GatewayID   string
-	Title       string
-	Summary     string
-	Detail      string
-	Permissions []string
-	Scopes      []string
-	Policies    []string
+	GatewayID string
+	Title     string
+	Summary   string
+	Detail    string
+	Grants    []proposal.GrantDetail
+	Policies  []string
 }
 
 // approvalView is the data passed to the consent page template.
@@ -83,13 +83,12 @@ func viewItems(p *store.Proposal) []itemView {
 	out := make([]itemView, 0, len(p.Items))
 	for _, it := range p.Items {
 		out = append(out, itemView{
-			GatewayID:   it.GatewayID,
-			Title:       it.Presentation.Title,
-			Summary:     it.Presentation.Summary,
-			Detail:      it.Presentation.Detail,
-			Permissions: it.Presentation.Permissions,
-			Scopes:      it.Presentation.Scopes,
-			Policies:    it.Policies,
+			GatewayID: it.GatewayID,
+			Title:     it.Presentation.Title,
+			Summary:   it.Presentation.Summary,
+			Detail:    it.Presentation.Detail,
+			Grants:    it.Presentation.Grants,
+			Policies:  it.Policies,
 		})
 	}
 	return out

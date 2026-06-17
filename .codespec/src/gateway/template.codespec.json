@@ -1,0 +1,28 @@
+{
+	"functions": [
+		{
+			"function_name": "findTemplate",
+			"documentation_hash": "16ed18e8078ee43c721e4449b3f50eb468c009494888c663a7ceedf0b5070b17",
+			"definition_hash": "1509dbe632c675eef3cae005b659f6f52091e2ee9e7acc229d581f104b38a122",
+			"reviewed_at": "2026-06-17T09:32:27.159747864Z"
+		},
+		{
+			"function_name": "expandTemplate",
+			"documentation_hash": "c101df8e01e994a4cd82e528c9720700eb9ac958da166b9d43568251429b76da",
+			"definition_hash": "dbf9335471029613dfb9985bd767082773bc5f4592d7d58e414f355f640c8728",
+			"reviewed_at": "2026-06-17T09:32:27.160888478Z"
+		},
+		{
+			"function_name": "conditionLiteral",
+			"documentation_hash": "e0dcba575f53c1d96de054e1fe0234463cf6bdbc3f27ba29fe72305fb29d95e4",
+			"definition_hash": "6787efb18e3981d3121f465990039335a92b37ab408085061c3d4dcf923644dd",
+			"reviewed_at": "2026-06-17T09:32:27.161465632Z"
+		},
+		{
+			"function_name": "renderSummary",
+			"documentation_hash": "855cb6f9cbc5ef529ab0b7a22dbe125b5d0b25e995d9087946ab80ca06b7f2af",
+			"definition_hash": "7494c8f77cf05a844787c462a67005b9706026206909908061a12019a9e48c51",
+			"reviewed_at": "2026-06-17T09:32:27.161917723Z"
+		}
+	]
+}

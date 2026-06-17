@@ -61,11 +61,66 @@ type Action struct {
 	Description string   `json:"description"`
 }
 
+// Param describes one parameter an operation accepts: its name, value type, whether it
+// is required, and what it means. It is the signature a client needs to invoke an
+// operation.
+type Param struct {
+	Name        string `json:"name"`
+	Type        string `json:"type"`
+	Required    bool   `json:"required"`
+	Description string `json:"description"`
+}
+
+// OperationSpec describes one executable operation: the type id a client submits to run
+// it, the parameters it accepts, whether it mutates, and the action/resource a grant
+// must authorize for it to run. It is what an agent reads to actually perform work
+// (as opposed to Action, which is the vocabulary a grant request is built from).
+type OperationSpec struct {
+	Type        string  `json:"type"`
+	Title       string  `json:"title"`
+	Action      string  `json:"action"`
+	Resource    string  `json:"resource"`
+	Mutating    bool    `json:"mutating"`
+	Params      []Param `json:"params"`
+	Description string  `json:"description,omitempty"`
+}
+
 // ScopeFunc translates a capability's resource selector into the Cedar entity its
 // permit's `resource in` clause is scoped to, plus a human-readable label for the
 // consent screen. It is the one piece of resource logic that is domain-specific, so
 // the SDK user supplies it alongside the Schema.
 type ScopeFunc func(sel ResourceSelector) (entityType, entityID, label string, err error)
+
+// Template is a gateway-authored, parameterized permission shape a client can instantiate
+// instead of assembling a raw capability. Its parameters bind either to the scope
+// selector (Field) or to an attribute condition (Attr+Op), and may be pinned by the
+// author (Fixed). The gateway expands a template plus its bindings into a single permit
+// and a readable presentation, so the consent screen reads well while the raw policy
+// remains inspectable.
+type Template struct {
+	Name        string          `json:"name"`
+	Title       string          `json:"title"`
+	Description string          `json:"description"`
+	Summary     string          `json:"summary"` // shown on consent, with {param} placeholders
+	Actions     []string        `json:"actions"` // actions or groups granted
+	Scope       string          `json:"scope"`   // resource type of the scope selector
+	Params      []TemplateParam `json:"params"`
+}
+
+// TemplateParam is one parameter of a Template. A param with Field set contributes to the
+// scope selector's match; a param with Attr+Op set becomes a Cedar condition on that
+// resource attribute. Fixed pins the value (the client cannot bind it); otherwise the
+// client supplies it (falling back to Default), and Required rejects an empty result.
+type TemplateParam struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Required    bool   `json:"required,omitempty"`
+	Default     string `json:"default,omitempty"`
+	Fixed       string `json:"fixed,omitempty"`
+	Field       string `json:"field,omitempty"` // scope: selector match field this fills
+	Attr        string `json:"attr,omitempty"`  // condition: resource attribute name
+	Op          string `json:"op,omitempty"`    // condition operator: eq | contains | like
+}
 
 // Schema is the permission vocabulary a gateway exposes. Resources, Groups and Actions
 // are served to clients (as JSON) so they can build grant requests; AgentType,
@@ -78,10 +133,12 @@ type Schema struct {
 	ActionType string `json:"-"`
 	AgentID    string `json:"-"`
 
-	Resources []ResourceType   `json:"resources"`
-	Groups    []Group          `json:"groups"`
-	Actions   []Action         `json:"actions"`
-	Example   api.GrantRequest `json:"request_example"`
+	Resources  []ResourceType   `json:"resources"`
+	Groups     []Group          `json:"groups"`
+	Actions    []Action         `json:"actions"`
+	Operations []OperationSpec  `json:"operations"`
+	Templates  []Template       `json:"templates"`
+	Example    api.GrantRequest `json:"request_example"`
 
 	// Scope maps a capability selector to a Cedar scope entity; supplied by the user.
 	Scope ScopeFunc `json:"-"`

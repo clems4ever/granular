@@ -34,6 +34,14 @@ type Config struct {
 	// secret loaded from its secret_file.
 	Gateways []Gateway `yaml:"gateways"`
 
+	// AdminTokenFile holds the bearer token that gates the policy-administration
+	// endpoints (PUT/GET/DELETE /api/policy). The granular-policy admin CLI presents
+	// it; when unset, policy administration is disabled.
+	AdminTokenFile string `yaml:"admin_token_file"`
+
+	// AdminToken is read from AdminTokenFile at load time.
+	AdminToken string `yaml:"-"`
+
 	// Auth holds the GitHub-OAuth settings protecting the human consent screen.
 	Auth Auth `yaml:"auth"`
 }
@@ -107,6 +115,9 @@ func (c *Config) resolveSecrets() error {
 		if c.Gateways[i].Secret, err = readSecretFile(c.Gateways[i].SecretFile); err != nil {
 			return fmt.Errorf("gateways[%d].secret_file: %w", i, err)
 		}
+	}
+	if c.AdminToken, err = readSecretFile(c.AdminTokenFile); err != nil {
+		return fmt.Errorf("admin_token_file: %w", err)
 	}
 	if c.Auth.ClientSecret, err = readSecretFile(c.Auth.ClientSecretFile); err != nil {
 		return fmt.Errorf("auth.client_secret_file: %w", err)

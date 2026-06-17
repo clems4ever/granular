@@ -70,10 +70,10 @@ func fakeAS(t *testing.T, got *proposalSubmit) *httptest.Server {
 		w.WriteHeader(http.StatusCreated)
 		_ = json.NewEncoder(w).Encode(policyResult{Token: "tok"})
 	})
-	mux.HandleFunc("GET /api/policy", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("GET /api/policy/{token}", func(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewEncoder(w).Encode(policyResult{Grants: []Grant{{GatewayID: "g1", ExpiresAt: "soon"}}})
 	})
-	mux.HandleFunc("DELETE /api/policy", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("DELETE /api/policy/{token}", func(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewEncoder(w).Encode(map[string]int{"destroyed": 2})
 	})
 	mux.HandleFunc("POST /api/proposals", func(w http.ResponseWriter, r *http.Request) {
@@ -210,34 +210,39 @@ func TestSubmitSendsBundle(t *testing.T) {
 	}
 }
 
-// TestCreatePolicySetsToken creates a policy and adopts the returned token.
-func TestCreatePolicySetsToken(t *testing.T) {
+// TestCreatePolicyReturnsToken mints a policy with the admin token without changing the
+// configured admin token.
+func TestCreatePolicyReturnsToken(t *testing.T) {
 	as := fakeAS(t, nil)
-	c := New(Config{ASURL: as.URL})
+	c := New(Config{ASURL: as.URL, Token: "admin"})
 	tok, err := c.CreatePolicy(context.Background())
 	if err != nil || tok != "tok" {
 		t.Fatalf("create: %q %v", tok, err)
 	}
-	if c.Token() != "tok" {
-		t.Fatalf("token not adopted: %q", c.Token())
+	if c.Token() != "admin" {
+		t.Fatalf("admin token changed: %q", c.Token())
+	}
+	// Without an admin token, creation is refused.
+	if _, err := New(Config{ASURL: as.URL}).CreatePolicy(context.Background()); !errors.Is(err, ErrNoToken) {
+		t.Fatalf("want ErrNoToken, got %v", err)
 	}
 }
 
-// TestPolicyReadsGrants lists the grants attached to a policy token.
+// TestPolicyReadsGrants lists the grants attached to a named policy token.
 func TestPolicyReadsGrants(t *testing.T) {
 	as := fakeAS(t, nil)
-	c := New(Config{ASURL: as.URL, Token: "tok"})
-	grants, err := c.Policy(context.Background())
+	c := New(Config{ASURL: as.URL, Token: "admin"})
+	grants, err := c.Policy(context.Background(), "somepolicy")
 	if err != nil || len(grants) != 1 || grants[0].GatewayID != "g1" {
 		t.Fatalf("grants: %v %v", grants, err)
 	}
 }
 
-// TestDestroyPolicy destroys a policy and reports the number removed.
+// TestDestroyPolicy destroys a named policy and reports the number removed.
 func TestDestroyPolicy(t *testing.T) {
 	as := fakeAS(t, nil)
-	c := New(Config{ASURL: as.URL, Token: "tok"})
-	n, err := c.DestroyPolicy(context.Background())
+	c := New(Config{ASURL: as.URL, Token: "admin"})
+	n, err := c.DestroyPolicy(context.Background(), "somepolicy")
 	if err != nil || n != 2 {
 		t.Fatalf("destroy: %d %v", n, err)
 	}

@@ -3,6 +3,7 @@ package gateway
 import (
 	"context"
 	"fmt"
+	"sort"
 )
 
 // ResourceRef is an operation-supplied description of a resource being acted on: its
@@ -63,6 +64,20 @@ func NewRegistry() *Registry {
 // @testcase TestRegistry registers a factory and builds an operation from it.
 func (r *Registry) Register(opType string, factory Factory) {
 	r.factories[opType] = factory
+}
+
+// Types returns the registered operation type ids in sorted order.
+//
+// @return []string The registered operation type ids.
+//
+// @testcase TestRegistry lists the registered types.
+func (r *Registry) Types() []string {
+	out := make([]string, 0, len(r.factories))
+	for t := range r.factories {
+		out = append(out, t)
+	}
+	sort.Strings(out)
+	return out
 }
 
 // Build constructs the Operation described by req using the registered factory for its

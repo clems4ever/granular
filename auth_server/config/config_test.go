@@ -14,9 +14,14 @@ func TestLoadParsesYAML(t *testing.T) {
 	if err := os.WriteFile(secret, []byte("  s3cret\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
+	adminTok := filepath.Join(dir, "admin.token")
+	if err := os.WriteFile(adminTok, []byte("  admintok\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
 	cfgPath := filepath.Join(dir, "as.yaml")
 	body := "addr: \":7000\"\n" +
 		"base_url: \"http://as.example\"\n" +
+		"admin_token_file: " + adminTok + "\n" +
 		"gateways:\n" +
 		"  - id: github-gateway\n" +
 		"    secret_file: " + secret + "\n"
@@ -33,6 +38,9 @@ func TestLoadParsesYAML(t *testing.T) {
 	}
 	if got := cfg.GatewaySecrets()["github-gateway"]; got != "s3cret" {
 		t.Fatalf("gateway secret = %q, want trimmed s3cret", got)
+	}
+	if cfg.AdminToken != "admintok" {
+		t.Fatalf("admin token = %q, want trimmed admintok", cfg.AdminToken)
 	}
 }
 

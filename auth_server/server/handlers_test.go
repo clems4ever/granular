@@ -64,10 +64,10 @@ func TestGetPolicyReturnsGrants(t *testing.T) {
 	id := propose(t, h, token, "me@example.com")
 	approve(t, h, id)
 
-	resp := do(t, h, http.MethodGet, "/api/policy", nil, token, false)
+	resp := do(t, h, http.MethodGet, "/api/policy/"+token, nil, adminToken, false)
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		t.Fatalf("GET /api/policy = %d, want 200", resp.StatusCode)
+		t.Fatalf("GET /api/policy/{token} = %d, want 200", resp.StatusCode)
 	}
 	var out policyOutput
 	_ = json.NewDecoder(resp.Body).Decode(&out)
@@ -76,21 +76,44 @@ func TestGetPolicyReturnsGrants(t *testing.T) {
 	}
 }
 
-// TestDestroyPolicyEndpoint destroys a policy and then rejects its token.
+// TestDestroyPolicyEndpoint destroys a policy and then no longer finds it.
 func TestDestroyPolicyEndpoint(t *testing.T) {
 	_, h := newServer(t)
 	token := createPolicy(t, h)
 
-	resp := do(t, h, http.MethodDelete, "/api/policy", nil, token, false)
+	resp := do(t, h, http.MethodDelete, "/api/policy/"+token, nil, adminToken, false)
 	resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		t.Fatalf("DELETE /api/policy = %d, want 200", resp.StatusCode)
+		t.Fatalf("DELETE /api/policy/{token} = %d, want 200", resp.StatusCode)
 	}
 	// The token no longer identifies a policy.
-	resp2 := do(t, h, http.MethodGet, "/api/policy", nil, token, false)
+	resp2 := do(t, h, http.MethodGet, "/api/policy/"+token, nil, adminToken, false)
 	resp2.Body.Close()
-	if resp2.StatusCode != http.StatusUnauthorized {
-		t.Fatalf("GET after destroy = %d, want 401", resp2.StatusCode)
+	if resp2.StatusCode != http.StatusNotFound {
+		t.Fatalf("GET after destroy = %d, want 404", resp2.StatusCode)
+	}
+}
+
+// TestPolicyAdminRequiresAdminToken checks the policy-administration endpoints reject a
+// missing or wrong admin token, and are disabled when no admin token is configured.
+func TestPolicyAdminRequiresAdminToken(t *testing.T) {
+	srv, h := newServer(t)
+
+	// No token / wrong token are rejected.
+	for _, bearer := range []string{"", "wrong"} {
+		resp := do(t, h, http.MethodPut, "/api/policy", nil, bearer, false)
+		resp.Body.Close()
+		if resp.StatusCode != http.StatusUnauthorized {
+			t.Fatalf("PUT with bearer %q = %d, want 401", bearer, resp.StatusCode)
+		}
+	}
+
+	// With no admin token configured the endpoints are disabled.
+	srv.UseAdminToken("")
+	resp := do(t, h, http.MethodPut, "/api/policy", nil, adminToken, false)
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusServiceUnavailable {
+		t.Fatalf("PUT with admin disabled = %d, want 503", resp.StatusCode)
 	}
 }
 

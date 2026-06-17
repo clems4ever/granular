@@ -9,8 +9,8 @@
 		{
 			"function_name": "viewItems",
 			"documentation_hash": "cabd55c2f4384a6f41865222c7cf306e49910a22d475fd2cbc91bf20cbaf620a",
-			"definition_hash": "c91a72afe5d4f030c7a1ce13f76a23d30c653fe9273f34beacc0709cf5a8b2b7",
-			"reviewed_at": "2026-06-17T05:59:07.659858738Z"
+			"definition_hash": "95b4f7902494d96a3b93cc0c1a20b9352fbe994589246a1d341d7073f0fb0356",
+			"reviewed_at": "2026-06-17T09:30:29.948564995Z"
 		},
 		{
 			"function_name": "approverGate",

@@ -1,13 +1,13 @@
 // Command granular-policy is the administrative CLI for policy lifecycle on the
 // authorization server (AS). Policy management is independent from the grant management
-// the granular client CLI performs: an administrator mints a policy token here, hands it
-// to a client (which submits proposals and runs operations under it), and can inspect or
-// destroy it. It is a thin implementation of the client SDK's policy methods.
+// the granular client CLI performs: an administrator authenticates with the AS admin
+// token, mints a policy token here, hands it to a client (which submits proposals and
+// runs operations under it), and can inspect or destroy it. It is a thin implementation
+// of the client SDK's policy methods.
 package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -18,12 +18,13 @@ import (
 	"github.com/clems4ever/granular/client"
 )
 
-// admin holds the policy CLI's shared state: the AS URL, the token flags, and the writer.
+// admin holds the policy CLI's shared state: the AS URL, the admin-token flags, and the
+// output writer.
 type admin struct {
-	asURL     string
-	token     string
-	tokenFile string
-	out       io.Writer
+	asURL          string
+	adminToken     string
+	adminTokenFile string
+	out            io.Writer
 }
 
 // main builds the command tree and executes it, exiting non-zero on error.
@@ -52,27 +53,30 @@ func newRootCmd(out io.Writer) *cobra.Command {
 		SilenceErrors: true,
 	}
 	root.PersistentFlags().StringVar(&a.asURL, "as", "http://localhost:9090", "authorization server base URL")
-	root.PersistentFlags().StringVar(&a.token, "token", "", "policy token (for show/destroy)")
-	root.PersistentFlags().StringVar(&a.tokenFile, "token-file", "", "file holding the policy token (for show/destroy)")
+	root.PersistentFlags().StringVar(&a.adminToken, "admin-token", "", "AS admin token (gates policy administration)")
+	root.PersistentFlags().StringVar(&a.adminTokenFile, "admin-token-file", "", "file holding the AS admin token")
 	root.AddCommand(a.createCmd(), a.showCmd(), a.destroyCmd())
 	return root
 }
 
-// client builds an SDK client for policy operations, resolving the token from the
-// --token flag or the --token-file.
+// client builds an SDK client authenticated with the resolved admin token (from the
+// --admin-token flag or the --admin-token-file), requiring one to be set.
 //
 // @return *client.Client The configured client.
-// @error error when the token file is set but cannot be read.
+// @error error when no admin token is set or its file cannot be read.
 //
 // @testcase TestRunPolicy builds a client for the policy operations.
 func (a *admin) client() (*client.Client, error) {
-	token := a.token
-	if token == "" && a.tokenFile != "" {
-		data, err := os.ReadFile(a.tokenFile)
+	token := a.adminToken
+	if token == "" && a.adminTokenFile != "" {
+		data, err := os.ReadFile(a.adminTokenFile)
 		if err != nil {
-			return nil, fmt.Errorf("token-file: %w", err)
+			return nil, fmt.Errorf("admin-token-file: %w", err)
 		}
 		token = strings.TrimSpace(string(data))
+	}
+	if token == "" {
+		return nil, fmt.Errorf("an admin token is required (set --admin-token or --admin-token-file)")
 	}
 	return client.New(client.Config{ASURL: a.asURL, Token: token}), nil
 }
@@ -86,54 +90,60 @@ func (a *admin) createCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "create",
 		Short: "Mint a new policy token",
-		RunE:  func(*cobra.Command, []string) error { return a.run(runCreate) },
+		RunE: func(*cobra.Command, []string) error {
+			c, err := a.client()
+			if err != nil {
+				return err
+			}
+			return runCreate(context.Background(), c, a.out)
+		},
 	}
 }
 
-// showCmd builds the "show" command: list the grants attached to the policy token.
+// showCmd builds the "show" command: list the grants attached to a policy token.
 //
 // @return *cobra.Command The show command.
 //
 // @testcase TestCommandTree checks the show command is present.
 func (a *admin) showCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "show",
-		Short: "Show the grants attached to the policy token",
-		RunE:  func(*cobra.Command, []string) error { return a.run(runShow) },
+		Use:   "show <policy-token>",
+		Short: "Show the grants attached to a policy token",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			c, err := a.client()
+			if err != nil {
+				return err
+			}
+			return runShow(context.Background(), c, args[0], a.out)
+		},
 	}
 }
 
-// destroyCmd builds the "destroy" command: destroy the policy token and its grants.
+// destroyCmd builds the "destroy" command: destroy a policy token and its grants.
 //
 // @return *cobra.Command The destroy command.
 //
 // @testcase TestCommandTree checks the destroy command is present.
 func (a *admin) destroyCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "destroy",
-		Short: "Destroy the policy token and its grants",
-		RunE:  func(*cobra.Command, []string) error { return a.run(runDestroy) },
+		Use:   "destroy <policy-token>",
+		Short: "Destroy a policy token and its grants",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			c, err := a.client()
+			if err != nil {
+				return err
+			}
+			return runDestroy(context.Background(), c, args[0], a.out)
+		},
 	}
-}
-
-// run builds the client and invokes a policy action with it and the output writer.
-//
-// @arg action The policy action to run with the client.
-// @error error when the client cannot be built or the action fails.
-//
-// @testcase TestRunPolicy runs the create/show/destroy actions.
-func (a *admin) run(action func(context.Context, *client.Client, io.Writer) error) error {
-	c, err := a.client()
-	if err != nil {
-		return err
-	}
-	return action(context.Background(), c, a.out)
 }
 
 // runCreate mints a policy token and prints it for the administrator to distribute.
 //
 // @arg ctx Context for cancellation.
-// @arg c The client SDK.
+// @arg c The client SDK (authenticated with the admin token).
 // @arg w The writer for output.
 // @error error when the AS call fails.
 //
@@ -147,20 +157,17 @@ func runCreate(ctx context.Context, c *client.Client, w io.Writer) error {
 	return nil
 }
 
-// runShow lists the active grants attached to the policy token.
+// runShow lists the active grants attached to a policy token.
 //
 // @arg ctx Context for cancellation.
-// @arg c The client SDK.
+// @arg c The client SDK (authenticated with the admin token).
+// @arg policyToken The policy token to inspect.
 // @arg w The writer for output.
-// @error ErrNoToken when no token is configured.
 // @error error when the AS call fails.
 //
 // @testcase TestRunPolicy lists grants.
-func runShow(ctx context.Context, c *client.Client, w io.Writer) error {
-	if c.Token() == "" {
-		return errors.New("a token is required (set --token or --token-file)")
-	}
-	grants, err := c.Policy(ctx)
+func runShow(ctx context.Context, c *client.Client, policyToken string, w io.Writer) error {
+	grants, err := c.Policy(ctx, policyToken)
 	if err != nil {
 		return err
 	}
@@ -174,19 +181,17 @@ func runShow(ctx context.Context, c *client.Client, w io.Writer) error {
 	return nil
 }
 
-// runDestroy destroys the policy token and prints how many grants were removed.
+// runDestroy destroys a policy token and prints how many grants were removed.
 //
 // @arg ctx Context for cancellation.
-// @arg c The client SDK.
+// @arg c The client SDK (authenticated with the admin token).
+// @arg policyToken The policy token to destroy.
 // @arg w The writer for output.
-// @error error when no token is configured or the AS call fails.
+// @error error when the AS call fails.
 //
 // @testcase TestRunPolicy destroys the policy.
-func runDestroy(ctx context.Context, c *client.Client, w io.Writer) error {
-	if c.Token() == "" {
-		return errors.New("a token is required (set --token or --token-file)")
-	}
-	n, err := c.DestroyPolicy(ctx)
+func runDestroy(ctx context.Context, c *client.Client, policyToken string, w io.Writer) error {
+	n, err := c.DestroyPolicy(ctx, policyToken)
 	if err != nil {
 		return err
 	}

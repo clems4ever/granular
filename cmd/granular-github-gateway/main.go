@@ -25,7 +25,7 @@ import (
 //
 // @testcase TestMainIsEntryPoint is a placeholder; main only delegates to run.
 func main() {
-	configPath := flag.String("config", "granular-gateway.yaml", "path to the YAML configuration file")
+	configPath := flag.String("config", "granular-github-gateway.yaml", "path to the YAML configuration file")
 	flag.Parse()
 	cfg, err := loadConfig(*configPath)
 	if err != nil {

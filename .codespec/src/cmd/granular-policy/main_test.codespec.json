@@ -3,8 +3,8 @@
 		{
 			"function_name": "fakeAS",
 			"documentation_hash": "cac408bcdb1a96ab362f918bbfc847879443279eeca85abc5e2f07758bfc3ac6",
-			"definition_hash": "fdf410684fc7d4d3fec51c067d85f30e699257c67b17b03a17f5dcf2fce4f5df",
-			"reviewed_at": "2026-06-17T06:58:24.500911782Z"
+			"definition_hash": "79ca7f4b56800e4bad4c436537c39748c8188b8aa42f0bff1e0a3ba81243d437",
+			"reviewed_at": "2026-06-17T07:18:41.230821321Z"
 		},
 		{
 			"function_name": "TestMainIsEntryPoint",
@@ -20,9 +20,15 @@
 		},
 		{
 			"function_name": "TestRunPolicy",
-			"documentation_hash": "30dbb95eec3994ea2f03d71719bc002214885e5273aeae0f6886b3dd69090b0f",
-			"definition_hash": "020c3f7e951aa38b595f44cde17e3c4c15274fb0a11e1ecb7961f46ddbba203b",
-			"reviewed_at": "2026-06-17T06:58:24.502714934Z"
+			"documentation_hash": "ceb9fa054e6ed61d339d9983a281c0130b20c38a276588bb0b763b07e738cd46",
+			"definition_hash": "72d0238aef2f6f67ff51eee8eceef518be22e1c1c5ea6599bc18f0be34976b1f",
+			"reviewed_at": "2026-06-17T07:18:41.231326303Z"
+		},
+		{
+			"function_name": "TestClientRequiresAdminToken",
+			"documentation_hash": "7e340697cca94cfc4faddf25bb5d64294020030cdf68ef5f1098dd6dc3e798ca",
+			"definition_hash": "76f5a1d86655081ab1ff42471a0d0f831fbdec40c89a2f11f6f5d4fa7a683a04",
+			"reviewed_at": "2026-06-17T07:18:41.231099104Z"
 		}
 	]
 }

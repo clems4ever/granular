@@ -17,15 +17,25 @@ import (
 	"encoding/json"
 )
 
+// GrantDetail is the structured, human-readable breakdown of one permit a grant would
+// add. The consent screen shows it when the user expands a request to inspect what it
+// really grants; it is index-aligned with the SignedGrantRequest's Policies, so each
+// detail describes the raw Cedar policy at the same position.
+type GrantDetail struct {
+	Actions    []string `json:"actions,omitempty"`
+	Resource   string   `json:"resource,omitempty"`
+	Conditions []string `json:"conditions,omitempty"`
+}
+
 // Presentation is the human-readable description a Gateway authors for a grant
 // request. The AS displays it verbatim on the consent screen; it carries no machine
-// meaning.
+// meaning. Summary is the collapsed one-line view; Grants is the expandable per-permit
+// breakdown, and the raw Policies (shown at the deepest expand) are the ground truth.
 type Presentation struct {
-	Title       string   `json:"title"`
-	Summary     string   `json:"summary"`
-	Detail      string   `json:"detail,omitempty"`
-	Permissions []string `json:"permissions,omitempty"`
-	Scopes      []string `json:"scopes,omitempty"`
+	Title   string        `json:"title"`
+	Summary string        `json:"summary"`
+	Detail  string        `json:"detail,omitempty"`
+	Grants  []GrantDetail `json:"grants,omitempty"`
 }
 
 // SignedGrantRequest is one Gateway-authored, Gateway-signed grant request. The HMAC

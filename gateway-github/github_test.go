@@ -2,11 +2,15 @@ package gatewaygithub
 
 import (
 	"context"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 
 	"github.com/clems4ever/granular/gateway"
 	"github.com/clems4ever/granular/internal/operations"
+	"github.com/clems4ever/granular/internal/proposal"
 )
 
 // TestSchemaDerivedFromCatalog checks the schema mirrors the catalog and carries the
@@ -72,5 +76,96 @@ func TestRegistryBuildsCloneOperation(t *testing.T) {
 
 	if _, err := reg.Build(gateway.OperationRequest{Type: "github.unknown"}); err == nil {
 		t.Fatal("expected unknown-type error")
+	}
+}
+
+// TestTemplatesExpand checks every authored template is exposed in the schema and signs
+// into a verifiable grant request with the expected scope and conditions.
+func TestTemplatesExpand(t *testing.T) {
+	env := operations.Env{BaseURL: "http://gw", GitHubToken: "x"}
+	gw := gateway.New(gateway.Config{
+		Schema: Schema(), Registry: Registry(env),
+		GatewayID: "github-gateway", Secret: []byte("s"),
+	})
+
+	bind := map[string]map[string]string{
+		"read-repo":              {"owner": "clems4ever", "name": "granular"},
+		"comment-on-open-issues": {"owner": "clems4ever", "name": "granular", "label": "bug"},
+		"triage-issues":          {"owner": "clems4ever", "name": "granular"},
+	}
+	names := map[string]bool{}
+	for _, tpl := range Schema().Templates {
+		names[tpl.Name] = true
+	}
+	for name := range bind {
+		if !names[name] {
+			t.Fatalf("template %q not exposed in schema", name)
+		}
+	}
+
+	sign := func(name string, bindings map[string]string) proposal.SignedGrantRequest {
+		body, _ := json.Marshal(gateway.GrantRequest{Template: name, Bindings: bindings})
+		ts := httptest.NewServer(gw.Handler())
+		defer ts.Close()
+		resp, err := http.Post(ts.URL+"/api/grant-requests/sign", "application/json", strings.NewReader(string(body)))
+		if err != nil {
+			t.Fatalf("post: %v", err)
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode != http.StatusOK {
+			t.Fatalf("template %q sign status %d", name, resp.StatusCode)
+		}
+		var sgr proposal.SignedGrantRequest
+		if err := json.NewDecoder(resp.Body).Decode(&sgr); err != nil {
+			t.Fatalf("decode: %v", err)
+		}
+		if !sgr.Verify([]byte("s")) || len(sgr.Policies) != 1 {
+			t.Fatalf("template %q: bad signed request %+v", name, sgr)
+		}
+		return sgr
+	}
+
+	for name, bindings := range bind {
+		sgr := sign(name, bindings)
+		if !strings.Contains(sgr.Policies[0], `GitHub::Repo::"clems4ever/granular"`) {
+			t.Fatalf("template %q scope wrong: %s", name, sgr.Policies[0])
+		}
+	}
+
+	// comment-on-open-issues carries the fixed open-state and label conditions.
+	sgr := sign("comment-on-open-issues", bind["comment-on-open-issues"])
+	if !strings.Contains(sgr.Policies[0], `resource.state == "open"`) || !strings.Contains(sgr.Policies[0], `resource.labels.contains("bug")`) {
+		t.Fatalf("missing conditions: %s", sgr.Policies[0])
+	}
+	if len(sgr.Presentation.Grants) != 1 || len(sgr.Presentation.Grants[0].Conditions) != 2 {
+		t.Fatalf("presentation conditions: %+v", sgr.Presentation.Grants)
+	}
+}
+
+// TestOperationSpecsCoverRegistry checks there is exactly one operation spec per
+// registered operation, and that each spec names a real action and resource.
+func TestOperationSpecsCoverRegistry(t *testing.T) {
+	specs := operationSpecs()
+	registered := map[string]bool{}
+	for _, ty := range Registry(operations.Env{}).Types() {
+		registered[ty] = true
+	}
+	if len(specs) != len(registered) {
+		t.Fatalf("%d specs for %d registered operations", len(specs), len(registered))
+	}
+	s := Schema()
+	for _, op := range specs {
+		if !registered[op.Type] {
+			t.Fatalf("spec for unregistered operation %q", op.Type)
+		}
+		if !s.HasAction(op.Action) {
+			t.Fatalf("operation %q names unknown action %q", op.Type, op.Action)
+		}
+		if _, ok := s.ResourceEntity(op.Resource); !ok {
+			t.Fatalf("operation %q names unknown resource %q", op.Type, op.Resource)
+		}
+		if len(op.Params) == 0 {
+			t.Fatalf("operation %q has no params", op.Type)
+		}
 	}
 }
