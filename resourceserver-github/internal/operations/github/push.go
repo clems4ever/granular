@@ -3,7 +3,6 @@ package github
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/clems4ever/granular/resourceserver-github/internal/authz"
 	"github.com/clems4ever/granular/resourceserver-github/internal/operations"
@@ -13,12 +12,11 @@ import (
 const TypePush = "github.push"
 
 // PushOperation authorises pushing to a single GitHub repository through the server
-// git proxy. Like clone, the push itself runs on the client against the brokered
-// proxy URL, which injects the server-held PAT. Grants are scoped to the whole
-// repository.
+// git proxy. Like clone, the push itself runs on the client against the resource
+// server's relative proxy path, which injects the server-held PAT. Grants are scoped
+// to the whole repository.
 type PushOperation struct {
-	repo    string
-	baseURL string
+	repo string
 }
 
 // Push builds a PushOperation from request parameters and the server Env. It
@@ -26,7 +24,7 @@ type PushOperation struct {
 // "owner/name").
 //
 // @arg params The wire parameters carrying repo.
-// @arg env The server Env supplying the public base URL.
+// @arg env The server Env (unused: the push path is resource-server-relative).
 // @return operations.Operation A ready-to-authorise PushOperation.
 // @error ErrMissingRepo if the "repo" parameter is absent or empty.
 //
@@ -37,7 +35,7 @@ func Push(params map[string]any, env operations.Env) (operations.Operation, erro
 	if repo == "" {
 		return nil, ErrMissingRepo
 	}
-	return &PushOperation{repo: NormalizeRepo(repo), baseURL: env.BaseURL}, nil
+	return &PushOperation{repo: NormalizeRepo(repo)}, nil
 }
 
 // Type returns the github.push type id.
@@ -65,17 +63,19 @@ func (o *PushOperation) Describe() string {
 	return fmt.Sprintf("Push to GitHub repository %s through the granular proxy", o.repo)
 }
 
-// Execute does no server-side work: it returns the brokered push URL the client
-// should push to, which routes back through the server's authenticating git proxy.
+// Execute does no server-side work: it returns the resource-server-relative push
+// path the client should push to. The client joins it with the resource server URL
+// it already uses, and the request routes back through the server's authenticating
+// git proxy (which injects the server-held PAT).
 //
 // @arg ctx Context (unused; the push happens on the client).
-// @return map[string]any Result with a "push_url" and the "repo".
+// @return map[string]any Result with a relative "push_path" and the "repo".
 // @error error is always nil; the signature matches operations.Operation.
 //
-// @testcase TestPushExecuteReturnsProxyURL checks the brokered URL is built.
+// @testcase TestPushExecuteReturnsProxyPath checks the relative path is built.
 func (o *PushOperation) Execute(ctx context.Context) (map[string]any, error) {
 	return map[string]any{
-		"push_url": strings.TrimRight(o.baseURL, "/") + "/git/" + o.repo + ".git",
-		"repo":     o.repo,
+		"push_path": "/git/" + o.repo + ".git",
+		"repo":      o.repo,
 	}, nil
 }

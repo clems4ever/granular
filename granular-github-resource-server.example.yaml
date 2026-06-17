@@ -6,9 +6,10 @@
 # the permission schema, signs grant requests for clients, and verifies operations
 # against the authorization server (AS) before executing them.
 
-# HTTP listen address and externally reachable base URL (used for brokered URLs).
+# HTTP listen address. Clients reach this resource server at the URL configured on
+# their side (the client's resource_servers[].base_url), and git clone/push traffic is
+# proxied back through that same URL — the resource server needs no base_url of its own.
 addr: ":8080"
-base_url: "http://localhost:8080"
 
 # This resource server's id, registered with the AS, and the AS base URL it calls to verify
 # operations. The resource_server_id must match an entry in the AS's `resource_servers:` list.

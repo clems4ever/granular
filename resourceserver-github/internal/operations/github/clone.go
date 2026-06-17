@@ -1,7 +1,8 @@
 // Package github implements granular operations targeting GitHub. The first is
 // github.clone: it does not clone server-side. Instead, once approved, it hands
-// the client a brokered clone URL pointing at the server's git proxy, which
-// injects the server-held PAT. The actual clone runs on the client.
+// the client a resource-server-relative clone path pointing at the server's git
+// proxy, which injects the server-held PAT. The actual clone runs on the client,
+// against the resource server URL it already uses.
 package github
 
 import (
@@ -19,8 +20,7 @@ const TypeClone = "github.clone"
 // CloneOperation authorises cloning a single GitHub repository through the server
 // git proxy. Grants are scoped to the whole repository.
 type CloneOperation struct {
-	repo    string
-	baseURL string
+	repo string
 }
 
 // Clone builds a CloneOperation from request parameters and the server Env. It
@@ -28,7 +28,7 @@ type CloneOperation struct {
 // "owner/name").
 //
 // @arg params The wire parameters carrying repo.
-// @arg env The server Env supplying the public base URL.
+// @arg env The server Env (unused: the clone path is resource-server-relative).
 // @return operations.Operation A ready-to-authorise CloneOperation.
 // @error ErrMissingRepo if the "repo" parameter is absent or empty.
 //
@@ -39,7 +39,7 @@ func Clone(params map[string]any, env operations.Env) (operations.Operation, err
 	if repo == "" {
 		return nil, ErrMissingRepo
 	}
-	return &CloneOperation{repo: NormalizeRepo(repo), baseURL: env.BaseURL}, nil
+	return &CloneOperation{repo: NormalizeRepo(repo)}, nil
 }
 
 // Type returns the github.clone type id.
@@ -67,19 +67,20 @@ func (o *CloneOperation) Describe() string {
 	return fmt.Sprintf("Clone GitHub repository %s through the granular proxy", o.repo)
 }
 
-// Execute does no server-side work: it returns the brokered clone URL the client
-// should clone from, which routes back through the server's authenticating git
-// proxy.
+// Execute does no server-side work: it returns the resource-server-relative clone
+// path the client should clone from. The client joins it with the resource server
+// URL it already uses, and the request routes back through the server's
+// authenticating git proxy (which injects the server-held PAT).
 //
 // @arg ctx Context (unused; the clone happens on the client).
-// @return map[string]any Result with a "clone_url" and the "repo".
+// @return map[string]any Result with a relative "clone_path" and the "repo".
 // @error error is always nil; the signature matches operations.Operation.
 //
-// @testcase TestExecuteReturnsProxyCloneURL checks the brokered URL is built.
+// @testcase TestExecuteReturnsProxyClonePath checks the relative path is built.
 func (o *CloneOperation) Execute(ctx context.Context) (map[string]any, error) {
 	return map[string]any{
-		"clone_url": strings.TrimRight(o.baseURL, "/") + "/git/" + o.repo + ".git",
-		"repo":      o.repo,
+		"clone_path": "/git/" + o.repo + ".git",
+		"repo":       o.repo,
 	}, nil
 }
 

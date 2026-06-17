@@ -74,12 +74,12 @@ func run(cfg *rsconfig.Config) error {
 	verifier := asclient.New(cfg.ASURL, cfg.ResourceServerID, []byte(cfg.Secret))
 	rs := resourceserver.New(resourceserver.Config{
 		Schema:           resourceservergithub.Schema(),
-		Registry:         resourceservergithub.Registry(cfg.GitHubToken, cfg.BaseURL),
+		Registry:         resourceservergithub.Registry(cfg.GitHubToken),
 		ResourceServerID: cfg.ResourceServerID,
 		Secret:           []byte(cfg.Secret),
 		Verifier:         verifier,
 	})
 
-	log.Printf("granular-github-resource-server %q listening on %s (base URL %s, AS %s)", cfg.ResourceServerID, cfg.Addr, cfg.BaseURL, cfg.ASURL)
+	log.Printf("granular-github-resource-server %q listening on %s (AS %s)", cfg.ResourceServerID, cfg.Addr, cfg.ASURL)
 	return fmt.Errorf("server stopped: %w", http.ListenAndServe(cfg.Addr, rs.Handler()))
 }

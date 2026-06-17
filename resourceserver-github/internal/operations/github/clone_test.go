@@ -39,15 +39,15 @@ func TestCloneDescribe(t *testing.T) {
 	}
 }
 
-// TestExecuteReturnsProxyCloneURL checks executing a clone returns the brokered proxy clone URL.
-func TestExecuteReturnsProxyCloneURL(t *testing.T) {
-	op, _ := Clone(map[string]any{"repo": "owner/name"}, operations.Env{BaseURL: "http://localhost:8080"})
+// TestExecuteReturnsProxyClonePath checks executing a clone returns the resource-server-relative proxy clone path.
+func TestExecuteReturnsProxyClonePath(t *testing.T) {
+	op, _ := Clone(map[string]any{"repo": "owner/name"}, operations.Env{})
 	result, err := op.Execute(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := result["clone_url"]; got != "http://localhost:8080/git/owner/name.git" {
-		t.Fatalf("unexpected clone_url %v", got)
+	if got := result["clone_path"]; got != "/git/owner/name.git" {
+		t.Fatalf("unexpected clone_path %v", got)
 	}
 }
 

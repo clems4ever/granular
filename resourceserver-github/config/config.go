@@ -16,8 +16,7 @@ import (
 
 // Config is the GitHub resource server configuration.
 type Config struct {
-	Addr    string `yaml:"addr"`
-	BaseURL string `yaml:"base_url"`
+	Addr string `yaml:"addr"`
 
 	// ResourceServerID identifies this resource server to the AS; ASURL is the AS base URL the resource server
 	// calls to verify operations.
@@ -116,9 +115,6 @@ func Default() *Config {
 func (c *Config) applyDefaults() {
 	if c.Addr == "" {
 		c.Addr = ":8080"
-	}
-	if c.BaseURL == "" {
-		c.BaseURL = "http://localhost" + c.Addr
 	}
 	if c.ResourceServerID == "" {
 		c.ResourceServerID = "github-resource-server"

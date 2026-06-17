@@ -2,9 +2,9 @@
 	"functions": [
 		{
 			"function_name": "Clone",
-			"documentation_hash": "aaabc718e1b41a6b3fbc433f2eeea43940d37833dc4fa636b83e9b9cabc4e4e3",
-			"definition_hash": "fedc27bc1751fa683bf00b7eea69975e3a42c8069567c1a867070db48327fffb",
-			"reviewed_at": "2026-06-17T13:00:54.614872518Z"
+			"documentation_hash": "0eb01e56d73f7108011c9f77d60a8c224aa934e833f141cb8dca3fa879879e87",
+			"definition_hash": "c40327e70ca192bec4e9a84bc2e0250dffd13f46ef4d88ec4bb45ce9264c13cb",
+			"reviewed_at": "2026-06-17T16:12:28.67879815Z"
 		},
 		{
 			"function_name": "Type",
@@ -30,9 +30,9 @@
 		{
 			"function_name": "Execute",
 			"receiver": "CloneOperation",
-			"documentation_hash": "e4943ea49a5991cfdef13b9a25f3d04584e89910f322c42eb747f4925530a581",
-			"definition_hash": "27359338acba9249049816318d3abf966435e6472f230359a27aaa70e9d6ac02",
-			"reviewed_at": "2026-06-17T13:00:54.615916283Z"
+			"documentation_hash": "2f666ad297e816e1ca6358576c617fade4136c80db424d97916480e3f20717b5",
+			"definition_hash": "2ec85892eda30550bdd414ba990f6d98ed0f3f1eec0df917b9ae04ab11bfc172",
+			"reviewed_at": "2026-06-17T16:12:28.67929767Z"
 		},
 		{
 			"function_name": "NormalizeRepo",

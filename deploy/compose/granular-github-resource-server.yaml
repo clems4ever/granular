@@ -2,8 +2,6 @@
 # Secrets are mounted by compose under /run/secrets (see docker-compose.yml).
 
 addr: ":8080"
-# Externally reachable URL of the resource server (used for brokered URLs handed to clients).
-base_url: "http://localhost:8080"
 
 # This resource server's id must match an entry in the AS's `resource_servers:` list, and as_url points
 # at the AS over the compose network (service name "auth-server").

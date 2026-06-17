@@ -84,17 +84,16 @@ func scope(sel resourceserver.ResourceSelector) (string, string, string, error) 
 }
 
 // Registry builds the SDK operation registry for all GitHub actions, binding each
-// factory to the execution environment built from the GitHub token and the public
-// base URL the operations need. Taking primitives (rather than an operations.Env)
-// keeps the GitHub operation packages internal to this resource server.
+// factory to the execution environment built from the GitHub token. Taking a
+// primitive (rather than an operations.Env) keeps the GitHub operation packages
+// internal to this resource server.
 //
 // @arg githubToken The GitHub personal access token operations authenticate with.
-// @arg baseURL The resource server's externally reachable base URL.
 // @return *resourceserver.Registry A registry with every GitHub operation registered.
 //
 // @testcase TestRegistryBuildsCloneOperation builds a github.clone operation.
-func Registry(githubToken, baseURL string) *resourceserver.Registry {
-	env := operations.Env{GitHubToken: githubToken, BaseURL: baseURL}
+func Registry(githubToken string) *resourceserver.Registry {
+	env := operations.Env{GitHubToken: githubToken}
 	reg := resourceserver.NewRegistry()
 	register := func(opType string, factory operations.Factory) {
 		reg.Register(opType, adapt(factory, env))

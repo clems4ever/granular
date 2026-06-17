@@ -29,8 +29,8 @@
 			"function_name": "applyDefaults",
 			"receiver": "Config",
 			"documentation_hash": "0c460b4a79656b151eea376cc05ee2b3f05f9de5eb4a186dbb5ea34bbfb7fb4f",
-			"definition_hash": "581d1d1edba9fb7bbe5d2eee925a1c0a5de9ac099b2601c585ea474576b104f2",
-			"reviewed_at": "2026-06-17T14:39:59.943427646Z"
+			"definition_hash": "6f959f5fcf361b6e7c2b2a71bbaa9744e4dd5f146070b7459d00ae9ebd3825dc",
+			"reviewed_at": "2026-06-17T16:12:28.67569374Z"
 		}
 	]
 }

@@ -7,12 +7,6 @@
 			"reviewed_at": "2026-06-17T13:00:54.696203264Z"
 		},
 		{
-			"function_name": "TestPushExecuteReturnsProxyURL",
-			"documentation_hash": "2e6fca9e49dc16c11a79ee6651bf9a127fe8c4c59d8bf587daf101e4d7b0a6bb",
-			"definition_hash": "4709a955633d57953b35e139a9f218feb445de7b5d2359ff4269f50c6a2e486a",
-			"reviewed_at": "2026-06-17T13:00:54.696465633Z"
-		},
-		{
 			"function_name": "TestPushFactoryRequiresRepo",
 			"documentation_hash": "3ce9ca518bdbdbf62eec9691338d7f13fcfeab3698acd59051f4c8734350d804",
 			"definition_hash": "427106a92b3ce58b8c89fa541c6ad6dbe4c40ba4d5c171cb7d81967a7c7e9e56",
@@ -23,6 +17,12 @@
 			"documentation_hash": "d50db153478727f3bda016eeb51ee198219e8e7763415e3f6ed7b3abacd0de2d",
 			"definition_hash": "115993b4b6fda1e2748602a39af6eaab1ceaf1eb898e3d33a1121902bd88ada9",
 			"reviewed_at": "2026-06-17T13:00:54.695934702Z"
+		},
+		{
+			"function_name": "TestPushExecuteReturnsProxyPath",
+			"documentation_hash": "d3ca3db6f08da13b741857a764991e687838667953a26a2e3b4e105c9a1c12d0",
+			"definition_hash": "00d96e2fc4497fe824c279ec0dc6c96b54321fe84433bf1fd853a1e15da418d0",
+			"reviewed_at": "2026-06-17T16:12:28.68038557Z"
 		}
 	]
 }

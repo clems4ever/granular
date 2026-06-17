@@ -52,7 +52,7 @@ func TestScopeResolvesRepoAndOrg(t *testing.T) {
 // TestRegistryBuildsCloneOperation builds an adapted github.clone operation and checks
 // its converted requirements, description and executed result.
 func TestRegistryBuildsCloneOperation(t *testing.T) {
-	reg := Registry("x", "http://rs")
+	reg := Registry("x")
 	op, err := reg.Build(resourceserver.OperationRequest{Type: "github.clone", Params: map[string]any{"repo": "octocat/Hello-World"}})
 	if err != nil {
 		t.Fatalf("build: %v", err)
@@ -69,7 +69,7 @@ func TestRegistryBuildsCloneOperation(t *testing.T) {
 		t.Fatalf("describe = %q", op.Describe())
 	}
 	res, err := op.Execute(context.Background())
-	if err != nil || res["clone_url"] == nil {
+	if err != nil || res["clone_path"] != "/git/octocat/Hello-World.git" {
 		t.Fatalf("execute: %v %v", res, err)
 	}
 
@@ -82,7 +82,7 @@ func TestRegistryBuildsCloneOperation(t *testing.T) {
 // into a verifiable grant request with the expected scope and conditions.
 func TestTemplatesExpand(t *testing.T) {
 	rs := resourceserver.New(resourceserver.Config{
-		Schema: Schema(), Registry: Registry("x", "http://rs"),
+		Schema: Schema(), Registry: Registry("x"),
 		ResourceServerID: "github-resource-server", Secret: []byte("s"),
 	})
 
@@ -145,7 +145,7 @@ func TestTemplatesExpand(t *testing.T) {
 func TestOperationSpecsCoverRegistry(t *testing.T) {
 	specs := operationSpecs()
 	registered := map[string]bool{}
-	for _, ty := range Registry("", "").Types() {
+	for _, ty := range Registry("").Types() {
 		registered[ty] = true
 	}
 	if len(specs) != len(registered) {

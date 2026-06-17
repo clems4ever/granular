@@ -15,20 +15,20 @@
 		{
 			"function_name": "TestRegistryBuildsCloneOperation",
 			"documentation_hash": "74e1580d9f8008967e5f248cb2e3ca97a1c0cc8f2939f27e9814bb17b1575397",
-			"definition_hash": "359a759e03527bedbabf61a46c2a9178ac7bcf90d10f99c361cacc8557d1db9c",
-			"reviewed_at": "2026-06-17T14:46:17.123410516Z"
+			"definition_hash": "82ea74d8824f41669249d4d100ccbaa3d68cbea761384b59d4e569ff200cd89d",
+			"reviewed_at": "2026-06-17T16:12:28.677261711Z"
 		},
 		{
 			"function_name": "TestOperationSpecsCoverRegistry",
 			"documentation_hash": "8c1faedbce8f0b55258afb7694402120df9a9bd43456ac7e7ad76085ad93f8f2",
-			"definition_hash": "42a6f33c7d5e8efd69189aae29b837a64a4c805b8bcb7d7d2f8d93f9180e8bd8",
-			"reviewed_at": "2026-06-17T11:57:34.120374754Z"
+			"definition_hash": "50cfc20fab638e573ca0b3c5e05e88a51804add693b887be7c0b8cb5c6d5a69f",
+			"reviewed_at": "2026-06-17T16:12:28.67849205Z"
 		},
 		{
 			"function_name": "TestTemplatesExpand",
 			"documentation_hash": "ad52258a8c4bf864ee9463014daa765b94746bd2dc60d3652cd33c258b7d8a57",
-			"definition_hash": "816348b730734c476bdc77f2d475398cb44616af8b9d5746c7952edbec305ef1",
-			"reviewed_at": "2026-06-17T14:46:17.123991534Z"
+			"definition_hash": "951e8909dae73770678868350ea30aa663d7c452510bf0d8cfe2533d6ae3a49c",
+			"reviewed_at": "2026-06-17T16:12:28.677917599Z"
 		}
 	]
 }

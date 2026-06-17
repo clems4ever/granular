@@ -11,16 +11,12 @@ import (
 )
 
 // Env carries the server-held material an operation needs, such as platform
-// credentials and the server's public base URL (used to build brokered endpoints
-// like the git proxy). It is passed to each factory so operations never reach for
-// global state.
+// credentials. It is passed to each factory so operations never reach for global
+// state.
 type Env struct {
 	// GitHubToken is the personal access token the server injects when proxying
 	// GitHub requests on the client's behalf.
 	GitHubToken string
-	// BaseURL is the server's externally reachable base URL, used to build
-	// brokered URLs (e.g. the git proxy clone URL) handed back to the client.
-	BaseURL string
 }
 
 // Operation is a single approved-action unit: it can describe itself, derive the

@@ -14,9 +14,9 @@
 		},
 		{
 			"function_name": "Registry",
-			"documentation_hash": "4bea9c81410eb530789f90b4ba4c0b3e625c2caf063858624a3d72ff8e7118b4",
-			"definition_hash": "7148fd8c47608ed484250be6336dc6fdb2394ed997b7e54f5fa71d1fbb4d63c1",
-			"reviewed_at": "2026-06-17T14:39:59.944941283Z"
+			"documentation_hash": "44558cd86ef99f84b25514c98ab8f540710dc868002effe9552a5060d5521095",
+			"definition_hash": "4fa5718fb5962db704ed9fc0a79be5159f6146531ed3902c0dba9ef1bc4937ed",
+			"reviewed_at": "2026-06-17T16:12:28.676422615Z"
 		},
 		{
 			"function_name": "adapt",

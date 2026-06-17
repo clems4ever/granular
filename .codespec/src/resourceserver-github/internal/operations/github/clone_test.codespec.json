@@ -19,16 +19,16 @@
 			"reviewed_at": "2026-06-17T13:00:54.617781755Z"
 		},
 		{
-			"function_name": "TestExecuteReturnsProxyCloneURL",
-			"documentation_hash": "214cf64f8a72cee9aa4dca94e5509147c70b772a9863cb40494d966393d06268",
-			"definition_hash": "70a7c370db8f198a0285f41bc05f451951adb01a80ead98cfa161cd6c05f06b1",
-			"reviewed_at": "2026-06-17T13:00:54.617973919Z"
-		},
-		{
 			"function_name": "TestNormalizeRepo",
 			"documentation_hash": "deef9e8d861dabe9e5eaa078cdc96c04fbc55f643cceba86990338626d382b2d",
 			"definition_hash": "5e84d716ad8a51f6ca62a164b3dd9030248a2f5ce4a720622ea5ed75f31fa192",
 			"reviewed_at": "2026-06-17T13:00:54.618261543Z"
+		},
+		{
+			"function_name": "TestExecuteReturnsProxyClonePath",
+			"documentation_hash": "f1eb67bdc0f18fe50921ad6edc452026ffadaaea49440eb7c4f54e819ab68752",
+			"definition_hash": "1028d267154a4e849eb332edb7d7721c22deeca96b27a255524681c148bb3f73",
+			"reviewed_at": "2026-06-17T16:12:28.679639348Z"
 		}
 	]
 }

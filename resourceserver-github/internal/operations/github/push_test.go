@@ -36,15 +36,15 @@ func TestPushDescribe(t *testing.T) {
 	}
 }
 
-// TestPushExecuteReturnsProxyURL checks executing a push returns the brokered proxy push URL.
-func TestPushExecuteReturnsProxyURL(t *testing.T) {
-	op, _ := Push(map[string]any{"repo": "owner/name"}, operations.Env{BaseURL: "http://localhost:8080/"})
+// TestPushExecuteReturnsProxyPath checks executing a push returns the resource-server-relative proxy push path.
+func TestPushExecuteReturnsProxyPath(t *testing.T) {
+	op, _ := Push(map[string]any{"repo": "owner/name"}, operations.Env{})
 	result, err := op.Execute(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
-	if result["push_url"] != "http://localhost:8080/git/owner/name.git" {
-		t.Fatalf("unexpected push_url: %v", result["push_url"])
+	if result["push_path"] != "/git/owner/name.git" {
+		t.Fatalf("unexpected push_path: %v", result["push_path"])
 	}
 	if result["repo"] != "owner/name" {
 		t.Fatalf("unexpected repo: %v", result["repo"])
