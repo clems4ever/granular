@@ -30,7 +30,7 @@
 			"receiver": "Config",
 			"documentation_hash": "d4902345e9a87d28ee6df0db419b6bb9a53a66b421e344b0915c3c35682af3e6",
 			"definition_hash": "dabb47e6233401e86f4c2c13d7032e96f32151d15efb8c382567427f91870de0",
-			"reviewed_at": "2026-06-17T14:43:58.78160818Z"
+			"reviewed_at": "2026-06-17T17:13:32.536924582Z"
 		},
 		{
 			"function_name": "ResourceServerSecrets",

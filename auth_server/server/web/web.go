@@ -12,6 +12,17 @@ import (
 //go:embed templates/*.html static/*
 var files embed.FS
 
+//go:embed openapi.yaml
+var openapiSpec []byte
+
+// OpenAPISpec returns the embedded OpenAPI document describing the authorization
+// server's JSON API.
+//
+// @return []byte The OpenAPI specification as YAML.
+//
+// @testcase TestOpenAPISpecEmbedded checks the spec is embedded and non-empty.
+func OpenAPISpec() []byte { return openapiSpec }
+
 // pages maps a page name to its parsed template (layout + page).
 var pages = map[string]*template.Template{
 	"approve":  page("approve.html"),

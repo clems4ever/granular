@@ -1,0 +1,17 @@
+{
+	"functions": [
+		{
+			"function_name": "OpenAPISpec",
+			"documentation_hash": "f95affaa05eebeb1053759dd5f3b2a664a6536db1996fe60008a090b99785929",
+			"definition_hash": "d63e043c789474c571074767cfe79e9a277e7856d631058af54df15269c1fa4f",
+			"reviewed_at": "2026-06-17T17:11:47.282471325Z"
+		},
+		{
+			"function_name": "handleOpenAPI",
+			"receiver": "ResourceServer",
+			"documentation_hash": "6e4649fbeae4bf88ea4ad0bd043fa114777f615912760b8f54b9bf11da52fb43",
+			"definition_hash": "d4a0e87c794fb7fec5819c942f0f12c437fc48b6b259b344713bded68aeb220f",
+			"reviewed_at": "2026-06-17T17:11:47.282652176Z"
+		}
+	]
+}

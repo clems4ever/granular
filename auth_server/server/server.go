@@ -166,6 +166,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /api/activity", s.handleActivityAdmin)
 
 	mux.Handle("GET /static/", web.Static())
+	mux.HandleFunc("GET /openapi.yaml", s.handleOpenAPI)
 
 	// GitHub OAuth login endpoints (public, only registered when enabled).
 	if s.auth != nil && s.auth.Enabled() {
@@ -553,6 +554,17 @@ func (s *Server) navFor(r *http.Request) web.Nav {
 	}
 	email, _ := s.auth.CurrentEmail(r)
 	return web.Nav{User: email, AuthEnabled: true}
+}
+
+// handleOpenAPI serves the embedded OpenAPI document describing the AS JSON API.
+//
+// @arg w The response writer.
+// @arg r The incoming request.
+//
+// @testcase TestOpenAPIServed serves the spec over HTTP.
+func (s *Server) handleOpenAPI(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/yaml")
+	_, _ = w.Write(web.OpenAPISpec())
 }
 
 // handleIndex serves the landing page describing the authorization server.

@@ -53,6 +53,13 @@ func TestStaticServesCSS(t *testing.T) {
 	}
 }
 
+// TestOpenAPISpecEmbedded checks the OpenAPI document is embedded and non-empty.
+func TestOpenAPISpecEmbedded(t *testing.T) {
+	if !strings.HasPrefix(string(OpenAPISpec()), "openapi:") {
+		t.Fatalf("OpenAPI spec missing or malformed: %.40q", string(OpenAPISpec()))
+	}
+}
+
 // TestStaticServesFavicon serves the embedded SVG favicon/logo through the static handler.
 func TestStaticServesFavicon(t *testing.T) {
 	ts := httptest.NewServer(Static())

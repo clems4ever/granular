@@ -189,7 +189,7 @@ func Default() *Config {
 // @testcase TestDefault checks the standalone defaults.
 func (c *Config) applyDefaults() {
 	if c.Addr == "" {
-		c.Addr = ":8080"
+		c.Addr = ":9090"
 	}
 	if c.BaseURL == "" {
 		c.BaseURL = "http://localhost" + c.Addr

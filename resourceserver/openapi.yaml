@@ -1,0 +1,181 @@
+openapi: 3.0.3
+info:
+  title: granular resource server API
+  version: "1.0.0"
+  description: >
+    A granular resource server owns a platform's permission vocabulary and credential. It
+    serves its permission schema, signs grant requests into opaque
+    (presentation + Cedar policies) artifacts, and executes operations only after the
+    authorization server confirms the subject is authorized. This is the generic resource
+    server contract; the GitHub resource server implements it.
+servers:
+  - url: http://localhost:8080
+    description: Local development default
+
+tags:
+  - name: schema
+  - name: grant-requests
+  - name: operations
+  - name: meta
+
+paths:
+  /openapi.yaml:
+    get:
+      tags: [meta]
+      summary: This OpenAPI document.
+      operationId: getOpenAPI
+      security: []
+      responses:
+        "200":
+          description: The OpenAPI specification.
+          content:
+            application/yaml:
+              schema:
+                type: string
+
+  /api/schema:
+    get:
+      tags: [schema]
+      summary: The permission vocabulary a client reads to build a grant request.
+      operationId: getSchema
+      security: []
+      responses:
+        "200":
+          description: The resource server's permission schema (resources, actions, templates, operations).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Schema" }
+
+  /api/grant-requests/sign:
+    post:
+      tags: [grant-requests]
+      summary: Translate a capability bundle (or template) into a signed grant request.
+      description: Provide exactly one of `capabilities` or `template`.
+      operationId: signGrantRequest
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/GrantRequest" }
+      responses:
+        "200":
+          description: The resource-server-signed grant request.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SignedGrantRequest" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+
+  /api/operations:
+    post:
+      tags: [operations]
+      summary: Run an operation; executes only after the AS authorizes the subject.
+      operationId: runOperation
+      security:
+        - subjectBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/OperationRequest" }
+      responses:
+        "200":
+          description: The operation completed.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OperationResult" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: The subject is not authorized for this operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: unauthorized }
+        "502":
+          description: The authorization check against the AS failed.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+components:
+  securitySchemes:
+    subjectBearer:
+      type: http
+      scheme: bearer
+      description: The AS subject token the operation runs under.
+
+  responses:
+    BadRequest:
+      description: Malformed or invalid request.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Unauthorized:
+      description: Missing subject token.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error: { type: string }
+    Schema:
+      type: object
+      description: The permission vocabulary (resources, actions, groups, templates, operations).
+      additionalProperties: true
+    Capability:
+      type: object
+      properties:
+        actions:
+          type: array
+          items: { type: string }
+        resource:
+          type: object
+          properties:
+            type: { type: string }
+            match:
+              type: object
+              additionalProperties: { type: string }
+    GrantRequest:
+      type: object
+      description: Provide exactly one of capabilities or template.
+      properties:
+        reason: { type: string }
+        capabilities:
+          type: array
+          items: { $ref: "#/components/schemas/Capability" }
+        template: { type: string }
+        bindings:
+          type: object
+          additionalProperties: { type: string }
+    SignedGrantRequest:
+      type: object
+      properties:
+        resource_server_id: { type: string }
+        presentation: { type: object, additionalProperties: true }
+        policies:
+          type: array
+          items: { type: string }
+        signature: { type: string }
+    OperationRequest:
+      type: object
+      required: [type]
+      properties:
+        type:
+          type: string
+          description: "The operation type id, e.g. github.clone."
+        params:
+          type: object
+          additionalProperties: true
+    OperationResult:
+      type: object
+      properties:
+        status: { type: string, example: completed }
+        result:
+          type: object
+          additionalProperties: true

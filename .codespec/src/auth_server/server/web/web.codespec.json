@@ -17,6 +17,12 @@
 			"documentation_hash": "604d7dbba9fce327ff6a35d6765c5d79d819d9fb0220b6c39687381ec6186097",
 			"definition_hash": "f972edac1e22f2eb0a98cb640fa8dd1e06a30f81d7664d4312b22145dd3ed139",
 			"reviewed_at": "2026-06-17T10:21:27.396929359Z"
+		},
+		{
+			"function_name": "OpenAPISpec",
+			"documentation_hash": "ba7e1add7b5193e5b193e237537006057e946d34f6b4a58f9a0a2cd32a22e958",
+			"definition_hash": "d63e043c789474c571074767cfe79e9a277e7856d631058af54df15269c1fa4f",
+			"reviewed_at": "2026-06-17T17:10:41.958927366Z"
 		}
 	]
 }

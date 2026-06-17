@@ -22,8 +22,8 @@
 			"function_name": "Handler",
 			"receiver": "ResourceServer",
 			"documentation_hash": "2207848811bd355484ef513046ac7bee6f1dd5ffad339c14c7fd7c99eaf13fad",
-			"definition_hash": "1583ff2515c0a894b1b212490f353ccdea9a1c8cd222721ab829ad7263378599",
-			"reviewed_at": "2026-06-17T14:43:58.882570433Z"
+			"definition_hash": "c95fabff924b8fd538a53bf22aafe32185169fc7d7ad0d6843a06c83ede1160c",
+			"reviewed_at": "2026-06-17T17:10:41.959806786Z"
 		},
 		{
 			"function_name": "handleSchema",

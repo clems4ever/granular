@@ -40,6 +40,11 @@ jobs:
       - name: Test
         run: go test ./...
 
+      # Lints the served OpenAPI specs (valid OpenAPI 3) and guards against
+      # spec/code drift: every documented path+method must be a real route.
+      - name: Validate OpenAPI specs
+        run: go test ./... -run OpenAPI -count=1
+
   # Only runs on a v* tag, and only once the test job is green. GoReleaser builds
   # each binary once and packages it into both the release archives and the Docker
   # images, so nothing is compiled twice.

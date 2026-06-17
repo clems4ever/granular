@@ -1,0 +1,311 @@
+openapi: 3.0.3
+info:
+  title: granular authorization server API
+  version: "1.0.0"
+  description: >
+    The granular authorization server (AS) is the domain-agnostic policy authority. It
+    mints subject tokens, accepts resource-server-signed grant-request bundles
+    (proposals) for human approval, answers allow/deny verify queries from resource
+    servers, and exposes activity. It holds no platform credentials and never interprets
+    the opaque Cedar policies it stores. This document covers the JSON API only; the human
+    consent pages under /proposal/{id}, /activity and /auth/github/* are HTML and are not
+    described here.
+servers:
+  - url: http://localhost:9090
+    description: Local development default
+
+tags:
+  - name: subjects
+  - name: proposals
+  - name: verify
+  - name: activity
+  - name: meta
+
+paths:
+  /openapi.yaml:
+    get:
+      tags: [meta]
+      summary: This OpenAPI document.
+      operationId: getOpenAPI
+      security: []
+      responses:
+        "200":
+          description: The OpenAPI specification.
+          content:
+            application/yaml:
+              schema:
+                type: string
+
+  /api/subject:
+    put:
+      tags: [subjects]
+      summary: Mint a new subject token.
+      operationId: createSubject
+      security:
+        - adminBearer: []
+      responses:
+        "201":
+          description: A new subject token.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SubjectResponse" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "503": { $ref: "#/components/responses/AdminDisabled" }
+
+  /api/subject/me:
+    get:
+      tags: [subjects]
+      summary: Read the caller's own grants, authenticated by the subject token.
+      operationId: getMySubject
+      security:
+        - subjectBearer: []
+      responses:
+        "200":
+          description: The caller's active grants.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SubjectResponse" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/subject/{token}:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        description: The subject token.
+        schema: { type: string }
+    get:
+      tags: [subjects]
+      summary: Inspect a subject's grants (admin).
+      operationId: getSubject
+      security:
+        - adminBearer: []
+      responses:
+        "200":
+          description: The subject's active grants.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SubjectResponse" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      tags: [subjects]
+      summary: Destroy a subject and all its grants (admin).
+      operationId: destroySubject
+      security:
+        - adminBearer: []
+      responses:
+        "200":
+          description: The number of grants destroyed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  destroyed: { type: integer }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/proposals:
+    post:
+      tags: [proposals]
+      summary: Submit a resource-server-signed grant-request bundle for human approval.
+      operationId: createProposal
+      security:
+        - subjectBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ProposalRequest" }
+      responses:
+        "202":
+          description: Proposal accepted; an approval URL is returned.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProposalResponse" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/verify:
+    post:
+      tags: [verify]
+      summary: Ask whether a subject's grants authorize an operation. Resource servers only.
+      description: >
+        Authenticated by the resource server's HMAC: the raw body is signed with the shared
+        secret and sent as a hex digest in X-Resource-Server-Signature, with the resource
+        server id in X-Resource-Server-ID.
+      operationId: verify
+      security:
+        - resourceServerId: []
+          resourceServerSig: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/VerifyRequest" }
+      responses:
+        "200":
+          description: The allow/deny decision.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/VerifyResponse" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/activity:
+    get:
+      tags: [activity]
+      summary: The full cross-subject grant inventory and request/decision history (admin).
+      operationId: getActivity
+      security:
+        - adminBearer: []
+      responses:
+        "200":
+          description: The grant inventory and request/decision history.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ActivityResponse" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+components:
+  securitySchemes:
+    adminBearer:
+      type: http
+      scheme: bearer
+      description: The AS admin token; gates subject administration and the activity view.
+    subjectBearer:
+      type: http
+      scheme: bearer
+      description: A subject token, minted by an administrator and held by the agent.
+    resourceServerId:
+      type: apiKey
+      in: header
+      name: X-Resource-Server-ID
+      description: The calling resource server's registered id.
+    resourceServerSig:
+      type: apiKey
+      in: header
+      name: X-Resource-Server-Signature
+      description: Hex HMAC-SHA256 of the raw request body, keyed by the shared secret.
+
+  responses:
+    Unauthorized:
+      description: Missing or invalid credentials.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    BadRequest:
+      description: Malformed or invalid request.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    NotFound:
+      description: The named resource does not exist.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    AdminDisabled:
+      description: Subject administration is disabled (no admin token configured).
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error: { type: string }
+    Presentation:
+      type: object
+      description: The human-readable consent text, rendered verbatim by the AS.
+      properties:
+        title: { type: string }
+        summary: { type: string }
+        detail: { type: string }
+        grants:
+          type: array
+          items: { type: object, additionalProperties: true }
+    SignedGrantRequest:
+      type: object
+      description: An opaque, resource-server-signed (presentation + Cedar policies) artifact.
+      properties:
+        resource_server_id: { type: string }
+        presentation: { $ref: "#/components/schemas/Presentation" }
+        policies:
+          type: array
+          items: { type: string }
+        signature:
+          type: string
+          description: Hex HMAC-SHA256 over the canonical (id, presentation, policies).
+    Grant:
+      type: object
+      properties:
+        subject_token:
+          type: string
+          description: Present only in the admin activity view; omitted in per-subject reads.
+        resource_server_id: { type: string }
+        expires_at: { type: string }
+        item: { $ref: "#/components/schemas/SignedGrantRequest" }
+    SubjectResponse:
+      type: object
+      properties:
+        token: { type: string }
+        grants:
+          type: array
+          items: { $ref: "#/components/schemas/Grant" }
+        error: { type: string }
+    ProposalRequest:
+      type: object
+      required: [approver_email, items]
+      properties:
+        approver_email:
+          type: string
+          format: email
+          description: The verified GitHub email of the human who may approve.
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/SignedGrantRequest" }
+    ProposalResponse:
+      type: object
+      properties:
+        proposal_id: { type: string }
+        url: { type: string, description: The human approval page URL. }
+        expires_at: { type: string }
+        error: { type: string }
+    VerifyRequest:
+      type: object
+      required: [token]
+      properties:
+        token: { type: string, description: The subject token the operation runs under. }
+        requests:
+          type: array
+          description: The Cedar authorization questions, supplied by the resource server.
+          items: { type: object, additionalProperties: true }
+        entities:
+          type: array
+          description: The Cedar entity world, supplied by the resource server.
+          items: { type: object, additionalProperties: true }
+    VerifyResponse:
+      type: object
+      properties:
+        allowed: { type: boolean }
+        error: { type: string }
+    HistoryEntry:
+      type: object
+      properties:
+        subject_token: { type: string }
+        approver: { type: string }
+        status: { type: string, enum: [pending, approved, rejected, expired] }
+        summary: { type: string }
+        items: { type: integer }
+        created_at: { type: string }
+    ActivityResponse:
+      type: object
+      properties:
+        grants:
+          type: array
+          items: { $ref: "#/components/schemas/Grant" }
+        history:
+          type: array
+          items: { $ref: "#/components/schemas/HistoryEntry" }
+        error: { type: string }

@@ -62,6 +62,7 @@ func (g *ResourceServer) Handler() http.Handler {
 	mux.HandleFunc("GET /api/schema", g.handleSchema)
 	mux.HandleFunc("POST /api/grant-requests/sign", g.handleSign)
 	mux.HandleFunc("POST /api/operations", g.handleOperation)
+	mux.HandleFunc("GET /openapi.yaml", g.handleOpenAPI)
 	return mux
 }
 
