@@ -1,0 +1,19 @@
+{{define "title"}}granular · authorization server{{end}}
+{{define "container-class"}} narrow{{end}}
+{{define "content"}}
+<div class="card">
+  <img src="/static/favicon.svg" width="46" height="46" alt="" style="display:block;margin-bottom:.7rem;filter:drop-shadow(0 5px 12px rgba(99,102,241,.4))">
+  <p class="eyebrow">Authorization server</p>
+  <h1>granular</h1>
+  <p class="lead">The generic policy authority. Clients submit resource-server-signed grant
+    requests here for human approval, and resource servers verify operations against the
+    approved policy before executing them.</p>
+  {{if .SignIn}}
+  <p>Sign in to review the requests addressed to you and the decisions you've made.</p>
+  <p><a class="btn btn-primary" href="{{.SignIn}}">Sign in with GitHub →</a></p>
+  {{else}}
+  <p class="muted">Approval links are sent to you by the agent; there is nothing to do on
+    this page.</p>
+  {{end}}
+</div>
+{{end}}

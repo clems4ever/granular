@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/clems4ever/granular/internal/proposal"
+	"github.com/clems4ever/granular/internal/redoc"
 	"github.com/clems4ever/granular/internal/verify"
 )
 
@@ -63,6 +64,7 @@ func (g *ResourceServer) Handler() http.Handler {
 	mux.HandleFunc("POST /api/grant-requests/sign", g.handleSign)
 	mux.HandleFunc("POST /api/operations", g.handleOperation)
 	mux.HandleFunc("GET /openapi.yaml", g.handleOpenAPI)
+	redoc.Register(mux, "granular resource server API", "/openapi.yaml")
 	return mux
 }
 

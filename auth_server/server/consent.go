@@ -79,7 +79,7 @@ type activityView struct {
 // @arg t The timestamp to render.
 // @return string The formatted UTC timestamp.
 //
-// @testcase TestActivityPageRendersApproverHistory renders proposal timestamps.
+// @testcase TestHomeShowsApproverHistory renders proposal timestamps.
 func fmtTime(t time.Time) string {
 	if t.IsZero() {
 		return "—"
@@ -115,7 +115,7 @@ func humanizeUntil(now, t time.Time) string {
 // @arg items The signed grant requests in a proposal.
 // @return string A one-line summary for the bundle.
 //
-// @testcase TestActivityPageRendersApproverHistory summarises a multi-item proposal.
+// @testcase TestHomeShowsApproverHistory summarises a multi-item proposal.
 func firstSummary(items []proposal.SignedGrantRequest) string {
 	if len(items) == 0 {
 		return ""
@@ -131,10 +131,10 @@ func firstSummary(items []proposal.SignedGrantRequest) string {
 // one history row each, with lapsed pending requests shown as expired.
 //
 // @arg now The reference time used to mark lapsed pending requests as expired.
-// @arg proposals The approver's own proposals (already filtered by handleActivity).
+// @arg proposals The approver's own proposals (already filtered by handleHome).
 // @return activityView The view rendered by the activity page.
 //
-// @testcase TestActivityPageRendersApproverHistory builds the history section.
+// @testcase TestHomeShowsApproverHistory builds the history section.
 func buildActivity(now time.Time, proposals []store.Proposal) activityView {
 	v := activityView{}
 	for _, p := range proposals {
@@ -150,42 +150,6 @@ func buildActivity(now time.Time, proposals []store.Proposal) activityView {
 		})
 	}
 	return v
-}
-
-// handleActivity handles GET /activity: it renders the signed-in approver's OWN request
-// and decision history — only the proposals that name them. It requires an authenticated
-// approver: when consent authentication is disabled there is no identity to scope to, so
-// the page is unavailable. The cross-subject inventory is the operator's view, served
-// admin-gated at GET /api/activity; a subject sees its own grants at GET /api/subject/me.
-//
-// @arg w The response writer.
-// @arg r The incoming request.
-//
-// @testcase TestActivityPageRendersApproverHistory shows the approver their own history.
-// @testcase TestActivityScopedToApprover hides another approver's requests.
-// @testcase TestActivityUnavailableWhenAuthDisabled is not found when auth is off.
-func (s *Server) handleActivity(w http.ResponseWriter, r *http.Request) {
-	if s.auth == nil || !s.auth.Enabled() {
-		http.Error(w, "activity is unavailable when consent authentication is disabled", http.StatusNotFound)
-		return
-	}
-	email, ok := s.auth.CurrentEmail(r)
-	if !ok || email == "" {
-		http.Error(w, "authentication required", http.StatusForbidden)
-		return
-	}
-	proposals, err := s.store.AllProposals()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	mine := make([]store.Proposal, 0, len(proposals))
-	for _, p := range proposals {
-		if p.ApproverEmail == email {
-			mine = append(mine, p)
-		}
-	}
-	_ = s.render(w, r, "activity", buildActivity(time.Now(), mine))
 }
 
 // parseTTL converts a consent-form duration value into a time.Duration, falling back

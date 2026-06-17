@@ -17,8 +17,8 @@
 			"function_name": "Handler",
 			"receiver": "Server",
 			"documentation_hash": "e4b02e73163179adebe24952b4c53b8e12572f93e4e80c270e803c18dc358c33",
-			"definition_hash": "04a4d9529abe964960b082a90b287d4d185e34020ce4068633bd1d8c54eb33e0",
-			"reviewed_at": "2026-06-17T17:10:41.955737716Z"
+			"definition_hash": "d18206d2f96ae0187fe6a6104c5a390fe74430ae844685586ba96f568ea870c3",
+			"reviewed_at": "2026-06-17T19:06:15.618223955Z"
 		},
 		{
 			"function_name": "handleProposal",
@@ -54,13 +54,6 @@
 			"documentation_hash": "a3fe2b2537c0d88229a68fb2079318f51537ac9aef7aaf250202ca4d05223d65",
 			"definition_hash": "a2275490434c490d543f0b3b0a5adc7044ee5f639b484b8ec7ee37331bfebbc2",
 			"reviewed_at": "2026-06-17T14:43:58.761961513Z"
-		},
-		{
-			"function_name": "handleIndex",
-			"receiver": "Server",
-			"documentation_hash": "1ed0e10784bf31823fe8dc89d0711ac30047dd8dd7bdfddcf0665a1c71302161",
-			"definition_hash": "9f6adc04d4071a7e1cc4909e57bcbec2483b185f0f32e7b3caf6dbff32b50769",
-			"reviewed_at": "2026-06-17T15:57:58.587985807Z"
 		},
 		{
 			"function_name": "writeJSON",
@@ -156,6 +149,13 @@
 			"documentation_hash": "540a44a01b3cdc6114194244ffd95effc440ee785f6edd47818b04bce9d2a43d",
 			"definition_hash": "063e42415b70adff44214bd5cfc7b16368f1e3e5f0ce887350c2ec83dffd74ba",
 			"reviewed_at": "2026-06-17T17:10:41.958123285Z"
+		},
+		{
+			"function_name": "handleHome",
+			"receiver": "Server",
+			"documentation_hash": "028a56a6cea42373736e162f20389a87a6bc0c6765f34974cc3c96b7cb97c654",
+			"definition_hash": "a8ab78ad1c026b8333682e326602674ed13c772cdf8c089f136156ebcc758b8c",
+			"reviewed_at": "2026-06-17T17:52:09.882595676Z"
 		}
 	]
 }

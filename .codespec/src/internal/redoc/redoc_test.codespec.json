@@ -1,0 +1,10 @@
+{
+	"functions": [
+		{
+			"function_name": "TestRegisterServesDocsAndScript",
+			"documentation_hash": "db6d193027b19718aa5595b281260267700da0f72aef87ffc85d194cbcd5599e",
+			"definition_hash": "8e22e4805a55136cd219d439c7a2bc03106e350cc554a75b7b25902452b43db8",
+			"reviewed_at": "2026-06-17T19:06:15.590999517Z"
+		}
+	]
+}

@@ -8,8 +8,9 @@ info:
     (proposals) for human approval, answers allow/deny verify queries from resource
     servers, and exposes activity. It holds no platform credentials and never interprets
     the opaque Cedar policies it stores. This document covers the JSON API only; the human
-    consent pages under /proposal/{id}, /activity and /auth/github/* are HTML and are not
-    described here.
+    pages (the / landing and approvals, /proposal/{id}, /auth/github/*, and the rendered
+    API docs at /docs) are HTML and are not described here. This spec is served at
+    /openapi.yaml and rendered with Redoc at /docs.
 servers:
   - url: http://localhost:9090
     description: Local development default

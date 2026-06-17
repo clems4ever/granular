@@ -25,6 +25,7 @@ func OpenAPISpec() []byte { return openapiSpec }
 
 // pages maps a page name to its parsed template (layout + page).
 var pages = map[string]*template.Template{
+	"home":     page("home.html"),
 	"approve":  page("approve.html"),
 	"result":   page("result.html"),
 	"denied":   page("denied.html"),

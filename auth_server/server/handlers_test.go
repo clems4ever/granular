@@ -241,8 +241,9 @@ func TestVerifyAllowsAfterApproval(t *testing.T) {
 	}
 }
 
-// TestIndexServesLanding renders the landing page.
-func TestIndexServesLanding(t *testing.T) {
+// TestHomeLandingWhenAuthDisabled renders the informational landing at / when consent
+// authentication is disabled (there is no approver identity to scope activity to).
+func TestHomeLandingWhenAuthDisabled(t *testing.T) {
 	_, h := newServer(t)
 	resp := do(t, h, http.MethodGet, "/", nil, "", false)
 	defer resp.Body.Close()
@@ -252,5 +253,8 @@ func TestIndexServesLanding(t *testing.T) {
 	body, _ := io.ReadAll(resp.Body)
 	if !strings.Contains(string(body), "Authorization server") {
 		t.Fatal("landing page missing expected content")
+	}
+	if strings.Contains(string(body), "Your approvals") || strings.Contains(string(body), "Sign in with GitHub") {
+		t.Fatal("auth-disabled landing should show neither activity nor a sign-in prompt")
 	}
 }

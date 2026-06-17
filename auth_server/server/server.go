@@ -25,6 +25,7 @@ import (
 	"github.com/clems4ever/granular/auth_server/server/web"
 	"github.com/clems4ever/granular/auth_server/store"
 	"github.com/clems4ever/granular/internal/proposal"
+	"github.com/clems4ever/granular/internal/redoc"
 	"github.com/clems4ever/granular/internal/verify"
 )
 
@@ -167,6 +168,7 @@ func (s *Server) Handler() http.Handler {
 
 	mux.Handle("GET /static/", web.Static())
 	mux.HandleFunc("GET /openapi.yaml", s.handleOpenAPI)
+	redoc.Register(mux, "granular authorization server API", "/openapi.yaml")
 
 	// GitHub OAuth login endpoints (public, only registered when enabled).
 	if s.auth != nil && s.auth.Enabled() {
@@ -178,9 +180,8 @@ func (s *Server) Handler() http.Handler {
 	// Human consent pages require a GitHub login when authentication is enabled.
 	mux.Handle("GET /proposal/{id}", s.protect(s.handleApprovePage))
 	mux.Handle("POST /proposal/{id}", s.protect(s.handleApproveSubmit))
-	// Observability: the active grants and the request/decision history.
-	mux.Handle("GET /activity", s.protect(s.handleActivity))
-	mux.HandleFunc("GET /{$}", s.handleIndex)
+	// The single main page: a signed-in approver's own activity, else a landing.
+	mux.HandleFunc("GET /{$}", s.handleHome)
 	return mux
 }
 
@@ -567,32 +568,47 @@ func (s *Server) handleOpenAPI(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(web.OpenAPISpec())
 }
 
-// handleIndex serves the landing page describing the authorization server.
+// homeView is the data for the landing page shown to anonymous visitors. SignIn is the
+// "log in with GitHub" URL, set only when consent authentication is enabled.
+type homeView struct {
+	SignIn string
+}
+
+// handleHome serves GET /: the single main page. For a signed-in approver it IS their
+// approvals view (the requests addressed to them and the decisions made); otherwise it is
+// an informational landing — with a "sign in" call to action when consent authentication
+// is enabled, so a human can reach their approvals. There is no separate /activity page.
 //
 // @arg w The response writer.
 // @arg r The incoming request.
 //
-// @testcase TestIndexServesLanding renders the landing page.
-func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	// The activity page shows the signed-in approver their own history, so only link to it
-	// when consent authentication is enabled (otherwise there is no approver to scope to).
-	activityLink := ""
+// @testcase TestHomeShowsApproverHistory shows a signed-in approver their own history.
+// @testcase TestHomeScopedToApprover hides another approver's requests.
+// @testcase TestHomeShowsSignInWhenAnonymous offers a login to an anonymous visitor.
+// @testcase TestHomeLandingWhenAuthDisabled renders the landing when auth is off.
+func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 	if s.auth != nil && s.auth.Enabled() {
-		activityLink = `<p><a class="btn" href="/activity">Your approvals &amp; history →</a></p>`
+		if email, ok := s.auth.CurrentEmail(r); ok && email != "" {
+			proposals, err := s.store.AllProposals()
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			mine := make([]store.Proposal, 0, len(proposals))
+			for _, p := range proposals {
+				if p.ApproverEmail == email {
+					mine = append(mine, p)
+				}
+			}
+			_ = s.render(w, r, "activity", buildActivity(time.Now(), mine))
+			return
+		}
 	}
-	_, _ = io.WriteString(w, `<!doctype html><meta charset="utf-8"><title>granular · authorization server</title>`+
-		`<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">`+
-		`<link rel="stylesheet" href="/static/style.css">`+
-		`<main class="container narrow"><div class="card">`+
-		`<img src="/static/favicon.svg" width="46" height="46" alt="" style="display:block;margin-bottom:.7rem;filter:drop-shadow(0 5px 12px rgba(99,102,241,.4))">`+
-		`<p class="eyebrow">Authorization server</p>`+
-		`<h1>granular</h1>`+
-		`<p class="lead">The generic policy authority. Clients submit resource server-signed grant requests here `+
-		`for human approval, and resource servers verify operations against the approved policy before executing them.</p>`+
-		`<p class="muted">Approval links are sent to you by the agent; there is nothing to do on this page.</p>`+
-		activityLink+
-		`</div></main>`)
+	view := homeView{}
+	if s.auth != nil && s.auth.Enabled() {
+		view.SignIn = loginPath + "?next=%2F"
+	}
+	_ = s.render(w, r, "home", view)
 }
 
 // writeJSON serialises v as JSON with the given status code.
