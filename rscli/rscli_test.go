@@ -206,6 +206,37 @@ func TestLoadResolvesBaseURLFromConfig(t *testing.T) {
 	}
 }
 
+// TestAppExposesResolvedBaseURLAndToken checks BaseURL and Token return the values
+// resolved by load (here the --base-url and --token flags), which is what custom Extra
+// commands (e.g. the GitHub git proxy commands) read.
+func TestAppExposesResolvedBaseURLAndToken(t *testing.T) {
+	var gotBase, gotToken string
+	spec := Spec{
+		Use: "rs", RSID: "github", DefaultBaseURL: "http://default.invalid",
+		Extra: func(a *App) []*cobra.Command {
+			return []*cobra.Command{{
+				Use: "probe",
+				RunE: func(*cobra.Command, []string) error {
+					gotBase, gotToken = a.BaseURL(), a.Token()
+					return nil
+				},
+			}}
+		},
+	}
+	missingCfg := filepath.Join(t.TempDir(), "absent.yaml")
+	root := NewRootCmd(spec, &bytes.Buffer{})
+	root.SetArgs([]string{"--config", missingCfg, "--base-url", "http://chosen.example", "--token", "TOK", "probe"})
+	if err := root.Execute(); err != nil {
+		t.Fatalf("probe: %v", err)
+	}
+	if gotBase != "http://chosen.example" {
+		t.Errorf("BaseURL() = %q, want the --base-url value", gotBase)
+	}
+	if gotToken != "TOK" {
+		t.Errorf("Token() = %q, want the --token value", gotToken)
+	}
+}
+
 // --- catalog ---
 
 // TestCatalogPrintsSchema checks the human-readable catalog renders the schema.

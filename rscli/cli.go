@@ -113,7 +113,7 @@ type App struct {
 //
 // @return string The resource server base URL.
 //
-// @testcase TestGitCloneCommandRunsGit builds the proxy URL from the base URL.
+// @testcase TestAppExposesResolvedBaseURLAndToken reads the resolved base URL.
 func (a *App) BaseURL() string { return a.resolvedBaseURL }
 
 // Token returns the resolved subject token (flag, else token file). It is "" for
@@ -121,7 +121,7 @@ func (a *App) BaseURL() string { return a.resolvedBaseURL }
 //
 // @return string The subject token, or "".
 //
-// @testcase TestGitCloneCommandRunsGit passes the resolved token to git.
+// @testcase TestAppExposesResolvedBaseURLAndToken reads the resolved token.
 func (a *App) Token() string { return a.resolvedToken }
 
 // Client returns the configured SDK client. It is non-nil for any command that
