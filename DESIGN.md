@@ -174,7 +174,7 @@ gateway/asclient/             gateway's client for the AS verify call
 gateway-github/               GitHub gateway: schema, templates, operation specs
 gateway-github/internal/      GitHub-only, unimportable from outside the gateway:
   catalog/                      GitHub permission vocabulary (resources, actions)
-  authz/                        Cedar GitHub entity world + capability→policy
+  authz/                        GitHub requirement + resource-reference primitives
   operations/                   operation framework + GitHub operation implementations
 auth_server/config/           AS YAML configuration
 auth_server/server/           AS HTTP handlers, consent UI, GitHub-OAuth login, eval

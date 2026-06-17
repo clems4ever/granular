@@ -1,15 +1,11 @@
-// Package catalog describes the granular capability model — the typed resource
+// Package catalog describes the GitHub capability model — the typed resource
 // hierarchy, the verb lattice (action groups), and the concrete operations with
-// their CLI commands. It is the single, machine- and human-readable manifest the
-// server renders (as a page and as JSON) so an agent or a human can see what the
-// CLI can do, what can be requested, and how grants are scoped.
+// their CLI commands. It is the single source the GitHub gateway builds its
+// published permission schema from, so an agent or a human can see what can be
+// requested and how grants are scoped.
 package catalog
 
-import (
-	"sort"
-
-	"github.com/clems4ever/granular/internal/api"
-)
+import "github.com/clems4ever/granular/internal/api"
 
 // MatchField is a typed attribute a resource can be matched on in a grant.
 type MatchField struct {
@@ -126,131 +122,4 @@ func Build() Catalog {
 			}},
 		},
 	}
-}
-
-// HasAction reports whether name is a known concrete action or group.
-//
-// @arg name The action or group name to check.
-// @return bool True when name appears in the action lattice.
-//
-// @testcase TestHasActionAndResourceEntity checks known and unknown names.
-func (c Catalog) HasAction(name string) bool {
-	_, ok := c.ActionLattice()[name]
-	return ok
-}
-
-// ResourceEntity returns the Cedar entity type for a catalog resource name.
-//
-// @arg name The catalog resource name, e.g. "github.repo".
-// @return string The Cedar entity type, e.g. "GitHub::Repo".
-// @return bool True when the resource name is known.
-//
-// @testcase TestHasActionAndResourceEntity resolves a known resource type.
-func (c Catalog) ResourceEntity(name string) (string, bool) {
-	for _, r := range c.Resources {
-		if r.Name == name {
-			return r.Entity, true
-		}
-	}
-	return "", false
-}
-
-// ActionLattice returns the verb lattice as a flat map of every action and group
-// name to its direct parent group names. It is the single source the Cedar layer
-// uses to build its action-group entities.
-//
-// @return map[string][]string Each action/group name mapped to its parent groups.
-//
-// @testcase TestActionLatticeCoversGroupsAndActions checks groups and actions are present.
-func (c Catalog) ActionLattice() map[string][]string {
-	lattice := make(map[string][]string, len(c.Groups)+len(c.Actions))
-	for _, g := range c.Groups {
-		lattice[g.Name] = g.Parents
-	}
-	for _, a := range c.Actions {
-		lattice[a.Name] = a.Groups
-	}
-	return lattice
-}
-
-// ResourceRow is a resource type annotated with its depth in the hierarchy, for
-// indented rendering.
-type ResourceRow struct {
-	Resource ResourceType
-	Depth    int
-}
-
-// ResourceTree returns the resource types flattened depth-first from the roots,
-// each annotated with its depth.
-//
-// @return []ResourceRow The resources in tree order with depths.
-//
-// @testcase TestResourceTreeOrder checks roots precede their children.
-func (c Catalog) ResourceTree() []ResourceRow {
-	children := map[string][]ResourceType{}
-	for _, r := range c.Resources {
-		children[r.Parent] = append(children[r.Parent], r)
-	}
-	var rows []ResourceRow
-	var walk func(parent string, depth int)
-	walk = func(parent string, depth int) {
-		for _, r := range children[parent] {
-			rows = append(rows, ResourceRow{Resource: r, Depth: depth})
-			walk(r.Name, depth+1)
-		}
-	}
-	walk("", 0)
-	return rows
-}
-
-// GroupExpansion is a top-level verb group together with the concrete actions it
-// ultimately grants.
-type GroupExpansion struct {
-	Group   Group
-	Actions []Action
-}
-
-// VerbGroups returns every group (in catalog order) expanded to the concrete
-// actions it grants transitively — i.e. "granting <group> lets you …".
-//
-// @return []GroupExpansion Each group with its expanded action set.
-//
-// @testcase TestVerbGroupsExpand checks read expands to include issue.view.
-func (c Catalog) VerbGroups() []GroupExpansion {
-	parents := map[string][]string{}
-	for _, g := range c.Groups {
-		parents[g.Name] = g.Parents
-	}
-	// ancestorsOf returns the set of groups reachable upward from a starting group.
-	ancestorsOf := func(start string) map[string]bool {
-		seen := map[string]bool{}
-		var visit func(string)
-		visit = func(name string) {
-			if seen[name] {
-				return
-			}
-			seen[name] = true
-			for _, p := range parents[name] {
-				visit(p)
-			}
-		}
-		visit(start)
-		return seen
-	}
-
-	var out []GroupExpansion
-	for _, g := range c.Groups {
-		var acts []Action
-		for _, a := range c.Actions {
-			for _, ag := range a.Groups {
-				if ancestorsOf(ag)[g.Name] {
-					acts = append(acts, a)
-					break
-				}
-			}
-		}
-		sort.Slice(acts, func(i, j int) bool { return acts[i].Name < acts[j].Name })
-		out = append(out, GroupExpansion{Group: g, Actions: acts})
-	}
-	return out
 }

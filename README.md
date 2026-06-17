@@ -173,7 +173,7 @@ gateway/                   generic gateway SDK (schema, sign, present, verify, a
 gateway-github/            GitHub gateway implementation (schema, templates, operations)
 gateway-github/internal/   GitHub-only concerns, unimportable from outside the gateway:
   catalog/                   GitHub permission vocabulary (resources, actions)
-  authz/                     Cedar GitHub entity world + capability→policy
+  authz/                     GitHub requirement + resource-reference primitives
   operations/                operation framework + GitHub operation implementations
 auth_server/               authorization server: config, store (bbolt), HTTP + consent UI
 internal/proposal/         the signed (presentation + policy) artifact shared on the wire
