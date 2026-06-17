@@ -5,7 +5,7 @@
 // requested and how grants are scoped.
 package catalog
 
-import "github.com/clems4ever/granular/internal/api"
+import "github.com/clems4ever/granular/gateway"
 
 // MatchField is a typed attribute a resource can be matched on in a grant.
 type MatchField struct {
@@ -50,10 +50,10 @@ type Action struct {
 
 // Catalog is the full capability manifest.
 type Catalog struct {
-	Resources      []ResourceType   `json:"resources"`
-	Groups         []Group          `json:"groups"`
-	Actions        []Action         `json:"actions"`
-	RequestExample api.GrantRequest `json:"request_example"`
+	Resources      []ResourceType       `json:"resources"`
+	Groups         []Group              `json:"groups"`
+	Actions        []Action             `json:"actions"`
+	RequestExample gateway.GrantRequest `json:"request_example"`
 }
 
 // Build returns the capability catalog for the GitHub operations the CLI exposes
@@ -111,11 +111,11 @@ func Build() Catalog {
 			{"pull.close", "Close pull request", "github.pull", []string{"pulls.triage"}, "granular github pr close <repo> <number>", true, "per pull request", "Close a pull request."},
 			{"pull.reopen", "Reopen pull request", "github.pull", []string{"pulls.triage"}, "granular github pr reopen <repo> <number>", true, "per pull request", "Reopen a pull request."},
 		},
-		RequestExample: api.GrantRequest{
+		RequestExample: gateway.GrantRequest{
 			Reason: "Work on the granular project: clone, read issues + comments, read PRs.",
-			Capabilities: []api.Capability{{
+			Capabilities: []gateway.Capability{{
 				Actions: []string{"repo.clone", "issues.read", "comment.read", "pulls.read"},
-				Resource: api.ResourceSelector{
+				Resource: gateway.ResourceSelector{
 					Type:  "github.repo",
 					Match: map[string]string{"owner": "clems4ever", "name": "granular"},
 				},

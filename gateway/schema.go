@@ -8,21 +8,6 @@
 // generic and provided here. The SDK never hard-codes any platform vocabulary.
 package gateway
 
-import "github.com/clems4ever/granular/internal/api"
-
-// Wire-type aliases re-exported so SDK users depend only on the gateway package for
-// the request/response shapes a client exchanges with a gateway.
-type (
-	// Capability grants a set of actions on the resources a selector matches.
-	Capability = api.Capability
-	// ResourceSelector picks the resources a capability applies to.
-	ResourceSelector = api.ResourceSelector
-	// GrantRequest is a client's bundle of capabilities to be signed.
-	GrantRequest = api.GrantRequest
-	// OperationRequest names a concrete operation and its parameters.
-	OperationRequest = api.Operation
-)
-
 // MatchField is a typed attribute a resource can be matched on in a grant request.
 type MatchField struct {
 	Name        string `json:"name"`
@@ -133,12 +118,12 @@ type Schema struct {
 	ActionType string `json:"-"`
 	AgentID    string `json:"-"`
 
-	Resources  []ResourceType   `json:"resources"`
-	Groups     []Group          `json:"groups"`
-	Actions    []Action         `json:"actions"`
-	Operations []OperationSpec  `json:"operations"`
-	Templates  []Template       `json:"templates"`
-	Example    api.GrantRequest `json:"request_example"`
+	Resources  []ResourceType  `json:"resources"`
+	Groups     []Group         `json:"groups"`
+	Actions    []Action        `json:"actions"`
+	Operations []OperationSpec `json:"operations"`
+	Templates  []Template      `json:"templates"`
+	Example    GrantRequest    `json:"request_example"`
 
 	// Scope maps a capability selector to a Cedar scope entity; supplied by the user.
 	Scope ScopeFunc `json:"-"`
