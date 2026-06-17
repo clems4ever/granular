@@ -10,8 +10,8 @@ import (
 	"github.com/clems4ever/granular/internal/verify"
 )
 
-// Verifier asks the AS whether an operation's requirements are authorized by the policy
-// attached to a token. The asclient.Client implements it; tests stub it.
+// Verifier asks the AS whether an operation's requirements are authorized for the subject
+// identified by a token. The asclient.Client implements it; tests stub it.
 type Verifier interface {
 	Verify(ctx context.Context, in verify.Input) (bool, error)
 }
@@ -123,19 +123,19 @@ func (g *ResourceServer) handleSign(w http.ResponseWriter, r *http.Request) {
 }
 
 // handleOperation handles POST /api/operations: a client asks the resource server to run an
-// operation, presenting its AS policy token as a bearer credential. The resource server builds
-// the operation, derives its requirements, asks the AS whether the token's policy
+// operation, presenting its AS subject token as a bearer credential. The resource server builds
+// the operation, derives its requirements, asks the AS whether the token's subject
 // authorizes them, and executes only on an allow.
 //
 // @arg w The response writer.
-// @arg r The request whose body is an OperationRequest, with a Bearer policy token.
+// @arg r The request whose body is an OperationRequest, with a Bearer subject token.
 //
 // @testcase TestOperationDenied returns 403 when the AS denies.
 // @testcase TestOperationAllowed executes when the AS allows.
 func (g *ResourceServer) handleOperation(w http.ResponseWriter, r *http.Request) {
 	token := strings.TrimSpace(strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer "))
 	if token == "" {
-		writeJSON(w, http.StatusUnauthorized, errBody("missing policy token"))
+		writeJSON(w, http.StatusUnauthorized, errBody("missing subject token"))
 		return
 	}
 	var req OperationRequest

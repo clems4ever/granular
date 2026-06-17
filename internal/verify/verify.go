@@ -27,7 +27,7 @@ type Request struct {
 	Context   map[string]string `json:"context,omitempty"`
 }
 
-// Input is the body a resource server posts to POST /api/verify: the policy token plus the
+// Input is the body a resource server posts to POST /api/verify: the subject token plus the
 // questions and the entity world to evaluate them against.
 type Input struct {
 	Token    string    `json:"token"`

@@ -58,7 +58,7 @@ type mismatchView struct {
 	Approver   string
 }
 
-// grantRow is one active grant shown on the activity page. No policy token is shown.
+// grantRow is one active grant shown on the activity page. No subject token is shown.
 // ExpiresIn is the relative time until expiry (e.g. "in 12m"); ExpiresAt is the absolute
 // time shown as a tooltip.
 type grantRow struct {

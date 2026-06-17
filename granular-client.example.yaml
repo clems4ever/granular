@@ -5,14 +5,14 @@
 # catalogs the resource servers' permission schemas, runs operations (executed when the policy
 # authorizes them), and builds grant requests it submits to the AS for human approval.
 
-# The authorization server base URL (where proposals are submitted and policies live).
+# The authorization server base URL (where proposals are submitted and subjects live).
 as_url: "http://localhost:9090"
 
-# The policy token is the bearer credential proposals and operations are made under.
-# Never store it inline — point at a file holding it. Policy lifecycle is an admin
-# concern: mint a token with `granular-policy create` and hand it to the client. Omit to
+# The subject token is the bearer credential proposals and operations are made under.
+# Never store it inline — point at a file holding it. Subject lifecycle is an admin
+# concern: mint a token with `granular-subject create` and hand it to the client. Omit to
 # run unauthenticated commands like `catalog`, or pass --token.
-token_file: "/run/secrets/granular_policy_token"
+token_file: "/run/secrets/granular_subject_token"
 
 # The resource servers this client knows about. Each has a stable id (used to target it) and the
 # base URL it is reached at. Add one block per resource server (e.g. a future resource server-gitlab).

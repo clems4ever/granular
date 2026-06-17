@@ -6,8 +6,8 @@ BIN_DIR := bin
 #   granular-client          agent CLI (builds proposals, runs operations)
 #   granular-auth-server     authorization server (policy authority + consent UI)
 #   granular-github-resource-server  GitHub resource server (holds the credential, executes ops)
-#   granular-policy          admin CLI for policy-token lifecycle
-CMDS := granular-client granular-auth-server granular-github-resource-server granular-policy
+#   granular-subject          admin CLI for subject-token lifecycle
+CMDS := granular-client granular-auth-server granular-github-resource-server granular-subject
 BINS := $(addprefix $(BIN_DIR)/,$(CMDS))
 
 GO ?= go

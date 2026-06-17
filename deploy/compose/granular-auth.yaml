@@ -24,7 +24,7 @@ resource_servers:
   - id: "github-resource-server"
     secret_file: "/run/secrets/granular_resource_server_github_secret"
 
-# Gates policy administration (the granular-policy CLI mints tokens against it).
+# Gates subject administration (the granular-subject CLI mints tokens against it).
 admin_token_file: "/run/secrets/granular_auth_admin_token"
 
 # Optional: require a "log in with GitHub" on the consent screen. Register an OAuth

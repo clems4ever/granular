@@ -36,9 +36,9 @@ resource_servers:
   - id: "github-resource-server"
     secret_file: "/run/secrets/granular_resource_server_github_secret"
 
-# The admin token gates the policy-administration endpoints (PUT/GET/DELETE /api/policy)
-# the granular-policy admin CLI calls to mint, inspect, and destroy policy tokens. Never
-# inline — point at a file holding it. When unset, policy administration is disabled.
+# The admin token gates the subject-administration endpoints (PUT/GET/DELETE /api/subject)
+# the granular-subject admin CLI calls to mint, inspect, and destroy subject tokens. Never
+# inline — point at a file holding it. When unset, subject administration is disabled.
 admin_token_file: "/run/secrets/granular_auth_admin_token"
 
 # Consent-screen authentication (GitHub login, for now). When client_id and the

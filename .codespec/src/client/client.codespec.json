@@ -16,9 +16,9 @@
 		{
 			"function_name": "doJSON",
 			"receiver": "Client",
-			"documentation_hash": "c8a77f8e0b44a534323197b1ddc7b2f598cb6219b60adcb839c440f4c9b3057a",
+			"documentation_hash": "c22ee1e41c5d3bed533bd5cbeda73ca2ddf32971958baabf4efcf951835fa7b3",
 			"definition_hash": "8ec7de1810df6c2a2cecefe5ff2d72f8d55947222ee726ea46dfef7d4ab1c25e",
-			"reviewed_at": "2026-06-17T14:47:56.39290916Z"
+			"reviewed_at": "2026-06-17T15:18:49.72441441Z"
 		},
 		{
 			"function_name": "trimSlash",

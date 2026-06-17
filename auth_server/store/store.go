@@ -1,10 +1,10 @@
 // Package store persists the authorization server's state in a bbolt database:
-// policies (each identified by a token), pending proposals awaiting human approval,
-// and the approved grants attached to a policy token. It is domain-agnostic — grants
+// subjects (each identified by a token), pending proposals awaiting human approval,
+// and the approved grants attached to a subject token. It is domain-agnostic — grants
 // carry opaque, resource server-signed policy blobs the store never interprets. The clock and
 // id generator are injectable for testing.
 //
-// A token *represents a policy*: PUT mints one, grants attach to it on approval, GET
+// A token *represents a subject*: PUT mints one, grants attach to it on approval, GET
 // reads it, DELETE destroys it.
 package store
 
@@ -21,9 +21,9 @@ import (
 	bolt "go.etcd.io/bbolt"
 )
 
-// Bucket names: policy tokens, pending proposals, and approved grants.
+// Bucket names: subject tokens, pending proposals, and approved grants.
 var (
-	bucketPolicies  = []byte("policies")
+	bucketSubjects  = []byte("subjects")
 	bucketProposals = []byte("proposals")
 	bucketGrants    = []byte("grants")
 )
@@ -43,15 +43,15 @@ const (
 	StatusExpired Status = "expired"
 )
 
-// policyRecord is the metadata for a policy token. The grants attached to the token
-// form the policy's content.
-type policyRecord struct {
+// subjectRecord is the metadata for a subject token. The grants attached to the token
+// form the subject's content.
+type subjectRecord struct {
 	Token     string    `json:"token"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
 // Proposal is a bundle of resource server-signed grant requests a holder submitted for
-// approval against its policy token. ApproverEmail names the human who must sign in
+// approval against its subject token. ApproverEmail names the human who must sign in
 // to decide it. A proposal is only approvable while pending and before ExpiresAt; past
 // that it is automatically revoked (StatusExpired).
 type Proposal struct {
@@ -75,7 +75,7 @@ func (p *Proposal) Expired(now time.Time) bool {
 	return p.Status == StatusPending && !now.Before(p.ExpiresAt)
 }
 
-// Grant is one approved, time-limited grant attached to a policy token. Item carries
+// Grant is one approved, time-limited grant attached to a subject token. Item carries
 // the opaque, resource server-signed policies a resource server evaluates at enforcement.
 type Grant struct {
 	ID         string                      `json:"id"`
@@ -86,7 +86,7 @@ type Grant struct {
 	ExpiresAt  time.Time                   `json:"expires_at"`
 }
 
-// Store persists policies, proposals and grants in a bbolt database.
+// Store persists subjects, proposals and grants in a bbolt database.
 type Store struct {
 	db    *bolt.DB
 	now   func() time.Time
@@ -100,14 +100,14 @@ type Store struct {
 // @return *Store A ready-to-use store backed by the opened database.
 // @error error when the database cannot be opened or buckets cannot be created.
 //
-// @testcase TestPolicyLifecycle opens a temp-file store.
+// @testcase TestSubjectLifecycle opens a temp-file store.
 func Open(path string) (*Store, error) {
 	db, err := bolt.Open(path, 0o600, &bolt.Options{Timeout: time.Second})
 	if err != nil {
 		return nil, err
 	}
 	err = db.Update(func(tx *bolt.Tx) error {
-		for _, name := range [][]byte{bucketPolicies, bucketProposals, bucketGrants} {
+		for _, name := range [][]byte{bucketSubjects, bucketProposals, bucketGrants} {
 			if _, err := tx.CreateBucketIfNotExists(name); err != nil {
 				return err
 			}
@@ -125,47 +125,47 @@ func Open(path string) (*Store, error) {
 //
 // @error error Any error from closing the database.
 //
-// @testcase TestPolicyLifecycle closes its store on cleanup.
+// @testcase TestSubjectLifecycle closes its store on cleanup.
 func (s *Store) Close() error { return s.db.Close() }
 
-// CreatePolicy mints a new policy with a fresh random token (PUT /api/policy) and
-// returns the token. The policy starts empty; grants attach to it on approval.
+// CreateSubject mints a new subject with a fresh random token (PUT /api/subject) and
+// returns the token. The subject starts empty; grants attach to it on approval.
 //
-// @return string The new policy token.
+// @return string The new subject token.
 // @error error when a token cannot be generated or persisted.
 //
-// @testcase TestPolicyLifecycle creates a policy and uses its token.
-func (s *Store) CreatePolicy() (string, error) {
+// @testcase TestSubjectLifecycle creates a subject and uses its token.
+func (s *Store) CreateSubject() (string, error) {
 	token, err := randomToken()
 	if err != nil {
 		return "", err
 	}
-	if err := s.put(bucketPolicies, token, policyRecord{Token: token, CreatedAt: s.now()}); err != nil {
+	if err := s.put(bucketSubjects, token, subjectRecord{Token: token, CreatedAt: s.now()}); err != nil {
 		return "", err
 	}
 	return token, nil
 }
 
-// PolicyExists reports whether token identifies an existing policy.
+// SubjectExists reports whether token identifies an existing subject.
 //
 // @arg token The bearer token presented by a caller.
-// @return bool True when the token identifies a known policy.
+// @return bool True when the token identifies a known subject.
 //
-// @testcase TestPolicyLifecycle checks a known and an unknown token.
-func (s *Store) PolicyExists(token string) bool {
+// @testcase TestSubjectLifecycle checks a known and an unknown token.
+func (s *Store) SubjectExists(token string) bool {
 	exists := false
 	_ = s.db.View(func(tx *bolt.Tx) error {
-		exists = token != "" && tx.Bucket(bucketPolicies).Get([]byte(token)) != nil
+		exists = token != "" && tx.Bucket(bucketSubjects).Get([]byte(token)) != nil
 		return nil
 	})
 	return exists
 }
 
-// CreateProposal records a pending proposal against the policy token, carrying the
+// CreateProposal records a pending proposal against the subject token, carrying the
 // signed items and the approver's email. The proposal expires ttl after creation; once
 // expired it is automatically revoked and can no longer be approved.
 //
-// @arg token The policy the approved grants will attach to.
+// @arg token The subject the approved grants will attach to.
 // @arg approverEmail The human who must sign in to decide the proposal.
 // @arg items The resource server-signed grant requests bundled by the client.
 // @arg ttl How long the proposal may stay pending before it is automatically revoked.
@@ -214,7 +214,7 @@ func (s *Store) GetProposal(id string) (*Proposal, error) {
 	return &p, nil
 }
 
-// Approve marks the proposal approved and attaches one grant per item to its policy
+// Approve marks the proposal approved and attaches one grant per item to its subject
 // token, each valid for ttl from now.
 //
 // @arg id The proposal id to approve.
@@ -222,7 +222,7 @@ func (s *Store) GetProposal(id string) (*Proposal, error) {
 // @return *Proposal The updated proposal in the approved state.
 // @error ErrNotFound when no proposal has the id; ErrAlreadyDecided when not pending.
 //
-// @testcase TestProposalApprovalAttachesGrants approves and reads back the policy.
+// @testcase TestProposalApprovalAttachesGrants approves and reads back the subject's grants.
 // @testcase TestApproveTwiceFails rejects approving an already-decided proposal.
 // @testcase TestProposalExpires refuses to approve a lapsed proposal.
 func (s *Store) Approve(id string, ttl time.Duration) (*Proposal, error) {
@@ -315,16 +315,16 @@ func (s *Store) Reject(id string) (*Proposal, error) {
 	return &p, nil
 }
 
-// PolicyForToken returns the active (non-expired) grants attached to a policy token,
+// SubjectForToken returns the active (non-expired) grants attached to a subject token,
 // deleting any that have expired as a side effect.
 //
-// @arg token The policy whose grants are requested.
+// @arg token The subject whose grants are requested.
 // @return []Grant The active grants attached to the token.
 // @error error when the database cannot be read or updated.
 //
-// @testcase TestProposalApprovalAttachesGrants reads the policy attached to a token.
+// @testcase TestProposalApprovalAttachesGrants reads the subject identified by a token.
 // @testcase TestExpiredGrantDropped omits an elapsed grant.
-func (s *Store) PolicyForToken(token string) ([]Grant, error) {
+func (s *Store) SubjectForToken(token string) ([]Grant, error) {
 	var out []Grant
 	err := s.db.Update(func(tx *bolt.Tx) error {
 		gb := tx.Bucket(bucketGrants)
@@ -360,7 +360,7 @@ func (s *Store) PolicyForToken(token string) ([]Grant, error) {
 	return out, nil
 }
 
-// AllGrants returns every active (non-expired) grant across all policies, for the
+// AllGrants returns every active (non-expired) grant across all subjects, for the
 // authorization server's observability UI. It does not mutate the store.
 //
 // @return []Grant The active grants, newest first.
@@ -424,18 +424,18 @@ func sortByCreatedDesc[T any](s []T, created func(i int) time.Time) {
 	sort.SliceStable(s, func(i, j int) bool { return created(i).After(created(j)) })
 }
 
-// DestroyPolicy deletes a policy token and every grant attached to it, returning how
+// DestroySubject deletes a subject token and every grant attached to it, returning how
 // many grants were removed.
 //
-// @arg token The policy to destroy.
+// @arg token The subject to destroy.
 // @return int The number of grants deleted.
 // @error error when the database cannot be updated.
 //
-// @testcase TestDestroyPolicy removes the token and all its grants.
-func (s *Store) DestroyPolicy(token string) (int, error) {
+// @testcase TestDestroySubject removes the token and all its grants.
+func (s *Store) DestroySubject(token string) (int, error) {
 	deleted := 0
 	err := s.db.Update(func(tx *bolt.Tx) error {
-		if err := tx.Bucket(bucketPolicies).Delete([]byte(token)); err != nil {
+		if err := tx.Bucket(bucketSubjects).Delete([]byte(token)); err != nil {
 			return err
 		}
 		gb := tx.Bucket(bucketGrants)
@@ -561,7 +561,7 @@ func (s *Store) StartCleanup(stop <-chan struct{}, interval time.Duration, onPur
 // @arg value The value to JSON-encode and store.
 // @error error when encoding or the write transaction fails.
 //
-// @testcase TestPolicyLifecycle exercises put via CreatePolicy.
+// @testcase TestSubjectLifecycle exercises put via CreateSubject.
 func (s *Store) put(bucket []byte, key string, value any) error {
 	return s.db.Update(func(tx *bolt.Tx) error {
 		return putTx(tx.Bucket(bucket), key, value)
@@ -584,12 +584,12 @@ func putTx(b *bolt.Bucket, key string, value any) error {
 	return b.Put([]byte(key), encoded)
 }
 
-// randomToken returns a URL-safe random 32-byte token representing a policy.
+// randomToken returns a URL-safe random 32-byte token representing a subject.
 //
 // @return string A base64url-encoded random token.
 // @error error when the system RNG fails.
 //
-// @testcase TestPolicyLifecycle relies on a generated token.
+// @testcase TestSubjectLifecycle relies on a generated token.
 func randomToken() (string, error) {
 	b := make([]byte, 32)
 	if _, err := rand.Read(b); err != nil {

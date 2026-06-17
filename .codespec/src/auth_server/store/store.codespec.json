@@ -2,37 +2,23 @@
 	"functions": [
 		{
 			"function_name": "Open",
-			"documentation_hash": "b41c503d9a484e288e180efd85b32ac53573104ee77545c4f458cdb05560c479",
-			"definition_hash": "2393bf7712daf5bfd52091a6f3f74c139866e5033f9cc840dea9ba2ee0e67ef4",
-			"reviewed_at": "2026-06-17T05:59:07.680971072Z"
+			"documentation_hash": "95e2bafc0062928cb49a674d8fe3bf8d1473b26c18316f02402d52d830115786",
+			"definition_hash": "051b6436afc2e45e945a005b99c0a2107d38ffd18f70701b4c8558465f618793",
+			"reviewed_at": "2026-06-17T15:18:49.678419397Z"
 		},
 		{
 			"function_name": "Close",
 			"receiver": "Store",
-			"documentation_hash": "73064d719fecab376c41764136b28785001cedae964bd1d4ff66d0201fab2656",
+			"documentation_hash": "5a69af3130667bca585c892248a564eb622d0ac617ffff4f63bf5c635f3d639a",
 			"definition_hash": "2b0813b127b152e0ae1d2e59f39e7c2e137acc7535330719382263a803ab6177",
-			"reviewed_at": "2026-06-17T05:59:07.681736691Z"
-		},
-		{
-			"function_name": "CreatePolicy",
-			"receiver": "Store",
-			"documentation_hash": "7bc35d5c44be120dcb20337b89cb745d479bc921feee90b498cdb0b6cf747d8e",
-			"definition_hash": "fd3acd50b899145088d1198295847735e3ded1f1f2ce5b048ff62eda3c6cde3c",
-			"reviewed_at": "2026-06-17T05:59:07.682560492Z"
-		},
-		{
-			"function_name": "PolicyExists",
-			"receiver": "Store",
-			"documentation_hash": "7dc08539587334467e79eb2e75a7952e4f827e5edf9712611e69c91140a8a688",
-			"definition_hash": "9bb22383d4d59e8f8eacecd73eb68c0464cc63025180175be552a64fbdc1a7c9",
-			"reviewed_at": "2026-06-17T05:59:07.683452914Z"
+			"reviewed_at": "2026-06-17T15:18:49.681594794Z"
 		},
 		{
 			"function_name": "CreateProposal",
 			"receiver": "Store",
-			"documentation_hash": "7893a3afad9dfef3988ae4b9720abd7910d8849bbe5d1d5efe2ad3e4b9f1e26d",
+			"documentation_hash": "ac868f8ac2b5503b9dc4c40ef7bd5526946314016277cf97dbc8b909114bcc36",
 			"definition_hash": "512bfbb4bb0bf041074e6a3ff7c70f026d6a0aec027399433e7693015b4008c2",
-			"reviewed_at": "2026-06-17T14:39:59.857270949Z"
+			"reviewed_at": "2026-06-17T15:18:49.689763117Z"
 		},
 		{
 			"function_name": "GetProposal",
@@ -44,9 +30,9 @@
 		{
 			"function_name": "Approve",
 			"receiver": "Store",
-			"documentation_hash": "c19bcbb829ca507af2db6cc9e6bb561186b4b614d57a35f3c9cad1c82154a248",
+			"documentation_hash": "17e0a4201f8076f20a8c8ba671e3f2ae889009eb9243f744b6e4a3d6f80ad4b9",
 			"definition_hash": "f8067bfe0cca1811cd61f2199e09aa470399596c36ebc17c0526ffbfddfce27e",
-			"reviewed_at": "2026-06-17T10:59:49.858626873Z"
+			"reviewed_at": "2026-06-17T15:18:49.692378987Z"
 		},
 		{
 			"function_name": "Reject",
@@ -54,20 +40,6 @@
 			"documentation_hash": "6aeff0a7eb71b8600942bf8bc0e66d1c2d17b87f60f1f5dd2e7cd9ad0ae301a8",
 			"definition_hash": "c1c28327794192aa78fa79c8a4d840acad6d2414dea857c635e9ab30709a12f0",
 			"reviewed_at": "2026-06-17T10:59:49.862486289Z"
-		},
-		{
-			"function_name": "PolicyForToken",
-			"receiver": "Store",
-			"documentation_hash": "7782d4ac4f5d2776469cbc3f0e19835220f239836f2742ca7056abc2c5f9024b",
-			"definition_hash": "61df712f7cd43d754db1b8d67c3fa8ec354ee8c242fbf7b9447e20249f9968cb",
-			"reviewed_at": "2026-06-17T05:59:07.691160364Z"
-		},
-		{
-			"function_name": "DestroyPolicy",
-			"receiver": "Store",
-			"documentation_hash": "253cf30b129b84cbc3c24dbed9637ed099b02cd2916fc0f3150592ac709373de",
-			"definition_hash": "e419e2c7a71f56459dfb2d409cdd6dd31c6461bef13ebdc5f6ef3ba3ab050c63",
-			"reviewed_at": "2026-06-17T05:59:07.693089133Z"
 		},
 		{
 			"function_name": "PurgeExpired",
@@ -86,9 +58,9 @@
 		{
 			"function_name": "put",
 			"receiver": "Store",
-			"documentation_hash": "8268a9f9bd4af70db49663e15bed639a556bdce1c89d9d4616bf9670147b5610",
+			"documentation_hash": "a114355b5f1accf3f6b176f2cf6248ec4932b55aee3c069a3e19d055b79d6d1d",
 			"definition_hash": "5f3cf50a23ed96697275672efda427544feef30a78f68dfc6775c01e7323fe3b",
-			"reviewed_at": "2026-06-17T05:59:07.701079715Z"
+			"reviewed_at": "2026-06-17T15:18:49.701080807Z"
 		},
 		{
 			"function_name": "putTx",
@@ -98,16 +70,16 @@
 		},
 		{
 			"function_name": "randomToken",
-			"documentation_hash": "ad31c24e03b2fb53cceb97831e327198b5e4b3363edb882f9ff6029fa2f716b5",
+			"documentation_hash": "4baff24f25cb2d5ca1cf99ca5d2b4d0bbed5c2fc0839fb12cd3a9769e50d6c1b",
 			"definition_hash": "dedec501d6e6a48141efbbc860ba0c44e779ec7461eed197a7734dd332d3d616",
-			"reviewed_at": "2026-06-17T05:59:07.70324834Z"
+			"reviewed_at": "2026-06-17T15:18:49.703096667Z"
 		},
 		{
 			"function_name": "AllGrants",
 			"receiver": "Store",
-			"documentation_hash": "ec55abf85a60c2221c8c9319f3d530ace505fcf4b8ed5acd5e9342f9d797febb",
+			"documentation_hash": "1a052c838249e910db2a1e8948f1cb606e4fbc1c06589daec6c62e406190ed6e",
 			"definition_hash": "4d1e7ba05507cd070d1597cbb930ad7ab8a540d2fcd76da42f432401be97306a",
-			"reviewed_at": "2026-06-17T10:21:37.219910886Z"
+			"reviewed_at": "2026-06-17T15:18:49.69663919Z"
 		},
 		{
 			"function_name": "AllProposals",
@@ -128,6 +100,34 @@
 			"documentation_hash": "81b5e062c4eae2856cd2b5e8f2d925bc393ae3a77951e379371eac5e2f233587",
 			"definition_hash": "9707c2256f5970ca0cd474801fc38c75c2df7ccdf79ca56cfadb3abc0a7a60fc",
 			"reviewed_at": "2026-06-17T10:59:49.852317454Z"
+		},
+		{
+			"function_name": "CreateSubject",
+			"receiver": "Store",
+			"documentation_hash": "568355350cca991d0ea66abc8d09a110eaa508cb859a51e47464e252a390c0a1",
+			"definition_hash": "f2e3d890cc00a7a4946d2a10a5d2857c58385d578dab14af85dbcb5ddd7244e7",
+			"reviewed_at": "2026-06-17T15:18:49.68406685Z"
+		},
+		{
+			"function_name": "SubjectExists",
+			"receiver": "Store",
+			"documentation_hash": "5404dff160b50975e695700c555c91a41984c87b2a7bf8b2a90798c06e608ea6",
+			"definition_hash": "4cad7adcc621cb36015dc99135b7075c63d23fc23b5d2a41a0433f186ba93ee5",
+			"reviewed_at": "2026-06-17T15:18:49.686460876Z"
+		},
+		{
+			"function_name": "SubjectForToken",
+			"receiver": "Store",
+			"documentation_hash": "dd60cf48e6bd45d73fcdd8d3beaaa35a882837aea2e3b8e047f0e99fc5df204f",
+			"definition_hash": "c4dda851ae5df21ffc9b415405de069f9d28be36192cc9db5cb2c56ff8471161",
+			"reviewed_at": "2026-06-17T15:18:49.694711253Z"
+		},
+		{
+			"function_name": "DestroySubject",
+			"receiver": "Store",
+			"documentation_hash": "d996f944497fe5a9eb8bf9b556b4334b8c860fc3ef19ff938e68ea2b4bd18f80",
+			"definition_hash": "d9dec7f8be3caef25f44c19eea50bbd57421972edba2be235af5202c79136eeb",
+			"reviewed_at": "2026-06-17T15:18:49.698818921Z"
 		}
 	]
 }

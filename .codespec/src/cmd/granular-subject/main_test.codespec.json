@@ -2,9 +2,9 @@
 	"functions": [
 		{
 			"function_name": "fakeAS",
-			"documentation_hash": "cac408bcdb1a96ab362f918bbfc847879443279eeca85abc5e2f07758bfc3ac6",
-			"definition_hash": "61c50157454e09fa040603bd2606d669f6521fe4ae71e35589f0811526f1d398",
-			"reviewed_at": "2026-06-17T14:39:59.912820593Z"
+			"documentation_hash": "41eceac2c83bfaae0d737c2dbdff2d3173d8a4e0a70e4455e534d65bba15746b",
+			"definition_hash": "553637f819065eba52b96632f0eaf31ce6e59cb9990c80c08ec8658e8fc53ee5",
+			"reviewed_at": "2026-06-17T15:18:49.739332468Z"
 		},
 		{
 			"function_name": "TestMainIsEntryPoint",
@@ -19,16 +19,16 @@
 			"reviewed_at": "2026-06-17T06:58:24.502235168Z"
 		},
 		{
-			"function_name": "TestRunPolicy",
-			"documentation_hash": "ceb9fa054e6ed61d339d9983a281c0130b20c38a276588bb0b763b07e738cd46",
-			"definition_hash": "72d0238aef2f6f67ff51eee8eceef518be22e1c1c5ea6599bc18f0be34976b1f",
-			"reviewed_at": "2026-06-17T07:18:41.231326303Z"
-		},
-		{
 			"function_name": "TestClientRequiresAdminToken",
 			"documentation_hash": "7e340697cca94cfc4faddf25bb5d64294020030cdf68ef5f1098dd6dc3e798ca",
 			"definition_hash": "76f5a1d86655081ab1ff42471a0d0f831fbdec40c89a2f11f6f5d4fa7a683a04",
 			"reviewed_at": "2026-06-17T07:18:41.231099104Z"
+		},
+		{
+			"function_name": "TestRunSubject",
+			"documentation_hash": "f8425aaebcb4be73c8c363c6bc67041b78377250d736ae508c6f84b45fe99e6e",
+			"definition_hash": "05b4f38cc334bf369079c729720fac395d5955d9dacb4533bd95080c87770628",
+			"reviewed_at": "2026-06-17T15:18:49.739913474Z"
 		}
 	]
 }

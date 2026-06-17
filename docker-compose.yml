@@ -9,7 +9,7 @@
 #
 #      mkdir -p .secrets
 #      openssl rand -hex 32           > .secrets/granular_resource_server_github_secret  # shared AS<->resource server HMAC
-#      openssl rand -hex 32           > .secrets/granular_auth_admin_token       # gates policy administration
+#      openssl rand -hex 32           > .secrets/granular_auth_admin_token       # gates subject administration
 #      printf '%s' "$GITHUB_PAT"      > .secrets/granular_github_token           # PAT the resource server uses
 #
 # 2. Start the services:
@@ -17,11 +17,11 @@
 #      docker compose up -d
 #      # AS consent UI:  http://localhost:9090      resource server: http://localhost:8080
 #
-# 3. Mint a policy token (admin) and hand it to the client. Using the local CLI:
+# 3. Mint a subject token (admin) and hand it to the client. Using the local CLI:
 #
-#      go run ./cmd/granular-policy --as http://localhost:9090 \
+#      go run ./cmd/granular-subject --as http://localhost:9090 \
 #        --admin-token "$(cat .secrets/granular_auth_admin_token)" create \
-#        > .secrets/granular_policy_token
+#        > .secrets/granular_subject_token
 #
 # 4. Drive the resource server through the client (on-demand, joins the compose network):
 #
@@ -74,7 +74,7 @@ services:
     # The client reads ./granular-client.yaml by default; point it at the mounted file.
     working_dir: /etc/granular
     secrets:
-      - granular_policy_token
+      - granular_subject_token
 
 secrets:
   granular_resource_server_github_secret:
@@ -83,8 +83,8 @@ secrets:
     file: ./.secrets/granular_auth_admin_token
   granular_github_token:
     file: ./.secrets/granular_github_token
-  granular_policy_token:
-    file: ./.secrets/granular_policy_token
+  granular_subject_token:
+    file: ./.secrets/granular_subject_token
   # granular_auth_oauth_client_secret:
   #   file: ./.secrets/granular_auth_oauth_client_secret
 

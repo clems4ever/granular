@@ -63,7 +63,7 @@ func (c *Client) Sign(ctx context.Context, resourceServerID string, req resource
 }
 
 // Submit packs one or more resource server-signed grant requests into a proposal and submits it
-// to the AS under the client's policy token, returning the proposal id and the approval
+// to the AS under the client's subject token, returning the proposal id and the approval
 // URL to hand to the user. The signed items may come from different resource servers; the AS
 // verifies each one's signature independently.
 //
@@ -71,7 +71,7 @@ func (c *Client) Sign(ctx context.Context, resourceServerID string, req resource
 // @arg approverEmail The email of the human who must approve.
 // @arg items The resource server-signed grant requests to bundle.
 // @return Proposal The submitted proposal's id and approval URL.
-// @error ErrNoToken when no policy token is configured.
+// @error ErrNoToken when no subject token is configured.
 // @error error when the approver/items are missing or the AS rejects the proposal.
 //
 // @testcase TestSubmitSendsBundle submits a signed bundle to the AS.

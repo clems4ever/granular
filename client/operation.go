@@ -15,7 +15,7 @@ type Result struct {
 }
 
 // Run submits an operation to one resource server and returns its result. The resource server asks the
-// AS whether the client's policy token authorizes the operation; on an allow it executes
+// AS whether the client's subject token authorizes the operation; on an allow it executes
 // and Run returns the result, and on a deny Run returns ErrNotAuthorized so the caller
 // can react clearly (typically by building a grant request).
 //
@@ -23,7 +23,7 @@ type Result struct {
 // @arg resourceServerID The resource server to run the operation on.
 // @arg op The operation type and parameters.
 // @return Result The executed operation's result (on success).
-// @error ErrNoToken when no policy token is configured.
+// @error ErrNoToken when no subject token is configured.
 // @error ErrUnknownResourceServer when the resource server id is not configured.
 // @error ErrNotAuthorized when the AS denies the operation.
 // @error error on transport failure or an unexpected resource server status.

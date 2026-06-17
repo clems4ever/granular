@@ -28,8 +28,8 @@ type ResourceServer struct {
 	BaseURL string
 }
 
-// Config configures a Client: the AS base URL, an optional policy token (the bearer
-// credential proposals and policy reads are made under), and the known resource servers.
+// Config configures a Client: the AS base URL, an optional subject token (the bearer
+// credential proposals and subject reads are made under), and the known resource servers.
 type Config struct {
 	ASURL           string
 	Token           string
@@ -49,8 +49,8 @@ type Client struct {
 var (
 	// ErrNotAuthorized is returned by Run when the AS denies the operation.
 	ErrNotAuthorized = errors.New("operation not authorized by policy")
-	// ErrNoToken is returned when an operation needs a policy token but none is set.
-	ErrNoToken = errors.New("no policy token configured")
+	// ErrNoToken is returned when an operation needs a subject token but none is set.
+	ErrNoToken = errors.New("no subject token configured")
 	// ErrUnknownResourceServer is returned when a referenced resource server id is not configured.
 	ErrUnknownResourceServer = errors.New("unknown resource server")
 )
@@ -134,7 +134,7 @@ func (c *Client) resolveTargets(ids []string) ([]string, error) {
 // @return int The HTTP status code.
 // @error error on transport failure, request construction, or a body decode error.
 //
-// @testcase TestCreatePolicyReturnsToken drives a PUT through doJSON.
+// @testcase TestCreateSubjectReturnsToken drives a PUT through doJSON.
 func (c *Client) doJSON(ctx context.Context, method, url, bearer string, body, out any) (int, error) {
 	var reader io.Reader
 	if body != nil {

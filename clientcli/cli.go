@@ -6,8 +6,8 @@
 // to the AS for human approval. The cmd/granular-client binary is a thin entrypoint that
 // delegates here.
 //
-// Policy lifecycle (minting and destroying the policy token) is an administrative concern
-// handled by a separate command (granular-policy); this CLI only uses a configured token.
+// Subject lifecycle (minting and destroying the subject token) is an administrative concern
+// handled by a separate command (granular-subject); this CLI only uses a configured token.
 package clientcli
 
 import (
@@ -48,7 +48,7 @@ func NewRootCmd(out io.Writer) *cobra.Command {
 		PersistentPreRunE: func(*cobra.Command, []string) error { return a.load() },
 	}
 	root.PersistentFlags().StringVar(&a.configPath, "config", "granular-client.yaml", "path to the YAML configuration file")
-	root.PersistentFlags().StringVar(&a.token, "token", "", "policy token (overrides the configured token_file)")
+	root.PersistentFlags().StringVar(&a.token, "token", "", "subject token (overrides the configured token_file)")
 	root.AddCommand(a.catalogCmd(), a.templateCmd(), a.opCmd(), a.signCmd(), a.proposeCmd())
 	return root
 }

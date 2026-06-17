@@ -3,8 +3,8 @@
 		{
 			"function_name": "NewRootCmd",
 			"documentation_hash": "a7e0c969dcf98016fb51b807576a6203f477365fe4606b6473a7c38f8bde66eb",
-			"definition_hash": "502af41ea8b67eb95ed1476957d629692b1362c716ace710309e2b394f3f3e46",
-			"reviewed_at": "2026-06-17T14:39:59.878045842Z"
+			"definition_hash": "49b95be30010021eef1bf7cfe97ae15087a6ff1f0ec99e42442302d7641232dd",
+			"reviewed_at": "2026-06-17T15:18:49.731280561Z"
 		},
 		{
 			"function_name": "load",

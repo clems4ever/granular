@@ -19,7 +19,7 @@ import (
 
 const rsSecret = "s3cret"
 
-// adminToken is the policy-administration bearer the test server is configured with.
+// adminToken is the subject-administration bearer the test server is configured with.
 const adminToken = "admintok"
 
 // The Cedar policy and matching world used by the verify tests: agent "a" may view
@@ -53,7 +53,7 @@ func newServer(t *testing.T) (*Server, http.Handler) {
 // @arg method The HTTP method.
 // @arg path The request path.
 // @arg body The request body (may be nil).
-// @arg bearer A policy token for the Authorization header, or "".
+// @arg bearer A subject token for the Authorization header, or "".
 // @arg sign Whether to attach a valid resource server signature over the body.
 // @return *http.Response The response.
 //
@@ -82,21 +82,21 @@ func do(t *testing.T, h http.Handler, method, path string, body []byte, bearer s
 	return resp
 }
 
-// createPolicy PUTs a new policy and returns its token.
+// createSubject PUTs a new subject and returns its token.
 //
 // @arg t The test handle.
 // @arg h The handler.
-// @return string The new policy token.
+// @return string The new subject token.
 //
 // @testcase TestProposalApproveFlow mints a token through here.
-func createPolicy(t *testing.T, h http.Handler) string {
+func createSubject(t *testing.T, h http.Handler) string {
 	t.Helper()
-	resp := do(t, h, http.MethodPut, "/api/policy", nil, adminToken, false)
+	resp := do(t, h, http.MethodPut, "/api/subject", nil, adminToken, false)
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusCreated {
-		t.Fatalf("PUT /api/policy = %d, want 201", resp.StatusCode)
+		t.Fatalf("PUT /api/subject = %d, want 201", resp.StatusCode)
 	}
-	var out policyOutput
+	var out subjectOutput
 	_ = json.NewDecoder(resp.Body).Decode(&out)
 	if out.Token == "" {
 		t.Fatal("no token returned")
@@ -117,7 +117,7 @@ func signedItem() proposal.SignedGrantRequest {
 
 // verifyBody builds the JSON verify body for the agent/view/repo request.
 //
-// @arg token The policy token to evaluate against.
+// @arg token The subject token to evaluate against.
 // @return []byte The marshalled verifyInput.
 //
 // @testcase TestProposalApproveFlow verifies through here.
@@ -142,7 +142,7 @@ func verifyBody(token string) []byte {
 //
 // @arg t The test handle.
 // @arg h The handler.
-// @arg token The policy token.
+// @arg token The subject token.
 // @return bool The decision.
 //
 // @testcase TestProposalApproveFlow reads the decision through here.
@@ -158,12 +158,12 @@ func verifyAllowed(t *testing.T, h http.Handler, token string) bool {
 	return out.Allowed
 }
 
-// TestProposalApproveFlow drives the whole path: mint a policy token, submit a signed
+// TestProposalApproveFlow drives the whole path: mint a subject token, submit a signed
 // proposal, approve it via the (auth-disabled) consent endpoint, and verify the
 // operation is then allowed.
 func TestProposalApproveFlow(t *testing.T) {
 	_, h := newServer(t)
-	token := createPolicy(t, h)
+	token := createSubject(t, h)
 
 	pin, _ := json.Marshal(proposalInput{ApproverEmail: "me@example.com", Items: []proposal.SignedGrantRequest{signedItem()}})
 	resp := do(t, h, http.MethodPost, "/api/proposals", pin, token, false)
@@ -205,7 +205,7 @@ func TestProposalApproveFlow(t *testing.T) {
 // wrong secret (a tampering/forging client).
 func TestProposalRejectsBadSignature(t *testing.T) {
 	_, h := newServer(t)
-	token := createPolicy(t, h)
+	token := createSubject(t, h)
 	bad := proposal.Sign([]byte("wrong"), "rs", proposal.Presentation{Summary: "x"}, []string{testPolicy})
 	pin, _ := json.Marshal(proposalInput{ApproverEmail: "me@example.com", Items: []proposal.SignedGrantRequest{bad}})
 	resp := do(t, h, http.MethodPost, "/api/proposals", pin, token, false)
@@ -215,11 +215,11 @@ func TestProposalRejectsBadSignature(t *testing.T) {
 	}
 }
 
-// TestPolicyRejectsUnknownToken returns 404 when an admin inspects an unregistered
-// policy token.
-func TestPolicyRejectsUnknownToken(t *testing.T) {
+// TestSubjectRejectsUnknownToken returns 404 when an admin inspects an unregistered
+// subject token.
+func TestSubjectRejectsUnknownToken(t *testing.T) {
 	_, h := newServer(t)
-	resp := do(t, h, http.MethodGet, "/api/policy/nope", nil, adminToken, false)
+	resp := do(t, h, http.MethodGet, "/api/subject/nope", nil, adminToken, false)
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusNotFound {
 		t.Fatalf("status = %d, want 404", resp.StatusCode)
@@ -229,7 +229,7 @@ func TestPolicyRejectsUnknownToken(t *testing.T) {
 // TestVerifyRejectsUnknownResourceServer rejects a verify call not signed by a known resource server.
 func TestVerifyRejectsUnknownResourceServer(t *testing.T) {
 	_, h := newServer(t)
-	token := createPolicy(t, h)
+	token := createSubject(t, h)
 	resp := do(t, h, http.MethodPost, "/api/verify", verifyBody(token), "", false)
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusUnauthorized {

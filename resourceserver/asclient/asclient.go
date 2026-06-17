@@ -43,7 +43,7 @@ func New(baseURL, resourceServerID string, secret []byte) *Client {
 	}
 }
 
-// Verify asks the AS whether the policy attached to in.Token authorizes the requests.
+// Verify asks the AS whether the subject identified by in.Token authorizes the requests.
 // It signs the JSON body with the resource server secret (X-Resource-Server-ID + X-Resource-Server-Signature).
 //
 // @arg ctx Context for cancellation.

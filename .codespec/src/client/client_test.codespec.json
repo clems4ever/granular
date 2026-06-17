@@ -2,9 +2,9 @@
 	"functions": [
 		{
 			"function_name": "fakeAS",
-			"documentation_hash": "943d052b411929b8af37c46f589f9dffa41448f8bfea367da002008c711f29e1",
-			"definition_hash": "42372609f90431a96e28ee9d8d955f794fbd96648edcf065caa612c42770faba",
-			"reviewed_at": "2026-06-17T14:43:58.783786757Z"
+			"documentation_hash": "01bd443d4abc18852beaef2c22ff8d1cee19dc9363b4e1b982574ad409490eab",
+			"definition_hash": "7f5f4fc8816f98c314fb4e07f5ce6804089831909490d28e0dad977030cdef16",
+			"reviewed_at": "2026-06-17T15:18:49.725330131Z"
 		},
 		{
 			"function_name": "readCap",
@@ -25,18 +25,6 @@
 			"reviewed_at": "2026-06-17T14:43:58.784499416Z"
 		},
 		{
-			"function_name": "TestPolicyReadsGrants",
-			"documentation_hash": "f6563b315184cd837f39f665891b880a2f9800f6ad7562761f8c95cf8bc6b780",
-			"definition_hash": "cd8929e0ef4373b43e897340d6d545b27a9a55c6d6c27c9e167537ba637ae56b",
-			"reviewed_at": "2026-06-17T14:43:58.784821816Z"
-		},
-		{
-			"function_name": "TestDestroyPolicy",
-			"documentation_hash": "74fb5b48295e8556530a753202e1a9269db99c1916154d6d601855de0eccab24",
-			"definition_hash": "2c6b6cedf6e672149154c0c06d99af4b2419170323b078b5d1ef4f7f0b20de0c",
-			"reviewed_at": "2026-06-17T14:43:58.785449806Z"
-		},
-		{
 			"function_name": "TestSignReturnsSignedRequest",
 			"documentation_hash": "d26f8204964533c54d4441474d3ca8058e8db7ec45e96afbd0a361cf6df5fd4a",
 			"definition_hash": "d1875dd77a6dc26bb0fc65f9708ebbbc307a1889fdb9d3ca732e4b23cd1f1d46",
@@ -47,12 +35,6 @@
 			"documentation_hash": "fd87665faa5b5cabea34ce4c9e72a55b67029111161c0601ae1df4fe537925f3",
 			"definition_hash": "e917f71f3571bad849f413c14fd0537604217fe2761177e61e9408b7a885679a",
 			"reviewed_at": "2026-06-17T14:46:17.086473908Z"
-		},
-		{
-			"function_name": "TestCreatePolicyReturnsToken",
-			"documentation_hash": "b1baa80c9febef1311fe9be4e333ba5e490ed97d535e96b2e53356a49c004066",
-			"definition_hash": "a8a1ff6ee47a6240cc4ca429aa94119028c14a9aab5543a30787d1e8521fca8e",
-			"reviewed_at": "2026-06-17T14:43:58.786675284Z"
 		},
 		{
 			"function_name": "fakeResourceServer",
@@ -77,6 +59,24 @@
 			"documentation_hash": "6880bd63e73246c75e5ee43276ffd51a5eff4d97073d120e31b624c5527a40d6",
 			"definition_hash": "6a3f0a91f756a4646dab8f5f863cc17eee2aa76e52d4220a7704939e7de2064f",
 			"reviewed_at": "2026-06-17T14:43:58.789424048Z"
+		},
+		{
+			"function_name": "TestCreateSubjectReturnsToken",
+			"documentation_hash": "65b0c1331d04dc1d2887c34958c4bf4fd94585894600fcfc0d174b0a73243504",
+			"definition_hash": "3f57cb3ea8cdb8a1b6f7b5665650f94681a3276f510e1500ce66a81e0aca0587",
+			"reviewed_at": "2026-06-17T15:18:49.726443813Z"
+		},
+		{
+			"function_name": "TestSubjectReadsGrants",
+			"documentation_hash": "d500d486528ff722d4e7b0fb41635aca620b0339fdf25a3629a12b6cce75cf4e",
+			"definition_hash": "13c8185308a83ea63127f3ad24b26bc061ec89e2c91fe6cefc89c2527634726c",
+			"reviewed_at": "2026-06-17T15:18:49.72735545Z"
+		},
+		{
+			"function_name": "TestDestroySubject",
+			"documentation_hash": "363f2c8fe381bc7377da1e581824b1ecdd2cef35692f2ab887d9744b63d3ae0a",
+			"definition_hash": "858eab36e15b494a85aa9798e57dc6b8a3a91a8fff83b3e33c7323bf67e4913a",
+			"reviewed_at": "2026-06-17T15:18:49.728393411Z"
 		}
 	]
 }

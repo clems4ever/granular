@@ -1,5 +1,5 @@
 # GoReleaser configuration. granular ships as four independent binaries — the
-# client CLI, the authorization server, the GitHub resource server, and the policy admin
+# client CLI, the authorization server, the GitHub resource server, and the subject admin
 # CLI — each archived on its own so a release ships one bundle per binary (per
 # OS/arch). The three deployable services/clients also get Docker images.
 # See https://goreleaser.com.
@@ -49,9 +49,9 @@ builds:
       - -X main.commit={{ .Commit }}
       - -X main.date={{ .Date }}
 
-  - id: granular-policy
-    main: ./cmd/granular-policy
-    binary: granular-policy
+  - id: granular-subject
+    main: ./cmd/granular-subject
+    binary: granular-subject
     env:
       - CGO_ENABLED=0
     goos: [linux, darwin, windows]
@@ -90,9 +90,9 @@ archives:
         formats: [zip]
     files: [LICENSE*, README*]
 
-  - id: granular-policy
-    ids: [granular-policy]
-    name_template: "granular-policy_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+  - id: granular-subject
+    ids: [granular-subject]
+    name_template: "granular-subject_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     formats: [tar.gz]
     format_overrides:
       - goos: windows

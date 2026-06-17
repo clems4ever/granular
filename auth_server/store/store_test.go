@@ -14,7 +14,7 @@ import (
 // @arg t The test handle.
 // @return *Store The store under test.
 //
-// @testcase TestPolicyLifecycle opens a store with this helper.
+// @testcase TestSubjectLifecycle opens a store with this helper.
 func openTemp(t *testing.T) *Store {
 	t.Helper()
 	s, err := Open(filepath.Join(t.TempDir(), "as.db"))
@@ -34,25 +34,25 @@ func item() proposal.SignedGrantRequest {
 	return proposal.Sign([]byte("s"), "rs", proposal.Presentation{Summary: "x"}, []string{"permit(principal, action, resource);"})
 }
 
-// TestPolicyLifecycle covers minting a policy token, checking existence, and destroy.
-func TestPolicyLifecycle(t *testing.T) {
+// TestSubjectLifecycle covers minting a subject token, checking existence, and destroy.
+func TestSubjectLifecycle(t *testing.T) {
 	s := openTemp(t)
-	token, err := s.CreatePolicy()
+	token, err := s.CreateSubject()
 	if err != nil || token == "" {
-		t.Fatalf("CreatePolicy: %v %q", err, token)
+		t.Fatalf("CreateSubject: %v %q", err, token)
 	}
-	if !s.PolicyExists(token) {
-		t.Fatal("PolicyExists false for a freshly minted token")
+	if !s.SubjectExists(token) {
+		t.Fatal("SubjectExists false for a freshly minted token")
 	}
-	if s.PolicyExists("nope") {
-		t.Fatal("PolicyExists true for an unknown token")
+	if s.SubjectExists("nope") {
+		t.Fatal("SubjectExists true for an unknown token")
 	}
 }
 
-// TestProposalApprovalAttachesGrants approves a proposal and reads the attached policy.
+// TestProposalApprovalAttachesGrants approves a proposal and reads the attached subject's grants.
 func TestProposalApprovalAttachesGrants(t *testing.T) {
 	s := openTemp(t)
-	token, _ := s.CreatePolicy()
+	token, _ := s.CreateSubject()
 	p, err := s.CreateProposal(token, "me@example.com", []proposal.SignedGrantRequest{item()}, time.Hour)
 	if err != nil {
 		t.Fatalf("CreateProposal: %v", err)
@@ -63,16 +63,16 @@ func TestProposalApprovalAttachesGrants(t *testing.T) {
 	if _, err := s.Approve(p.ID, time.Hour); err != nil {
 		t.Fatalf("Approve: %v", err)
 	}
-	grants, err := s.PolicyForToken(token)
+	grants, err := s.SubjectForToken(token)
 	if err != nil || len(grants) != 1 {
-		t.Fatalf("PolicyForToken: %v len=%d", err, len(grants))
+		t.Fatalf("SubjectForToken: %v len=%d", err, len(grants))
 	}
 }
 
 // TestApproveTwiceFails rejects approving an already-decided proposal.
 func TestApproveTwiceFails(t *testing.T) {
 	s := openTemp(t)
-	token, _ := s.CreatePolicy()
+	token, _ := s.CreateSubject()
 	p, _ := s.CreateProposal(token, "me@example.com", []proposal.SignedGrantRequest{item()}, time.Hour)
 	if _, err := s.Approve(p.ID, time.Hour); err != nil {
 		t.Fatalf("first approve: %v", err)
@@ -85,12 +85,12 @@ func TestApproveTwiceFails(t *testing.T) {
 // TestRejectProposal marks a proposal rejected and attaches nothing.
 func TestRejectProposal(t *testing.T) {
 	s := openTemp(t)
-	token, _ := s.CreatePolicy()
+	token, _ := s.CreateSubject()
 	p, _ := s.CreateProposal(token, "me@example.com", []proposal.SignedGrantRequest{item()}, time.Hour)
 	if _, err := s.Reject(p.ID); err != nil {
 		t.Fatalf("Reject: %v", err)
 	}
-	grants, _ := s.PolicyForToken(token)
+	grants, _ := s.SubjectForToken(token)
 	if len(grants) != 0 {
 		t.Fatalf("reject attached %d grants, want 0", len(grants))
 	}
@@ -107,14 +107,14 @@ func TestGetMissingProposal(t *testing.T) {
 // TestExpiredGrantDropped omits (and deletes) a grant whose expiry has passed.
 func TestExpiredGrantDropped(t *testing.T) {
 	s := openTemp(t)
-	token, _ := s.CreatePolicy()
+	token, _ := s.CreateSubject()
 	p, _ := s.CreateProposal(token, "me@example.com", []proposal.SignedGrantRequest{item()}, time.Hour)
 	if _, err := s.Approve(p.ID, time.Millisecond); err != nil {
 		t.Fatalf("Approve: %v", err)
 	}
 	// Advance the store clock past the grant's expiry.
 	s.now = func() time.Time { return time.Now().Add(time.Hour) }
-	grants, _ := s.PolicyForToken(token)
+	grants, _ := s.SubjectForToken(token)
 	if len(grants) != 0 {
 		t.Fatalf("expired grant still active: %d", len(grants))
 	}
@@ -126,19 +126,19 @@ func TestAllGrantsAndProposals(t *testing.T) {
 	s := openTemp(t)
 
 	// An approved proposal with a long-lived grant.
-	tokA, _ := s.CreatePolicy()
+	tokA, _ := s.CreateSubject()
 	pA, _ := s.CreateProposal(tokA, "a@example.com", []proposal.SignedGrantRequest{item()}, time.Hour)
 	if _, err := s.Approve(pA.ID, 24*time.Hour); err != nil {
 		t.Fatalf("approve A: %v", err)
 	}
 	// An approved proposal whose grant expires almost immediately.
-	tokB, _ := s.CreatePolicy()
+	tokB, _ := s.CreateSubject()
 	pB, _ := s.CreateProposal(tokB, "b@example.com", []proposal.SignedGrantRequest{item()}, time.Hour)
 	if _, err := s.Approve(pB.ID, time.Millisecond); err != nil {
 		t.Fatalf("approve B: %v", err)
 	}
 	// A rejected proposal (history only, no grant).
-	tokC, _ := s.CreatePolicy()
+	tokC, _ := s.CreateSubject()
 	pC, _ := s.CreateProposal(tokC, "c@example.com", []proposal.SignedGrantRequest{item()}, time.Hour)
 	if _, err := s.Reject(pC.ID); err != nil {
 		t.Fatalf("reject C: %v", err)
@@ -169,9 +169,9 @@ func TestAllGrantsAndProposals(t *testing.T) {
 // window has passed (and no grant attaches), and the janitor revokes an untouched one.
 func TestProposalExpires(t *testing.T) {
 	s := openTemp(t)
-	tok1, _ := s.CreatePolicy()
+	tok1, _ := s.CreateSubject()
 	p1, _ := s.CreateProposal(tok1, "a@example.com", []proposal.SignedGrantRequest{item()}, time.Minute)
-	tok2, _ := s.CreatePolicy()
+	tok2, _ := s.CreateSubject()
 	p2, _ := s.CreateProposal(tok2, "b@example.com", []proposal.SignedGrantRequest{item()}, time.Minute)
 
 	if p1.Expired(time.Now()) {
@@ -188,7 +188,7 @@ func TestProposalExpires(t *testing.T) {
 	if g, _ := s.GetProposal(p1.ID); g.Status != StatusExpired {
 		t.Fatalf("p1 status = %q, want expired", g.Status)
 	}
-	if grants, _ := s.PolicyForToken(tok1); len(grants) != 0 {
+	if grants, _ := s.SubjectForToken(tok1); len(grants) != 0 {
 		t.Fatalf("expired approval attached %d grant(s)", len(grants))
 	}
 
@@ -201,17 +201,17 @@ func TestProposalExpires(t *testing.T) {
 	}
 }
 
-// TestDestroyPolicy removes the token and all of its grants.
-func TestDestroyPolicy(t *testing.T) {
+// TestDestroySubject removes the token and all of its grants.
+func TestDestroySubject(t *testing.T) {
 	s := openTemp(t)
-	token, _ := s.CreatePolicy()
+	token, _ := s.CreateSubject()
 	p, _ := s.CreateProposal(token, "me@example.com", []proposal.SignedGrantRequest{item()}, time.Hour)
 	_, _ = s.Approve(p.ID, time.Hour)
-	n, err := s.DestroyPolicy(token)
+	n, err := s.DestroySubject(token)
 	if err != nil || n != 1 {
-		t.Fatalf("DestroyPolicy: %v n=%d", err, n)
+		t.Fatalf("DestroySubject: %v n=%d", err, n)
 	}
-	if s.PolicyExists(token) {
+	if s.SubjectExists(token) {
 		t.Fatal("token still exists after destroy")
 	}
 }
@@ -219,11 +219,11 @@ func TestDestroyPolicy(t *testing.T) {
 // TestPurgeExpired deletes elapsed grants and keeps live ones.
 func TestPurgeExpired(t *testing.T) {
 	s := openTemp(t)
-	live, _ := s.CreatePolicy()
+	live, _ := s.CreateSubject()
 	pl, _ := s.CreateProposal(live, "me@example.com", []proposal.SignedGrantRequest{item()}, time.Hour)
 	_, _ = s.Approve(pl.ID, time.Hour)
 
-	dead, _ := s.CreatePolicy()
+	dead, _ := s.CreateSubject()
 	pd, _ := s.CreateProposal(dead, "me@example.com", []proposal.SignedGrantRequest{item()}, time.Hour)
 	_, _ = s.Approve(pd.ID, time.Millisecond)
 
@@ -237,7 +237,7 @@ func TestPurgeExpired(t *testing.T) {
 // TestStartCleanupPurges runs the janitor and observes a purge callback.
 func TestStartCleanupPurges(t *testing.T) {
 	s := openTemp(t)
-	token, _ := s.CreatePolicy()
+	token, _ := s.CreateSubject()
 	p, _ := s.CreateProposal(token, "me@example.com", []proposal.SignedGrantRequest{item()}, time.Hour)
 	_, _ = s.Approve(p.ID, time.Millisecond)
 	s.now = func() time.Time { return time.Now().Add(time.Minute) }

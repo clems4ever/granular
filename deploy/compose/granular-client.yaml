@@ -3,10 +3,10 @@
 
 as_url: "http://auth-server:9090"
 
-# The policy token the client attaches proposals and operations to. Mint it first with
-# the granular-policy CLI (see docker-compose.yml header), write it to
-# .secrets/granular_policy_token, then run client commands.
-token_file: "/run/secrets/granular_policy_token"
+# The subject token the client attaches proposals and operations to. Mint it first with
+# the granular-subject CLI (see docker-compose.yml header), write it to
+# .secrets/granular_subject_token, then run client commands.
+token_file: "/run/secrets/granular_subject_token"
 
 resource_servers:
   - id: "github-resource-server"

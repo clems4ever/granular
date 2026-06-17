@@ -17,7 +17,7 @@ type resourceServerConf struct {
 }
 
 // Config is the granular client configuration: the AS base URL, an optional file holding
-// the policy token, and the known resource servers. The token is never stored inline — token_file
+// the subject token, and the known resource servers. The token is never stored inline — token_file
 // names a path read at load time.
 type Config struct {
 	ASURL           string               `yaml:"as_url"`

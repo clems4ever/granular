@@ -12,23 +12,23 @@ import (
 	"github.com/clems4ever/granular/client"
 )
 
-// fakeAS is a minimal AS exposing the policy endpoints for the admin CLI tests.
+// fakeAS is a minimal AS exposing the subject endpoints for the admin CLI tests.
 //
 // @arg t The test handle.
 // @return *httptest.Server The running fake AS.
 //
-// @testcase TestRunPolicy drives this AS.
+// @testcase TestRunSubject drives this AS.
 func fakeAS(t *testing.T) *httptest.Server {
 	t.Helper()
 	mux := http.NewServeMux()
-	mux.HandleFunc("PUT /api/policy", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("PUT /api/subject", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusCreated)
 		_ = json.NewEncoder(w).Encode(map[string]string{"token": "tok"})
 	})
-	mux.HandleFunc("GET /api/policy/{token}", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("GET /api/subject/{token}", func(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewEncoder(w).Encode(map[string]any{"grants": []client.Grant{{ResourceServerID: "g1", ExpiresAt: "soon"}}})
 	})
-	mux.HandleFunc("DELETE /api/policy/{token}", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("DELETE /api/subject/{token}", func(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewEncoder(w).Encode(map[string]int{"destroyed": 3})
 	})
 	ts := httptest.NewServer(mux)
@@ -61,8 +61,8 @@ func TestClientRequiresAdminToken(t *testing.T) {
 	}
 }
 
-// TestRunPolicy creates a token, lists grants, and destroys a policy via the AS.
-func TestRunPolicy(t *testing.T) {
+// TestRunSubject creates a token, lists grants, and destroys a subject via the AS.
+func TestRunSubject(t *testing.T) {
 	as := fakeAS(t)
 	c := client.New(client.Config{ASURL: as.URL, Token: "admin"})
 
@@ -72,12 +72,12 @@ func TestRunPolicy(t *testing.T) {
 	}
 
 	buf.Reset()
-	if err := runShow(context.Background(), c, "somepolicy", &buf); err != nil || !strings.Contains(buf.String(), "g1") {
+	if err := runShow(context.Background(), c, "somesubject", &buf); err != nil || !strings.Contains(buf.String(), "g1") {
 		t.Fatalf("show: %v %q", err, buf.String())
 	}
 
 	buf.Reset()
-	if err := runDestroy(context.Background(), c, "somepolicy", &buf); err != nil || !strings.Contains(buf.String(), "destroyed 3") {
+	if err := runDestroy(context.Background(), c, "somesubject", &buf); err != nil || !strings.Contains(buf.String(), "destroyed 3") {
 		t.Fatalf("destroy: %v %q", err, buf.String())
 	}
 }

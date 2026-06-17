@@ -16,11 +16,11 @@ import (
 //
 // @arg t The test handle.
 // @arg h The handler.
-// @arg token The policy token.
+// @arg token The subject token.
 // @arg email The approver email.
 // @return string The created proposal id.
 //
-// @testcase TestGetPolicyReturnsGrants proposes through here.
+// @testcase TestGetSubjectReturnsGrants proposes through here.
 func propose(t *testing.T, h http.Handler, token, email string) string {
 	t.Helper()
 	pin, _ := json.Marshal(proposalInput{ApproverEmail: email, Items: []proposal.SignedGrantRequest{signedItem()}})
@@ -41,7 +41,7 @@ func propose(t *testing.T, h http.Handler, token, email string) string {
 // @arg h The handler.
 // @arg id The proposal id to approve.
 //
-// @testcase TestGetPolicyReturnsGrants approves through here.
+// @testcase TestGetSubjectReturnsGrants approves through here.
 func approve(t *testing.T, h http.Handler, id string) {
 	t.Helper()
 	ts := httptest.NewServer(h)
@@ -58,51 +58,51 @@ func approve(t *testing.T, h http.Handler, id string) {
 	}
 }
 
-// TestGetPolicyReturnsGrants returns the attached grants once a proposal is approved.
-func TestGetPolicyReturnsGrants(t *testing.T) {
+// TestGetSubjectReturnsGrants returns the attached grants once a proposal is approved.
+func TestGetSubjectReturnsGrants(t *testing.T) {
 	_, h := newServer(t)
-	token := createPolicy(t, h)
+	token := createSubject(t, h)
 	id := propose(t, h, token, "me@example.com")
 	approve(t, h, id)
 
-	resp := do(t, h, http.MethodGet, "/api/policy/"+token, nil, adminToken, false)
+	resp := do(t, h, http.MethodGet, "/api/subject/"+token, nil, adminToken, false)
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		t.Fatalf("GET /api/policy/{token} = %d, want 200", resp.StatusCode)
+		t.Fatalf("GET /api/subject/{token} = %d, want 200", resp.StatusCode)
 	}
-	var out policyOutput
+	var out subjectOutput
 	_ = json.NewDecoder(resp.Body).Decode(&out)
 	if len(out.Grants) != 1 || out.Grants[0].ResourceServerID != "rs" {
 		t.Fatalf("unexpected grants: %+v", out.Grants)
 	}
 }
 
-// TestDestroyPolicyEndpoint destroys a policy and then no longer finds it.
-func TestDestroyPolicyEndpoint(t *testing.T) {
+// TestDestroySubjectEndpoint destroys a subject and then no longer finds it.
+func TestDestroySubjectEndpoint(t *testing.T) {
 	_, h := newServer(t)
-	token := createPolicy(t, h)
+	token := createSubject(t, h)
 
-	resp := do(t, h, http.MethodDelete, "/api/policy/"+token, nil, adminToken, false)
+	resp := do(t, h, http.MethodDelete, "/api/subject/"+token, nil, adminToken, false)
 	resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		t.Fatalf("DELETE /api/policy/{token} = %d, want 200", resp.StatusCode)
+		t.Fatalf("DELETE /api/subject/{token} = %d, want 200", resp.StatusCode)
 	}
-	// The token no longer identifies a policy.
-	resp2 := do(t, h, http.MethodGet, "/api/policy/"+token, nil, adminToken, false)
+	// The token no longer identifies a subject.
+	resp2 := do(t, h, http.MethodGet, "/api/subject/"+token, nil, adminToken, false)
 	resp2.Body.Close()
 	if resp2.StatusCode != http.StatusNotFound {
 		t.Fatalf("GET after destroy = %d, want 404", resp2.StatusCode)
 	}
 }
 
-// TestPolicyAdminRequiresAdminToken checks the policy-administration endpoints reject a
+// TestSubjectAdminRequiresAdminToken checks the subject-administration endpoints reject a
 // missing or wrong admin token, and are disabled when no admin token is configured.
-func TestPolicyAdminRequiresAdminToken(t *testing.T) {
+func TestSubjectAdminRequiresAdminToken(t *testing.T) {
 	srv, h := newServer(t)
 
 	// No token / wrong token are rejected.
 	for _, bearer := range []string{"", "wrong"} {
-		resp := do(t, h, http.MethodPut, "/api/policy", nil, bearer, false)
+		resp := do(t, h, http.MethodPut, "/api/subject", nil, bearer, false)
 		resp.Body.Close()
 		if resp.StatusCode != http.StatusUnauthorized {
 			t.Fatalf("PUT with bearer %q = %d, want 401", bearer, resp.StatusCode)
@@ -111,7 +111,7 @@ func TestPolicyAdminRequiresAdminToken(t *testing.T) {
 
 	// With no admin token configured the endpoints are disabled.
 	srv.UseAdminToken("")
-	resp := do(t, h, http.MethodPut, "/api/policy", nil, adminToken, false)
+	resp := do(t, h, http.MethodPut, "/api/subject", nil, adminToken, false)
 	resp.Body.Close()
 	if resp.StatusCode != http.StatusServiceUnavailable {
 		t.Fatalf("PUT with admin disabled = %d, want 503", resp.StatusCode)
@@ -123,7 +123,7 @@ func TestPolicyAdminRequiresAdminToken(t *testing.T) {
 // shows the attribute conditions in plain language.
 func TestApprovePageRendersFriendlyGrants(t *testing.T) {
 	_, h := newServer(t)
-	token := createPolicy(t, h)
+	token := createSubject(t, h)
 	item := proposal.Sign([]byte(rsSecret), "rs", proposal.Presentation{
 		Summary: "Read everything in clems4ever/granular",
 		Grants: []proposal.GrantDetail{{
@@ -162,7 +162,7 @@ func TestApprovePageRendersFriendlyGrants(t *testing.T) {
 // /activity page after a proposal is approved.
 func TestActivityPageRendersGrants(t *testing.T) {
 	_, h := newServer(t)
-	token := createPolicy(t, h)
+	token := createSubject(t, h)
 	id := propose(t, h, token, "me@example.com")
 	approve(t, h, id)
 
@@ -190,7 +190,7 @@ func TestActivityPageRendersGrants(t *testing.T) {
 func TestProposalExpiresViaEndpoint(t *testing.T) {
 	srv, h := newServer(t)
 	srv.UseRequestTTL(time.Millisecond)
-	token := createPolicy(t, h)
+	token := createSubject(t, h)
 	id := propose(t, h, token, "me@example.com")
 	time.Sleep(15 * time.Millisecond) // let the request lapse
 
@@ -218,19 +218,19 @@ func TestProposalExpiresViaEndpoint(t *testing.T) {
 	}
 
 	// And no grant attached.
-	g := do(t, h, http.MethodGet, "/api/policy/"+token, nil, adminToken, false)
+	g := do(t, h, http.MethodGet, "/api/subject/"+token, nil, adminToken, false)
 	defer g.Body.Close()
-	var out policyOutput
+	var out subjectOutput
 	_ = json.NewDecoder(g.Body).Decode(&out)
 	if len(out.Grants) != 0 {
 		t.Fatalf("expired request attached %d grant(s)", len(out.Grants))
 	}
 }
 
-// TestProposalRejectsUnknownPolicyToken rejects a proposal whose bearer token does not
-// identify a persisted policy (empty or never created), so a grant cannot attach to a
-// non-existent policy.
-func TestProposalRejectsUnknownPolicyToken(t *testing.T) {
+// TestProposalRejectsUnknownSubjectToken rejects a proposal whose bearer token does not
+// identify a persisted subject (empty or never created), so a grant cannot attach to a
+// non-existent subject.
+func TestProposalRejectsUnknownSubjectToken(t *testing.T) {
 	_, h := newServer(t)
 	pin, _ := json.Marshal(proposalInput{ApproverEmail: "me@example.com", Items: []proposal.SignedGrantRequest{signedItem()}})
 	for _, token := range []string{"", "never-created"} {
@@ -245,7 +245,7 @@ func TestProposalRejectsUnknownPolicyToken(t *testing.T) {
 // TestProposalRequiresApproverEmail rejects a proposal with no approver email.
 func TestProposalRequiresApproverEmail(t *testing.T) {
 	_, h := newServer(t)
-	token := createPolicy(t, h)
+	token := createSubject(t, h)
 	pin, _ := json.Marshal(proposalInput{Items: []proposal.SignedGrantRequest{signedItem()}})
 	resp := do(t, h, http.MethodPost, "/api/proposals", pin, token, false)
 	defer resp.Body.Close()
@@ -257,7 +257,7 @@ func TestProposalRequiresApproverEmail(t *testing.T) {
 // TestVerifyAllowsAfterApproval allows an operation once a covering grant is live.
 func TestVerifyAllowsAfterApproval(t *testing.T) {
 	_, h := newServer(t)
-	token := createPolicy(t, h)
+	token := createSubject(t, h)
 	id := propose(t, h, token, "me@example.com")
 	if verifyAllowed(t, h, token) {
 		t.Fatal("allowed before approval")

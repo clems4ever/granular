@@ -2,7 +2,7 @@
 // policy authority. It is domain-agnostic — it never parses or understands the
 // policies it stores. It exposes:
 //
-//   - PUT/GET/DELETE /api/policy — a token represents a policy; PUT mints one, GET
+//   - PUT/GET/DELETE /api/subject — a token represents a subject; PUT mints one, GET
 //     reads the grants attached to it, DELETE destroys it.
 //   - POST /api/proposals — a client (Bearer token) submits a bundle of
 //     resource server-signed grant requests; the AS verifies each HMAC against the resource server's
@@ -35,7 +35,7 @@ type Server struct {
 	store           *store.Store
 	baseURL         string
 	resourceServers map[string]string // resource server id -> shared HMAC secret
-	adminToken      string            // bearer gating the policy-administration endpoints
+	adminToken      string            // bearer gating the subject-administration endpoints
 	requestTTL      time.Duration     // how long a submitted proposal stays pending
 	auth            *Authenticator
 }
@@ -59,15 +59,15 @@ type proposalOutput struct {
 	Error      string `json:"error,omitempty"`
 }
 
-// policyOutput is returned by PUT /api/policy (Token only) and GET /api/policy (the
+// subjectOutput is returned by PUT /api/subject (Token only) and GET /api/subject (the
 // attached grants).
-type policyOutput struct {
+type subjectOutput struct {
 	Token  string      `json:"token,omitempty"`
 	Grants []grantView `json:"grants,omitempty"`
 	Error  string      `json:"error,omitempty"`
 }
 
-// grantView is one active grant returned to the policy holder, carrying the opaque,
+// grantView is one active grant returned to the subject-token holder, carrying the opaque,
 // resource server-signed item the resource server re-checks at enforcement.
 type grantView struct {
 	ResourceServerID string                      `json:"resource_server_id"`
@@ -109,31 +109,31 @@ func (s *Server) UseAuth(auth *Authenticator) {
 	s.auth = auth
 }
 
-// UseAdminToken sets the bearer token that gates the policy-administration endpoints
-// (PUT/GET/DELETE /api/policy). When it is empty those endpoints are disabled (they
-// fail closed), so an administrator must configure one to manage policies.
+// UseAdminToken sets the bearer token that gates the subject-administration endpoints
+// (PUT/GET/DELETE /api/subject). When it is empty those endpoints are disabled (they
+// fail closed), so an administrator must configure one to manage subjects.
 //
-// @arg token The admin bearer token; empty disables policy administration.
+// @arg token The admin bearer token; empty disables subject administration.
 //
-// @testcase TestPolicyAdminRequiresAdminToken rejects calls without the admin token.
+// @testcase TestSubjectAdminRequiresAdminToken rejects calls without the admin token.
 func (s *Server) UseAdminToken(token string) {
 	s.adminToken = token
 }
 
 // Handler builds the HTTP routing for the AS.
 //
-// @return http.Handler A mux routing the policy/proposal/verify API and consent UI.
+// @return http.Handler A mux routing the subject/proposal/verify API and consent UI.
 //
 // @testcase TestProposalApproveFlow exercises the API routes.
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 
-	// Policy resource: a token represents a policy. These are administrative endpoints
-	// gated by the admin token; the policy itself is identified by the path for
+	// Subject resource: a token represents a subject. These are administrative endpoints
+	// gated by the admin token; the subject itself is identified by the path for
 	// inspection and destruction.
-	mux.HandleFunc("PUT /api/policy", s.handleCreatePolicy)
-	mux.HandleFunc("GET /api/policy/{token}", s.handleGetPolicy)
-	mux.HandleFunc("DELETE /api/policy/{token}", s.handleDestroyPolicy)
+	mux.HandleFunc("PUT /api/subject", s.handleCreateSubject)
+	mux.HandleFunc("GET /api/subject/{token}", s.handleGetSubject)
+	mux.HandleFunc("DELETE /api/subject/{token}", s.handleDestroySubject)
 
 	// Client submits a proposal (Bearer token); resource server verifies an operation.
 	mux.HandleFunc("POST /api/proposals", s.handleProposal)
@@ -157,50 +157,50 @@ func (s *Server) Handler() http.Handler {
 	return mux
 }
 
-// handleCreatePolicy handles PUT /api/policy: an administrator (authenticated by the
-// admin token) mints a new policy and receives its token, which it hands to a client to
+// handleCreateSubject handles PUT /api/subject: an administrator (authenticated by the
+// admin token) mints a new subject and receives its token, which it hands to a client to
 // present as a bearer credential thereafter.
 //
 // @arg w The response writer.
 // @arg r The incoming request carrying the admin bearer token.
 //
-// @testcase TestProposalApproveFlow creates a policy token.
-// @testcase TestPolicyAdminRequiresAdminToken rejects creation without the admin token.
-func (s *Server) handleCreatePolicy(w http.ResponseWriter, r *http.Request) {
+// @testcase TestProposalApproveFlow creates a subject token.
+// @testcase TestSubjectAdminRequiresAdminToken rejects creation without the admin token.
+func (s *Server) handleCreateSubject(w http.ResponseWriter, r *http.Request) {
 	if !s.requireAdmin(w, r) {
 		return
 	}
-	token, err := s.store.CreatePolicy()
+	token, err := s.store.CreateSubject()
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, policyOutput{Error: err.Error()})
+		writeJSON(w, http.StatusInternalServerError, subjectOutput{Error: err.Error()})
 		return
 	}
-	writeJSON(w, http.StatusCreated, policyOutput{Token: token})
+	writeJSON(w, http.StatusCreated, subjectOutput{Token: token})
 }
 
-// handleGetPolicy handles GET /api/policy/{token}: an administrator inspects the active
-// grants attached to the policy named in the path.
+// handleGetSubject handles GET /api/subject/{token}: an administrator inspects the active
+// grants attached to the subject named in the path.
 //
 // @arg w The response writer.
-// @arg r The request carrying the admin bearer token and the policy token in the path.
+// @arg r The request carrying the admin bearer token and the subject token in the path.
 //
-// @testcase TestGetPolicyReturnsGrants returns the attached grants after approval.
-// @testcase TestPolicyRejectsUnknownToken returns 404 for an unknown policy token.
-func (s *Server) handleGetPolicy(w http.ResponseWriter, r *http.Request) {
+// @testcase TestGetSubjectReturnsGrants returns the attached grants after approval.
+// @testcase TestSubjectRejectsUnknownToken returns 404 for an unknown subject token.
+func (s *Server) handleGetSubject(w http.ResponseWriter, r *http.Request) {
 	if !s.requireAdmin(w, r) {
 		return
 	}
 	token := r.PathValue("token")
-	if !s.store.PolicyExists(token) {
-		writeJSON(w, http.StatusNotFound, policyOutput{Error: "unknown policy token"})
+	if !s.store.SubjectExists(token) {
+		writeJSON(w, http.StatusNotFound, subjectOutput{Error: "unknown subject token"})
 		return
 	}
-	grants, err := s.store.PolicyForToken(token)
+	grants, err := s.store.SubjectForToken(token)
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, policyOutput{Error: err.Error()})
+		writeJSON(w, http.StatusInternalServerError, subjectOutput{Error: err.Error()})
 		return
 	}
-	out := policyOutput{Grants: make([]grantView, 0, len(grants))}
+	out := subjectOutput{Grants: make([]grantView, 0, len(grants))}
 	for _, g := range grants {
 		out.Grants = append(out.Grants, grantView{
 			ResourceServerID: g.Item.ResourceServerID,
@@ -211,26 +211,26 @@ func (s *Server) handleGetPolicy(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, out)
 }
 
-// handleDestroyPolicy handles DELETE /api/policy/{token}: an administrator destroys the
-// policy named in the path and all grants attached to it.
+// handleDestroySubject handles DELETE /api/subject/{token}: an administrator destroys the
+// subject named in the path and all grants attached to it.
 //
 // @arg w The response writer.
-// @arg r The request carrying the admin bearer token and the policy token in the path.
+// @arg r The request carrying the admin bearer token and the subject token in the path.
 //
-// @testcase TestDestroyPolicyEndpoint destroys a policy via the endpoint.
-func (s *Server) handleDestroyPolicy(w http.ResponseWriter, r *http.Request) {
+// @testcase TestDestroySubjectEndpoint destroys a subject via the endpoint.
+func (s *Server) handleDestroySubject(w http.ResponseWriter, r *http.Request) {
 	if !s.requireAdmin(w, r) {
 		return
 	}
-	n, err := s.store.DestroyPolicy(r.PathValue("token"))
+	n, err := s.store.DestroySubject(r.PathValue("token"))
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, policyOutput{Error: err.Error()})
+		writeJSON(w, http.StatusInternalServerError, subjectOutput{Error: err.Error()})
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]int{"destroyed": n})
 }
 
-// requireAdmin authenticates a policy-administration request against the configured
+// requireAdmin authenticates a subject-administration request against the configured
 // admin token. It fails closed: when no admin token is configured the endpoints are
 // disabled (503), and a missing or wrong token is rejected (401). The comparison is
 // constant-time.
@@ -239,34 +239,34 @@ func (s *Server) handleDestroyPolicy(w http.ResponseWriter, r *http.Request) {
 // @arg r The incoming request carrying the admin bearer token.
 // @return bool True when the request presents the configured admin token.
 //
-// @testcase TestPolicyAdminRequiresAdminToken rejects missing, wrong, and unconfigured tokens.
+// @testcase TestSubjectAdminRequiresAdminToken rejects missing, wrong, and unconfigured tokens.
 func (s *Server) requireAdmin(w http.ResponseWriter, r *http.Request) bool {
 	if s.adminToken == "" {
-		writeJSON(w, http.StatusServiceUnavailable, policyOutput{Error: "policy administration is disabled (no admin token configured)"})
+		writeJSON(w, http.StatusServiceUnavailable, subjectOutput{Error: "subject administration is disabled (no admin token configured)"})
 		return false
 	}
 	got := strings.TrimSpace(strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer "))
 	if got == "" || !hmac.Equal([]byte(got), []byte(s.adminToken)) {
-		writeJSON(w, http.StatusUnauthorized, policyOutput{Error: "invalid admin token"})
+		writeJSON(w, http.StatusUnauthorized, subjectOutput{Error: "invalid admin token"})
 		return false
 	}
 	return true
 }
 
-// handleProposal handles POST /api/proposals: a client (authenticated by its policy
+// handleProposal handles POST /api/proposals: a client (authenticated by its subject
 // token) submits a bundle of resource server-signed grant requests and an approver email. The
 // AS verifies each item's HMAC against the named resource server's shared secret (so the
 // client cannot tamper or forge), records a pending proposal, and returns a review
 // URL for the approver.
 //
 // @arg w The response writer.
-// @arg r The request whose body is a proposalInput, with a Bearer policy token.
+// @arg r The request whose body is a proposalInput, with a Bearer subject token.
 //
 // @testcase TestProposalApproveFlow submits a valid proposal.
 // @testcase TestProposalRejectsBadSignature rejects an item signed with the wrong secret.
 // @testcase TestProposalRequiresApproverEmail rejects a missing approver email.
 func (s *Server) handleProposal(w http.ResponseWriter, r *http.Request) {
-	token, ok := s.bearerPolicy(w, r)
+	token, ok := s.bearerSubject(w, r)
 	if !ok {
 		return
 	}
@@ -308,7 +308,7 @@ func (s *Server) handleProposal(w http.ResponseWriter, r *http.Request) {
 }
 
 // handleVerify handles POST /api/verify: a registered resource server asks whether an
-// operation is authorized by the policy attached to a token. The AS authenticates the
+// operation is authorized by the subject identified by a token. The AS authenticates the
 // resource server (HMAC over the body), loads the token's active policies and evaluates the
 // resource server-supplied requests against the resource server-supplied entity world, returning the
 // decision. The AS never interprets the policies' meaning.
@@ -328,7 +328,7 @@ func (s *Server) handleVerify(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusBadRequest, verify.Output{Error: "invalid request body"})
 		return
 	}
-	grants, err := s.store.PolicyForToken(in.Token)
+	grants, err := s.store.SubjectForToken(in.Token)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, verify.Output{Error: err.Error()})
 		return
@@ -345,20 +345,20 @@ func (s *Server) handleVerify(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, verify.Output{Allowed: allowed})
 }
 
-// bearerPolicy extracts the Bearer token and checks it identifies a known policy. On
+// bearerSubject extracts the Bearer token and checks it identifies a known subject. On
 // failure it writes a 401 and returns ok=false.
 //
 // @arg w The response writer (used to write a 401 on failure).
 // @arg r The incoming request.
-// @return string The policy token when valid.
-// @return bool True when the token identifies a known policy.
+// @return string The subject token when valid.
+// @return bool True when the token identifies a known subject.
 //
-// @testcase TestGetPolicyReturnsGrants reads a policy with a valid token.
-// @testcase TestPolicyRejectsUnknownToken rejects an unknown bearer token.
-func (s *Server) bearerPolicy(w http.ResponseWriter, r *http.Request) (string, bool) {
+// @testcase TestGetSubjectReturnsGrants reads a subject with a valid token.
+// @testcase TestSubjectRejectsUnknownToken rejects an unknown bearer token.
+func (s *Server) bearerSubject(w http.ResponseWriter, r *http.Request) (string, bool) {
 	token := strings.TrimSpace(strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer "))
-	if token == "" || !s.store.PolicyExists(token) {
-		writeJSON(w, http.StatusUnauthorized, policyOutput{Error: "unknown or missing policy token"})
+	if token == "" || !s.store.SubjectExists(token) {
+		writeJSON(w, http.StatusUnauthorized, subjectOutput{Error: "unknown or missing subject token"})
 		return "", false
 	}
 	return token, true

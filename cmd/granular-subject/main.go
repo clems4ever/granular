@@ -1,9 +1,9 @@
-// Command granular-policy is the administrative CLI for policy lifecycle on the
-// authorization server (AS). Policy management is independent from the grant management
+// Command granular-subject is the administrative CLI for subject lifecycle on the
+// authorization server (AS). Subject management is independent from the grant management
 // the granular client CLI performs: an administrator authenticates with the AS admin
-// token, mints a policy token here, hands it to a client (which submits proposals and
+// token, mints a subject token here, hands it to a client (which submits proposals and
 // runs operations under it), and can inspect or destroy it. It is a thin implementation
-// of the client SDK's policy methods.
+// of the client SDK's subject methods.
 package main
 
 import (
@@ -18,7 +18,7 @@ import (
 	"github.com/clems4ever/granular/client"
 )
 
-// admin holds the policy CLI's shared state: the AS URL, the admin-token flags, and the
+// admin holds the subject CLI's shared state: the AS URL, the admin-token flags, and the
 // output writer.
 type admin struct {
 	asURL          string
@@ -37,7 +37,7 @@ func main() {
 	}
 }
 
-// newRootCmd builds the root "granular-policy" command with the shared flags and the
+// newRootCmd builds the root "granular-subject" command with the shared flags and the
 // create/show/destroy sub-commands.
 //
 // @arg out The writer the commands print to.
@@ -47,13 +47,13 @@ func main() {
 func newRootCmd(out io.Writer) *cobra.Command {
 	a := &admin{out: out}
 	root := &cobra.Command{
-		Use:           "granular-policy",
-		Short:         "Administer policy tokens on the authorization server",
+		Use:           "granular-subject",
+		Short:         "Administer subject tokens on the authorization server",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
 	root.PersistentFlags().StringVar(&a.asURL, "as", "http://localhost:9090", "authorization server base URL")
-	root.PersistentFlags().StringVar(&a.adminToken, "admin-token", "", "AS admin token (gates policy administration)")
+	root.PersistentFlags().StringVar(&a.adminToken, "admin-token", "", "AS admin token (gates subject administration)")
 	root.PersistentFlags().StringVar(&a.adminTokenFile, "admin-token-file", "", "file holding the AS admin token")
 	root.AddCommand(a.createCmd(), a.showCmd(), a.destroyCmd())
 	return root
@@ -65,7 +65,7 @@ func newRootCmd(out io.Writer) *cobra.Command {
 // @return *client.Client The configured client.
 // @error error when no admin token is set or its file cannot be read.
 //
-// @testcase TestRunPolicy builds a client for the policy operations.
+// @testcase TestRunSubject builds a client for the subject operations.
 func (a *admin) client() (*client.Client, error) {
 	token := a.adminToken
 	if token == "" && a.adminTokenFile != "" {
@@ -81,7 +81,7 @@ func (a *admin) client() (*client.Client, error) {
 	return client.New(client.Config{ASURL: a.asURL, Token: token}), nil
 }
 
-// createCmd builds the "create" command: mint a new policy token and print it.
+// createCmd builds the "create" command: mint a new subject token and print it.
 //
 // @return *cobra.Command The create command.
 //
@@ -89,7 +89,7 @@ func (a *admin) client() (*client.Client, error) {
 func (a *admin) createCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "create",
-		Short: "Mint a new policy token",
+		Short: "Mint a new subject token",
 		RunE: func(*cobra.Command, []string) error {
 			c, err := a.client()
 			if err != nil {
@@ -100,15 +100,15 @@ func (a *admin) createCmd() *cobra.Command {
 	}
 }
 
-// showCmd builds the "show" command: list the grants attached to a policy token.
+// showCmd builds the "show" command: list the grants attached to a subject token.
 //
 // @return *cobra.Command The show command.
 //
 // @testcase TestCommandTree checks the show command is present.
 func (a *admin) showCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "show <policy-token>",
-		Short: "Show the grants attached to a policy token",
+		Use:   "show <subject-token>",
+		Short: "Show the grants attached to a subject token",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := a.client()
@@ -120,15 +120,15 @@ func (a *admin) showCmd() *cobra.Command {
 	}
 }
 
-// destroyCmd builds the "destroy" command: destroy a policy token and its grants.
+// destroyCmd builds the "destroy" command: destroy a subject token and its grants.
 //
 // @return *cobra.Command The destroy command.
 //
 // @testcase TestCommandTree checks the destroy command is present.
 func (a *admin) destroyCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "destroy <policy-token>",
-		Short: "Destroy a policy token and its grants",
+		Use:   "destroy <subject-token>",
+		Short: "Destroy a subject token and its grants",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := a.client()
@@ -140,16 +140,16 @@ func (a *admin) destroyCmd() *cobra.Command {
 	}
 }
 
-// runCreate mints a policy token and prints it for the administrator to distribute.
+// runCreate mints a subject token and prints it for the administrator to distribute.
 //
 // @arg ctx Context for cancellation.
 // @arg c The client SDK (authenticated with the admin token).
 // @arg w The writer for output.
 // @error error when the AS call fails.
 //
-// @testcase TestRunPolicy creates a token.
+// @testcase TestRunSubject creates a token.
 func runCreate(ctx context.Context, c *client.Client, w io.Writer) error {
-	tok, err := c.CreatePolicy(ctx)
+	tok, err := c.CreateSubject(ctx)
 	if err != nil {
 		return err
 	}
@@ -157,17 +157,17 @@ func runCreate(ctx context.Context, c *client.Client, w io.Writer) error {
 	return nil
 }
 
-// runShow lists the active grants attached to a policy token.
+// runShow lists the active grants attached to a subject token.
 //
 // @arg ctx Context for cancellation.
 // @arg c The client SDK (authenticated with the admin token).
-// @arg policyToken The policy token to inspect.
+// @arg subjectToken The subject token to inspect.
 // @arg w The writer for output.
 // @error error when the AS call fails.
 //
-// @testcase TestRunPolicy lists grants.
-func runShow(ctx context.Context, c *client.Client, policyToken string, w io.Writer) error {
-	grants, err := c.Policy(ctx, policyToken)
+// @testcase TestRunSubject lists grants.
+func runShow(ctx context.Context, c *client.Client, subjectToken string, w io.Writer) error {
+	grants, err := c.Subject(ctx, subjectToken)
 	if err != nil {
 		return err
 	}
@@ -181,17 +181,17 @@ func runShow(ctx context.Context, c *client.Client, policyToken string, w io.Wri
 	return nil
 }
 
-// runDestroy destroys a policy token and prints how many grants were removed.
+// runDestroy destroys a subject token and prints how many grants were removed.
 //
 // @arg ctx Context for cancellation.
 // @arg c The client SDK (authenticated with the admin token).
-// @arg policyToken The policy token to destroy.
+// @arg subjectToken The subject token to destroy.
 // @arg w The writer for output.
 // @error error when the AS call fails.
 //
-// @testcase TestRunPolicy destroys the policy.
-func runDestroy(ctx context.Context, c *client.Client, policyToken string, w io.Writer) error {
-	n, err := c.DestroyPolicy(ctx, policyToken)
+// @testcase TestRunSubject destroys the subject.
+func runDestroy(ctx context.Context, c *client.Client, subjectToken string, w io.Writer) error {
+	n, err := c.DestroySubject(ctx, subjectToken)
 	if err != nil {
 		return err
 	}

@@ -2,9 +2,9 @@
 	"functions": [
 		{
 			"function_name": "openTemp",
-			"documentation_hash": "224230e5ff3f946a6f398bb264a966b1c6f3ecaa99017cbaa49db0d970c7cb2f",
+			"documentation_hash": "84200d04ecdb509218c4d32fb88112a8cc961540dd6b1a467d9639a22c6d6062",
 			"definition_hash": "c26d71f613504936d7cdb230398a7efd4ec9a4efc27dafb2f2c986f1874c4c71",
-			"reviewed_at": "2026-06-17T05:58:11.059348918Z"
+			"reviewed_at": "2026-06-17T15:18:49.705150119Z"
 		},
 		{
 			"function_name": "item",
@@ -13,28 +13,22 @@
 			"reviewed_at": "2026-06-17T14:46:17.083886645Z"
 		},
 		{
-			"function_name": "TestPolicyLifecycle",
-			"documentation_hash": "d217cc818a7aeca6d6ac44a41d10e5395a2d1c744ec1e818e1738727a033da75",
-			"definition_hash": "53b0bcb015afe0ae7df62d2aafe783f5f9c0f4467d10048b7aac25938fcc1afa",
-			"reviewed_at": "2026-06-17T05:58:11.060609269Z"
-		},
-		{
 			"function_name": "TestProposalApprovalAttachesGrants",
-			"documentation_hash": "d760885ed232dfa508eb63ca4c692f6b87ea77ead5fab1e278812c24588348ce",
-			"definition_hash": "77611f8462d96df8e901bfc8f196b93f411b417efb061a33e15877efae381be3",
-			"reviewed_at": "2026-06-17T10:59:58.775392658Z"
+			"documentation_hash": "23002f40a815ffb4164ed5a850b2c605cb7eabc1ea44be841b2de11986ae1c46",
+			"definition_hash": "4e14c05a4065ba507e97293b2c42d883b462b871bbb23fab18fe5f9900eacf58",
+			"reviewed_at": "2026-06-17T15:18:49.710493601Z"
 		},
 		{
 			"function_name": "TestApproveTwiceFails",
 			"documentation_hash": "2ca11ea833c27f6c899901a7176929734ae3cded2887a983238807623becf323",
-			"definition_hash": "c7cc65c5df45043221e713d08fda0bbea51b7643751eaff2bfab0d959234c248",
-			"reviewed_at": "2026-06-17T10:59:58.77728161Z"
+			"definition_hash": "3a6e58addc12ca31887994e1ba814867d8fb4a3d5d6e1549e72196b86f6eb09a",
+			"reviewed_at": "2026-06-17T15:18:49.712743439Z"
 		},
 		{
 			"function_name": "TestRejectProposal",
 			"documentation_hash": "6a2bc8055146414e4917c1ede9d2a9ae046d462befb20d3901716bda8356b994",
-			"definition_hash": "3389147df379e23fd2ccce3ce0fcdc9159313208ea8fa8157354c026c0ce94a7",
-			"reviewed_at": "2026-06-17T10:59:58.778846445Z"
+			"definition_hash": "b3f18c7565804296325a05001a0dc553eeeff9d87c209ab8bd05b291e538d65d",
+			"reviewed_at": "2026-06-17T15:18:49.714273787Z"
 		},
 		{
 			"function_name": "TestGetMissingProposal",
@@ -45,38 +39,44 @@
 		{
 			"function_name": "TestExpiredGrantDropped",
 			"documentation_hash": "aa4eefa95bedbc83ad08052fe28519a7ee772dfb9e1b9f0f4ed11da4ee2ec9a3",
-			"definition_hash": "00a4ee6ddf988704cc46b9162395bd4814d1d08e5877fc80c38f6de9a97d063b",
-			"reviewed_at": "2026-06-17T10:59:58.780401636Z"
-		},
-		{
-			"function_name": "TestDestroyPolicy",
-			"documentation_hash": "ed15f0a9b9c573cde494a2bbed8c724a3041a3f8e7301d82c79be320a6861161",
-			"definition_hash": "44ee6e86d3a21ee7c508da3c093e7087ff9cd7c8d7dcca42601b41c917c19e0d",
-			"reviewed_at": "2026-06-17T10:59:58.785045163Z"
+			"definition_hash": "f9759d66fe0d4cbfd1bf7301f2317022d43080bc0eb8ccb28613b82ff00548bd",
+			"reviewed_at": "2026-06-17T15:18:49.71568608Z"
 		},
 		{
 			"function_name": "TestPurgeExpired",
 			"documentation_hash": "1579ff0b20bb3da2b34eb2844e8b7dbc583a1beadc41bc0e49ab6f97c4e91714",
-			"definition_hash": "4c05abab774db6f76eea622e269130f71ca7c468e304005a371350e793546194",
-			"reviewed_at": "2026-06-17T10:59:58.78659857Z"
+			"definition_hash": "ba455d777ac97d3f303092b354440d3907de3090f0ddedd48c0c0a3cf6950ffc",
+			"reviewed_at": "2026-06-17T15:18:49.721963149Z"
 		},
 		{
 			"function_name": "TestStartCleanupPurges",
 			"documentation_hash": "00ccd007c60c8fd17debabb99aee236bd869bfe34f08eb516424b52d80221435",
-			"definition_hash": "68957006a5d87c7a3578e870bf302407d7ffbdd7dbcb0df3ed82387cd2b08df6",
-			"reviewed_at": "2026-06-17T10:59:58.790671697Z"
+			"definition_hash": "b9d0bee4b610f865df97827918b297c1992efcad5a0c8ed35cf3dc6bb828b93e",
+			"reviewed_at": "2026-06-17T15:18:49.723494027Z"
 		},
 		{
 			"function_name": "TestAllGrantsAndProposals",
 			"documentation_hash": "5ecdf4ec041b5d822510832f8cecdfdc4e7ea5d4ffd0d1a6f304c1983b47f1e9",
-			"definition_hash": "f18b15c8c91b93aa44f8a4541683b4aad4d22c9ab96bf9769fe5b8aa53fd423b",
-			"reviewed_at": "2026-06-17T10:59:58.781904744Z"
+			"definition_hash": "ab9c20d3ee7224089bc3a05dc659a8daab4aa014c493f41ce5d657d234dddfdc",
+			"reviewed_at": "2026-06-17T15:18:49.7170419Z"
 		},
 		{
 			"function_name": "TestProposalExpires",
 			"documentation_hash": "5189b8a6e0b1eff29e31977f213ac39bee7248935a264160ad46e43aba0a05ee",
-			"definition_hash": "8367db4066a78f8a16fe4465af25964ff97e19f8fdf87e9641563df60d51f568",
-			"reviewed_at": "2026-06-17T10:59:58.78350921Z"
+			"definition_hash": "a9621f04c0273aac2843fded57b325b49dea7935259adb3e67096119311c4fc9",
+			"reviewed_at": "2026-06-17T15:18:49.718392921Z"
+		},
+		{
+			"function_name": "TestSubjectLifecycle",
+			"documentation_hash": "6d6f7c8cb0b914079b5631ad75fa24c6f8bc475bae5e978d7cc43f5c2549a169",
+			"definition_hash": "23cb2fa521e8197242f6f2bad6a384f1917a001ed5712503b4dd12d24a3f04fa",
+			"reviewed_at": "2026-06-17T15:18:49.707874725Z"
+		},
+		{
+			"function_name": "TestDestroySubject",
+			"documentation_hash": "181041c8e9eb7578537869e567baca668ec8442ba86e84291e0da8844d7b5ed3",
+			"definition_hash": "8f43160b6d9b1bcdd5cf9016bfdb63498e5cad8d6f1301ea6e1ca760033c4f2d",
+			"reviewed_at": "2026-06-17T15:18:49.719904925Z"
 		}
 	]
 }

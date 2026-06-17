@@ -28,7 +28,7 @@ granular is four binaries:
   login, gated on the approver's email), and answers allow/deny. It holds **no**
   platform credential and renders the resource-server-signed consent text **verbatim** —
   it cannot interpret or add to it.
-- **`granular-policy`** — the admin CLI for the **policy token** lifecycle. An
+- **`granular-subject`** — the admin CLI for the **subject token** lifecycle. An
   administrator mints a token against the AS admin credential, hands it to a
   client, and can later inspect or destroy it.
 
@@ -36,8 +36,8 @@ granular is four binaries:
 
 ```
 admin            client (agent)              resource server (GitHub)         AS + human
-  |  mint policy token ----------------------------------------------> |
-  |<------------------ token --------------------------------------- (PUT /api/policy)
+  |  mint subject token ----------------------------------------------> |
+  |<------------------ token --------------------------------------- (PUT /api/subject)
             | catalog / template (GET /api/schema) -----> |
             | sign grant request -----------------------> | freeze consent text
             |<----- signed (presentation + policy) ------ | + Cedar policy, HMAC-sign
@@ -48,7 +48,7 @@ admin            client (agent)              resource server (GitHub)         AS
             |<--------- result ------------ | execute with credential   |
 ```
 
-1. **Mint a policy token** (admin): `granular-policy create`. The token is the
+1. **Mint a subject token** (admin): `granular-subject create`. The token is the
    bearer credential the client attaches grant requests and operations to.
 2. **Explore** (client): `granular catalog` / `granular template` print what a
    resource server can grant.
@@ -60,9 +60,9 @@ admin            client (agent)              resource server (GitHub)         AS
    acted on.
 5. **Approve** (human): open the URL, log in with GitHub (only the human whose
    verified email matches the named approver may decide), pick how long the grant
-   lasts, approve. The grant attaches to the policy token with a TTL.
+   lasts, approve. The grant attaches to the subject token with a TTL.
 6. **Run** (client → resource server → AS): `granular op …` calls the resource server, which asks
-   the AS to verify the policy token authorizes it before executing with the
+   the AS to verify the subject token authorizes it before executing with the
    GitHub credential.
 
 ## Build
@@ -73,7 +73,7 @@ make build                 # builds all four binaries into ./bin
 go build -o bin/granular-client         ./cmd/granular-client
 go build -o bin/granular-auth-server    ./cmd/granular-auth-server
 go build -o bin/granular-github-resource-server ./cmd/granular-github-resource-server
-go build -o bin/granular-policy         ./cmd/granular-policy
+go build -o bin/granular-subject         ./cmd/granular-subject
 ```
 
 ## Configure and run
@@ -97,8 +97,8 @@ cp granular-client.example.yaml granular-client.yaml && $EDITOR granular-client.
 
 The resource server and the AS share a **per-resource-server HMAC secret** (`secret_file` on each
 side, under the same `resource_server_id`); the resource server signs grant requests with it and
-the AS verifies them. The AS's policy-administration endpoints are gated by an
-**admin token** (`admin_token_file`); when unset, policy administration is
+the AS verifies them. The AS's subject-administration endpoints are gated by an
+**admin token** (`admin_token_file`); when unset, subject administration is
 disabled (fail closed). The consent pages can require a **GitHub login**
 (`auth.client_id` + `auth.client_secret_file`); each proposal names its approver
 and only that verified email may decide it.
@@ -106,9 +106,9 @@ and only that verified email may decide it.
 ## Use the client
 
 ```sh
-# Mint a policy token (admin, against the AS admin token) and give it to the client.
-bin/granular-policy create --admin-token-file admin.token
-#   -> prints a policy token; put its path in granular-client.yaml's token_file
+# Mint a subject token (admin, against the AS admin token) and give it to the client.
+bin/granular-subject create --admin-token-file admin.token
+#   -> prints a subject token; put its path in granular-client.yaml's token_file
 
 # Explore what the resource server can grant.
 bin/granular catalog
@@ -129,7 +129,7 @@ bin/granular sign --resource-server github-resource-server \
 bin/granular propose req.json --approver you@example.com
 #   -> prints an approval URL; open it, log in, pick a duration, approve.
 
-# Once approved, run operations under the policy token.
+# Once approved, run operations under the subject token.
 bin/granular op github-resource-server repo.clone -p repo=clems4ever/granular
 ```
 
@@ -147,10 +147,10 @@ granular (granular-client)
 │     └── --reason --actions --resource --match   # or freeform
 └── propose <signed-file ...> --approver <email>   # submit a proposal for approval
 
-granular-policy                            # admin: --admin-token[-file]
-├── create                                 # mint a policy token
-├── show <policy-token>                    # inspect a token's grants
-└── destroy <policy-token>                 # revoke a token and its grants
+granular-subject                            # admin: --admin-token[-file]
+├── create                                 # mint a subject token
+├── show <subject-token>                    # inspect a token's grants
+└── destroy <subject-token>                 # revoke a token and its grants
 ```
 
 ## Adding a resource server or operation
@@ -168,7 +168,7 @@ granular-policy                            # admin: --admin-token[-file]
 ```
 cmd/                       the four binary entrypoints (main.go + tests only)
 clientcli/                 client CLI command tree (catalog, template, op, sign, propose)
-client/                    client SDK (proposals, operations, policy admin)
+client/                    client SDK (proposals, operations, subject admin)
 resourceserver/                   generic resource server SDK (schema, sign, present, verify, asclient)
 resourceserver-github/            GitHub resource server implementation (schema, templates, operations)
 resourceserver-github/internal/   GitHub-only concerns, unimportable from outside the resource server:

@@ -43,7 +43,7 @@ func TestHumanizeUntil(t *testing.T) {
 // TestApprovePageRendersItems renders a pending proposal's items verbatim.
 func TestApprovePageRendersItems(t *testing.T) {
 	_, h := newServer(t)
-	token := createPolicy(t, h)
+	token := createSubject(t, h)
 	id := propose(t, h, token, "me@example.com")
 
 	resp := do(t, h, http.MethodGet, "/proposal/"+id, nil, "", false)
@@ -70,7 +70,7 @@ func TestApprovePageNotFound(t *testing.T) {
 // TestApproveSubmitReject records a rejection and marks the proposal rejected.
 func TestApproveSubmitReject(t *testing.T) {
 	srv, h := newServer(t)
-	token := createPolicy(t, h)
+	token := createSubject(t, h)
 	id := propose(t, h, token, "me@example.com")
 
 	ts := httptest.NewServer(h)
@@ -104,7 +104,7 @@ func TestApproveDeniesWrongApprover(t *testing.T) {
 	srv.UseAuth(auth)
 	h := srv.Handler()
 
-	token := createPolicy(t, h)
+	token := createSubject(t, h)
 	id := propose(t, h, token, "me@example.com")
 
 	ts := httptest.NewServer(h)

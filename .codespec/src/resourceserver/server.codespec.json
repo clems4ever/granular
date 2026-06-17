@@ -42,9 +42,9 @@
 		{
 			"function_name": "handleOperation",
 			"receiver": "ResourceServer",
-			"documentation_hash": "d83e5f454e913d40fb09cffb1fac11bccc3cba880b1563446b4460e67e599d01",
-			"definition_hash": "58b294a741843fd80fe68044ffc189206dd94933d1226315f58c7dd97f90b1db",
-			"reviewed_at": "2026-06-17T14:43:58.884623424Z"
+			"documentation_hash": "9d1d66c4e746c97ebc8b0743f30dfdaf004d3a973974df1e512f151e774d1b92",
+			"definition_hash": "4c1d7a2495baff0311155b130ffdc1e8123440b75840e06704e4da947311dec5",
+			"reviewed_at": "2026-06-17T15:18:49.741039161Z"
 		}
 	]
 }

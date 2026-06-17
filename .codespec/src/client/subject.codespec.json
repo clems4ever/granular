@@ -1,0 +1,32 @@
+{
+	"functions": [
+		{
+			"function_name": "Token",
+			"receiver": "Client",
+			"documentation_hash": "68fc1b086a9408fcee88ab732397ff635be988f1a6ff85adb77c6f376ae8b63d",
+			"definition_hash": "7e20341bafb5547ba2d8128cf8f367a061d3cbd7acb60bba1e5046a22b252af5",
+			"reviewed_at": "2026-06-17T15:18:49.729275584Z"
+		},
+		{
+			"function_name": "CreateSubject",
+			"receiver": "Client",
+			"documentation_hash": "3c423d800a0eec7fd9cea00e6c3ac5d43c5adeaf48d6baba7ce3141a9c4b24ae",
+			"definition_hash": "a7d572082843a6f83c00ebef55bdf2397ca5cbe662acdfbbe9293eccbf1393ff",
+			"reviewed_at": "2026-06-17T15:18:49.729478706Z"
+		},
+		{
+			"function_name": "Subject",
+			"receiver": "Client",
+			"documentation_hash": "86b0ed8fa3876bb989366c8bffed15aad2a4ceb2522b697933efb9b210183ecb",
+			"definition_hash": "6cc02dfcadebef0bdaaf7dbac6e56f05be10da491bbb5aee000f101dad1b8fdf",
+			"reviewed_at": "2026-06-17T15:18:49.729678708Z"
+		},
+		{
+			"function_name": "DestroySubject",
+			"receiver": "Client",
+			"documentation_hash": "364a616848fa87ac5662637d03398badb434e8261da68b11f7ca915bf270d4f5",
+			"definition_hash": "19c63b49b71525013489a5d5be43cf94f5810894bfaf33a6f116f1b0a2de4cd8",
+			"reviewed_at": "2026-06-17T15:18:49.730375637Z"
+		}
+	]
+}

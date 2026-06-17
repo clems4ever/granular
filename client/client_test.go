@@ -55,7 +55,7 @@ func fakeResourceServer(t *testing.T, id string, allow bool) *httptest.Server {
 	return ts
 }
 
-// fakeAS is an httptest server mimicking the AS policy and proposal endpoints. It
+// fakeAS is an httptest server mimicking the AS subject and proposal endpoints. It
 // records the most recent proposal it received.
 //
 // @arg t The test handle.
@@ -66,14 +66,14 @@ func fakeResourceServer(t *testing.T, id string, allow bool) *httptest.Server {
 func fakeAS(t *testing.T, got *proposalSubmit) *httptest.Server {
 	t.Helper()
 	mux := http.NewServeMux()
-	mux.HandleFunc("PUT /api/policy", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("PUT /api/subject", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusCreated)
-		_ = json.NewEncoder(w).Encode(policyResult{Token: "tok"})
+		_ = json.NewEncoder(w).Encode(subjectResult{Token: "tok"})
 	})
-	mux.HandleFunc("GET /api/policy/{token}", func(w http.ResponseWriter, r *http.Request) {
-		_ = json.NewEncoder(w).Encode(policyResult{Grants: []Grant{{ResourceServerID: "g1", ExpiresAt: "soon"}}})
+	mux.HandleFunc("GET /api/subject/{token}", func(w http.ResponseWriter, r *http.Request) {
+		_ = json.NewEncoder(w).Encode(subjectResult{Grants: []Grant{{ResourceServerID: "g1", ExpiresAt: "soon"}}})
 	})
-	mux.HandleFunc("DELETE /api/policy/{token}", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("DELETE /api/subject/{token}", func(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewEncoder(w).Encode(map[string]int{"destroyed": 2})
 	})
 	mux.HandleFunc("POST /api/proposals", func(w http.ResponseWriter, r *http.Request) {
@@ -210,12 +210,12 @@ func TestSubmitSendsBundle(t *testing.T) {
 	}
 }
 
-// TestCreatePolicyReturnsToken mints a policy with the admin token without changing the
+// TestCreateSubjectReturnsToken mints a subject with the admin token without changing the
 // configured admin token.
-func TestCreatePolicyReturnsToken(t *testing.T) {
+func TestCreateSubjectReturnsToken(t *testing.T) {
 	as := fakeAS(t, nil)
 	c := New(Config{ASURL: as.URL, Token: "admin"})
-	tok, err := c.CreatePolicy(context.Background())
+	tok, err := c.CreateSubject(context.Background())
 	if err != nil || tok != "tok" {
 		t.Fatalf("create: %q %v", tok, err)
 	}
@@ -223,26 +223,26 @@ func TestCreatePolicyReturnsToken(t *testing.T) {
 		t.Fatalf("admin token changed: %q", c.Token())
 	}
 	// Without an admin token, creation is refused.
-	if _, err := New(Config{ASURL: as.URL}).CreatePolicy(context.Background()); !errors.Is(err, ErrNoToken) {
+	if _, err := New(Config{ASURL: as.URL}).CreateSubject(context.Background()); !errors.Is(err, ErrNoToken) {
 		t.Fatalf("want ErrNoToken, got %v", err)
 	}
 }
 
-// TestPolicyReadsGrants lists the grants attached to a named policy token.
-func TestPolicyReadsGrants(t *testing.T) {
+// TestSubjectReadsGrants lists the grants attached to a named subject token.
+func TestSubjectReadsGrants(t *testing.T) {
 	as := fakeAS(t, nil)
 	c := New(Config{ASURL: as.URL, Token: "admin"})
-	grants, err := c.Policy(context.Background(), "somepolicy")
+	grants, err := c.Subject(context.Background(), "somesubject")
 	if err != nil || len(grants) != 1 || grants[0].ResourceServerID != "g1" {
 		t.Fatalf("grants: %v %v", grants, err)
 	}
 }
 
-// TestDestroyPolicy destroys a named policy and reports the number removed.
-func TestDestroyPolicy(t *testing.T) {
+// TestDestroySubject destroys a named subject and reports the number removed.
+func TestDestroySubject(t *testing.T) {
 	as := fakeAS(t, nil)
 	c := New(Config{ASURL: as.URL, Token: "admin"})
-	n, err := c.DestroyPolicy(context.Background(), "somepolicy")
+	n, err := c.DestroySubject(context.Background(), "somesubject")
 	if err != nil || n != 2 {
 		t.Fatalf("destroy: %d %v", n, err)
 	}

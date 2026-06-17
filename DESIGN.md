@@ -17,7 +17,7 @@ grants.
 - **`granular-client` (agent CLI)** — reads a resource server's permission schema, builds
   grant requests, submits them to the AS for approval, and runs operations once
   authorized. It holds no platform credential and no signing secret. Operations
-  and proposals are attached to a **policy token** (a bearer credential).
+  and proposals are attached to a **subject token** (a bearer credential).
 
 - **`granular-github-resource-server` (resource server / Resource Server)** — owns the GitHub
   credential and the permission vocabulary. It serves the permission **schema**,
@@ -32,8 +32,8 @@ grants.
   **grants**, and answers **allow/deny** at operation time. It holds no platform
   credential, authors no policy, and renders the resource server's consent text verbatim.
 
-- **`granular-policy` (admin CLI)** — mints, inspects, and destroys **policy
-  tokens** against the AS admin credential. Policy lifecycle is deliberately an
+- **`granular-subject` (admin CLI)** — mints, inspects, and destroys **subject
+  tokens** against the AS admin credential. Subject lifecycle is deliberately an
   administrative concern, separate from the grant lifecycle the client drives.
 
 ## The signed-artifact model
@@ -91,11 +91,11 @@ restart, and re-running an operation after approval simply succeeds.
 
 | Method | Path                     | Purpose                                                        |
 |--------|--------------------------|----------------------------------------------------------------|
-| PUT    | `/api/policy`            | Mint a policy token. **Admin-gated.**                          |
-| GET    | `/api/policy/{token}`    | Inspect a token's grants. **Admin-gated.**                     |
-| DELETE | `/api/policy/{token}`    | Destroy a token and its grants. **Admin-gated.**              |
+| PUT    | `/api/subject`            | Mint a subject token. **Admin-gated.**                          |
+| GET    | `/api/subject/{token}`    | Inspect a token's grants. **Admin-gated.**                     |
+| DELETE | `/api/subject/{token}`    | Destroy a token and its grants. **Admin-gated.**              |
 | POST   | `/api/proposals`         | Submit a signed grant-request bundle; returns approval URL + expiry. |
-| POST   | `/api/verify`            | resource server asks whether a policy token authorizes an operation.   |
+| POST   | `/api/verify`            | resource server asks whether a subject token authorizes an operation.   |
 | GET    | `/proposal/{id}`         | Human consent page (renders the resource server Presentation verbatim). |
 | POST   | `/proposal/{id}`         | Approve (with a grant TTL) or reject.                          |
 | GET    | `/activity`              | Active grants + request history.                              |
@@ -124,12 +124,12 @@ resource server sends its id in `X-Resource-Server-ID` and an HMAC over the body
 `X-Resource-Server-Signature`; the AS verifies against the secret registered for that id
 and rejects an unknown or wrongly-signed resource server with `401`.
 
-## Policy tokens and admin
+## Subject tokens and admin
 
-A **policy token** is the bearer credential that grants attach to. Minting,
+A **subject token** is the bearer credential that grants attach to. Minting,
 inspecting, and destroying tokens is gated by the AS **admin token**
-(`admin_token_file`), which the `granular-policy` CLI presents. The gate is
-**fail-closed**: when no admin token is configured, policy administration is
+(`admin_token_file`), which the `granular-subject` CLI presents. The gate is
+**fail-closed**: when no admin token is configured, subject administration is
 disabled (`503`); a wrong token is `401`. An administrator mints a token, hands it
 to a client (via the client's `token_file`), and the client then submits proposals
 and runs operations under it without any admin credential.
@@ -166,9 +166,9 @@ Two independent clocks, both enforced:
 cmd/granular-client/          agent CLI entrypoint (main.go only)
 cmd/granular-auth-server/     AS entrypoint
 cmd/granular-github-resource-server/  GitHub resource server entrypoint
-cmd/granular-policy/          policy admin CLI entrypoint
+cmd/granular-subject/          subject admin CLI entrypoint
 clientcli/                    client command tree (catalog, template, op, sign, propose)
-client/                       client SDK: proposals, operations, policy admin
+client/                       client SDK: proposals, operations, subject admin
 resourceserver/                      generic resource server SDK: schema, sign, present, verify
 resourceserver/asclient/             resource server's client for the AS verify call
 resourceserver-github/               GitHub resource server: schema, templates, operation specs

@@ -38,9 +38,9 @@ type Config struct {
 	// secret loaded from its secret_file.
 	ResourceServers []ResourceServer `yaml:"resource_servers"`
 
-	// AdminTokenFile holds the bearer token that gates the policy-administration
-	// endpoints (PUT/GET/DELETE /api/policy). The granular-policy admin CLI presents
-	// it; when unset, policy administration is disabled.
+	// AdminTokenFile holds the bearer token that gates the subject-administration
+	// endpoints (PUT/GET/DELETE /api/subject). The granular-subject admin CLI presents
+	// it; when unset, subject administration is disabled.
 	AdminTokenFile string `yaml:"admin_token_file"`
 
 	// AdminToken is read from AdminTokenFile at load time.
