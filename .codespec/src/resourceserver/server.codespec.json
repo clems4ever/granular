@@ -43,8 +43,15 @@
 			"function_name": "handleOperation",
 			"receiver": "ResourceServer",
 			"documentation_hash": "9d1d66c4e746c97ebc8b0743f30dfdaf004d3a973974df1e512f151e774d1b92",
-			"definition_hash": "4c1d7a2495baff0311155b130ffdc1e8123440b75840e06704e4da947311dec5",
-			"reviewed_at": "2026-06-17T15:18:49.741039161Z"
+			"definition_hash": "018dcbdef939ade8f42a5c4ca4a73d35ee77f41d3ebeaccb0b5317ee1ad69cfb",
+			"reviewed_at": "2026-06-17T21:56:37.088440794Z"
+		},
+		{
+			"function_name": "Authorize",
+			"receiver": "ResourceServer",
+			"documentation_hash": "349c372d753200fd9a5f49e8b933bb5c8d22c75b66e4068b83a9837224960b9f",
+			"definition_hash": "9c4cddd1df18dc20c50fe894402c8dc1ee77f95b9486c766c31862a4d677d03f",
+			"reviewed_at": "2026-06-17T21:56:37.089261499Z"
 		}
 	]
 }

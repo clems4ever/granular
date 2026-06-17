@@ -1,0 +1,28 @@
+{
+	"functions": [
+		{
+			"function_name": "gitCommands",
+			"documentation_hash": "27b0c19d61cd2678fa47b036892bcd807dac6ded7965ea9401ca8fd4b1f90524",
+			"definition_hash": "34189d28c1b796299598c74c7c7abfb7f7d61a680e8e7a7c549137bc9c85e0e8",
+			"reviewed_at": "2026-06-17T21:57:56.210961368Z"
+		},
+		{
+			"function_name": "runProxyGit",
+			"documentation_hash": "e82f0ce8caa89472dc4c43da1352f8e02e33318e8f7a5b6c3c3003b8453061d7",
+			"definition_hash": "ce56701c5c3e1779995d423b63c3fdc8aaaed99f99b9494ea4a66644d9cb906b",
+			"reviewed_at": "2026-06-17T21:57:56.211364138Z"
+		},
+		{
+			"function_name": "cloneArgs",
+			"documentation_hash": "20dfc32ebeef56bbaae30831c951ae3860fc7e2e147c30163fe841cee0a27eeb",
+			"definition_hash": "e87a5dc5efabc4166ab44d5648b6b0ab16362ea0185f14b67a53eb0a726f577c",
+			"reviewed_at": "2026-06-17T21:57:56.211632589Z"
+		},
+		{
+			"function_name": "pushArgs",
+			"documentation_hash": "1cf18f99e105a0350901b1c7fa425d5a591692e6351499ba66b973bc51282aca",
+			"definition_hash": "d51649ca9bf88fb7c20155e267109b35fbc266ea64cf418d20d9c5cf15cf6edd",
+			"reviewed_at": "2026-06-17T21:57:56.211902793Z"
+		}
+	]
+}

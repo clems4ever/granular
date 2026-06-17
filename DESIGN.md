@@ -112,6 +112,23 @@ restart, and re-running an operation after approval simply succeeds.
 | GET    | `/api/schema`                 | The permission schema (resources, actions, templates, operations). |
 | POST   | `/api/grant-requests/sign`    | Freeze a grant request into a signed (Presentation, Policies). |
 | POST   | `/api/operations`             | Run an operation: verify with the AS, then execute.  |
+| ANY    | `/git/{owner}/{repo}.git/…`   | Authorizing git smart-HTTP proxy: gates `git clone`/`git push` on a grant, then injects the server-held PAT. |
+
+### The git proxy
+
+`git clone` and `git push` are not ordinary operations — they need a real git
+transport, not a JSON result. The resource server mounts an **authorizing git
+smart-HTTP proxy** at `/git/`. The client runs the system `git` against it,
+passing its subject token as the HTTP credential (supplied through a git
+credential helper, so the token stays out of the process list). For each request
+the proxy reads the subject token, derives the required action from the git
+service (`git-upload-pack` ⇒ `repo.clone`, `git-receive-pack` ⇒ `repo.push`), and
+asks the AS — through the very same `Authorize` path the `/api/operations` endpoint
+uses — whether that subject may act on that repository. Only on an allow does it
+reverse-proxy the request to GitHub with the **server-held PAT** injected; the
+client never sees the credential and the proxy never decides approval. An
+unauthenticated request is met with a `401` Basic challenge, a denied one with
+`403`.
 
 ## Consent and authentication
 

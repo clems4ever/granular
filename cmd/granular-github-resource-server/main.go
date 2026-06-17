@@ -80,6 +80,13 @@ func run(cfg *rsconfig.Config) error {
 		Verifier:         verifier,
 	})
 
+	// The git proxy serves authorized `git clone`/`git push` traffic under /git/,
+	// injecting the server-held PAT; everything else (schema, sign, operations, docs)
+	// is the generic SDK handler.
+	mux := http.NewServeMux()
+	mux.Handle("/git/", resourceservergithub.NewGitProxy(cfg.GitHubToken, rs))
+	mux.Handle("/", rs.Handler())
+
 	log.Printf("granular-github-resource-server %q listening on %s (AS %s)", cfg.ResourceServerID, cfg.Addr, cfg.ASURL)
-	return fmt.Errorf("server stopped: %w", http.ListenAndServe(cfg.Addr, rs.Handler()))
+	return fmt.Errorf("server stopped: %w", http.ListenAndServe(cfg.Addr, mux))
 }

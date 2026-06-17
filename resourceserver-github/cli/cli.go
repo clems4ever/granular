@@ -30,9 +30,8 @@ var (
 // @testcase TestNewRootCmdHasGitHubCommands builds the root from these declarations.
 func operations() []rscli.OpCommand {
 	return []rscli.OpCommand{
-		{Path: "clone", Type: githubops.TypeClone, Short: "Clone a repository", Flags: []rscli.Flag{fRepo}},
-		{Path: "push", Type: githubops.TypePush, Short: "Push to a repository", Flags: []rscli.Flag{fRepo}},
-
+		// clone and push are not generic operations: they run real git through the
+		// resource server's authorizing proxy and are wired as Extra commands below.
 		{Path: "issue list", Type: githubops.TypeIssueList, Short: "List a repository's issues", Flags: []rscli.Flag{fRepo, fState, fLimit}},
 		{Path: "issue view", Type: githubops.TypeIssueView, Short: "View a single issue", Flags: []rscli.Flag{fRepo, fNumber, fComments}},
 		{Path: "issue create", Type: githubops.TypeIssueCreate, Short: "Create an issue", Flags: []rscli.Flag{
@@ -109,5 +108,6 @@ func NewRootCmd(out io.Writer) *cobra.Command {
 		RSID:           "github",
 		DefaultBaseURL: "http://localhost:9091",
 		Operations:     operations(),
+		Extra:          gitCommands,
 	}, out)
 }

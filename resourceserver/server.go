@@ -152,12 +152,7 @@ func (g *ResourceServer) handleOperation(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	reqs := op.Requirements()
-	allowed, err := g.verifier.Verify(r.Context(), verify.Input{
-		Token:    token,
-		Requests: verifyRequests(g.schema, reqs),
-		Entities: verifyWorld(g.schema, reqs),
-	})
+	allowed, err := g.Authorize(r.Context(), token, op.Requirements())
 	if err != nil {
 		writeJSON(w, http.StatusBadGateway, errBody("authorization check failed: "+err.Error()))
 		return
@@ -173,6 +168,28 @@ func (g *ResourceServer) handleOperation(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"status": "completed", "result": result})
+}
+
+// Authorize asks the AS whether the subject identified by token is permitted the given
+// requirements. It builds the Cedar authorization questions and entity world from the
+// schema and delegates to the configured Verifier. Both the operations endpoint and the
+// git proxy use it so a clone or push is gated by exactly the same allow/deny decision as
+// an API operation.
+//
+// @arg ctx Context for cancellation.
+// @arg token The subject token the action runs under.
+// @arg reqs The requirements the action needs authorized.
+// @return bool Whether every requirement is allowed for the subject.
+// @error error when the verify call to the AS fails.
+//
+// @testcase TestOperationAllowed authorizes an allowed operation through this path.
+// @testcase TestOperationDenied denies through this path.
+func (g *ResourceServer) Authorize(ctx context.Context, token string, reqs []Requirement) (bool, error) {
+	return g.verifier.Verify(ctx, verify.Input{
+		Token:    token,
+		Requests: verifyRequests(g.schema, reqs),
+		Entities: verifyWorld(g.schema, reqs),
+	})
 }
 
 // errBody builds a small JSON error object.

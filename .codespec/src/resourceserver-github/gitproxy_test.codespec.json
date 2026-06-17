@@ -1,0 +1,59 @@
+{
+	"functions": [
+		{
+			"function_name": "Authorize",
+			"receiver": "stubAuthorizer",
+			"documentation_hash": "6854d8b27775d9d3c877e5bbdb3faf8c3c3e5d6730589cfc0542b62d07a4e522",
+			"definition_hash": "65ed7fa0855f063352ad59ce018efbbf852784e3b95b5e4067842563885ff074",
+			"reviewed_at": "2026-06-17T21:57:56.206686992Z"
+		},
+		{
+			"function_name": "basicHeader",
+			"documentation_hash": "e83fd91d6c5129f6f1623cc5487ffdda6109745966fc06c220fdcc230fa9cf7b",
+			"definition_hash": "81d3817084e896f0e384ab329a778c2d39477d56da3c1bf96aea1d51093591d5",
+			"reviewed_at": "2026-06-17T21:57:56.207065023Z"
+		},
+		{
+			"function_name": "TestGitProxyRequiresToken",
+			"documentation_hash": "9a8024e3e07d115523998677f2367885083bb6fadc3ba295b155203231d04dba",
+			"definition_hash": "cf906760d7cab558d202f359bc8819ead0e679e98a6d84c6b53fc22319e2cc9d",
+			"reviewed_at": "2026-06-17T21:57:56.207470889Z"
+		},
+		{
+			"function_name": "TestGitProxyDeniesUnauthorized",
+			"documentation_hash": "233e646ab9b6dfa21ab0dafa48402d0593eee827b833087b59d8518914a5740b",
+			"definition_hash": "81ef06ff9a12c5ed3daa025ad0938ba22b0253ca268adbb93e9606ea73b8e146",
+			"reviewed_at": "2026-06-17T21:57:56.207851604Z"
+		},
+		{
+			"function_name": "TestGitProxyForwardsWithPAT",
+			"documentation_hash": "92ac64f68499e732df89d8ca4a3fea01336255ecc8fd1bb31a7da29e4f1a46c5",
+			"definition_hash": "ea3aa184a4e2a9816ac820b55d53dd9c4cd25653eaeb2261bc7c6d7949b4ac3f",
+			"reviewed_at": "2026-06-17T21:57:56.208231185Z"
+		},
+		{
+			"function_name": "TestGitProxyRejectsBadPath",
+			"documentation_hash": "9dee2a4da6416d9aef7fce061d77273199b292b3ae70a58f4ceb4ef397810b89",
+			"definition_hash": "1632ab1697e6bd64a9fc3aa6a78ec3a2111581c50324a8c8515913329e5810c3",
+			"reviewed_at": "2026-06-17T21:57:56.208617019Z"
+		},
+		{
+			"function_name": "TestParseGitRequest",
+			"documentation_hash": "e1f97e6fcd9bbe973fd26f788a1909f7928c21d6ca1cda215b1ce73b2e4bca24",
+			"definition_hash": "de71ccaaa1385179a39a58f33218d24bd994dea693d351e8068b32ea2e3490f5",
+			"reviewed_at": "2026-06-17T21:57:56.20969703Z"
+		},
+		{
+			"function_name": "TestServiceAction",
+			"documentation_hash": "cd5d3c1ec092e2c6f0c4724bb844e957272cd7d54c0c0a085618eb1f5e3a59d5",
+			"definition_hash": "fbd5908c5539d2990f72d1571da0c55ed203c764a879b11c8178df0378a0441f",
+			"reviewed_at": "2026-06-17T21:57:56.210240801Z"
+		},
+		{
+			"function_name": "TestSubjectTokenFromBasicAuth",
+			"documentation_hash": "90040b9d7d2a38f3661db4e651762e2aa31a8686dee90d4203967f3f20fc2576",
+			"definition_hash": "b90fe55ef1ca17fdf26247d95a7c2cbe796ef49c0f9a4569e719c047ba3f0cc8",
+			"reviewed_at": "2026-06-17T21:57:56.210624528Z"
+		}
+	]
+}

@@ -96,15 +96,33 @@ type App struct {
 	// Out is the writer command output is written to.
 	Out io.Writer
 
-	c              *client.Client
-	defaultBaseURL string
-	configPath     string
-	baseURL        string
-	asURL          string // resolved AS URL (for the request command)
-	asURLFlag      string
-	token          string
-	tokenFile      string
+	c               *client.Client
+	defaultBaseURL  string
+	configPath      string
+	baseURL         string
+	resolvedBaseURL string // base URL after flag/config/default resolution
+	resolvedToken   string // subject token after flag/file resolution
+	asURL           string // resolved AS URL (for the request command)
+	asURLFlag       string
+	token           string
+	tokenFile       string
 }
+
+// BaseURL returns the resolved resource server base URL (flag, else config, else the
+// spec default). It is set once configuration is loaded.
+//
+// @return string The resource server base URL.
+//
+// @testcase TestGitCloneCommandRunsGit builds the proxy URL from the base URL.
+func (a *App) BaseURL() string { return a.resolvedBaseURL }
+
+// Token returns the resolved subject token (flag, else token file). It is "" for
+// token-less invocations.
+//
+// @return string The subject token, or "".
+//
+// @testcase TestGitCloneCommandRunsGit passes the resolved token to git.
+func (a *App) Token() string { return a.resolvedToken }
 
 // Client returns the configured SDK client. It is non-nil for any command that
 // runs after configuration is loaded.
@@ -229,6 +247,8 @@ func (a *App) load(tokenFileFlagSet bool) error {
 	if err != nil {
 		return err
 	}
+	a.resolvedBaseURL = base
+	a.resolvedToken = token
 
 	a.c = client.New(client.Config{
 		ASURL:           a.asURL,

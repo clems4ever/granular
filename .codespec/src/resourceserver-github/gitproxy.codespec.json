@@ -1,0 +1,54 @@
+{
+	"functions": [
+		{
+			"function_name": "NewGitProxy",
+			"documentation_hash": "d2f098d5018273c80c74ce79fded7e6487b9c569ab45242389e3d63865b58f0d",
+			"definition_hash": "371f4332a33bf70b997e442b873bd5a08ef38ac2d304ac39b57124a1ab09eaea",
+			"reviewed_at": "2026-06-17T21:57:56.199917223Z"
+		},
+		{
+			"function_name": "newGitProxy",
+			"documentation_hash": "0b16510c6ad206649a00f98b1add0d616a2fc37b03e99bf43588fd989824f6de",
+			"definition_hash": "73853f498f9f3d812f6d208e3c49f715b432ffc4725752993660727f6e6d3c87",
+			"reviewed_at": "2026-06-17T21:57:56.201564492Z"
+		},
+		{
+			"function_name": "ServeHTTP",
+			"receiver": "GitProxy",
+			"documentation_hash": "a39ba2e7b2793628ddd40201c793346f377d891bb303c2d0ca52644ad0b2188f",
+			"definition_hash": "3e38e787f4abbf4fcd95c6fe452c1a8357e574438210fb6074855cf21774130f",
+			"reviewed_at": "2026-06-17T21:57:56.203495632Z"
+		},
+		{
+			"function_name": "direct",
+			"receiver": "GitProxy",
+			"documentation_hash": "353cb602a6cf5f34273eb54c44718dbc91544d11e4458cf7be05d0c759e30414",
+			"definition_hash": "693d1d1c7a707a9d21eb0d19eb1cf4e61d97b6af4a8bc73d34730d76f786752c",
+			"reviewed_at": "2026-06-17T21:57:56.204895833Z"
+		},
+		{
+			"function_name": "parseGitRequest",
+			"documentation_hash": "4c8a33adb791af276cc8d5af2617a08df304954d5c301b0ed26df994b9e3f17a",
+			"definition_hash": "903589d6d4c69e12989dc3901a02183e0399346b50102c3860501325b1693344",
+			"reviewed_at": "2026-06-17T21:57:56.205310018Z"
+		},
+		{
+			"function_name": "serviceAction",
+			"documentation_hash": "4ea568ad24fcef1098ea64531b33e103e3b4a9842f222738b5563ccdd19f6c1f",
+			"definition_hash": "0222599f8969bc93a48c9987a84053c5edee88753f2f3c952f2e9dee495c2e29",
+			"reviewed_at": "2026-06-17T21:57:56.205675868Z"
+		},
+		{
+			"function_name": "subjectToken",
+			"documentation_hash": "8fd6f2c3e46e95b55c82dde5df7b873700de3082d33fa0fce588c8c9ca12434e",
+			"definition_hash": "3dad568382e08d42df3ebca6f7e16c7ae9b9cfc499a2cf4e3c12cf2b918f7394",
+			"reviewed_at": "2026-06-17T21:57:56.206020242Z"
+		},
+		{
+			"function_name": "basicAuth",
+			"documentation_hash": "6c86970d0aa19464ccaee78aee26f1d9ae3e30d58368ec5eff55e7da3c1efd4d",
+			"definition_hash": "3cef22995197168b1a7fb22ff5ce541b59e0c3888e68f1aaf6e63d98da0de800",
+			"reviewed_at": "2026-06-17T21:57:56.206386135Z"
+		}
+	]
+}

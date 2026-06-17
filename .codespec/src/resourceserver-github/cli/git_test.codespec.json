@@ -1,0 +1,28 @@
+{
+	"functions": [
+		{
+			"function_name": "captureGit",
+			"documentation_hash": "ef13ec2fe7d2e5ce8427dc24395181da933984d53f55133c3061e74768604f24",
+			"definition_hash": "28058853025580a9f5586f59b927e439e642e30a5f6377028d570f4734deddc4",
+			"reviewed_at": "2026-06-17T21:57:56.212099177Z"
+		},
+		{
+			"function_name": "TestGitCloneCommandRunsGit",
+			"documentation_hash": "60cab2e45c0aa29676f4bea14369a6c7f866716392f6f772e95d8a7ef5d227bd",
+			"definition_hash": "fa13a90fadddf26f8e8a1369c693163d143fec0033e04a059af856e2a0c192e2",
+			"reviewed_at": "2026-06-17T21:57:56.212283981Z"
+		},
+		{
+			"function_name": "TestGitCloneNeedsToken",
+			"documentation_hash": "a33812c5ac729b45caf789346a17eed6edaed9fe4b347dbd652668a7540073e6",
+			"definition_hash": "75ab57097d867aef4b57009e4f9bb4f088572d5da14b1913f5e82056f126c745",
+			"reviewed_at": "2026-06-17T21:57:56.212468655Z"
+		},
+		{
+			"function_name": "TestGitPushArgsBuildsPush",
+			"documentation_hash": "d6f66afb9a02166394b1f4215f97da75eb162186a261b4df6c8ad331f84250cb",
+			"definition_hash": "0ecef05d92e0aba84f701414f91652c7e90a75560ab6b2d276b5027a3991a2b5",
+			"reviewed_at": "2026-06-17T21:57:56.212640805Z"
+		}
+	]
+}
