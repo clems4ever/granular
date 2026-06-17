@@ -9,11 +9,12 @@ import (
 	"github.com/clems4ever/granular/internal/proposal"
 )
 
-// Proposal is the AS's answer to a submitted proposal: its id and the URL the approver
-// visits to review and decide.
+// Proposal is the AS's answer to a submitted proposal: its id, the URL the approver
+// visits to review and decide, and when the pending request expires.
 type Proposal struct {
-	ID  string
-	URL string
+	ID        string
+	URL       string
+	ExpiresAt string
 }
 
 // proposalSubmit is the body posted to the AS POST /api/proposals endpoint.
@@ -26,6 +27,7 @@ type proposalSubmit struct {
 type proposalResult struct {
 	ProposalID string `json:"proposal_id"`
 	URL        string `json:"url"`
+	ExpiresAt  string `json:"expires_at,omitempty"`
 	Error      string `json:"error,omitempty"`
 }
 
@@ -95,5 +97,5 @@ func (c *Client) Submit(ctx context.Context, approverEmail string, items []propo
 	if status != http.StatusAccepted {
 		return out, fmt.Errorf("submit proposal: status %d: %s", status, res.Error)
 	}
-	return Proposal{ID: res.ProposalID, URL: res.URL}, nil
+	return Proposal{ID: res.ProposalID, URL: res.URL, ExpiresAt: res.ExpiresAt}, nil
 }

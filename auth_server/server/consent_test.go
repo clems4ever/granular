@@ -22,6 +22,24 @@ func TestParseTTLFallsBack(t *testing.T) {
 	}
 }
 
+// TestHumanizeUntil renders relative time-to-expiry across hours, minutes, seconds and
+// the already-expired case.
+func TestHumanizeUntil(t *testing.T) {
+	now := time.Unix(1_000_000, 0)
+	cases := map[time.Duration]string{
+		2*time.Hour + 5*time.Minute: "in 2h 5m",
+		12 * time.Minute:            "in 12m",
+		30 * time.Second:            "in 30s",
+		-time.Minute:                "expired",
+		0:                           "expired",
+	}
+	for d, want := range cases {
+		if got := humanizeUntil(now, now.Add(d)); got != want {
+			t.Fatalf("humanizeUntil(+%s) = %q, want %q", d, got, want)
+		}
+	}
+}
+
 // TestApprovePageRendersItems renders a pending proposal's items verbatim.
 func TestApprovePageRendersItems(t *testing.T) {
 	_, h := newServer(t)

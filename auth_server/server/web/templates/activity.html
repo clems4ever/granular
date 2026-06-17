@@ -1,0 +1,47 @@
+{{define "title"}}Grants &amp; activity · granular{{end}}
+{{define "content"}}
+<div class="card">
+  <p class="eyebrow">Authorization server</p>
+  <h1>Grants &amp; activity</h1>
+  <p class="lead">The grants currently in force, and the history of every request and the
+    decision it received. Policy tokens are never shown.</p>
+
+  <h3 style="margin-top:1.4rem">Active grants</h3>
+  {{if .Active}}
+  <table class="grid">
+    <thead><tr><th>Gateway</th><th>Grants</th><th>Granted</th><th>Expires</th></tr></thead>
+    <tbody>
+      {{range .Active}}
+      <tr>
+        <td><code>{{.GatewayID}}</code></td>
+        <td>{{.Summary}}</td>
+        <td class="muted">{{.CreatedAt}}</td>
+        <td title="{{.ExpiresAt}}">{{.ExpiresIn}}</td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <p class="muted">No active grants.</p>
+  {{end}}
+
+  <h3 style="margin-top:1.6rem">Request history</h3>
+  {{if .History}}
+  <table class="grid">
+    <thead><tr><th>Status</th><th>Approver</th><th>Request</th><th>Submitted</th></tr></thead>
+    <tbody>
+      {{range .History}}
+      <tr>
+        <td><span class="badge badge-{{.Status}}">{{.Status}}</span></td>
+        <td><code>{{.Approver}}</code></td>
+        <td>{{.Summary}}{{if gt .Items 1}} <span class="muted">({{.Items}} items)</span>{{end}}</td>
+        <td class="muted">{{.CreatedAt}}</td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <p class="muted">No requests yet.</p>
+  {{end}}
+</div>
+{{end}}

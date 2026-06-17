@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/clems4ever/granular/internal/proposal"
 )
@@ -114,6 +115,130 @@ func TestPolicyAdminRequiresAdminToken(t *testing.T) {
 	resp.Body.Close()
 	if resp.StatusCode != http.StatusServiceUnavailable {
 		t.Fatalf("PUT with admin disabled = %d, want 503", resp.StatusCode)
+	}
+}
+
+// TestApprovePageRendersFriendlyGrants checks the consent card leads with a single
+// heading (the summary), lists each permission as a friendly phrase on its resource, and
+// shows the attribute conditions in plain language.
+func TestApprovePageRendersFriendlyGrants(t *testing.T) {
+	_, h := newServer(t)
+	token := createPolicy(t, h)
+	item := proposal.Sign([]byte(gwSecret), "gw", proposal.Presentation{
+		Summary: "Read everything in clems4ever/granular",
+		Grants: []proposal.GrantDetail{{
+			Actions:      []string{"Everything readable: list/view, clone, read comments."},
+			ResourceType: "Repository",
+			Resource:     "clems4ever/granular",
+			Conditions:   []string{"state is open"},
+		}},
+	}, []string{`permit(principal, action, resource);`})
+	pin, _ := json.Marshal(proposalInput{ApproverEmail: "me@example.com", Items: []proposal.SignedGrantRequest{item}})
+	resp := do(t, h, http.MethodPost, "/api/proposals", pin, token, false)
+	var out proposalOutput
+	_ = json.NewDecoder(resp.Body).Decode(&out)
+	resp.Body.Close()
+
+	page := do(t, h, http.MethodGet, "/proposal/"+out.ProposalID, nil, "", false)
+	defer page.Body.Close()
+	body, _ := io.ReadAll(page.Body)
+	html := string(body)
+	for _, want := range []string{
+		"request-summary",                        // single heading class (no double title)
+		"Read everything in clems4ever/granular", // the summary heading text
+		"Everything readable",                    // friendly permission phrase, not "read"
+		`class="restype">Repository`,             // the human resource type label
+		"clems4ever/granular",                    // resource value
+		"but only when",                          // conditions label
+		"state is open",                          // the condition phrase
+	} {
+		if !strings.Contains(html, want) {
+			t.Fatalf("consent page missing %q", want)
+		}
+	}
+}
+
+// TestActivityPageRendersGrants renders the active grants and the request history on the
+// /activity page after a proposal is approved.
+func TestActivityPageRendersGrants(t *testing.T) {
+	_, h := newServer(t)
+	token := createPolicy(t, h)
+	id := propose(t, h, token, "me@example.com")
+	approve(t, h, id)
+
+	resp := do(t, h, http.MethodGet, "/activity", nil, "", false)
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("GET /activity = %d, want 200", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	html := string(body)
+	for _, want := range []string{
+		"Active grants", "Request history",
+		"View repo r",    // grant + proposal summary (from signedItem)
+		"me@example.com", // approver in history
+		"badge-approved", // status badge
+	} {
+		if !strings.Contains(html, want) {
+			t.Fatalf("/activity missing %q", want)
+		}
+	}
+}
+
+// TestProposalExpiresViaEndpoint checks a proposal with a short request TTL is shown as
+// expired on the consent page and can no longer be approved through the endpoint.
+func TestProposalExpiresViaEndpoint(t *testing.T) {
+	srv, h := newServer(t)
+	srv.UseRequestTTL(time.Millisecond)
+	token := createPolicy(t, h)
+	id := propose(t, h, token, "me@example.com")
+	time.Sleep(15 * time.Millisecond) // let the request lapse
+
+	// The consent page reflects the expired status (no approve form).
+	page := do(t, h, http.MethodGet, "/proposal/"+id, nil, "", false)
+	body, _ := io.ReadAll(page.Body)
+	page.Body.Close()
+	if !strings.Contains(string(body), "badge-expired") {
+		t.Fatalf("consent page does not show expired status:\n%s", string(body))
+	}
+
+	// Approving the lapsed request is refused with a clear message.
+	ts := httptest.NewServer(h)
+	defer ts.Close()
+	req, _ := http.NewRequest(http.MethodPost, ts.URL+"/proposal/"+id, strings.NewReader("decision=approve&ttl=1h"))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatalf("approve: %v", err)
+	}
+	defer resp.Body.Close()
+	rb, _ := io.ReadAll(resp.Body)
+	if !strings.Contains(string(rb), "expired") {
+		t.Fatalf("approve of lapsed request not reported as expired:\n%s", string(rb))
+	}
+
+	// And no grant attached.
+	g := do(t, h, http.MethodGet, "/api/policy/"+token, nil, adminToken, false)
+	defer g.Body.Close()
+	var out policyOutput
+	_ = json.NewDecoder(g.Body).Decode(&out)
+	if len(out.Grants) != 0 {
+		t.Fatalf("expired request attached %d grant(s)", len(out.Grants))
+	}
+}
+
+// TestProposalRejectsUnknownPolicyToken rejects a proposal whose bearer token does not
+// identify a persisted policy (empty or never created), so a grant cannot attach to a
+// non-existent policy.
+func TestProposalRejectsUnknownPolicyToken(t *testing.T) {
+	_, h := newServer(t)
+	pin, _ := json.Marshal(proposalInput{ApproverEmail: "me@example.com", Items: []proposal.SignedGrantRequest{signedItem()}})
+	for _, token := range []string{"", "never-created"} {
+		resp := do(t, h, http.MethodPost, "/api/proposals", pin, token, false)
+		resp.Body.Close()
+		if resp.StatusCode != http.StatusUnauthorized {
+			t.Fatalf("propose with token %q = %d, want 401", token, resp.StatusCode)
+		}
 	}
 }
 

@@ -14,9 +14,10 @@ var files embed.FS
 
 // pages maps a page name to its parsed template (layout + page).
 var pages = map[string]*template.Template{
-	"approve": page("approve.html"),
-	"result":  page("result.html"),
-	"denied":  page("denied.html"),
+	"approve":  page("approve.html"),
+	"result":   page("result.html"),
+	"denied":   page("denied.html"),
+	"activity": page("activity.html"),
 }
 
 // page parses the shared layout together with a single page template.

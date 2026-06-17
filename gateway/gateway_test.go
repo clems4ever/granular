@@ -246,15 +246,23 @@ func TestVerifyWorld(t *testing.T) {
 	}
 }
 
-// TestPresentation renders one grant detail per capability with its actions and scope.
+// TestPresentation renders one grant detail per capability, labelling actions by their
+// friendly description rather than the raw name, with the resolved scope.
 func TestPresentation(t *testing.T) {
 	p := buildPresentation(testSchema(), "", []Capability{readCap()})
 	if len(p.Grants) != 1 {
 		t.Fatalf("grants = %v", p.Grants)
 	}
 	g := p.Grants[0]
-	if len(g.Actions) != 1 || g.Actions[0] != "repo.read" || g.Resource != "octo/hello" {
+	// testSchema's repo.read action has description "Read a repo." — the friendly label;
+	// the t.repo resource has title "Repo" — the human type name.
+	if len(g.Actions) != 1 || g.Actions[0] != "Read a repo." || g.Resource != "octo/hello" || g.ResourceType != "Repo" {
 		t.Fatalf("grant detail = %+v", g)
+	}
+
+	// A name with no schema entry falls back to the raw name.
+	if got := actionLabels(testSchema(), []string{"unknown.x"}); got[0] != "unknown.x" {
+		t.Fatalf("fallback label = %q", got[0])
 	}
 }
 
@@ -277,7 +285,7 @@ func TestExpandTemplate(t *testing.T) {
 	if pres.Summary != "Comment on octo/hello" {
 		t.Fatalf("summary = %q", pres.Summary)
 	}
-	if len(pres.Grants) != 1 || pres.Grants[0].Resource != "octo/hello" {
+	if len(pres.Grants) != 1 || pres.Grants[0].Resource != "octo/hello" || pres.Grants[0].ResourceType != "Repo" {
 		t.Fatalf("grants = %+v", pres.Grants)
 	}
 	conds := pres.Grants[0].Conditions

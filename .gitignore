@@ -11,3 +11,5 @@ granular-workspace/
 
 /.secrets
 /.workspace
+
+/*.json

@@ -20,11 +20,14 @@ import (
 // GrantDetail is the structured, human-readable breakdown of one permit a grant would
 // add. The consent screen shows it when the user expands a request to inspect what it
 // really grants; it is index-aligned with the SignedGrantRequest's Policies, so each
-// detail describes the raw Cedar policy at the same position.
+// detail describes the raw Cedar policy at the same position. ResourceType is the
+// gateway-supplied human name for the resource's kind (e.g. "Repository"), so the UI can
+// label the otherwise-ambiguous Resource value.
 type GrantDetail struct {
-	Actions    []string `json:"actions,omitempty"`
-	Resource   string   `json:"resource,omitempty"`
-	Conditions []string `json:"conditions,omitempty"`
+	Actions      []string `json:"actions,omitempty"`
+	ResourceType string   `json:"resource_type,omitempty"`
+	Resource     string   `json:"resource,omitempty"`
+	Conditions   []string `json:"conditions,omitempty"`
 }
 
 // Presentation is the human-readable description a Gateway authors for a grant

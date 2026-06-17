@@ -1,6 +1,8 @@
 package server
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -46,6 +48,7 @@ type approvalView struct {
 	Items      []itemView
 	Decided    bool
 	Status     store.Status
+	ExpiresIn  string // relative time until the pending request is auto-revoked
 	TTLOptions []ttlOption
 }
 
@@ -53,6 +56,143 @@ type approvalView struct {
 type mismatchView struct {
 	SignedInAs string
 	Approver   string
+}
+
+// grantRow is one active grant shown on the activity page. No policy token is shown.
+// ExpiresIn is the relative time until expiry (e.g. "in 12m"); ExpiresAt is the absolute
+// time shown as a tooltip.
+type grantRow struct {
+	GatewayID string
+	Summary   string
+	CreatedAt string
+	ExpiresIn string
+	ExpiresAt string
+}
+
+// historyRow is one past or pending proposal shown on the activity page (the request and
+// decision history).
+type historyRow struct {
+	Approver  string
+	Status    store.Status
+	Summary   string
+	Items     int
+	CreatedAt string
+}
+
+// activityView is the data passed to the activity page template.
+type activityView struct {
+	Active  []grantRow
+	History []historyRow
+}
+
+// fmtTime renders a timestamp in a compact UTC form for the UI, or "—" for the zero time.
+//
+// @arg t The timestamp to render.
+// @return string The formatted UTC timestamp.
+//
+// @testcase TestActivityPageRendersGrants renders grant timestamps.
+func fmtTime(t time.Time) string {
+	if t.IsZero() {
+		return "—"
+	}
+	return t.UTC().Format("2006-01-02 15:04 UTC")
+}
+
+// humanizeUntil renders how long until t, relative to now, as a short phrase like
+// "in 2h 5m", "in 12m", "in 30s", or "expired" once t has passed.
+//
+// @arg now The reference time.
+// @arg t The future time to describe.
+// @return string The relative time-to-expiry phrase.
+//
+// @testcase TestHumanizeUntil covers hours, minutes, seconds and the expired case.
+func humanizeUntil(now, t time.Time) string {
+	d := t.Sub(now)
+	switch {
+	case d <= 0:
+		return "expired"
+	case d >= time.Hour:
+		return fmt.Sprintf("in %dh %dm", int(d/time.Hour), int((d%time.Hour)/time.Minute))
+	case d >= time.Minute:
+		return fmt.Sprintf("in %dm", int(d/time.Minute))
+	default:
+		return fmt.Sprintf("in %ds", int(d/time.Second))
+	}
+}
+
+// firstSummary returns a representative summary for a bundle of signed items: the first
+// item's summary, suffixed when more items are present.
+//
+// @arg items The signed grant requests in a proposal.
+// @return string A one-line summary for the bundle.
+//
+// @testcase TestActivityPageRendersGrants summarises a multi-item proposal.
+func firstSummary(items []proposal.SignedGrantRequest) string {
+	if len(items) == 0 {
+		return ""
+	}
+	s := items[0].Presentation.Summary
+	if len(items) > 1 {
+		s += " (+" + itoa(len(items)-1) + " more)"
+	}
+	return s
+}
+
+// buildActivity assembles the observability view from the active grants and the proposal
+// history, expressing each grant's expiry relative to now.
+//
+// @arg now The reference time for relative expiry.
+// @arg grants The active (non-expired) grants.
+// @arg proposals The recorded proposals (request/decision history).
+// @return activityView The view rendered by the activity page.
+//
+// @testcase TestActivityPageRendersGrants builds the active and history sections.
+func buildActivity(now time.Time, grants []store.Grant, proposals []store.Proposal) activityView {
+	v := activityView{}
+	for _, g := range grants {
+		v.Active = append(v.Active, grantRow{
+			GatewayID: g.Item.GatewayID,
+			Summary:   g.Item.Presentation.Summary,
+			CreatedAt: fmtTime(g.CreatedAt),
+			ExpiresIn: humanizeUntil(now, g.ExpiresAt),
+			ExpiresAt: fmtTime(g.ExpiresAt),
+		})
+	}
+	for _, p := range proposals {
+		status := p.Status
+		if p.Expired(now) {
+			status = store.StatusExpired
+		}
+		v.History = append(v.History, historyRow{
+			Approver:  p.ApproverEmail,
+			Status:    status,
+			Summary:   firstSummary(p.Items),
+			Items:     len(p.Items),
+			CreatedAt: fmtTime(p.CreatedAt),
+		})
+	}
+	return v
+}
+
+// handleActivity handles GET /activity: it renders the active grants and the proposal
+// history so an operator can observe what is granted and what was decided.
+//
+// @arg w The response writer.
+// @arg r The incoming request.
+//
+// @testcase TestActivityPageRendersGrants renders active grants and history.
+func (s *Server) handleActivity(w http.ResponseWriter, r *http.Request) {
+	grants, err := s.store.AllGrants()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	proposals, err := s.store.AllProposals()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	_ = s.render(w, r, "activity", buildActivity(time.Now(), grants, proposals))
 }
 
 // parseTTL converts a consent-form duration value into a time.Duration, falling back
@@ -134,12 +274,18 @@ func (s *Server) handleApprovePage(w http.ResponseWriter, r *http.Request) {
 	if !s.approverGate(w, r, p) {
 		return
 	}
+	now := time.Now()
+	status := p.Status
+	if p.Expired(now) {
+		status = store.StatusExpired
+	}
 	_ = s.render(w, r, "approve", approvalView{
 		ID:         p.ID,
 		Approver:   p.ApproverEmail,
 		Items:      viewItems(p),
-		Decided:    p.Status != store.StatusPending,
-		Status:     p.Status,
+		Decided:    status != store.StatusPending,
+		Status:     status,
+		ExpiresIn:  humanizeUntil(now, p.ExpiresAt),
 		TTLOptions: ttlOptions,
 	})
 }
@@ -184,6 +330,13 @@ func (s *Server) handleApproveSubmit(w http.ResponseWriter, r *http.Request) {
 		}
 	default:
 		http.Error(w, "invalid decision", http.StatusBadRequest)
+		return
+	}
+	if errors.Is(err, store.ErrExpired) {
+		_ = s.render(w, r, "result", struct {
+			Status  store.Status
+			Message string
+		}{Status: store.StatusExpired, Message: "This request expired before it was decided. Ask the agent to submit a new one."})
 		return
 	}
 	if err != nil {

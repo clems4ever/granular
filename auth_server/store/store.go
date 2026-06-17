@@ -13,6 +13,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"sort"
 	"time"
 
 	"github.com/clems4ever/granular/internal/proposal"
@@ -37,6 +38,9 @@ const (
 	StatusApproved Status = "approved"
 	// StatusRejected means a human denied the proposal.
 	StatusRejected Status = "rejected"
+	// StatusExpired means the proposal elapsed its pending window before a human
+	// decided it, so it was automatically revoked and can no longer be approved.
+	StatusExpired Status = "expired"
 )
 
 // policyRecord is the metadata for a policy token. The grants attached to the token
@@ -48,7 +52,8 @@ type policyRecord struct {
 
 // Proposal is a bundle of gateway-signed grant requests a holder submitted for
 // approval against its policy token. ApproverEmail names the human who must sign in
-// to decide it.
+// to decide it. A proposal is only approvable while pending and before ExpiresAt; past
+// that it is automatically revoked (StatusExpired).
 type Proposal struct {
 	ID            string                        `json:"id"`
 	Token         string                        `json:"token"`
@@ -56,6 +61,18 @@ type Proposal struct {
 	Items         []proposal.SignedGrantRequest `json:"items"`
 	Status        Status                        `json:"status"`
 	CreatedAt     time.Time                     `json:"created_at"`
+	ExpiresAt     time.Time                     `json:"expires_at"`
+}
+
+// Expired reports whether the proposal is still pending but its approval window has
+// elapsed as of now, so it should be treated as automatically revoked.
+//
+// @arg now The reference time.
+// @return bool True when the proposal is pending and past its expiry.
+//
+// @testcase TestProposalExpires reports a lapsed pending proposal as expired.
+func (p *Proposal) Expired(now time.Time) bool {
+	return p.Status == StatusPending && !now.Before(p.ExpiresAt)
 }
 
 // Grant is one approved, time-limited grant attached to a policy token. Item carries
@@ -145,23 +162,28 @@ func (s *Store) PolicyExists(token string) bool {
 }
 
 // CreateProposal records a pending proposal against the policy token, carrying the
-// signed items and the approver's email.
+// signed items and the approver's email. The proposal expires ttl after creation; once
+// expired it is automatically revoked and can no longer be approved.
 //
 // @arg token The policy the approved grants will attach to.
 // @arg approverEmail The human who must sign in to decide the proposal.
 // @arg items The gateway-signed grant requests bundled by the client.
-// @return *Proposal The stored proposal with its generated id and pending status.
+// @arg ttl How long the proposal may stay pending before it is automatically revoked.
+// @return *Proposal The stored proposal with its generated id, pending status and expiry.
 // @error error when the proposal cannot be written.
 //
 // @testcase TestProposalApprovalAttachesGrants creates and approves a proposal.
-func (s *Store) CreateProposal(token, approverEmail string, items []proposal.SignedGrantRequest) (*Proposal, error) {
+// @testcase TestProposalExpires creates a proposal that lapses.
+func (s *Store) CreateProposal(token, approverEmail string, items []proposal.SignedGrantRequest, ttl time.Duration) (*Proposal, error) {
+	now := s.now()
 	p := &Proposal{
 		ID:            s.newID(),
 		Token:         token,
 		ApproverEmail: approverEmail,
 		Items:         items,
 		Status:        StatusPending,
-		CreatedAt:     s.now(),
+		CreatedAt:     now,
+		ExpiresAt:     now.Add(ttl),
 	}
 	if err := s.put(bucketProposals, p.ID, p); err != nil {
 		return nil, err
@@ -202,8 +224,10 @@ func (s *Store) GetProposal(id string) (*Proposal, error) {
 //
 // @testcase TestProposalApprovalAttachesGrants approves and reads back the policy.
 // @testcase TestApproveTwiceFails rejects approving an already-decided proposal.
+// @testcase TestProposalExpires refuses to approve a lapsed proposal.
 func (s *Store) Approve(id string, ttl time.Duration) (*Proposal, error) {
 	var p Proposal
+	expired := false
 	err := s.db.Update(func(tx *bolt.Tx) error {
 		pb := tx.Bucket(bucketProposals)
 		v := pb.Get([]byte(id))
@@ -215,6 +239,13 @@ func (s *Store) Approve(id string, ttl time.Duration) (*Proposal, error) {
 		}
 		if p.Status != StatusPending {
 			return ErrAlreadyDecided
+		}
+		// Auto-revoke a lapsed request: commit the expired status (returning an error
+		// here would roll the change back) and signal ErrExpired to the caller below.
+		if p.Expired(s.now()) {
+			expired = true
+			p.Status = StatusExpired
+			return putTx(pb, p.ID, &p)
 		}
 		p.Status = StatusApproved
 		if err := putTx(pb, p.ID, &p); err != nil {
@@ -239,6 +270,9 @@ func (s *Store) Approve(id string, ttl time.Duration) (*Proposal, error) {
 	if err != nil {
 		return nil, err
 	}
+	if expired {
+		return &p, ErrExpired
+	}
 	return &p, nil
 }
 
@@ -251,6 +285,7 @@ func (s *Store) Approve(id string, ttl time.Duration) (*Proposal, error) {
 // @testcase TestRejectProposal sets the status to rejected and attaches nothing.
 func (s *Store) Reject(id string) (*Proposal, error) {
 	var p Proposal
+	expired := false
 	err := s.db.Update(func(tx *bolt.Tx) error {
 		pb := tx.Bucket(bucketProposals)
 		v := pb.Get([]byte(id))
@@ -263,11 +298,19 @@ func (s *Store) Reject(id string) (*Proposal, error) {
 		if p.Status != StatusPending {
 			return ErrAlreadyDecided
 		}
+		if p.Expired(s.now()) {
+			expired = true
+			p.Status = StatusExpired
+			return putTx(pb, p.ID, &p)
+		}
 		p.Status = StatusRejected
 		return putTx(pb, p.ID, &p)
 	})
 	if err != nil {
 		return nil, err
+	}
+	if expired {
+		return &p, ErrExpired
 	}
 	return &p, nil
 }
@@ -317,6 +360,70 @@ func (s *Store) PolicyForToken(token string) ([]Grant, error) {
 	return out, nil
 }
 
+// AllGrants returns every active (non-expired) grant across all policies, for the
+// authorization server's observability UI. It does not mutate the store.
+//
+// @return []Grant The active grants, newest first.
+// @error error when the database cannot be read.
+//
+// @testcase TestAllGrantsAndProposals lists active grants and omits expired ones.
+func (s *Store) AllGrants() ([]Grant, error) {
+	var out []Grant
+	err := s.db.View(func(tx *bolt.Tx) error {
+		return tx.Bucket(bucketGrants).ForEach(func(_, v []byte) error {
+			var g Grant
+			if err := json.Unmarshal(v, &g); err != nil {
+				return err
+			}
+			if s.now().Before(g.ExpiresAt) {
+				out = append(out, g)
+			}
+			return nil
+		})
+	})
+	if err != nil {
+		return nil, err
+	}
+	sortByCreatedDesc(out, func(i int) time.Time { return out[i].CreatedAt })
+	return out, nil
+}
+
+// AllProposals returns every recorded proposal (the request/decision history) for the
+// observability UI. It does not mutate the store.
+//
+// @return []Proposal The proposals, newest first.
+// @error error when the database cannot be read.
+//
+// @testcase TestAllGrantsAndProposals lists the proposal history with statuses.
+func (s *Store) AllProposals() ([]Proposal, error) {
+	var out []Proposal
+	err := s.db.View(func(tx *bolt.Tx) error {
+		return tx.Bucket(bucketProposals).ForEach(func(_, v []byte) error {
+			var p Proposal
+			if err := json.Unmarshal(v, &p); err != nil {
+				return err
+			}
+			out = append(out, p)
+			return nil
+		})
+	})
+	if err != nil {
+		return nil, err
+	}
+	sortByCreatedDesc(out, func(i int) time.Time { return out[i].CreatedAt })
+	return out, nil
+}
+
+// sortByCreatedDesc sorts a slice in place by a creation timestamp, newest first.
+//
+// @arg s The slice to sort.
+// @arg created Returns the creation time of element i.
+//
+// @testcase TestAllGrantsAndProposals checks results come back newest first.
+func sortByCreatedDesc[T any](s []T, created func(i int) time.Time) {
+	sort.SliceStable(s, func(i, j int) bool { return created(i).After(created(j)) })
+}
+
 // DestroyPolicy deletes a policy token and every grant attached to it, returning how
 // many grants were removed.
 //
@@ -357,16 +464,20 @@ func (s *Store) DestroyPolicy(token string) (int, error) {
 	return deleted, err
 }
 
-// PurgeExpired deletes every grant whose expiry has passed and returns how many were
-// removed. It is what the background janitor calls on each tick.
+// PurgeExpired deletes every grant whose expiry has passed and automatically revokes
+// (marks StatusExpired) every pending proposal whose approval window has elapsed,
+// returning how many items it affected. It is what the background janitor calls on each
+// tick, so even un-viewed requests are revoked durably.
 //
-// @return int The number of expired grants deleted.
+// @return int The number of grants deleted plus proposals expired.
 // @error error when the database cannot be updated.
 //
 // @testcase TestPurgeExpired deletes elapsed grants and keeps live ones.
+// @testcase TestProposalExpires has the janitor revoke a lapsed pending proposal.
 func (s *Store) PurgeExpired() (int, error) {
-	purged := 0
+	affected := 0
 	err := s.db.Update(func(tx *bolt.Tx) error {
+		now := s.now()
 		gb := tx.Bucket(bucketGrants)
 		var expired [][]byte
 		err := gb.ForEach(func(k, v []byte) error {
@@ -374,7 +485,7 @@ func (s *Store) PurgeExpired() (int, error) {
 			if err := json.Unmarshal(v, &g); err != nil {
 				return err
 			}
-			if !s.now().Before(g.ExpiresAt) {
+			if !now.Before(g.ExpiresAt) {
 				expired = append(expired, append([]byte(nil), k...))
 			}
 			return nil
@@ -386,11 +497,34 @@ func (s *Store) PurgeExpired() (int, error) {
 			if err := gb.Delete(k); err != nil {
 				return err
 			}
-			purged++
+			affected++
+		}
+
+		pb := tx.Bucket(bucketProposals)
+		var lapsed []Proposal
+		err = pb.ForEach(func(_, v []byte) error {
+			var p Proposal
+			if err := json.Unmarshal(v, &p); err != nil {
+				return err
+			}
+			if p.Expired(now) {
+				p.Status = StatusExpired
+				lapsed = append(lapsed, p)
+			}
+			return nil
+		})
+		if err != nil {
+			return err
+		}
+		for i := range lapsed {
+			if err := putTx(pb, lapsed[i].ID, &lapsed[i]); err != nil {
+				return err
+			}
+			affected++
 		}
 		return nil
 	})
-	return purged, err
+	return affected, err
 }
 
 // StartCleanup launches a background goroutine that calls PurgeExpired on the given
@@ -469,4 +603,6 @@ func randomToken() (string, error) {
 var (
 	ErrNotFound       = errors.New("proposal not found")
 	ErrAlreadyDecided = errors.New("proposal already decided")
+	// ErrExpired is returned when deciding a proposal whose approval window has elapsed.
+	ErrExpired = errors.New("proposal expired")
 )

@@ -23,15 +23,46 @@
 			"function_name": "handleApprovePage",
 			"receiver": "Server",
 			"documentation_hash": "1d1abdc8d30f8adba488763c1c58236a23f90d08edddc627746300fc312f152d",
-			"definition_hash": "5af364c7de211a266ca8c614a6614b1aec18481498cfcff17165bfbf95f0de01",
-			"reviewed_at": "2026-06-17T05:59:07.662489575Z"
+			"definition_hash": "b0615114346fe09e34f6f9b5508f8d0c92d5dde62199ca678bac5663b0622860",
+			"reviewed_at": "2026-06-17T10:59:35.232933039Z"
 		},
 		{
 			"function_name": "handleApproveSubmit",
 			"receiver": "Server",
 			"documentation_hash": "82fd110fa2a0cc042a6fc94d2e73af9155934a71e001ddd66f9a6610ad4373a8",
-			"definition_hash": "b959cc6e4276208099272e77fc0bcf26703b5408d575e54e6afd2be83ca210ac",
-			"reviewed_at": "2026-06-17T05:59:07.663207169Z"
+			"definition_hash": "3192a25b37a34875e0dd8ca675baf4ba17564117c37996f2575c63ce72dcaf8c",
+			"reviewed_at": "2026-06-17T10:59:35.233772878Z"
+		},
+		{
+			"function_name": "fmtTime",
+			"documentation_hash": "14d0a6e9eef001f63421acb1a38bc7bedd847c31c3cfbac0f5d0ab605714c52b",
+			"definition_hash": "9bdc98a0a87f407206df6da27afcfc61796c0b2cb2e4284466303f030bf6eb6f",
+			"reviewed_at": "2026-06-17T10:21:16.656640154Z"
+		},
+		{
+			"function_name": "firstSummary",
+			"documentation_hash": "391ff875651bc6af8252ec62e41c7098df6940863480a941a9b5c34031cc9323",
+			"definition_hash": "ad092b3d351c6641bc5010f4b5de48706509d560da26e30f3829a08f39897f44",
+			"reviewed_at": "2026-06-17T10:21:16.658466355Z"
+		},
+		{
+			"function_name": "buildActivity",
+			"documentation_hash": "b679a4b0f38989d9cd6a1c5e73b97f54019e8e3b9a18ad6a2e4595c2e934482f",
+			"definition_hash": "ae000c168dc62628366e3596ac980346b8bf322478644dfa4fb54152079f7175",
+			"reviewed_at": "2026-06-17T10:59:35.231945891Z"
+		},
+		{
+			"function_name": "handleActivity",
+			"receiver": "Server",
+			"documentation_hash": "fcc71944a3d9a0d2643d3c68d8bc22b934cca136f233b5c494ec8bbfa60b2c3f",
+			"definition_hash": "9861a8ecdd61d00da2993464ac6822223a43b3c96df2bf24e7b6f46bc58d99e0",
+			"reviewed_at": "2026-06-17T10:41:18.935273649Z"
+		},
+		{
+			"function_name": "humanizeUntil",
+			"documentation_hash": "a3544a3a4fa82432bece78ed2c2797c3ef516b3fad654e69681946ba1592881a",
+			"definition_hash": "f2bd14509c4dedb19c359f3a6fc4366740efd877464a466974e4753f85e0022f",
+			"reviewed_at": "2026-06-17T10:41:18.932255626Z"
 		}
 	]
 }

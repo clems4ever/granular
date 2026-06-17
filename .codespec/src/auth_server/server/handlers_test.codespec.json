@@ -47,6 +47,30 @@
 			"documentation_hash": "fab9251846edb0e9838d0399d003d20ee5ad8c04e9a7cf6cf6d9e797fc4ac361",
 			"definition_hash": "a56648404bd489650793ae510a2ea41cf35d23e2545f37a322b313452437c221",
 			"reviewed_at": "2026-06-17T07:17:59.53816061Z"
+		},
+		{
+			"function_name": "TestProposalRejectsUnknownPolicyToken",
+			"documentation_hash": "fc2903739e371dc52e570e05b9168517e6d16bc315ce628cbcf7c2519d009c59",
+			"definition_hash": "b37b1cd940db31c519a7d2fd2d6e0eb10f195798b26da21444cec23ac076c03c",
+			"reviewed_at": "2026-06-17T10:13:03.155608017Z"
+		},
+		{
+			"function_name": "TestActivityPageRendersGrants",
+			"documentation_hash": "415bec29a95bbf8cba81d2d1f468c41f2962e945978ae31d6a67b92b26c471b9",
+			"definition_hash": "9b212e3e5076d56a1c15da928f0fe2d8045a1e44ece2fb22af8bdb6f0ca1ef9a",
+			"reviewed_at": "2026-06-17T10:21:18.988175422Z"
+		},
+		{
+			"function_name": "TestApprovePageRendersFriendlyGrants",
+			"documentation_hash": "a32db47a6b11a6f69039406380afc4aafdaec605038a8f312556b11e07e3906e",
+			"definition_hash": "d461f01c7b55a4f394fc8bb2ed21a9f8e2b594368f26dc09efb681a400c075d3",
+			"reviewed_at": "2026-06-17T10:41:23.093583273Z"
+		},
+		{
+			"function_name": "TestProposalExpiresViaEndpoint",
+			"documentation_hash": "c721810bffdb3edb21824e8c2c02976799c22546136eba9a8d3c7b48088a00a3",
+			"definition_hash": "4d3c691b7fa741d3e9a8b70cc089661ccfb7ee17879c6358a5108c040fc49964",
+			"reviewed_at": "2026-06-17T10:59:38.774764076Z"
 		}
 	]
 }

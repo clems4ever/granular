@@ -20,6 +20,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/clems4ever/granular/auth_server/server/web"
 	"github.com/clems4ever/granular/auth_server/store"
@@ -35,8 +36,13 @@ type Server struct {
 	baseURL    string
 	gateways   map[string]string // gateway id -> shared HMAC secret
 	adminToken string            // bearer gating the policy-administration endpoints
+	requestTTL time.Duration     // how long a submitted proposal stays pending
 	auth       *Authenticator
 }
+
+// defaultRequestTTL is the pending lifetime applied to a proposal when the server is not
+// configured otherwise.
+const defaultRequestTTL = 15 * time.Minute
 
 // proposalInput is the body a client posts to POST /api/proposals: the email of the
 // human who must approve, and the gateway-signed grant requests to bundle.
@@ -49,6 +55,7 @@ type proposalInput struct {
 type proposalOutput struct {
 	ProposalID string `json:"proposal_id"`
 	URL        string `json:"url"`
+	ExpiresAt  string `json:"expires_at,omitempty"`
 	Error      string `json:"error,omitempty"`
 }
 
@@ -77,7 +84,19 @@ type grantView struct {
 //
 // @testcase TestProposalApproveFlow constructs a server.
 func New(st *store.Store, baseURL string, gateways map[string]string) *Server {
-	return &Server{store: st, baseURL: baseURL, gateways: gateways}
+	return &Server{store: st, baseURL: baseURL, gateways: gateways, requestTTL: defaultRequestTTL}
+}
+
+// UseRequestTTL sets how long a submitted proposal stays pending before it is
+// automatically revoked. A non-positive value leaves the default in place.
+//
+// @arg ttl The pending lifetime for new proposals.
+//
+// @testcase TestProposalExpiresViaEndpoint configures a short request TTL.
+func (s *Server) UseRequestTTL(ttl time.Duration) {
+	if ttl > 0 {
+		s.requestTTL = ttl
+	}
 }
 
 // UseAuth attaches an authenticator that guards the consent pages behind a GitHub
@@ -132,6 +151,8 @@ func (s *Server) Handler() http.Handler {
 	// Human consent pages require a GitHub login when authentication is enabled.
 	mux.Handle("GET /proposal/{id}", s.protect(s.handleApprovePage))
 	mux.Handle("POST /proposal/{id}", s.protect(s.handleApproveSubmit))
+	// Observability: the active grants and the request/decision history.
+	mux.Handle("GET /activity", s.protect(s.handleActivity))
 	mux.HandleFunc("GET /{$}", s.handleIndex)
 	return mux
 }
@@ -274,7 +295,7 @@ func (s *Server) handleProposal(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	p, err := s.store.CreateProposal(token, strings.ToLower(in.ApproverEmail), in.Items)
+	p, err := s.store.CreateProposal(token, strings.ToLower(in.ApproverEmail), in.Items, s.requestTTL)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, proposalOutput{Error: err.Error()})
 		return
@@ -282,6 +303,7 @@ func (s *Server) handleProposal(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusAccepted, proposalOutput{
 		ProposalID: p.ID,
 		URL:        s.baseURL + "/proposal/" + p.ID,
+		ExpiresAt:  p.ExpiresAt.UTC().Format(time.RFC3339),
 	})
 }
 
@@ -434,6 +456,7 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 		`<p class="lead">The generic policy authority. Clients submit gateway-signed grant requests here `+
 		`for human approval, and gateways verify operations against the approved policy before executing them.</p>`+
 		`<p class="muted">Approval links are sent to you by the agent; there is nothing to do on this page.</p>`+
+		`<p><a class="btn" href="/activity">View grants &amp; activity →</a></p>`+
 		`</div></main>`)
 }
 

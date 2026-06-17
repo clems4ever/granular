@@ -106,7 +106,12 @@ func expandTemplate(s Schema, name string, bindings map[string]string) ([]string
 	pres := proposal.Presentation{
 		Title:   t.Title,
 		Summary: renderSummary(t.Summary, values),
-		Grants:  []proposal.GrantDetail{{Actions: t.Actions, Resource: label, Conditions: conditions}},
+		Grants: []proposal.GrantDetail{{
+			Actions:      actionLabels(s, t.Actions),
+			ResourceType: resourceTypeName(s, et),
+			Resource:     label,
+			Conditions:   conditions,
+		}},
 	}
 	return []string{b.String()}, pres, nil
 }

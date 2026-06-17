@@ -9,8 +9,8 @@
 		{
 			"function_name": "TestLoadAppliesDefaults",
 			"documentation_hash": "74d301d6301f8bbc322841f5fd3d9d3fe8f2943e0e9c900e3dabd03ca6fd581b",
-			"definition_hash": "8d1df9f4d0660b8b442766a4f643d7a439b216039e069e266ee611cf7b64b3b8",
-			"reviewed_at": "2026-06-17T05:58:11.065112491Z"
+			"definition_hash": "8c3ed78c9dc99ff208f612b7423eff057264695c9b459f541e0ae7d1aac80063",
+			"reviewed_at": "2026-06-17T10:59:34.503058507Z"
 		},
 		{
 			"function_name": "TestLoadMissingFile",

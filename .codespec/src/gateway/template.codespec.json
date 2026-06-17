@@ -9,8 +9,8 @@
 		{
 			"function_name": "expandTemplate",
 			"documentation_hash": "c101df8e01e994a4cd82e528c9720700eb9ac958da166b9d43568251429b76da",
-			"definition_hash": "dbf9335471029613dfb9985bd767082773bc5f4592d7d58e414f355f640c8728",
-			"reviewed_at": "2026-06-17T09:32:27.160888478Z"
+			"definition_hash": "c4f16eb50c437f4def9acdf336efc3ba94272fb96c5927a6db1293e1109957b7",
+			"reviewed_at": "2026-06-17T10:41:48.728634109Z"
 		},
 		{
 			"function_name": "conditionLiteral",

@@ -565,6 +565,9 @@ func runPropose(ctx context.Context, c *client.Client, approver string, files []
 		return err
 	}
 	fmt.Fprintf(w, "Proposal %s created. Open this URL to approve or deny:\n\n  %s\n", p.ID, p.URL)
+	if p.ExpiresAt != "" {
+		fmt.Fprintf(w, "\nThis request expires at %s — approve before then or submit a new one.\n", p.ExpiresAt)
+	}
 	return nil
 }
 

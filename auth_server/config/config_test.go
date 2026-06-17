@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 )
 
 // TestLoadParsesYAML loads a full configuration file with gateway and auth secret
@@ -60,6 +61,9 @@ func TestLoadAppliesDefaults(t *testing.T) {
 	}
 	if cfg.DBPath == "" || cfg.CleanupInterval == 0 {
 		t.Fatalf("defaults not applied: %+v", cfg)
+	}
+	if cfg.RequestTTL.Std() != 15*time.Minute {
+		t.Fatalf("default request TTL = %s, want 15m", cfg.RequestTTL.Std())
 	}
 }
 

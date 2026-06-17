@@ -29,6 +29,10 @@ type Config struct {
 	DBPath          string          `yaml:"db"`
 	CleanupInterval config.Duration `yaml:"cleanup_interval"`
 
+	// RequestTTL is how long a submitted grant request (proposal) may stay pending
+	// before it is automatically revoked and a new request is needed.
+	RequestTTL config.Duration `yaml:"request_ttl"`
+
 	// Gateways registers the Resource-Gateways permitted to talk to the AS. Each
 	// gateway authenticates its grant-request and verify calls with the shared
 	// secret loaded from its secret_file.
@@ -198,5 +202,8 @@ func (c *Config) applyDefaults() {
 	}
 	if c.CleanupInterval == 0 {
 		c.CleanupInterval = config.Duration(30 * time.Second)
+	}
+	if c.RequestTTL == 0 {
+		c.RequestTTL = config.Duration(15 * time.Minute)
 	}
 }

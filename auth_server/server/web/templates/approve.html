@@ -14,12 +14,12 @@
     <p class="lead">An agent is asking permission to perform the {{if gt (len .Items) 1}}actions{{else}}action{{end}}
       below. Nothing happens until you approve, and the grant expires after the time you choose.</p>
     <p class="kv">Approver: <code>{{.Approver}}</code></p>
+    {{if .ExpiresIn}}<p class="expiry-notice">⏱ This request is only valid <strong>{{.ExpiresIn}}</strong> — after that it is automatically revoked and the agent must request again.</p>{{end}}
 
     {{range .Items}}
     <section class="review-block">
       <p class="block-label">Requested by gateway <code>{{.GatewayID}}</code></p>
-      {{if .Title}}<h3>{{.Title}}</h3>{{end}}
-      <p class="summary">{{.Summary}}</p>
+      <h3 class="request-summary">{{if .Summary}}{{.Summary}}{{else}}{{.Title}}{{end}}</h3>
 
       {{if .Detail}}
       <p class="block-label" style="margin-top:.9rem">Exact content to be submitted</p>
@@ -28,22 +28,22 @@
       {{end}}
 
       {{if .Grants}}
-      <p class="block-label" style="margin-top:.9rem">This grants the agent permission to</p>
-      <ul class="grant-list">
-        {{range .Grants}}
-        <li>
-          <span class="grant-title">{{range $i, $a := .Actions}}{{if $i}}, {{end}}{{$a}}{{end}}</span>
-          {{if .Resource}}<span class="muted">on</span> <code>{{.Resource}}</code>{{end}}
-          {{if .Conditions}}<div class="hint">when {{range $i, $c := .Conditions}}{{if $i}} · {{end}}{{$c}}{{end}}</div>{{end}}
-        </li>
-        {{end}}
-      </ul>
+      <p class="block-label" style="margin-top:1rem">What the agent will be able to do</p>
+      {{range .Grants}}
+      <div class="grant-item">
+        <ul class="grant-list">
+          {{range .Actions}}<li>{{.}}</li>{{end}}
+        </ul>
+        {{if .Resource}}<p class="grant-meta"><span class="muted">on</span> {{if .ResourceType}}<span class="restype">{{.ResourceType}}</span> {{end}}<code title="{{.ResourceType}}">{{.Resource}}</code></p>{{end}}
+        {{if .Conditions}}<p class="grant-meta"><span class="muted">but only when</span> {{range $i, $c := .Conditions}}{{if $i}} · {{end}}<span class="cond">{{$c}}</span>{{end}}</p>{{end}}
+      </div>
+      {{end}}
       {{end}}
 
       {{if .Policies}}
-      <details>
-        <summary>Advanced: the exact policies this would add ({{len .Policies}})</summary>
-        <p class="hint">These are the machine-enforced rules behind the plain-language summary above.</p>
+      <details class="advanced">
+        <summary>Show the exact policy ({{len .Policies}})</summary>
+        <p class="hint">The machine-enforced rules behind the summary above.</p>
         <pre><code>{{range .Policies}}{{.}}
 
 {{end}}</code></pre>

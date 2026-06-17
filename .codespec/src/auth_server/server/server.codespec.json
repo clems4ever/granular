@@ -3,8 +3,8 @@
 		{
 			"function_name": "New",
 			"documentation_hash": "09a8da58954c5fad51be320a0f4452c2a811f95fd4f929b3453862fe1e40a3d1",
-			"definition_hash": "b0621a0a834a3dc9d85f190ef5d7b51305bfa899ab73d6e3288e81b5bd3d5254",
-			"reviewed_at": "2026-06-17T05:59:07.634942748Z"
+			"definition_hash": "4e7e23f5ef3974081e2e4dc85bf804646a44771bc6ae4683c0e77d55a94d20f2",
+			"reviewed_at": "2026-06-17T10:59:41.540688989Z"
 		},
 		{
 			"function_name": "UseAuth",
@@ -17,8 +17,8 @@
 			"function_name": "Handler",
 			"receiver": "Server",
 			"documentation_hash": "a3ba76f784c0bfc2c15e216672d43ba96da3a3e802605cca65641a3e28dc6b77",
-			"definition_hash": "a0310297a45a77cbf63069a925ae2b11231e6a80610194061ee09a29d7cef499",
-			"reviewed_at": "2026-06-17T07:18:00.75028737Z"
+			"definition_hash": "f4d64dbce2373d861caf55d8144f41ab2ee4781f715d543dd692d11d1d2d9f4f",
+			"reviewed_at": "2026-06-17T10:21:20.960502677Z"
 		},
 		{
 			"function_name": "handleCreatePolicy",
@@ -45,8 +45,8 @@
 			"function_name": "handleProposal",
 			"receiver": "Server",
 			"documentation_hash": "d457fb0fd03e06fbfffc9be5f3cd695a82ca5f1f9b8fc026d499f5e8951c7674",
-			"definition_hash": "eb4d4562653e98e7430578a9fb19b71d602d1e7421c80728d2b1c84472ef813f",
-			"reviewed_at": "2026-06-17T05:59:07.642564306Z"
+			"definition_hash": "a4b139d21368d016465e01cd3fe4e3b0cf9f0be8901556545bfe0bde0052d640",
+			"reviewed_at": "2026-06-17T10:59:41.546552116Z"
 		},
 		{
 			"function_name": "handleVerify",
@@ -94,8 +94,8 @@
 			"function_name": "handleIndex",
 			"receiver": "Server",
 			"documentation_hash": "1ed0e10784bf31823fe8dc89d0711ac30047dd8dd7bdfddcf0665a1c71302161",
-			"definition_hash": "ac5e134168ed5c80a3ffe51363bbed5644cb7cfd48b6a44c0e4775c7bcd103d3",
-			"reviewed_at": "2026-06-17T05:59:07.65476985Z"
+			"definition_hash": "857f3070d13faec88931789a16321c355ae8bbc9c13dbd0eb7a6495094d4b569",
+			"reviewed_at": "2026-06-17T10:21:20.96361917Z"
 		},
 		{
 			"function_name": "writeJSON",
@@ -122,6 +122,13 @@
 			"documentation_hash": "7d54bc71aa1d2510aa5a55f00431754d479b686cd693c144fcb166c6782cb969",
 			"definition_hash": "bd06c7335f9dd1bf091f50d48076690440af5c851a987a436f4f6842d5e3d27b",
 			"reviewed_at": "2026-06-17T07:18:00.761843344Z"
+		},
+		{
+			"function_name": "UseRequestTTL",
+			"receiver": "Server",
+			"documentation_hash": "2eb65ef141ad3d7a246951fa5632d1fa508cb00a15084d50015d962d59e88638",
+			"definition_hash": "08b70c5aa933812b20ff96259dde4690ba75f1f21079a2169ffd2e9df7726d90",
+			"reviewed_at": "2026-06-17T10:59:41.54355762Z"
 		}
 	]
 }

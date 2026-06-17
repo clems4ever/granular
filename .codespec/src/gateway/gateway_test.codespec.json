@@ -84,9 +84,9 @@
 		},
 		{
 			"function_name": "TestPresentation",
-			"documentation_hash": "5fbae5fbfa464aea9bd1f0666a2454876068cc9f93bb98e8f77e9747f07e5352",
-			"definition_hash": "7e5461262f5a05962d1b26fa2bae2b6358fcb57c4d46558a45db7eb634907321",
-			"reviewed_at": "2026-06-17T09:31:47.043809966Z"
+			"documentation_hash": "b6733b2193e393cf4ddc5a442cc771e358d3af2e286f620c877652c649f8d410",
+			"definition_hash": "869623c89b6d131cbcfe095d4524e1415736aea5c3119fd810889c4c781a9fde",
+			"reviewed_at": "2026-06-17T10:41:32.672459648Z"
 		},
 		{
 			"function_name": "TestSchemaServed",
@@ -121,8 +121,8 @@
 		{
 			"function_name": "TestExpandTemplate",
 			"documentation_hash": "76afb04d7a0a370b706a39312ed1123958de5496d96cc9c3d3935a7b965ffd63",
-			"definition_hash": "11d9aedff2f5e41489b560de231733703aaa49dd487df7363c5e78b435a8b43d",
-			"reviewed_at": "2026-06-17T09:31:47.044498478Z"
+			"definition_hash": "b706b54313c693f2aaa6262332935e712766df9d7f0d061a74e17de5919fbf30",
+			"reviewed_at": "2026-06-17T10:41:32.675514542Z"
 		},
 		{
 			"function_name": "TestExpandTemplateRequiredParam",

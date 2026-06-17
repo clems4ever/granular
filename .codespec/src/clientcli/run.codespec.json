@@ -39,8 +39,8 @@
 		{
 			"function_name": "runPropose",
 			"documentation_hash": "e07a290daebb9274f0544d2791cdf2c9185f5ca171f72d564d1f0a4362556d25",
-			"definition_hash": "b956409ae318619c8813565a30ddc31d4c1ec38a7609932065f48b5e0761f9cd",
-			"reviewed_at": "2026-06-17T06:58:36.089854891Z"
+			"definition_hash": "4cf14ec2877790951946d1bf79462f1d2a4dba27a4312ce0690a60cf73cd682f",
+			"reviewed_at": "2026-06-17T11:00:14.416091521Z"
 		},
 		{
 			"function_name": "readSignedRequests",
