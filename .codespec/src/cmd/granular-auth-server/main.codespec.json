@@ -2,21 +2,9 @@
 	"functions": [
 		{
 			"function_name": "main",
-			"documentation_hash": "ae3fa18997561626911036879c57898312e065d4a58b2244e477b09eacbe139e",
-			"definition_hash": "e70f970b0c57edeb879165f07a72866962c4db633a8b0927b9ff3c35c5c9ffe7",
-			"reviewed_at": "2026-06-17T05:59:07.714141976Z"
-		},
-		{
-			"function_name": "loadConfig",
-			"documentation_hash": "91b4f82815cf50298b5cdedaddb64fd0559cca04ed2b6d40a60b1fe52c1bce2f",
-			"definition_hash": "a1e3ae313c0be70073200a80fe8699f0bcb499b82e3a41ced0498d7ef46f08c0",
-			"reviewed_at": "2026-06-17T05:59:07.714375878Z"
-		},
-		{
-			"function_name": "run",
-			"documentation_hash": "0404c033e9ed3b34c96592dfc94df3375f0c5fcc6374e75bfec7e3ffbeedd055",
-			"definition_hash": "2f4ee5461be2ad830d68354d5575b87f64a79c0bdd6fc44434b3487a41114b93",
-			"reviewed_at": "2026-06-17T11:00:26.915212207Z"
+			"documentation_hash": "57c9ca6f0af4fb3dfe5a022eb105f3dc9ba83a7c1d0dea4501463d43b6cc6e39",
+			"definition_hash": "22345a4ddb6bee8308a06e194cc67669e4645fe50bab5f1f11bc2264d5df9ce7",
+			"reviewed_at": "2026-06-17T13:24:41.174131778Z"
 		}
 	]
 }

@@ -1,0 +1,22 @@
+{
+	"functions": [
+		{
+			"function_name": "NewRootCmd",
+			"documentation_hash": "65faa5b174de1bfe6732ee4776ae27207b444eef789aa3068f03bb6bfd77d516",
+			"definition_hash": "4abb6e6e03b37bf57084791ea520bcbd8089817d66b5f569b10374844f313592",
+			"reviewed_at": "2026-06-17T13:24:41.174348827Z"
+		},
+		{
+			"function_name": "loadConfig",
+			"documentation_hash": "91b4f82815cf50298b5cdedaddb64fd0559cca04ed2b6d40a60b1fe52c1bce2f",
+			"definition_hash": "a1e3ae313c0be70073200a80fe8699f0bcb499b82e3a41ced0498d7ef46f08c0",
+			"reviewed_at": "2026-06-17T13:24:41.174472018Z"
+		},
+		{
+			"function_name": "run",
+			"documentation_hash": "0404c033e9ed3b34c96592dfc94df3375f0c5fcc6374e75bfec7e3ffbeedd055",
+			"definition_hash": "2f4ee5461be2ad830d68354d5575b87f64a79c0bdd6fc44434b3487a41114b93",
+			"reviewed_at": "2026-06-17T13:24:41.174603235Z"
+		}
+	]
+}
