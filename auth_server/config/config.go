@@ -24,7 +24,7 @@ import (
 type Config struct {
 	Addr            string   `yaml:"addr"`
 	BaseURL         string   `yaml:"base_url"`
-	Workspace       string   `yaml:"workspace"`
+	DataDir         string   `yaml:"data_dir"`
 	DBPath          string   `yaml:"db"`
 	CleanupInterval Duration `yaml:"cleanup_interval"`
 
@@ -183,7 +183,7 @@ func Default() *Config {
 
 // applyDefaults fills any unset field with its default, including values derived
 // from other fields (the base URL from the address, the database path from the
-// workspace).
+// data directory).
 //
 // @testcase TestLoadAppliesDefaults exercises the derived defaults.
 // @testcase TestDefault checks the standalone defaults.
@@ -194,11 +194,11 @@ func (c *Config) applyDefaults() {
 	if c.BaseURL == "" {
 		c.BaseURL = "http://localhost" + c.Addr
 	}
-	if c.Workspace == "" {
-		c.Workspace = filepath.Join(os.TempDir(), "granular-auth-workspace")
+	if c.DataDir == "" {
+		c.DataDir = filepath.Join(os.TempDir(), "granular-auth-data")
 	}
 	if c.DBPath == "" {
-		c.DBPath = filepath.Join(c.Workspace, "granular-auth.db")
+		c.DBPath = filepath.Join(c.DataDir, "granular-auth.db")
 	}
 	if c.CleanupInterval == 0 {
 		c.CleanupInterval = Duration(30 * time.Second)

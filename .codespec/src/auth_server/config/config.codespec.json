@@ -35,9 +35,9 @@
 		{
 			"function_name": "applyDefaults",
 			"receiver": "Config",
-			"documentation_hash": "5f852c5d5d8c1c1b3aa4112433aeb044cd0875c0a2adc0a8e0c7b41ea96931ae",
-			"definition_hash": "d4895db171e638fa09d82a265d78e6bd167de02a3610beb0f6f736d00fba22ef",
-			"reviewed_at": "2026-06-17T13:33:47.942231409Z"
+			"documentation_hash": "d4902345e9a87d28ee6df0db419b6bb9a53a66b421e344b0915c3c35682af3e6",
+			"definition_hash": "dabb47e6233401e86f4c2c13d7032e96f32151d15efb8c382567427f91870de0",
+			"reviewed_at": "2026-06-17T13:37:31.43454812Z"
 		}
 	]
 }

@@ -8,8 +8,8 @@ base_url: "http://localhost:9090"
 
 # The bbolt database lives here. The volume is mounted over the image's nonroot home
 # (/home/nonroot, owned by uid 65532), so this subdirectory is writable by the
-# unprivileged process. The db defaults to <workspace>/granular-auth.db.
-workspace: "/home/nonroot/data"
+# unprivileged process. The db defaults to <data_dir>/granular-auth.db.
+data_dir: "/home/nonroot/data"
 
 cleanup_interval: "2m"
 

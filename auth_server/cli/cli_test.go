@@ -32,16 +32,16 @@ func TestLoadConfigMissingUsesDefaults(t *testing.T) {
 	}
 }
 
-// TestRunRejectsBadWorkspace checks run fails when the workspace directory cannot be created.
-func TestRunRejectsBadWorkspace(t *testing.T) {
-	// A workspace path nested under a regular file cannot be created.
+// TestRunRejectsBadDataDir checks run fails when the data directory cannot be created.
+func TestRunRejectsBadDataDir(t *testing.T) {
+	// A data-dir path nested under a regular file cannot be created.
 	file := filepath.Join(t.TempDir(), "not-a-dir")
 	if err := os.WriteFile(file, []byte("x"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	cfg := asconfig.Default()
-	cfg.Workspace = filepath.Join(file, "sub")
+	cfg.DataDir = filepath.Join(file, "sub")
 	if err := run(cfg); err == nil {
-		t.Fatal("expected run to fail creating the workspace")
+		t.Fatal("expected run to fail creating the data directory")
 	}
 }

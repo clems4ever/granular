@@ -42,7 +42,7 @@ services:
     volumes:
       - ./deploy/compose/granular-auth.yaml:/etc/granular/granular-auth.yaml:ro
       # Persists the grant/proposal bbolt db. Mounted over the image's nonroot home so
-      # the unprivileged process (uid 65532) can write the workspace subdirectory.
+      # the unprivileged process (uid 65532) can write the data_dir subdirectory.
       - auth-data:/home/nonroot
     secrets:
       - granular_gateway_github_secret

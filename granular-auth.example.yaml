@@ -15,9 +15,9 @@ addr: ":9090"
 base_url: "http://localhost:9090"
 
 # Directory holding the bbolt database. Defaults to a temp directory.
-workspace: "/var/lib/granular-auth"
+data_dir: "/var/lib/granular-auth"
 
-# Database file path. Defaults to <workspace>/granular-auth.db.
+# Database file path. Defaults to <data_dir>/granular-auth.db.
 db: ""
 
 # How often expired grants are purged and lapsed requests revoked in the background.

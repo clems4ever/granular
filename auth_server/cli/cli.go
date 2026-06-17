@@ -79,10 +79,10 @@ func loadConfig(path string) (*asconfig.Config, error) {
 // @arg cfg The authorization-server configuration.
 // @error error Any error from configuration or from ListenAndServe.
 //
-// @testcase TestRunRejectsBadWorkspace checks run fails when the workspace cannot be created.
+// @testcase TestRunRejectsBadDataDir checks run fails when the data directory cannot be created.
 func run(cfg *asconfig.Config) error {
-	if err := os.MkdirAll(cfg.Workspace, 0o755); err != nil {
-		return fmt.Errorf("create workspace: %w", err)
+	if err := os.MkdirAll(cfg.DataDir, 0o755); err != nil {
+		return fmt.Errorf("create data directory: %w", err)
 	}
 
 	st, err := store.Open(cfg.DBPath)
@@ -125,6 +125,6 @@ func run(cfg *asconfig.Config) error {
 	})
 	log.Printf("janitor purging expired grants and revoking lapsed requests every %s (grant-request TTL %s)", cfg.CleanupInterval.Std(), cfg.GrantRequestTTL.Std())
 
-	log.Printf("granular-auth-server listening on %s (base URL %s, workspace %s)", cfg.Addr, cfg.BaseURL, cfg.Workspace)
+	log.Printf("granular-auth-server listening on %s (base URL %s, data dir %s)", cfg.Addr, cfg.BaseURL, cfg.DataDir)
 	return http.ListenAndServe(cfg.Addr, srv.Handler())
 }

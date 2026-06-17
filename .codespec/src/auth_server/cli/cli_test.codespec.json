@@ -13,10 +13,10 @@
 			"reviewed_at": "2026-06-17T13:24:41.174732773Z"
 		},
 		{
-			"function_name": "TestRunRejectsBadWorkspace",
-			"documentation_hash": "1aed8ad14b2b79dca8d61a177e3a281b097ebb2cd0da7d32dd5760a6d4bf1340",
-			"definition_hash": "70f0ae48df33db2bb4c3ac5f9da3fdf3bb8e7fd9d5fa5de2d4f9310a3038c5f0",
-			"reviewed_at": "2026-06-17T13:24:41.174790505Z"
+			"function_name": "TestRunRejectsBadDataDir",
+			"documentation_hash": "dfbcbf614c7370637a25e854447ca3e010486afd2fe49c417201482d7f0f88fb",
+			"definition_hash": "7cd976516e71f639be93eac1b306242e41946a906322db2211041c25f40572cf",
+			"reviewed_at": "2026-06-17T13:37:30.868247426Z"
 		}
 	]
 }
