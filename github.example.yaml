@@ -1,0 +1,9 @@
+# granular-github CLI configuration.
+# Default path: ~/.granular/github.yaml (override with --config).
+#
+# The only thing this file holds is the GitHub resource server's base URL, so an
+# agent need not pass --base-url on every call. Inside an llmbox this file is
+# written for you. The subject token is read separately from disk
+# (~/.granular/subject_token by default; override with --token-file/--token).
+
+base_url: "http://localhost:9091"

@@ -6,6 +6,12 @@
 // request a `sign` produces is handed off to the granular CLI's `propose`
 // command for human approval; this CLI never talks to the authorization server.
 //
+// Configuration is minimal: a small YAML file (default ~/.granular/<rsid>.yaml)
+// holds only the RS's base URL, so an agent need not pass it on every call. The
+// subject token is read from disk (DefaultSubjectTokenPath, ~/.granular/
+// subject_token) — where an llmbox injects it. Flags (--base-url, --token,
+// --token-file, --config) override both; catalog and sign need no token.
+//
 // An RS author builds a CLI by describing it with a Spec and calling NewRootCmd:
 //
 //	root := rscli.NewRootCmd(rscli.Spec{
@@ -24,80 +30,85 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/clems4ever/granular/client"
 	"gopkg.in/yaml.v3"
 )
 
-// Config is a resource-server CLI's configuration: the RS's HTTP base URL and the
-// file holding the subject token operations run under. catalog and sign need no
-// token; only running operations does.
-type Config struct {
-	// BaseURL is the resource server's HTTP base URL.
-	BaseURL string `yaml:"base_url"`
-	// TokenFile is the path to the subject token file; "~" is expanded to $HOME.
-	TokenFile string `yaml:"token_file"`
+// DefaultSubjectTokenPath is where the subject token is read from when no token
+// is supplied by flags. It matches the path an llmbox injects the token to
+// (~/.granular/subject_token).
+const DefaultSubjectTokenPath = "~/.granular/subject_token"
 
-	// Token is read from TokenFile at load time (empty when no file is set).
-	Token string `yaml:"-"`
+// defaultConfigPath returns the default config file path for resource server
+// rsID (~/.granular/<rsID>.yaml).
+//
+// @arg rsID The resource server id.
+// @return string The default config file path.
+//
+// @testcase TestLoadConfigReadsBaseURL uses a config path for a resource server.
+func defaultConfigPath(rsID string) string {
+	return "~/.granular/" + rsID + ".yaml"
 }
 
-// Load reads and parses the YAML configuration at path. A missing file is not an
-// error: it returns an empty Config so flags and defaults can supply everything.
-// When TokenFile is set, the token is read from it (with "~" expanded) and
-// trimmed.
+// fileConfig is the resource-server CLI config: only the RS base URL.
+type fileConfig struct {
+	BaseURL string `yaml:"base_url"`
+}
+
+// loadConfig reads and parses the config at path. A missing file is not an error:
+// it yields an empty config so flags and the spec default can supply the base URL.
 //
-// @arg path The configuration file path.
-// @return *Config The parsed configuration, or an empty one when the file is absent.
-// @error error when the file exists but cannot be parsed, or the token file cannot be read.
+// @arg path The config file path ("~" is expanded).
+// @return *fileConfig The parsed config, or an empty one when the file is absent.
+// @error error when the file exists but cannot be parsed.
 //
-// @testcase TestLoadMissingFileIsEmpty returns an empty config when the file is absent.
-// @testcase TestLoadReadsTokenFile parses base_url and reads the token file.
-func Load(path string) (*Config, error) {
-	data, err := os.ReadFile(path)
+// @testcase TestLoadConfigMissingIsEmpty returns an empty config for a missing file.
+// @testcase TestLoadConfigReadsBaseURL parses the base URL.
+func loadConfig(path string) (*fileConfig, error) {
+	data, err := os.ReadFile(expandHome(path))
 	if os.IsNotExist(err) {
-		return &Config{}, nil
+		return &fileConfig{}, nil
 	}
 	if err != nil {
 		return nil, err
 	}
-	var c Config
+	var c fileConfig
 	if err := yaml.Unmarshal(data, &c); err != nil {
 		return nil, fmt.Errorf("parse %s: %w", path, err)
-	}
-	if c.TokenFile != "" {
-		tok, err := os.ReadFile(expandHome(c.TokenFile))
-		if err != nil {
-			return nil, fmt.Errorf("token_file: %w", err)
-		}
-		c.Token = strings.TrimSpace(string(tok))
 	}
 	return &c, nil
 }
 
-// toClient builds an SDK client targeting the one resource server rsID. The base
-// URL and token come from the config, each overridable by a non-empty argument
-// (from a CLI flag). The AS URL is left empty: catalog, sign, and run never call
-// the authorization server.
+// resolveToken determines the subject token: the override (--token) wins;
+// otherwise the token is read from tokenFile (with "~" expanded). A missing token
+// file is tolerated (empty token) only when it is the default — tokenFileExplicit
+// reports whether the path came from a flag, in which case a missing file is an
+// error. Token-less commands (catalog, sign) work with an empty token.
 //
-// @arg rsID The resource server id this CLI targets.
-// @arg baseURLOverride A base URL that, when non-empty, replaces the configured one.
-// @arg tokenOverride A subject token that, when non-empty, replaces the configured one.
-// @return *client.Client A client configured for the single resource server.
+// @arg tokenOverride The --token value, or "" if unset.
+// @arg tokenFile The token file path (default or chosen).
+// @arg tokenFileExplicit Whether the path came from a flag.
+// @return string The resolved token, or "" when none is available.
+// @error error when an explicitly chosen token file cannot be read, or any token file fails for a reason other than not existing.
 //
-// @testcase TestToClientAppliesOverrides prefers the override base URL and token.
-func (c *Config) toClient(rsID, baseURLOverride, tokenOverride string) *client.Client {
-	base := c.BaseURL
-	if baseURLOverride != "" {
-		base = baseURLOverride
-	}
-	token := c.Token
+// @testcase TestResolveTokenFlagOverrides returns the override without reading a file.
+// @testcase TestResolveTokenReadsFile reads and trims the token from the file.
+// @testcase TestResolveTokenMissingDefaultTolerated returns "" for a missing default file.
+// @testcase TestResolveTokenExplicitMissingErrors errors for a missing explicit file.
+func resolveToken(tokenOverride, tokenFile string, tokenFileExplicit bool) (string, error) {
 	if tokenOverride != "" {
-		token = tokenOverride
+		return tokenOverride, nil
 	}
-	return client.New(client.Config{
-		Token:           token,
-		ResourceServers: []client.ResourceServer{{ID: rsID, BaseURL: base}},
-	})
+	if tokenFile == "" {
+		return "", nil
+	}
+	data, err := os.ReadFile(expandHome(tokenFile))
+	if err != nil {
+		if os.IsNotExist(err) && !tokenFileExplicit {
+			return "", nil
+		}
+		return "", fmt.Errorf("token file: %w", err)
+	}
+	return strings.TrimSpace(string(data)), nil
 }
 
 // expandHome replaces a leading "~" in path with the user's home directory,
@@ -106,7 +117,7 @@ func (c *Config) toClient(rsID, baseURLOverride, tokenOverride string) *client.C
 // @arg path The path to expand.
 // @return string The path with a leading "~" expanded to $HOME.
 //
-// @testcase TestLoadReadsTokenFile relies on a plain (non-~) path round-tripping.
+// @testcase TestResolveTokenReadsFile relies on a plain (non-~) path round-tripping.
 func expandHome(path string) string {
 	if path == "~" || strings.HasPrefix(path, "~/") {
 		if home, err := os.UserHomeDir(); err == nil {

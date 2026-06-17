@@ -1,0 +1,28 @@
+{
+	"functions": [
+		{
+			"function_name": "defaultConfigPath",
+			"documentation_hash": "a8df6ae94ac1eeb99e6e3ba62376116f21f580c133823ede5df4c969d96be1cf",
+			"definition_hash": "3a6930a49551e00dc2ff76eca3f4c8c75c2caebdac94071708354385ebc31b7f",
+			"reviewed_at": "2026-06-17T20:07:10.664437264Z"
+		},
+		{
+			"function_name": "loadConfig",
+			"documentation_hash": "68edd22c0e902c69345b5c9979d04f81069414241e3b45fb7795a9b7c5b3aa09",
+			"definition_hash": "b48a7561d93205967dcb8713651818ff6d77c6d73308fd3689b071ea012dc8fd",
+			"reviewed_at": "2026-06-17T20:07:10.665020509Z"
+		},
+		{
+			"function_name": "resolveToken",
+			"documentation_hash": "c4bb3555b4c933e9827d673c767804923e0edc873f278600c1203e1a17a05743",
+			"definition_hash": "f038c094ca6e1e5a0e420471a4d9d7e76d80b55eadea9a8e5256ca0d6c2e1419",
+			"reviewed_at": "2026-06-17T20:07:10.665464509Z"
+		},
+		{
+			"function_name": "expandHome",
+			"documentation_hash": "a446988a4f197fa4aa79024eb0251b6a30a02dff0a2ad853831fd730acb6f427",
+			"definition_hash": "48276989c5ce4f5bdba7659ac506484bff36bdafa0abda2607fbcdf1386c405a",
+			"reviewed_at": "2026-06-17T20:07:10.665875046Z"
+		}
+	]
+}

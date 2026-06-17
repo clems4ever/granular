@@ -1,0 +1,137 @@
+{
+	"functions": [
+		{
+			"function_name": "schema",
+			"receiver": "stubRS",
+			"documentation_hash": "7b9caf8e9a61b5782690f276620bce3713dc8351b211c0391b6e34e76c3a3cfa",
+			"definition_hash": "5b324c3f7d046148d0ffc9b615e99a549ac8f17f0b70c47a462a08ac29bc627e",
+			"reviewed_at": "2026-06-17T20:07:12.559792711Z"
+		},
+		{
+			"function_name": "newStubServer",
+			"documentation_hash": "f942415e6f4b8f9e8da51d11b4e00fd2daadde48543f85128b7b3f82ff1aee6b",
+			"definition_hash": "27d9d91e531583d98862170830e054c6d5d9abc12c16fa98457f7341d99f48de",
+			"reviewed_at": "2026-06-17T20:07:12.560690297Z"
+		},
+		{
+			"function_name": "echoSpec",
+			"documentation_hash": "13cdff322eff811310c1af2392c5569e4920ce01dc2d15ea2e931ee279b674fc",
+			"definition_hash": "01a7f4a5b8d2c054c1b279d959db028c9e7fc94acee1eace84991a8506c9f9b8",
+			"reviewed_at": "2026-06-17T20:07:12.561874355Z"
+		},
+		{
+			"function_name": "run",
+			"documentation_hash": "745972ad1b6e160d3d933ffe9aa45741d2b713580d7851974c72baebafc235af",
+			"definition_hash": "88830b27a6dc3e7fe3f8a27fc0f24b2fe24c1c8f88caf5409186472f3a5b19e2",
+			"reviewed_at": "2026-06-17T20:07:12.562508213Z"
+		},
+		{
+			"function_name": "TestLoadConfigMissingIsEmpty",
+			"documentation_hash": "fb0669a0c0fce08b72cb6c14a87ab46815a38ecd3430a4f23f625c86085ebe59",
+			"definition_hash": "563d7542a5f626f3c823841c87c3e1352061d591a40f3637dbac50cd0faf31d2",
+			"reviewed_at": "2026-06-17T20:07:12.563065545Z"
+		},
+		{
+			"function_name": "TestLoadConfigReadsBaseURL",
+			"documentation_hash": "590f4a73d710c5849513620c35738f6dfc64db9cff5ee5b74bdf177488b1c000",
+			"definition_hash": "fa94d52ff880c303fcf96aad3a8810720420226ea924538752ef14f743cf8035",
+			"reviewed_at": "2026-06-17T20:07:12.563583142Z"
+		},
+		{
+			"function_name": "defaultBaseName",
+			"documentation_hash": "8d7b8208c9020fe797dbcdf64c412ad29dee4e7a9d9ee768820684390d1a0f46",
+			"definition_hash": "c1b536d61c688a0323b56c219db09666356c75fbc96e3fcb3e4eee4124402e9e",
+			"reviewed_at": "2026-06-17T20:07:12.564059685Z"
+		},
+		{
+			"function_name": "TestResolveTokenFlagOverrides",
+			"documentation_hash": "9abcb1c505717f722e3dc0c32ff27d37989e1db33e89189d9ec2bbf02f939e29",
+			"definition_hash": "366589384abe65c5aeb8de92070fd47784d7394cef86eae37e24569cd04c4c08",
+			"reviewed_at": "2026-06-17T20:07:12.564954922Z"
+		},
+		{
+			"function_name": "TestResolveTokenReadsFile",
+			"documentation_hash": "c1f6ae39dfb3a51f7d0b7b52ae85faf094795be005bb40578351fac7f212f640",
+			"definition_hash": "8f801ea53292845c36c9110b59a80459a78efaaa66fc04fc27e72e54a01266e3",
+			"reviewed_at": "2026-06-17T20:07:12.565472809Z"
+		},
+		{
+			"function_name": "TestResolveTokenMissingDefaultTolerated",
+			"documentation_hash": "40dc6a8bbf65412c9a19f92307f7528e86ac2abf24320bcda1668490739f8471",
+			"definition_hash": "74cb568ada898e390bbd29a4f90f6730670e36d85a6ff222225ea3d0e0320f87",
+			"reviewed_at": "2026-06-17T20:07:12.566104586Z"
+		},
+		{
+			"function_name": "TestResolveTokenExplicitMissingErrors",
+			"documentation_hash": "9867b1aaa3e76b57540285917dcf9d229bd4d17d55bd8154d0fd6dcd39744b9f",
+			"definition_hash": "bba2bcd9ff1419eda010bda768aa22fd682ac371773dd8eb6644aa818f8981f1",
+			"reviewed_at": "2026-06-17T20:07:12.566597726Z"
+		},
+		{
+			"function_name": "TestLoadResolvesBaseURLFromConfig",
+			"documentation_hash": "ebde262233a48c0d951dad9b43979154b3d31a2706b465ae0f87f9b5b71bf160",
+			"definition_hash": "9e96273714737a77a4d20833c6b8ba34c77b585c38c2521a5473c6d08558fc66",
+			"reviewed_at": "2026-06-17T20:07:12.567169568Z"
+		},
+		{
+			"function_name": "TestCatalogPrintsSchema",
+			"documentation_hash": "013941707ba2a7cfd47b48089c9dcf858c2a97c45134b92d4ac0027a54d84b9f",
+			"definition_hash": "0008162a11ce116f1228f102d9a7f89664df2dd8cddc4140701dfa22f0a87494",
+			"reviewed_at": "2026-06-17T20:07:12.567795299Z"
+		},
+		{
+			"function_name": "TestCatalogJSON",
+			"documentation_hash": "6a4a4bb0e8a1b9cf8a9ca38a41637ee23fc3b0362c7ef100aa45f65c0c1043d6",
+			"definition_hash": "6a53361f0a10acbab888686b3912809541ae2afd2261b5bff6b5b33fba58fd49",
+			"reviewed_at": "2026-06-17T20:07:12.568261137Z"
+		},
+		{
+			"function_name": "TestSignWritesSignedRequest",
+			"documentation_hash": "aa9221a9db77182c905e4eb6a5cd9231e0cb5a2f3bc11b77b1f5949a53474c0f",
+			"definition_hash": "e455348c0b6860782dac28d6f5df83328192674144d01f500a2c50b17ee87449",
+			"reviewed_at": "2026-06-17T20:07:12.568708801Z"
+		},
+		{
+			"function_name": "TestSignToFile",
+			"documentation_hash": "f85c6fcac560afb0c41ede4098b387c7acc49f46a0260c9689f538aee11d2858",
+			"definition_hash": "d63b3b834c831f01280e8bf155f7b6f59c62dd66b14c4373210f6b2e8d04db00",
+			"reviewed_at": "2026-06-17T20:07:12.569114851Z"
+		},
+		{
+			"function_name": "TestBuildSignRequestTemplate",
+			"documentation_hash": "5217fd3ee592f8053ebfaf3e8c92b12d68d45a33118a030d33431e94ecf19b3f",
+			"definition_hash": "cc424afdc6fad98b890819f3b9b154ba3006502e6ae120f84bccc39a852d5524",
+			"reviewed_at": "2026-06-17T20:07:12.569816722Z"
+		},
+		{
+			"function_name": "TestBuildSignRequestFreeform",
+			"documentation_hash": "84320d624a58e5d28966098241c89e91268340dee0bd74d84a4fba0e95dc38e2",
+			"definition_hash": "3cac04f9dcf8159c1d21729c58884deee0f9ebd9ba7b8c93db3e3aee60725997",
+			"reviewed_at": "2026-06-17T20:07:12.570307237Z"
+		},
+		{
+			"function_name": "TestOperationCommandSendsTypedParams",
+			"documentation_hash": "b0b61eafd779a511b1b46083b623501c74093f1c272367cb6f27f42b0d78514b",
+			"definition_hash": "75171691b7323135abbcfa862fb7cba39ce317f9f9131827e8c8cb5319dfd306",
+			"reviewed_at": "2026-06-17T20:07:12.570773802Z"
+		},
+		{
+			"function_name": "TestOperationCommandDenialMessage",
+			"documentation_hash": "5e0fa14c9f082039747763f555f3800a5bfedce3effbcacba11eba9836e48736",
+			"definition_hash": "70ee02e447a366e9a9a06fdf0a6ff57ecd746fff903edae401fad10225eedd0f",
+			"reviewed_at": "2026-06-17T20:07:12.571276858Z"
+		},
+		{
+			"function_name": "TestNewRootCmdWiresBuiltins",
+			"documentation_hash": "23147b0d570dafbe19e2c0b3133b28fe23834be915a4adbd28bbcffdbbb95d8e",
+			"definition_hash": "3513d3bc49eea6151069b1615760a3d299d5e9ee9596dac0f55fd6589f0a0eed",
+			"reviewed_at": "2026-06-17T20:07:12.57190104Z"
+		},
+		{
+			"function_name": "findCmd",
+			"documentation_hash": "f4273f60c1fa4b75a79855f5e2088f16fc9a20b206cc3b39056b176af593ea24",
+			"definition_hash": "668567636873ece4338cf3f441546aa5d7bd02a6b8aabff335aa4713324bf572",
+			"reviewed_at": "2026-06-17T20:07:12.573560933Z"
+		}
+	]
+}

@@ -80,10 +80,8 @@ type Spec struct {
 	Short string
 	// RSID is the resource server id this CLI targets, e.g. "github".
 	RSID string
-	// DefaultBaseURL is the RS base URL used when config and flags supply none.
+	// DefaultBaseURL is the RS base URL used when --base-url is not given.
 	DefaultBaseURL string
-	// DefaultConfig is the default --config path; defaults to "<RSID>-client.yaml".
-	DefaultConfig string
 	// Operations are the RS-specific operation commands.
 	Operations []OpCommand
 	// Extra optionally contributes fully custom commands, given the shared App.
@@ -98,10 +96,12 @@ type App struct {
 	// Out is the writer command output is written to.
 	Out io.Writer
 
-	c          *client.Client
-	configPath string
-	baseURL    string
-	token      string
+	c              *client.Client
+	defaultBaseURL string
+	configPath     string
+	baseURL        string
+	token          string
+	tokenFile      string
 }
 
 // Client returns the configured SDK client. It is non-nil for any command that
@@ -152,9 +152,9 @@ func (a *App) Schema(ctx context.Context) (resourceserver.Schema, error) {
 }
 
 // NewRootCmd builds the complete resource-server CLI from spec: a root command
-// carrying the shared config/token flags, the built-in catalog and sign
-// commands, the declared operation commands, and any Extra commands. Output is
-// written to out.
+// carrying the shared --config/--base-url/--token/--token-file flags, the
+// built-in catalog and sign commands, the declared operation commands, and any
+// Extra commands. Output is written to out.
 //
 // @arg spec The CLI description (name, RS id, operations, extras).
 // @arg out The writer command output is written to.
@@ -163,23 +163,20 @@ func (a *App) Schema(ctx context.Context) (resourceserver.Schema, error) {
 // @testcase TestNewRootCmdWiresBuiltins includes catalog, sign and operation commands.
 // @testcase TestCatalogPrintsSchema executes the catalog command built here.
 func NewRootCmd(spec Spec, out io.Writer) *cobra.Command {
-	defaultConfig := spec.DefaultConfig
-	if defaultConfig == "" {
-		defaultConfig = spec.RSID + "-client.yaml"
-	}
-	a := &App{RSID: spec.RSID, Out: out}
+	a := &App{RSID: spec.RSID, Out: out, defaultBaseURL: spec.DefaultBaseURL}
 	root := &cobra.Command{
 		Use:           spec.Use,
 		Short:         spec.Short,
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		PersistentPreRunE: func(*cobra.Command, []string) error {
-			return a.load(spec.DefaultBaseURL)
+		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
+			return a.load(cmd.Flags().Changed("token-file"))
 		},
 	}
-	root.PersistentFlags().StringVar(&a.configPath, "config", defaultConfig, "path to YAML config file")
+	root.PersistentFlags().StringVar(&a.configPath, "config", defaultConfigPath(spec.RSID), "path to the config file")
 	root.PersistentFlags().StringVar(&a.baseURL, "base-url", "", "resource server base URL (overrides config)")
-	root.PersistentFlags().StringVar(&a.token, "token", "", "subject token (overrides token_file)")
+	root.PersistentFlags().StringVar(&a.token, "token", "", "subject token (overrides --token-file)")
+	root.PersistentFlags().StringVar(&a.tokenFile, "token-file", "", "file holding the subject token (default ~/.granular/subject_token)")
 
 	root.AddCommand(a.catalogCmd(), a.signCmd())
 	root.AddCommand(operationCommands(a, spec.Operations)...)
@@ -189,23 +186,45 @@ func NewRootCmd(spec Spec, out io.Writer) *cobra.Command {
 	return root
 }
 
-// load reads the configuration file and builds the client into the App, applying
-// the --base-url / --token flag overrides and falling back to defaultBaseURL.
+// load reads the config file (only the RS base URL) and builds the client into
+// the App. The base URL is the --base-url flag, else the config's base_url, else
+// the spec default. The token is --token, else read from --token-file, else from
+// the default subject token path on disk. tokenFileFlagSet reports whether
+// --token-file was given explicitly (which makes a missing file an error).
 //
-// @arg defaultBaseURL The base URL used when neither config nor flag supplies one.
-// @error error when the configuration file cannot be read or parsed.
+// @arg tokenFileFlagSet Whether --token-file was set explicitly.
+// @error error when the config or an explicitly chosen token file cannot be read.
 //
-// @testcase TestCatalogPrintsSchema loads config (from a flag) before running.
-func (a *App) load(defaultBaseURL string) error {
-	cfg, err := Load(a.configPath)
+// @testcase TestCatalogPrintsSchema builds the client before running a command.
+// @testcase TestLoadResolvesBaseURLFromConfig uses the config base URL when no flag is given.
+// @testcase TestOperationCommandSendsTypedParams resolves the --token before running.
+func (a *App) load(tokenFileFlagSet bool) error {
+	cfg, err := loadConfig(a.configPath)
 	if err != nil {
 		return err
 	}
-	baseOverride := a.baseURL
-	if baseOverride == "" && cfg.BaseURL == "" {
-		baseOverride = defaultBaseURL
+
+	base := a.baseURL
+	if base == "" {
+		base = cfg.BaseURL
 	}
-	a.c = cfg.toClient(a.RSID, baseOverride, a.token)
+	if base == "" {
+		base = a.defaultBaseURL
+	}
+
+	tokenFile := a.tokenFile
+	if tokenFile == "" {
+		tokenFile = DefaultSubjectTokenPath
+	}
+	token, err := resolveToken(a.token, tokenFile, tokenFileFlagSet)
+	if err != nil {
+		return err
+	}
+
+	a.c = client.New(client.Config{
+		Token:           token,
+		ResourceServers: []client.ResourceServer{{ID: a.RSID, BaseURL: base}},
+	})
 	return nil
 }
 

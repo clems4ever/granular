@@ -1,0 +1,58 @@
+{
+	"functions": [
+		{
+			"function_name": "param",
+			"receiver": "Flag",
+			"documentation_hash": "a1c7bd9fae889343d9cd398c1e0b1f516310f62dbe6827be66e23e7023439d52",
+			"definition_hash": "d0612b8923c04a09be3e47a963e37530211e6c3ebb1563c0554405e4dbefaef7",
+			"reviewed_at": "2026-06-17T20:07:08.571356943Z"
+		},
+		{
+			"function_name": "Client",
+			"receiver": "App",
+			"documentation_hash": "63f1154a7a95a45911080a051b5e933f83c1c7d4c57b199b1a3d65b0fe5ad199",
+			"definition_hash": "40d65904f926bcf1dcda87dbad2620419e3c42e54b1cbbb314e33d33de270455",
+			"reviewed_at": "2026-06-17T20:07:08.572316709Z"
+		},
+		{
+			"function_name": "Run",
+			"receiver": "App",
+			"documentation_hash": "eaf6d93edbd52beca286b6f2bd7d47a8d3a6196813a7394f35ddd63082dbc9ac",
+			"definition_hash": "b6093bcc5ca09728d79f98cd8d887e5a5b6ddd015fa8342e533731331e0e7165",
+			"reviewed_at": "2026-06-17T20:07:08.573091002Z"
+		},
+		{
+			"function_name": "Sign",
+			"receiver": "App",
+			"documentation_hash": "176a2fa1388c4f8fcd24636b658bb65045f894c6b7b72df306e3364e7559d375",
+			"definition_hash": "13e1d392acffce358c16232c1b84aad64da8aed05aa5626b42109fb7e90ca641",
+			"reviewed_at": "2026-06-17T20:07:08.573849928Z"
+		},
+		{
+			"function_name": "Schema",
+			"receiver": "App",
+			"documentation_hash": "851ead2c7d0381cbef1a926fc089b3c76141075c409734d39aabe8461f5effaa",
+			"definition_hash": "e0b733234e8735192c3d9d0ef0655cd5d33c4fed69f84dff5fadea9481d36b60",
+			"reviewed_at": "2026-06-17T20:07:08.574612594Z"
+		},
+		{
+			"function_name": "NewRootCmd",
+			"documentation_hash": "b29817fab5b3b73b273a2c6bede3f10233ae173d9a08f6f7eb132235d3c0fd64",
+			"definition_hash": "205f6f287b1f5273ef805d123247440ef03e59594411e991d2e2161dc0022daa",
+			"reviewed_at": "2026-06-17T20:07:08.57550216Z"
+		},
+		{
+			"function_name": "load",
+			"receiver": "App",
+			"documentation_hash": "e7def7f679854228785b829395b30a98dbf7e439c6d5fa0dc57ab09fa87d5b43",
+			"definition_hash": "ebd6b4a0f71ac281742ba3da859158abe3d9252573976b1e9cb4e7a76bbc7c82",
+			"reviewed_at": "2026-06-17T20:07:08.576758381Z"
+		},
+		{
+			"function_name": "operationCommands",
+			"documentation_hash": "af7471a4c85bd799f8b431263c262b8d3f5066982932959c80b34c16e94072f9",
+			"definition_hash": "cda82286e5ee54ed5ceabe35848a054407d452298ed6415f0d47db7022645293",
+			"reviewed_at": "2026-06-17T20:07:08.578877647Z"
+		}
+	]
+}

@@ -2,7 +2,6 @@ package rscli
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -84,67 +83,105 @@ func echoSpec(baseURL string) Spec {
 	}
 }
 
-// run executes the root command with args and returns its output and error.
+// run executes the root command with args and returns its output and error. It
+// neutralizes the default config and token files so tests never depend on the
+// host's ~/.granular contents.
 func run(spec Spec, args ...string) (string, error) {
 	var buf bytes.Buffer
 	root := NewRootCmd(spec, &buf)
-	// Use a non-existent config so Load falls back to an empty config + flags.
-	root.SetArgs(append([]string{"--config", "does-not-exist.yaml"}, args...))
+	root.SetArgs(append([]string{"--config", "/dev/null", "--token-file", "/dev/null"}, args...))
 	err := root.Execute()
 	return buf.String(), err
 }
 
 // --- config ---
 
-// TestLoadMissingFileIsEmpty checks a missing config file yields an empty config.
-func TestLoadMissingFileIsEmpty(t *testing.T) {
-	c, err := Load(filepath.Join(t.TempDir(), "nope.yaml"))
+// TestLoadConfigMissingIsEmpty checks a missing config file yields an empty config.
+func TestLoadConfigMissingIsEmpty(t *testing.T) {
+	c, err := loadConfig(filepath.Join(t.TempDir(), "nope.yaml"))
 	if err != nil {
-		t.Fatalf("Load: %v", err)
+		t.Fatalf("loadConfig: %v", err)
 	}
-	if c.BaseURL != "" || c.Token != "" {
+	if c.BaseURL != "" {
 		t.Errorf("want empty config, got %+v", c)
 	}
 }
 
-// TestLoadReadsTokenFile checks base_url is parsed and the token file is read.
-func TestLoadReadsTokenFile(t *testing.T) {
-	dir := t.TempDir()
-	tokenPath := filepath.Join(dir, "tok")
-	if err := os.WriteFile(tokenPath, []byte("  secret-token\n"), 0o600); err != nil {
+// TestLoadConfigReadsBaseURL checks the base URL is parsed from the config file.
+func TestLoadConfigReadsBaseURL(t *testing.T) {
+	cfgPath := filepath.Join(t.TempDir(), defaultBaseName("github"))
+	if err := os.WriteFile(cfgPath, []byte("base_url: http://rs.example\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	cfgPath := filepath.Join(dir, "cfg.yaml")
-	if err := os.WriteFile(cfgPath, []byte("base_url: http://rs.example\ntoken_file: "+tokenPath+"\n"), 0o600); err != nil {
-		t.Fatal(err)
-	}
-	c, err := Load(cfgPath)
+	c, err := loadConfig(cfgPath)
 	if err != nil {
-		t.Fatalf("Load: %v", err)
+		t.Fatalf("loadConfig: %v", err)
 	}
 	if c.BaseURL != "http://rs.example" {
 		t.Errorf("base_url = %q", c.BaseURL)
 	}
-	if c.Token != "secret-token" {
-		t.Errorf("token = %q, want trimmed secret-token", c.Token)
+}
+
+// defaultBaseName returns the base file name defaultConfigPath uses for rsID.
+func defaultBaseName(rsID string) string { return rsID + ".yaml" }
+
+// TestResolveTokenFlagOverrides checks --token wins and no file is read.
+func TestResolveTokenFlagOverrides(t *testing.T) {
+	got, err := resolveToken("flag-tok", "/no/such/file", true)
+	if err != nil || got != "flag-tok" {
+		t.Fatalf("resolveToken = (%q, %v), want flag-tok", got, err)
 	}
 }
 
-// TestToClientAppliesOverrides checks the base URL and token overrides take
-// precedence over the config values when a request is made.
-func TestToClientAppliesOverrides(t *testing.T) {
+// TestResolveTokenReadsFile checks the token is read and trimmed from the file.
+func TestResolveTokenReadsFile(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "tok")
+	if err := os.WriteFile(path, []byte("  secret\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	got, err := resolveToken("", path, true)
+	if err != nil || got != "secret" {
+		t.Fatalf("resolveToken = (%q, %v), want secret", got, err)
+	}
+}
+
+// TestResolveTokenMissingDefaultTolerated checks a missing default token file
+// yields an empty token without error (so catalog/sign still work).
+func TestResolveTokenMissingDefaultTolerated(t *testing.T) {
+	got, err := resolveToken("", filepath.Join(t.TempDir(), "absent"), false)
+	if err != nil || got != "" {
+		t.Fatalf("resolveToken = (%q, %v), want empty", got, err)
+	}
+}
+
+// TestResolveTokenExplicitMissingErrors checks a missing explicitly chosen token
+// file is an error.
+func TestResolveTokenExplicitMissingErrors(t *testing.T) {
+	if _, err := resolveToken("", filepath.Join(t.TempDir(), "absent"), true); err == nil {
+		t.Fatal("expected error for missing explicit token file")
+	}
+}
+
+// TestLoadResolvesBaseURLFromConfig checks the config's base_url is used when no
+// --base-url flag is given (so an agent need not pass the URL).
+func TestLoadResolvesBaseURLFromConfig(t *testing.T) {
 	s := &stubRS{}
 	srv := newStubServer(s)
 	defer srv.Close()
 
-	cfg := &Config{BaseURL: "http://wrong.example", Token: "config-token"}
-	c := cfg.toClient("github", srv.URL, "flag-token")
-	if _, err := c.Run(context.Background(), "github", resourceserver.OperationRequest{Type: "x"}); err != nil {
-		t.Fatalf("Run: %v", err)
+	cfgPath := filepath.Join(t.TempDir(), "github.yaml")
+	if err := os.WriteFile(cfgPath, []byte("base_url: "+srv.URL+"\n"), 0o600); err != nil {
+		t.Fatal(err)
 	}
-	// Reaching the stub at all proves the base URL override beat the config.
-	if s.lastAuth != "Bearer flag-token" {
-		t.Errorf("auth = %q, want Bearer flag-token (token override)", s.lastAuth)
+	spec := Spec{Use: "rs", RSID: "github", DefaultBaseURL: "http://wrong.invalid"}
+	var buf bytes.Buffer
+	root := NewRootCmd(spec, &buf)
+	root.SetArgs([]string{"--config", cfgPath, "--token-file", "/dev/null", "catalog"})
+	if err := root.Execute(); err != nil {
+		t.Fatalf("catalog: %v", err)
+	}
+	if !strings.Contains(buf.String(), "github.repo") {
+		t.Errorf("config base_url not used (stub not reached): %s", buf.String())
 	}
 }
 
