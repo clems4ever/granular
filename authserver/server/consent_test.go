@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/clems4ever/granular/auth_server/store"
+	"github.com/clems4ever/granular/authserver/store"
 )
 
 // TestParseTTLFallsBack checks empty and invalid durations default to 2 minutes.
