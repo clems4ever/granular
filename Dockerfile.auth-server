@@ -10,5 +10,5 @@ ARG TARGETPLATFORM
 COPY ${TARGETPLATFORM}/granular-auth-server /usr/local/bin/granular-auth-server
 # Listens on :9090; stores grants in a bbolt DB under the configured workspace.
 # Mount a writable volume and point the config's workspace/db at it to persist.
-EXPOSE 9090
+EXPOSE 8080
 ENTRYPOINT ["granular-auth-server"]
