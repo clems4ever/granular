@@ -1,0 +1,37 @@
+{
+	"functions": [
+		{
+			"function_name": "parseTTL",
+			"documentation_hash": "1f1c507980b976d42cf358fe720cbf618dd649c1400af27644c267fe12815565",
+			"definition_hash": "ed7f25489906e8e9bc233f2895ae447d2331eaddc1bf3f1cef54a80b0f083755",
+			"reviewed_at": "2026-06-17T05:59:07.659232207Z"
+		},
+		{
+			"function_name": "viewItems",
+			"documentation_hash": "cabd55c2f4384a6f41865222c7cf306e49910a22d475fd2cbc91bf20cbaf620a",
+			"definition_hash": "c91a72afe5d4f030c7a1ce13f76a23d30c653fe9273f34beacc0709cf5a8b2b7",
+			"reviewed_at": "2026-06-17T05:59:07.659858738Z"
+		},
+		{
+			"function_name": "approverGate",
+			"receiver": "Server",
+			"documentation_hash": "61df1825cfcb8be23be180566c0e9a8ce598f165e21db3a5236397c173aaad1d",
+			"definition_hash": "6b5f7402eab9f27133684bf0dac6a08517f6e0724940403d21c06aca3384dc0b",
+			"reviewed_at": "2026-06-17T05:59:07.66166573Z"
+		},
+		{
+			"function_name": "handleApprovePage",
+			"receiver": "Server",
+			"documentation_hash": "1d1abdc8d30f8adba488763c1c58236a23f90d08edddc627746300fc312f152d",
+			"definition_hash": "5af364c7de211a266ca8c614a6614b1aec18481498cfcff17165bfbf95f0de01",
+			"reviewed_at": "2026-06-17T05:59:07.662489575Z"
+		},
+		{
+			"function_name": "handleApproveSubmit",
+			"receiver": "Server",
+			"documentation_hash": "82fd110fa2a0cc042a6fc94d2e73af9155934a71e001ddd66f9a6610ad4373a8",
+			"definition_hash": "b959cc6e4276208099272e77fc0bcf26703b5408d575e54e6afd2be83ca210ac",
+			"reviewed_at": "2026-06-17T05:59:07.663207169Z"
+		}
+	]
+}

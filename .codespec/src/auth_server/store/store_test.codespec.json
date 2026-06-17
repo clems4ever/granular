@@ -1,0 +1,70 @@
+{
+	"functions": [
+		{
+			"function_name": "openTemp",
+			"documentation_hash": "224230e5ff3f946a6f398bb264a966b1c6f3ecaa99017cbaa49db0d970c7cb2f",
+			"definition_hash": "c26d71f613504936d7cdb230398a7efd4ec9a4efc27dafb2f2c986f1874c4c71",
+			"reviewed_at": "2026-06-17T05:58:11.059348918Z"
+		},
+		{
+			"function_name": "item",
+			"documentation_hash": "122dd5bdede3b1f5e94a31b56e0c8b0fe427156a8663301bbcf4fdf37ed0ea37",
+			"definition_hash": "7cd717fe6dbea0bdc7d1e2dc0cf1ff588a5b4acb44e8e4639579a24601bf0965",
+			"reviewed_at": "2026-06-17T05:58:11.059968694Z"
+		},
+		{
+			"function_name": "TestPolicyLifecycle",
+			"documentation_hash": "d217cc818a7aeca6d6ac44a41d10e5395a2d1c744ec1e818e1738727a033da75",
+			"definition_hash": "53b0bcb015afe0ae7df62d2aafe783f5f9c0f4467d10048b7aac25938fcc1afa",
+			"reviewed_at": "2026-06-17T05:58:11.060609269Z"
+		},
+		{
+			"function_name": "TestProposalApprovalAttachesGrants",
+			"documentation_hash": "d760885ed232dfa508eb63ca4c692f6b87ea77ead5fab1e278812c24588348ce",
+			"definition_hash": "6985a92d65b669158923496eef011c9363b37771330883c5e3c16087c97ad511",
+			"reviewed_at": "2026-06-17T05:58:11.061355085Z"
+		},
+		{
+			"function_name": "TestApproveTwiceFails",
+			"documentation_hash": "2ca11ea833c27f6c899901a7176929734ae3cded2887a983238807623becf323",
+			"definition_hash": "0cf4197b0ce116f89900bd454c2a9672c7107a710449e50e21e0885371a4ceff",
+			"reviewed_at": "2026-06-17T05:58:11.062091749Z"
+		},
+		{
+			"function_name": "TestRejectProposal",
+			"documentation_hash": "6a2bc8055146414e4917c1ede9d2a9ae046d462befb20d3901716bda8356b994",
+			"definition_hash": "a075f2f4271a1264701ff22e7b77b51abf2c55b797d64826b187f3cd44e4c4a3",
+			"reviewed_at": "2026-06-17T05:58:11.062869876Z"
+		},
+		{
+			"function_name": "TestGetMissingProposal",
+			"documentation_hash": "32807cba991d0a89d9c5d6a6a0779a0ce9ed544fd995325363a803dd8484a64d",
+			"definition_hash": "30185a211274e2bad22bc32134700ac3666175eab3748d49d27125444eab9f51",
+			"reviewed_at": "2026-06-17T05:58:11.063636736Z"
+		},
+		{
+			"function_name": "TestExpiredGrantDropped",
+			"documentation_hash": "aa4eefa95bedbc83ad08052fe28519a7ee772dfb9e1b9f0f4ed11da4ee2ec9a3",
+			"definition_hash": "26bf2ed9e14889da555c62ff9fe45e8f8df6f7209c611599545719bbdb4a681d",
+			"reviewed_at": "2026-06-17T05:58:11.064288099Z"
+		},
+		{
+			"function_name": "TestDestroyPolicy",
+			"documentation_hash": "ed15f0a9b9c573cde494a2bbed8c724a3041a3f8e7301d82c79be320a6861161",
+			"definition_hash": "f3f2b1f5213b1c3c22f14ebce10e446bd46a167e05673e22319451fbda64dea8",
+			"reviewed_at": "2026-06-17T05:58:11.064537802Z"
+		},
+		{
+			"function_name": "TestPurgeExpired",
+			"documentation_hash": "1579ff0b20bb3da2b34eb2844e8b7dbc583a1beadc41bc0e49ab6f97c4e91714",
+			"definition_hash": "10db0e69f24e9c94f4d32ba13fe6cf7436ba5d277b5a0d7c20ee43219700fc53",
+			"reviewed_at": "2026-06-17T05:58:11.064718025Z"
+		},
+		{
+			"function_name": "TestStartCleanupPurges",
+			"documentation_hash": "00ccd007c60c8fd17debabb99aee236bd869bfe34f08eb516424b52d80221435",
+			"definition_hash": "234b744269b9d4106c6e853aa60d2554bf6d8f47b92ceb436b6ea1fc3bac20e2",
+			"reviewed_at": "2026-06-17T05:58:11.064895822Z"
+		}
+	]
+}

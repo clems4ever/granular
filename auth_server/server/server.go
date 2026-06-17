@@ -24,6 +24,7 @@ import (
 	"github.com/clems4ever/granular/auth_server/server/web"
 	"github.com/clems4ever/granular/auth_server/store"
 	"github.com/clems4ever/granular/internal/proposal"
+	"github.com/clems4ever/granular/internal/verify"
 )
 
 // Server wires together the store, the registered gateway HMAC secrets and the public
@@ -64,20 +65,6 @@ type grantView struct {
 	GatewayID string                      `json:"gateway_id"`
 	ExpiresAt string                      `json:"expires_at"`
 	Item      proposal.SignedGrantRequest `json:"item"`
-}
-
-// verifyInput is the body a gateway posts to POST /api/verify: the policy token and
-// the authorization questions plus the entity world to evaluate them against.
-type verifyInput struct {
-	Token    string         `json:"token"`
-	Requests []requestInput `json:"requests"`
-	Entities []entityInput  `json:"entities"`
-}
-
-// verifyOutput is the AS's decision for POST /api/verify.
-type verifyOutput struct {
-	Allowed bool   `json:"allowed"`
-	Error   string `json:"error,omitempty"`
 }
 
 // New creates a Server.
@@ -268,14 +255,14 @@ func (s *Server) handleVerify(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	var in verifyInput
+	var in verify.Input
 	if err := json.Unmarshal(body, &in); err != nil {
-		writeJSON(w, http.StatusBadRequest, verifyOutput{Error: "invalid request body"})
+		writeJSON(w, http.StatusBadRequest, verify.Output{Error: "invalid request body"})
 		return
 	}
 	grants, err := s.store.PolicyForToken(in.Token)
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, verifyOutput{Error: err.Error()})
+		writeJSON(w, http.StatusInternalServerError, verify.Output{Error: err.Error()})
 		return
 	}
 	var policies []string
@@ -284,10 +271,10 @@ func (s *Server) handleVerify(w http.ResponseWriter, r *http.Request) {
 	}
 	allowed, err := evaluate(policies, in.Entities, in.Requests)
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, verifyOutput{Error: err.Error()})
+		writeJSON(w, http.StatusInternalServerError, verify.Output{Error: err.Error()})
 		return
 	}
-	writeJSON(w, http.StatusOK, verifyOutput{Allowed: allowed})
+	writeJSON(w, http.StatusOK, verify.Output{Allowed: allowed})
 }
 
 // bearerPolicy extracts the Bearer token and checks it identifies a known policy. On
@@ -324,19 +311,19 @@ func (s *Server) bearerPolicy(w http.ResponseWriter, r *http.Request) (string, b
 func (s *Server) authenticateGateway(w http.ResponseWriter, r *http.Request) ([]byte, bool) {
 	body, err := io.ReadAll(io.LimitReader(r.Body, 1<<20))
 	if err != nil {
-		writeJSON(w, http.StatusBadRequest, verifyOutput{Error: "cannot read body"})
+		writeJSON(w, http.StatusBadRequest, verify.Output{Error: "cannot read body"})
 		return nil, false
 	}
 	secret, known := s.gateways[r.Header.Get("X-Gateway-ID")]
 	if !known {
-		writeJSON(w, http.StatusUnauthorized, verifyOutput{Error: "unknown gateway"})
+		writeJSON(w, http.StatusUnauthorized, verify.Output{Error: "unknown gateway"})
 		return nil, false
 	}
 	mac := hmac.New(sha256.New, []byte(secret))
 	mac.Write(body)
 	want := hex.EncodeToString(mac.Sum(nil))
 	if !hmac.Equal([]byte(r.Header.Get("X-Gateway-Signature")), []byte(want)) {
-		writeJSON(w, http.StatusUnauthorized, verifyOutput{Error: "invalid gateway signature"})
+		writeJSON(w, http.StatusUnauthorized, verify.Output{Error: "invalid gateway signature"})
 		return nil, false
 	}
 	return body, true

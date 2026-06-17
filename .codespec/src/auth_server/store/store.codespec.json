@@ -1,0 +1,106 @@
+{
+	"functions": [
+		{
+			"function_name": "Open",
+			"documentation_hash": "b41c503d9a484e288e180efd85b32ac53573104ee77545c4f458cdb05560c479",
+			"definition_hash": "2393bf7712daf5bfd52091a6f3f74c139866e5033f9cc840dea9ba2ee0e67ef4",
+			"reviewed_at": "2026-06-17T05:59:07.680971072Z"
+		},
+		{
+			"function_name": "Close",
+			"receiver": "Store",
+			"documentation_hash": "73064d719fecab376c41764136b28785001cedae964bd1d4ff66d0201fab2656",
+			"definition_hash": "2b0813b127b152e0ae1d2e59f39e7c2e137acc7535330719382263a803ab6177",
+			"reviewed_at": "2026-06-17T05:59:07.681736691Z"
+		},
+		{
+			"function_name": "CreatePolicy",
+			"receiver": "Store",
+			"documentation_hash": "7bc35d5c44be120dcb20337b89cb745d479bc921feee90b498cdb0b6cf747d8e",
+			"definition_hash": "fd3acd50b899145088d1198295847735e3ded1f1f2ce5b048ff62eda3c6cde3c",
+			"reviewed_at": "2026-06-17T05:59:07.682560492Z"
+		},
+		{
+			"function_name": "PolicyExists",
+			"receiver": "Store",
+			"documentation_hash": "7dc08539587334467e79eb2e75a7952e4f827e5edf9712611e69c91140a8a688",
+			"definition_hash": "9bb22383d4d59e8f8eacecd73eb68c0464cc63025180175be552a64fbdc1a7c9",
+			"reviewed_at": "2026-06-17T05:59:07.683452914Z"
+		},
+		{
+			"function_name": "CreateProposal",
+			"receiver": "Store",
+			"documentation_hash": "00fb3f39a5972abf1d4be2559e28466105da12426dbb00b306536223ab0e6b93",
+			"definition_hash": "fe113df8f4daf7346ec843dacff96c6dbc563c742d205fc2218ed26d6b5df3aa",
+			"reviewed_at": "2026-06-17T05:59:07.684412526Z"
+		},
+		{
+			"function_name": "GetProposal",
+			"receiver": "Store",
+			"documentation_hash": "4c1dfe3a26010d734448eb03dc711ab6438898ad001712c2165e28d30299ac0d",
+			"definition_hash": "2b4e73be18fba34029b6e6d0a2e3e40cb4ac4e5db545f4b9dbba542bc531dd70",
+			"reviewed_at": "2026-06-17T05:59:07.685460433Z"
+		},
+		{
+			"function_name": "Approve",
+			"receiver": "Store",
+			"documentation_hash": "1da58973d0779a2ad7c9511d49a3c731b0dab6c3f5eb2fbae72dbc7f0b9d818e",
+			"definition_hash": "a502a5ce6fc503cfb4a49ab2edb7c5500b04a069645ccecc42197f73f8e304f3",
+			"reviewed_at": "2026-06-17T05:59:07.68753118Z"
+		},
+		{
+			"function_name": "Reject",
+			"receiver": "Store",
+			"documentation_hash": "6aeff0a7eb71b8600942bf8bc0e66d1c2d17b87f60f1f5dd2e7cd9ad0ae301a8",
+			"definition_hash": "e31683519cfc1f9031009de60582b51f97243210cf8c9e509c36c11b8169cfe6",
+			"reviewed_at": "2026-06-17T05:59:07.689203209Z"
+		},
+		{
+			"function_name": "PolicyForToken",
+			"receiver": "Store",
+			"documentation_hash": "7782d4ac4f5d2776469cbc3f0e19835220f239836f2742ca7056abc2c5f9024b",
+			"definition_hash": "61df712f7cd43d754db1b8d67c3fa8ec354ee8c242fbf7b9447e20249f9968cb",
+			"reviewed_at": "2026-06-17T05:59:07.691160364Z"
+		},
+		{
+			"function_name": "DestroyPolicy",
+			"receiver": "Store",
+			"documentation_hash": "253cf30b129b84cbc3c24dbed9637ed099b02cd2916fc0f3150592ac709373de",
+			"definition_hash": "e419e2c7a71f56459dfb2d409cdd6dd31c6461bef13ebdc5f6ef3ba3ab050c63",
+			"reviewed_at": "2026-06-17T05:59:07.693089133Z"
+		},
+		{
+			"function_name": "PurgeExpired",
+			"receiver": "Store",
+			"documentation_hash": "0cdf5f2a5d82e888e34da9e529e79d0bed618130ccec855614f6e9360d136481",
+			"definition_hash": "5619cbc468c32e902769d360441ff14d732dc84004f85cfcbe18b06ce40d08f1",
+			"reviewed_at": "2026-06-17T05:59:07.694688764Z"
+		},
+		{
+			"function_name": "StartCleanup",
+			"receiver": "Store",
+			"documentation_hash": "1498d0d52ad6b1444a66a4bda8349438acfb816189c245dfdfee600ae0144b2c",
+			"definition_hash": "1eeb8ef745bce8264cb61ecb8299512fe5b508f89a603fc66f96e0e0393b7b4b",
+			"reviewed_at": "2026-06-17T05:59:07.69807862Z"
+		},
+		{
+			"function_name": "put",
+			"receiver": "Store",
+			"documentation_hash": "8268a9f9bd4af70db49663e15bed639a556bdce1c89d9d4616bf9670147b5610",
+			"definition_hash": "5f3cf50a23ed96697275672efda427544feef30a78f68dfc6775c01e7323fe3b",
+			"reviewed_at": "2026-06-17T05:59:07.701079715Z"
+		},
+		{
+			"function_name": "putTx",
+			"documentation_hash": "5645a9d704d1c5eb7925ec4cdaea704aa7c19a52d4a0d8056749707688b0d29b",
+			"definition_hash": "a93880a3080887dcc7231b1b35c34f538b24496d5faf64c0961dcadedc07c7d1",
+			"reviewed_at": "2026-06-17T05:59:07.702728213Z"
+		},
+		{
+			"function_name": "randomToken",
+			"documentation_hash": "ad31c24e03b2fb53cceb97831e327198b5e4b3363edb882f9ff6029fa2f716b5",
+			"definition_hash": "dedec501d6e6a48141efbbc860ba0c44e779ec7461eed197a7734dd332d3d616",
+			"reviewed_at": "2026-06-17T05:59:07.70324834Z"
+		}
+	]
+}

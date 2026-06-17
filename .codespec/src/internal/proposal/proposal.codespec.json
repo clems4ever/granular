@@ -1,0 +1,29 @@
+{
+	"functions": [
+		{
+			"function_name": "Canonical",
+			"documentation_hash": "e3c142cd12fa153dd033213ddf602411ac1cf7a3d1c954017c13016e89602637",
+			"definition_hash": "23fe6993d61795aa93420bc444f3c4f297316e211eb9430f99a806f89ab0b169",
+			"reviewed_at": "2026-06-17T05:59:07.712274885Z"
+		},
+		{
+			"function_name": "Sign",
+			"documentation_hash": "74226c1810c2685de8056c37bdadbd8fdf224d60a960a8534987416851e9c531",
+			"definition_hash": "5790f22906f1518f9f3036ec3e23e9208900a589730b5f478022fc1e9f1dc34e",
+			"reviewed_at": "2026-06-17T05:59:07.712553611Z"
+		},
+		{
+			"function_name": "Verify",
+			"receiver": "SignedGrantRequest",
+			"documentation_hash": "30420de08f039b59e2a987b1293d2301715d3b65fa21b0bb7166dcbc4c07ae49",
+			"definition_hash": "7f785560d554fcac425b4b1f7627a7efc6adefd624917de9d857122272bbe4a7",
+			"reviewed_at": "2026-06-17T05:59:07.712828094Z"
+		},
+		{
+			"function_name": "mac",
+			"documentation_hash": "31ed0e315e1e6dd2bda5d299e15d46b30c78163fce7e290822e51de9e5f0149f",
+			"definition_hash": "3a5e326389d18084e52c465b14d48929430770f345d6b9c5abca538c251737a4",
+			"reviewed_at": "2026-06-17T05:59:07.713083917Z"
+		}
+	]
+}

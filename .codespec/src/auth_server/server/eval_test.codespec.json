@@ -1,0 +1,16 @@
+{
+	"functions": [
+		{
+			"function_name": "TestEvaluateWithAuthzWorld",
+			"documentation_hash": "049cd5b3c63accb29ffa49418cfbc4c912f4313919780b26af2ca5ff32e195d6",
+			"definition_hash": "f150fd0e31fcbbf05fadea89f6eb683f726727c113480d93ee3105bc47ede498",
+			"reviewed_at": "2026-06-17T05:58:11.065955864Z"
+		},
+		{
+			"function_name": "TestEvaluateDeniesUnrelated",
+			"documentation_hash": "b4a091d824e83c22ac88b2257fcbdc5dba467998924db2d8689a3fd4fc5e7b0f",
+			"definition_hash": "8107c747a755433d87c9ae0264c80da139e343d3aee9207705d1e428d3ca95f0",
+			"reviewed_at": "2026-06-17T05:58:11.066010009Z"
+		}
+	]
+}

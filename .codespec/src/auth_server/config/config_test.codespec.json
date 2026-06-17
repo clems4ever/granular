@@ -1,0 +1,40 @@
+{
+	"functions": [
+		{
+			"function_name": "TestLoadParsesYAML",
+			"documentation_hash": "7a1b580edf30801e35db627171cb2106ebb42f0f6383b3e8e558067fc233ecbf",
+			"definition_hash": "4910a24dd0a50707379493dc5f0e270183a4333af1d038cd9b1cc2dd13696b16",
+			"reviewed_at": "2026-06-17T05:58:11.064992507Z"
+		},
+		{
+			"function_name": "TestLoadAppliesDefaults",
+			"documentation_hash": "74d301d6301f8bbc322841f5fd3d9d3fe8f2943e0e9c900e3dabd03ca6fd581b",
+			"definition_hash": "8d1df9f4d0660b8b442766a4f643d7a439b216039e069e266ee611cf7b64b3b8",
+			"reviewed_at": "2026-06-17T05:58:11.065112491Z"
+		},
+		{
+			"function_name": "TestLoadMissingFile",
+			"documentation_hash": "5c293870068be8e7b223050316c7135c7b446a618f5b79e0515a11496265566d",
+			"definition_hash": "ad1b59b8f6fd401d3a41fee6cdfe8e77640d67ce47b128620a1eff50485a5033",
+			"reviewed_at": "2026-06-17T05:58:11.065218825Z"
+		},
+		{
+			"function_name": "TestLoadMissingSecretFile",
+			"documentation_hash": "c8b5b99440fde07da5101e4ba8d46377c4d294ac4ad56272b780ff4a1521ade7",
+			"definition_hash": "4e6676ff882b13b1c88a788370619ca9fb74fe1dd244513336b65164a8d17431",
+			"reviewed_at": "2026-06-17T05:58:11.065315323Z"
+		},
+		{
+			"function_name": "TestDefault",
+			"documentation_hash": "7f3646a2aff530133728d2621824bf1ad60c5a8585653647f66e8a5e1a119ec0",
+			"definition_hash": "f975d53c8f4ad981bc1d20fb5275c6bfe6ae348f85d9dde7284b531214180df1",
+			"reviewed_at": "2026-06-17T05:58:11.065415805Z"
+		},
+		{
+			"function_name": "TestGatewaySecretsSkipsIncomplete",
+			"documentation_hash": "69f31c59effff6199b990e03ff0877e8e9314a33541aa505d5b3c08a5d11eb64",
+			"definition_hash": "f5c720debb9a06414002cb39e0f320b5e8c72ba5e92e4c2c82adb273165d6a62",
+			"reviewed_at": "2026-06-17T05:58:11.065512203Z"
+		}
+	]
+}

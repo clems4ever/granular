@@ -1,0 +1,58 @@
+{
+	"functions": [
+		{
+			"function_name": "enabledAuth",
+			"documentation_hash": "5ba7cdc945db6dc5ad198b27692cba66841cbaee6ed43f556ee7df549a57e425",
+			"definition_hash": "4c2ebb40406f8295a2ec1dfe8d208f2b855bbd7594b9b222db5b31392dd208c7",
+			"reviewed_at": "2026-06-17T05:58:11.049860697Z"
+		},
+		{
+			"function_name": "TestAuthenticatorDisabledWhenUnconfigured",
+			"documentation_hash": "b2aaed397c98b0893386b8027f962f90ef1157df1cb6a7848e35fe034def7319",
+			"definition_hash": "d23dedf7bc4a610ec11d0b488aad2c20eb5ff4c3e718d1fa209129a830d9df1e",
+			"reviewed_at": "2026-06-17T05:58:11.050415571Z"
+		},
+		{
+			"function_name": "TestRequireRedirectsAnonymous",
+			"documentation_hash": "66fc639813d9442352e1d78d90f88e295ab24fd038dc3b9be9bd6c02844c63b8",
+			"definition_hash": "5f8d048f5046401b180b155cc5bcf1c103793264ef5e5395c3e3e02d9739bbeb",
+			"reviewed_at": "2026-06-17T05:58:11.050857057Z"
+		},
+		{
+			"function_name": "TestRequirePassesThroughWhenDisabled",
+			"documentation_hash": "c4c3f758a84f5906b4a08cf9fa99bc58e389b2103611de3ec6e0e425292b5606",
+			"definition_hash": "6244d89cbd6b3b901c60e571a2b5130379f15136518bb151db5c3b363a7084a4",
+			"reviewed_at": "2026-06-17T05:58:11.051289855Z"
+		},
+		{
+			"function_name": "TestSessionRoundTrip",
+			"documentation_hash": "21c5bc2bdace906c393040d5a0e2485fc0a2dd154794f270390af767249b8db1",
+			"definition_hash": "54d213ad064347dda7266f8635a721ac75c536077d3af1a49d3fc558f0f39393",
+			"reviewed_at": "2026-06-17T05:58:11.051757114Z"
+		},
+		{
+			"function_name": "TestLoginRedirectsToGitHub",
+			"documentation_hash": "ad3bfbd287e260fd30231f6d05dce63726f7406acb71ea926fcba2a5b5e5acf4",
+			"definition_hash": "02b369e415c51d81c5b314b7051b303411d7a179c1eab704c53a5a6e96e2e096",
+			"reviewed_at": "2026-06-17T05:58:11.05417233Z"
+		},
+		{
+			"function_name": "TestCallbackRejectsBadState",
+			"documentation_hash": "811695c90b7b6bf6d2290cbd19728802ea4101d1c51f71c871e444482a2427c7",
+			"definition_hash": "c6c54975dd149c5f535a6a0824922d731433972c30eb0e28f26da9fca48dfdc7",
+			"reviewed_at": "2026-06-17T05:58:11.054820932Z"
+		},
+		{
+			"function_name": "TestLogoutClearsSession",
+			"documentation_hash": "8d930b9c0e5d37a5092a4854353a9ce9393186e99412ba562a85cdc4fd9a3ac5",
+			"definition_hash": "c56cd3a36df1121f553989960f62fff6a21d037a7ed53d2142ea75efff81500e",
+			"reviewed_at": "2026-06-17T05:58:11.055512944Z"
+		},
+		{
+			"function_name": "TestSafeNext",
+			"documentation_hash": "18f11a48e6e9c568127dabc172eac4532d3794cc9892b25cf9828acf18a79dca",
+			"definition_hash": "fb9c17f039cb9e330b5c7409c180901defded477b0156c310081428c334a5c9c",
+			"reviewed_at": "2026-06-17T05:58:11.056003758Z"
+		}
+	]
+}

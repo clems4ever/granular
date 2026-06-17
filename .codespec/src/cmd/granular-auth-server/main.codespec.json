@@ -1,0 +1,22 @@
+{
+	"functions": [
+		{
+			"function_name": "main",
+			"documentation_hash": "ae3fa18997561626911036879c57898312e065d4a58b2244e477b09eacbe139e",
+			"definition_hash": "e70f970b0c57edeb879165f07a72866962c4db633a8b0927b9ff3c35c5c9ffe7",
+			"reviewed_at": "2026-06-17T05:59:07.714141976Z"
+		},
+		{
+			"function_name": "loadConfig",
+			"documentation_hash": "91b4f82815cf50298b5cdedaddb64fd0559cca04ed2b6d40a60b1fe52c1bce2f",
+			"definition_hash": "a1e3ae313c0be70073200a80fe8699f0bcb499b82e3a41ced0498d7ef46f08c0",
+			"reviewed_at": "2026-06-17T05:59:07.714375878Z"
+		},
+		{
+			"function_name": "run",
+			"documentation_hash": "0404c033e9ed3b34c96592dfc94df3375f0c5fcc6374e75bfec7e3ffbeedd055",
+			"definition_hash": "52f625d9fd99c9f8cf22fc279c2f319b5616fc0eab1729eb644fffc89fd28500",
+			"reviewed_at": "2026-06-17T05:59:07.715233688Z"
+		}
+	]
+}

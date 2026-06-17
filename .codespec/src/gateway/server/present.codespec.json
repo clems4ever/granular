@@ -1,0 +1,16 @@
+{
+	"functions": [
+		{
+			"function_name": "buildPresentation",
+			"documentation_hash": "c8a78603d94fead7ca9692c2aaa15057e34a9d23685bdf80d9909363068c6bd0",
+			"definition_hash": "7112a7fcd5baec6c9e293183b479281c63d33efd65e75e2cd531fd05b8c8e907",
+			"reviewed_at": "2026-06-17T05:59:07.707761529Z"
+		},
+		{
+			"function_name": "scopeString",
+			"documentation_hash": "d3d95368c23eb263bb600c82920c54e181fdbcb49f21cb1c250b8b310604a617",
+			"definition_hash": "936116e477084db683155e6d29cb7b10020c06ac1c8829812772503dfa4c94b2",
+			"reviewed_at": "2026-06-17T05:59:07.708074314Z"
+		}
+	]
+}

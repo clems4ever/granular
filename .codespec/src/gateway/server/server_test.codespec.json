@@ -1,0 +1,59 @@
+{
+	"functions": [
+		{
+			"function_name": "newGateway",
+			"documentation_hash": "f18953442cb541c593299bc1aadf2ca2b108109211cfedf3e679ba44f0f04923",
+			"definition_hash": "74c15889f4d602f69b342f255eb37b9a62d85b987c13602e2b6847a5f6493046",
+			"reviewed_at": "2026-06-17T05:58:11.043306363Z"
+		},
+		{
+			"function_name": "post",
+			"documentation_hash": "49bdc7fa5ae672b0164b449e3ec8695c8c1e969918d97007b74b58e82ac21554",
+			"definition_hash": "209bce44ecdf0cda172c0373c1c24aaa7a76436b2b43f547964886fe93aca7e6",
+			"reviewed_at": "2026-06-17T05:58:11.044203778Z"
+		},
+		{
+			"function_name": "readCap",
+			"documentation_hash": "5f81fb87d68996cc7937b60b2d684e2f042556db0aebf06669d14d0888eb9150",
+			"definition_hash": "f5788cbdb3157c8ecae9fcde8bde91119b70afeb0db6fc5acd4044f5e3a847a6",
+			"reviewed_at": "2026-06-17T05:58:11.045097789Z"
+		},
+		{
+			"function_name": "TestSchemaServed",
+			"documentation_hash": "b6250a33f0556bd6b43e090849f5d1336ecbf6dc01ab0c902b0a0bd72a10bdda",
+			"definition_hash": "3114e1f961d970a31625b882e81c4a7e6c8784be99b3f33bf3d08d414999bf88",
+			"reviewed_at": "2026-06-17T05:58:11.045976725Z"
+		},
+		{
+			"function_name": "TestSignProducesVerifiableRequest",
+			"documentation_hash": "2d1dcd54dae90e472f9a4a242eae290bb8e392d4427f54687f734835bd392bb3",
+			"definition_hash": "b4666516e26e18d318133d155544e3e4927f0d582caa81410006c9d15dd4ac94",
+			"reviewed_at": "2026-06-17T05:58:11.046807444Z"
+		},
+		{
+			"function_name": "TestSignRejectsUnknownAction",
+			"documentation_hash": "add3878c5d4efbe2f85d7c6b5298dfe30b278275c2b18e3900d733962d811a64",
+			"definition_hash": "cfff3c38df49812eb15f485a15404d045ac23278e2325764a615b5ccf98af7c4",
+			"reviewed_at": "2026-06-17T05:58:11.04769716Z"
+		},
+		{
+			"function_name": "TestOperationDeniedWithoutGrant",
+			"documentation_hash": "de1aea939a1c0049bf15f2f3de76c0fe2768238719470bf66729c296e1e85f0b",
+			"definition_hash": "2e89cd9b731039861164dda17e4a71781cd64c014068f77c8235f1c95a5d42da",
+			"reviewed_at": "2026-06-17T05:58:11.048456866Z"
+		},
+		{
+			"function_name": "TestOperationExecutesWhenAllowed",
+			"documentation_hash": "b9b9d3cbde0e455cd1d7276ecb3c830a1c30bbb6160f910263750a0c1aba841a",
+			"definition_hash": "5232d69e8a4d6c33c7d9fb0e98a145a5285305d3e4caa87df1429af38ccfc2d4",
+			"reviewed_at": "2026-06-17T05:58:11.049202496Z"
+		},
+		{
+			"function_name": "Verify",
+			"receiver": "stubVerifier",
+			"documentation_hash": "8cae569b4701d400305158161d4f964d1ce8d837adda4e85ae061f1269370bf8",
+			"definition_hash": "c0171b7fb4d79b4df7d6a10e8abe00314fa86ee682f054d5290c543fde3027f3",
+			"reviewed_at": "2026-06-17T05:58:26.182959Z"
+		}
+	]
+}

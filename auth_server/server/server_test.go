@@ -14,6 +14,7 @@ import (
 
 	"github.com/clems4ever/granular/auth_server/store"
 	"github.com/clems4ever/granular/internal/proposal"
+	"github.com/clems4ever/granular/internal/verify"
 )
 
 const gwSecret = "s3cret"
@@ -117,14 +118,14 @@ func signedItem() proposal.SignedGrantRequest {
 //
 // @testcase TestProposalApproveFlow verifies through here.
 func verifyBody(token string) []byte {
-	b, _ := json.Marshal(verifyInput{
+	b, _ := json.Marshal(verify.Input{
 		Token: token,
-		Requests: []requestInput{{
-			Principal: entityRef{Type: "Granular::Agent", ID: "a"},
-			Action:    entityRef{Type: "Granular::Action", ID: "view"},
-			Resource:  entityRef{Type: "Granular::Repo", ID: "r"},
+		Requests: []verify.Request{{
+			Principal: verify.EntityRef{Type: "Granular::Agent", ID: "a"},
+			Action:    verify.EntityRef{Type: "Granular::Action", ID: "view"},
+			Resource:  verify.EntityRef{Type: "Granular::Repo", ID: "r"},
 		}},
-		Entities: []entityInput{
+		Entities: []verify.Entity{
 			{Type: "Granular::Agent", ID: "a"},
 			{Type: "Granular::Action", ID: "view"},
 			{Type: "Granular::Repo", ID: "r"},
@@ -148,7 +149,7 @@ func verifyAllowed(t *testing.T, h http.Handler, token string) bool {
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("verify = %d, want 200", resp.StatusCode)
 	}
-	var out verifyOutput
+	var out verify.Output
 	_ = json.NewDecoder(resp.Body).Decode(&out)
 	return out.Allowed
 }

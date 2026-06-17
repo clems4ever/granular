@@ -1,0 +1,40 @@
+{
+	"functions": [
+		{
+			"function_name": "uidOf",
+			"documentation_hash": "245abefbdd555f7a692211add14754819c2a807f287fce0b3f90b98790b38e8d",
+			"definition_hash": "d24033025692bf89ab231aee55e831cac1d82e3655d3a8f523da44a3701b1f4f",
+			"reviewed_at": "2026-06-17T05:59:07.67875838Z"
+		},
+		{
+			"function_name": "evaluate",
+			"documentation_hash": "f51dd2390d043d8c91a8da8d9f1542428fac58384902d610f0cc6a9f54ce05fd",
+			"definition_hash": "e9a384a6b0435e88e1de7a40b17820efc82ee067d57c6c88022cc7c43f9e6df7",
+			"reviewed_at": "2026-06-17T05:59:07.678996727Z"
+		},
+		{
+			"function_name": "buildEntities",
+			"documentation_hash": "59d6314e2e95e6d1882cbf18ed1e0e7e0ce2847a717abfce5b6de82e03b8a41e",
+			"definition_hash": "9d90584df4841f87b21695da1d2fbdb7ad7556919bbb6da6ec7207d369eb11ac",
+			"reviewed_at": "2026-06-17T05:59:07.679202725Z"
+		},
+		{
+			"function_name": "recordFrom",
+			"documentation_hash": "e33b379eec4a9f7f24ac5072e152dcf9da51c1bcabcfb9e0b7fd846216b5cfa5",
+			"definition_hash": "bd99e8bde526cc743ac5fa9661f4f38e5be87fcc34637e9cc48352c0974e776b",
+			"reviewed_at": "2026-06-17T05:59:07.67941363Z"
+		},
+		{
+			"function_name": "contextRecord",
+			"documentation_hash": "13b520edf3d5b8f3b0cd8fc0b9396aeb66c89638f1e1ac80cba59a0d6c596a2a",
+			"definition_hash": "0bfc432e18992cdbf999e04a4c4f8c476ceec8ee830a3185798a0149b825e8d1",
+			"reviewed_at": "2026-06-17T05:59:07.67961472Z"
+		},
+		{
+			"function_name": "valueFrom",
+			"documentation_hash": "64a6a54cba5ca0bfa2174d309978b90b73551f63a6c19236db5b87ef8d8e72e1",
+			"definition_hash": "cff8e9ee3a0b81ae264b616c9dcef3ff35bb58d0bced9f8384dfdc99df06f238",
+			"reviewed_at": "2026-06-17T05:59:07.680270735Z"
+		}
+	]
+}

@@ -5,39 +5,17 @@ import (
 	"strings"
 
 	"github.com/cedar-policy/cedar-go"
+
+	"github.com/clems4ever/granular/internal/verify"
 )
 
-// entityRef identifies a Cedar entity by type and id on the wire.
-type entityRef struct {
-	Type string `json:"type"`
-	ID   string `json:"id"`
-}
-
-// entityInput is one Cedar entity supplied by the gateway: its uid, hierarchy parents
-// and attributes. The AS builds these into the world it evaluates against.
-type entityInput struct {
-	Type    string         `json:"type"`
-	ID      string         `json:"id"`
-	Parents []entityRef    `json:"parents,omitempty"`
-	Attrs   map[string]any `json:"attrs,omitempty"`
-}
-
-// requestInput is one authorization question the gateway needs answered: an action by
-// a principal on a resource, optionally qualified by context.
-type requestInput struct {
-	Principal entityRef      `json:"principal"`
-	Action    entityRef      `json:"action"`
-	Resource  entityRef      `json:"resource"`
-	Context   map[string]any `json:"context,omitempty"`
-}
-
-// uid converts an entityRef to a Cedar entity uid.
+// uidOf converts a verify.EntityRef to a Cedar entity uid.
 //
 // @arg r The wire entity reference.
 // @return cedar.EntityUID The Cedar uid.
 //
-// @testcase TestEvaluateAllowsWithMatchingPolicy resolves uids from refs.
-func (r entityRef) uid() cedar.EntityUID {
+// @testcase TestEvaluateWithAuthzWorld resolves uids from refs.
+func uidOf(r verify.EntityRef) cedar.EntityUID {
 	return cedar.NewEntityUID(cedar.EntityType(r.Type), cedar.String(r.ID))
 }
 
@@ -52,9 +30,9 @@ func (r entityRef) uid() cedar.EntityUID {
 // @return bool True when every request is allowed by the policies (and there is at least one).
 // @error error when the policy text fails to parse.
 //
-// @testcase TestEvaluateAllowsWithMatchingPolicy allows under a covering policy.
-// @testcase TestEvaluateDeniesWithoutPolicy denies with no policies.
-func evaluate(policies []string, entities []entityInput, requests []requestInput) (bool, error) {
+// @testcase TestEvaluateWithAuthzWorld allows under a covering policy.
+// @testcase TestEvaluateDeniesUnrelated denies an unrelated resource.
+func evaluate(policies []string, entities []verify.Entity, requests []verify.Request) (bool, error) {
 	if len(policies) == 0 || len(requests) == 0 {
 		return false, nil
 	}
@@ -65,10 +43,10 @@ func evaluate(policies []string, entities []entityInput, requests []requestInput
 	em := buildEntities(entities)
 	for _, req := range requests {
 		decision, _ := cedar.Authorize(ps, em, cedar.Request{
-			Principal: req.Principal.uid(),
-			Action:    req.Action.uid(),
-			Resource:  req.Resource.uid(),
-			Context:   recordFrom(req.Context),
+			Principal: uidOf(req.Principal),
+			Action:    uidOf(req.Action),
+			Resource:  uidOf(req.Resource),
+			Context:   contextRecord(req.Context),
 		})
 		if decision != cedar.Allow {
 			return false, nil
@@ -82,14 +60,14 @@ func evaluate(policies []string, entities []entityInput, requests []requestInput
 // @arg entities The wire entities supplied by the gateway.
 // @return cedar.EntityMap The populated entity map.
 //
-// @testcase TestEvaluateAllowsWithMatchingPolicy builds the world from wire entities.
-func buildEntities(entities []entityInput) cedar.EntityMap {
+// @testcase TestProposalApproveFlow builds the world from wire entities.
+func buildEntities(entities []verify.Entity) cedar.EntityMap {
 	em := cedar.EntityMap{}
 	for _, e := range entities {
 		uid := cedar.NewEntityUID(cedar.EntityType(e.Type), cedar.String(e.ID))
 		parents := make([]cedar.EntityUID, 0, len(e.Parents))
 		for _, p := range e.Parents {
-			parents = append(parents, p.uid())
+			parents = append(parents, uidOf(p))
 		}
 		em[uid] = cedar.Entity{
 			UID:        uid,
@@ -100,17 +78,31 @@ func buildEntities(entities []entityInput) cedar.EntityMap {
 	return em
 }
 
-// recordFrom converts a JSON-decoded attribute/context map into a Cedar record,
-// supporting strings, booleans, numbers and (string) sets.
+// recordFrom converts a JSON-decoded attribute map into a Cedar record, supporting
+// strings and (string) sets; any other scalar is stringified.
 //
 // @arg m The attribute map (may be nil).
 // @return cedar.Record The Cedar record.
 //
-// @testcase TestEvaluateAllowsWithMatchingPolicy passes attributes through.
+// @testcase TestProposalApproveFlow passes attributes through.
 func recordFrom(m map[string]any) cedar.Record {
 	rm := cedar.RecordMap{}
 	for k, v := range m {
 		rm[cedar.String(k)] = valueFrom(v)
+	}
+	return cedar.NewRecord(rm)
+}
+
+// contextRecord converts a string context map into a Cedar record.
+//
+// @arg ctx The context map (may be nil).
+// @return cedar.Record The Cedar record.
+//
+// @testcase TestProposalApproveFlow matches a context condition.
+func contextRecord(ctx map[string]string) cedar.Record {
+	rm := cedar.RecordMap{}
+	for k, v := range ctx {
+		rm[cedar.String(k)] = cedar.String(v)
 	}
 	return cedar.NewRecord(rm)
 }
@@ -122,7 +114,7 @@ func recordFrom(m map[string]any) cedar.Record {
 // @arg v The decoded value (string or a slice thereof).
 // @return cedar.Value The corresponding Cedar value.
 //
-// @testcase TestEvaluateAllowsWithMatchingPolicy converts attribute values.
+// @testcase TestProposalApproveFlow converts attribute values.
 func valueFrom(v any) cedar.Value {
 	switch x := v.(type) {
 	case string:

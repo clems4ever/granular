@@ -1,0 +1,50 @@
+{
+	"functions": [
+		{
+			"function_name": "New",
+			"documentation_hash": "7bf75deed155e9eff5ec67546e6ecfcfd8ab2457a87ce463f7492a35a60abb8d",
+			"definition_hash": "8a2fd026089f70e9142c82c1954ee3f1352592a2a3b1bfbd44c03e64782f527a",
+			"reviewed_at": "2026-06-17T05:59:07.704377741Z"
+		},
+		{
+			"function_name": "Handler",
+			"receiver": "Server",
+			"documentation_hash": "c34f4699abd90392d58ea90a5f4b6bad7f25326bcc9b61f2b6b013b362932936",
+			"definition_hash": "2e251288128dd4b3e223e3f5deb4b4b579f9d898a3dd53022d81b6875c6f6fc2",
+			"reviewed_at": "2026-06-17T05:59:07.704521596Z"
+		},
+		{
+			"function_name": "handleSchema",
+			"receiver": "Server",
+			"documentation_hash": "95bab920ff66abd47bcff57420e555a5ffa91f657026845b2d777ae0bbc67795",
+			"definition_hash": "c02a9f492085f0f8e4a043ae22f8d79cc7546dcb681ea81790d344d7dc30c9e2",
+			"reviewed_at": "2026-06-17T05:59:07.704659624Z"
+		},
+		{
+			"function_name": "handleSign",
+			"receiver": "Server",
+			"documentation_hash": "bd2bca34ba9ac5a4cf3fdfec558b17f0bf208b2e336da1eb7cd4802c7e0f0918",
+			"definition_hash": "c8df9f33d7a767fe0a97a1183b9fc9fa3ad3b7d60a79cf339f586a05cc272ee1",
+			"reviewed_at": "2026-06-17T05:59:07.705324924Z"
+		},
+		{
+			"function_name": "handleOperation",
+			"receiver": "Server",
+			"documentation_hash": "e79f0201a87dfa5a633fb52d0dfe77edd13ec664e4672cf1249f8c43b23ba03b",
+			"definition_hash": "69cbd001ce4951b77ae63207b0445ce87de1f2b3a19b339b7cc19f09b042d6b9",
+			"reviewed_at": "2026-06-17T05:59:07.706018761Z"
+		},
+		{
+			"function_name": "errBody",
+			"documentation_hash": "7350b0bce5180c284ede4021ffe362c2001bdd1a3a21af84037c5ff072900018",
+			"definition_hash": "ed44c22993874b607075c0466aa3529425a086f093aa9f3503bd55252b68d1d8",
+			"reviewed_at": "2026-06-17T05:59:07.706666371Z"
+		},
+		{
+			"function_name": "writeJSON",
+			"documentation_hash": "6701c1bc42b18b81a2fa3e746887b2d062970912915118d00626e3f01f990507",
+			"definition_hash": "7d55273efed15d1d8b9f8a9c413cfc0519a5196f46a1fecc8b851ed7beec385f",
+			"reviewed_at": "2026-06-17T05:59:07.707299687Z"
+		}
+	]
+}
