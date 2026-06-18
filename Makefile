@@ -14,7 +14,7 @@ GO ?= go
 
 .DEFAULT_GOAL := build
 
-.PHONY: all build run-auth-server run-resource-server fmt vet test test-race check codespec tidy clean install help
+.PHONY: all build run-auth-server run-resource-server fmt vet test test-race cover check codespec tidy clean install help
 
 ## all: tidy, check and build
 all: tidy check build
@@ -49,6 +49,13 @@ test:
 test-race:
 	$(GO) test -race ./...
 
+## cover: run the suite with coverage; print the total and write coverage.html
+cover:
+	$(GO) test -covermode=atomic -coverprofile=coverage.out ./...
+	$(GO) tool cover -func=coverage.out | tail -n 1
+	$(GO) tool cover -html=coverage.out -o coverage.html
+	@echo "wrote coverage.html"
+
 ## codespec: verify function docs are in sync (same check the Stop hook runs)
 codespec:
 	codespec check --all --exit
@@ -67,6 +74,7 @@ install:
 ## clean: remove build artifacts
 clean:
 	rm -rf $(BIN_DIR)
+	rm -f coverage.out coverage.html coverage-func.txt
 
 ## help: list available targets
 help:

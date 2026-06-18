@@ -1,6 +1,11 @@
 /bin/
 /dist/
 *.db
+
+# Coverage artifacts produced by `make cover` and the CI coverage job.
+/coverage.out
+/coverage.html
+/coverage-func.txt
 granular-workspace/
 # Local server config (may hold secrets); commit granular.example.yaml instead.
 

@@ -37,8 +37,43 @@ jobs:
       - name: Vet
         run: go vet ./...
 
-      - name: Test
-        run: go test ./...
+      - name: Test with coverage
+        run: go test -covermode=atomic -coverprofile=coverage.out ./...
+
+      # Render the per-function coverage and surface the module total in the job
+      # summary (shown on the PR's Checks tab) so coverage is checkable without
+      # downloading anything.
+      - name: Coverage report
+        run: |
+          go tool cover -func=coverage.out -o coverage-func.txt
+          total=$(grep '^total:' coverage-func.txt | awk '{print $NF}')
+          {
+            echo "## Coverage: ${total}"
+            echo ""
+            echo "<details><summary>Per-function coverage</summary>"
+            echo ""
+            echo '```'
+            cat coverage-func.txt
+            echo '```'
+            echo ""
+            echo "</details>"
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "Total coverage: ${total}"
+
+      # A browsable, line-by-line HTML report uploaded as a build artifact, so the
+      # full coverage detail can be downloaded from the run.
+      - name: Generate HTML coverage report
+        run: go tool cover -html=coverage.out -o coverage.html
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: |
+            coverage.out
+            coverage.html
+            coverage-func.txt
+          if-no-files-found: error
 
       # Lints the served OpenAPI specs (valid OpenAPI 3) and guards against
       # spec/code drift: every documented path+method must be a real route.
