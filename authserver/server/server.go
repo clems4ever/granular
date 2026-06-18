@@ -158,6 +158,9 @@ func (s *Server) Handler() http.Handler {
 	// A subject reads its OWN grants, authenticated by its subject token (not the admin
 	// token). More specific than /api/subject/{token}, so it takes precedence.
 	mux.HandleFunc("GET /api/subject/me", s.handleGetMySubject)
+	// A subject revokes ALL of its OWN grants in one step, authenticated by its subject
+	// token. The subject itself survives, so it can keep operating and request fresh grants.
+	mux.HandleFunc("DELETE /api/subject/me/grants", s.handleRevokeMyGrants)
 
 	// Client submits a proposal (Bearer token); resource server verifies an operation.
 	mux.HandleFunc("POST /api/proposals", s.handleProposal)
@@ -252,6 +255,30 @@ func (s *Server) handleGetMySubject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, subjectOutput{Grants: grantViews(grants)})
+}
+
+// handleRevokeMyGrants handles DELETE /api/subject/me/grants: a subject revokes every grant
+// attached to its OWN subject token in one step, authenticated by that token (the bearer it
+// already holds) rather than the admin token. The subject itself is left intact, so a
+// sandboxed agent can drop all the authority it currently holds without a privileged
+// credential and keep operating — it can never revoke another subject's grants.
+//
+// @arg w The response writer.
+// @arg r The request carrying the subject token as a bearer.
+//
+// @testcase TestRevokeMyGrantsRevokesOwnGrants revokes the bearer's own grants and keeps the subject.
+// @testcase TestRevokeMyGrantsRejectsUnknownToken rejects a missing or unknown bearer token.
+func (s *Server) handleRevokeMyGrants(w http.ResponseWriter, r *http.Request) {
+	token, ok := s.bearerSubject(w, r)
+	if !ok {
+		return
+	}
+	n, err := s.store.RevokeGrantsForToken(token)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, subjectOutput{Error: err.Error()})
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]int{"revoked": n})
 }
 
 // grantViews renders store grants as API grant views, omitting the subject token: callers

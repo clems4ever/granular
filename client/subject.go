@@ -130,6 +130,37 @@ func (c *Client) MySubject(ctx context.Context) ([]Grant, error) {
 	return res.Grants, nil
 }
 
+// RevokeMyGrants revokes every active grant attached to the client's OWN subject token in
+// one call. Like MySubject, this is not an administrative call: it authenticates with the
+// subject token the client already holds (DELETE /api/subject/me/grants), so a sandboxed
+// agent can drop all the authority it currently holds without any privileged credential.
+// The subject token itself survives and stays usable afterward.
+//
+// @arg ctx Context for cancellation.
+// @return int The number of grants revoked.
+// @error ErrNoToken when no subject token is configured.
+// @error error on transport failure or an unexpected AS status.
+//
+// @testcase TestRevokeMyGrantsRevokesOwnGrants revokes the caller's own grants.
+// @testcase TestRevokeMyGrantsRequiresToken fails with ErrNoToken when unconfigured.
+func (c *Client) RevokeMyGrants(ctx context.Context) (int, error) {
+	if c.token == "" {
+		return 0, ErrNoToken
+	}
+	var res struct {
+		Revoked int    `json:"revoked"`
+		Error   string `json:"error,omitempty"`
+	}
+	status, err := c.doJSON(ctx, http.MethodDelete, c.asURL+"/api/subject/me/grants", c.token, nil, &res)
+	if err != nil {
+		return 0, err
+	}
+	if status != http.StatusOK {
+		return 0, fmt.Errorf("revoke own grants: status %d: %s", status, res.Error)
+	}
+	return res.Revoked, nil
+}
+
 // Activity returns the operator view: the full grant inventory and request/decision
 // history across all subjects (GET /api/activity). This is an administrative call
 // authenticated with the client's admin token.

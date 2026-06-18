@@ -49,7 +49,7 @@ func NewRootCmd(out io.Writer) *cobra.Command {
 	}
 	root.PersistentFlags().StringVar(&a.configPath, "config", "granular-client.yaml", "path to the YAML configuration file")
 	root.PersistentFlags().StringVar(&a.token, "token", "", "subject token (overrides the configured token_file)")
-	root.AddCommand(a.catalogCmd(), a.templateCmd(), a.opCmd(), a.signCmd(), a.proposeCmd(), a.grantsCmd())
+	root.AddCommand(a.catalogCmd(), a.templateCmd(), a.opCmd(), a.signCmd(), a.proposeCmd(), a.grantsCmd(), a.revokeCmd())
 	return root
 }
 
@@ -188,6 +188,22 @@ func (a *app) grantsCmd() *cobra.Command {
 		Short: "List the grants currently attached to your subject token",
 		RunE: func(*cobra.Command, []string) error {
 			return runGrants(context.Background(), a.c, a.out)
+		},
+	}
+}
+
+// revokeCmd builds the "revoke" command: revoke every active grant attached to the
+// configured subject token in one step, letting an agent drop all the authority it holds.
+//
+// @return *cobra.Command The revoke command.
+//
+// @testcase TestCommandTree checks the revoke command is present.
+func (a *app) revokeCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "revoke",
+		Short: "Revoke all the grants currently attached to your subject token",
+		RunE: func(*cobra.Command, []string) error {
+			return runRevokeGrants(context.Background(), a.c, a.out)
 		},
 	}
 }

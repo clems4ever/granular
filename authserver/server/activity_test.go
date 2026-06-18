@@ -151,6 +151,50 @@ func TestMySubjectRejectsUnknownToken(t *testing.T) {
 	}
 }
 
+// TestRevokeMyGrantsRevokesOwnGrants revokes the bearer subject's own grants via
+// DELETE /api/subject/me/grants and leaves the subject token usable.
+func TestRevokeMyGrantsRevokesOwnGrants(t *testing.T) {
+	_, h := newServer(t)
+	token := createSubject(t, h)
+	approve(t, h, propose(t, h, token, "me@example.com"))
+
+	resp := do(t, h, http.MethodDelete, "/api/subject/me/grants", nil, token, false)
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("DELETE /api/subject/me/grants = %d, want 200", resp.StatusCode)
+	}
+	var out struct {
+		Revoked int `json:"revoked"`
+	}
+	_ = json.NewDecoder(resp.Body).Decode(&out)
+	if out.Revoked != 1 {
+		t.Fatalf("revoked = %d, want 1", out.Revoked)
+	}
+	// The subject survives and now holds no grants.
+	r2 := do(t, h, http.MethodGet, "/api/subject/me", nil, token, false)
+	defer r2.Body.Close()
+	if r2.StatusCode != http.StatusOK {
+		t.Fatalf("GET /api/subject/me after revoke = %d, want 200 (subject should survive)", r2.StatusCode)
+	}
+	var read subjectOutput
+	_ = json.NewDecoder(r2.Body).Decode(&read)
+	if len(read.Grants) != 0 {
+		t.Fatalf("want 0 grants after revoke, got %d", len(read.Grants))
+	}
+}
+
+// TestRevokeMyGrantsRejectsUnknownToken rejects a missing or unknown bearer token.
+func TestRevokeMyGrantsRejectsUnknownToken(t *testing.T) {
+	_, h := newServer(t)
+	for _, tok := range []string{"", "bogus"} {
+		resp := do(t, h, http.MethodDelete, "/api/subject/me/grants", nil, tok, false)
+		resp.Body.Close()
+		if resp.StatusCode != http.StatusUnauthorized {
+			t.Fatalf("DELETE /api/subject/me/grants bearer=%q = %d, want 401", tok, resp.StatusCode)
+		}
+	}
+}
+
 // TestActivityAdminRequiresAdminToken rejects the operator view without the admin token.
 func TestActivityAdminRequiresAdminToken(t *testing.T) {
 	_, h := newServer(t)

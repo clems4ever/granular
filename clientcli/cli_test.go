@@ -80,6 +80,9 @@ func fakeAS(t *testing.T) *httptest.Server {
 	mux.HandleFunc("GET /api/subject/me", func(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewEncoder(w).Encode(map[string]any{"grants": []client.Grant{{ResourceServerID: "g1", ExpiresAt: "soon"}}})
 	})
+	mux.HandleFunc("DELETE /api/subject/me/grants", func(w http.ResponseWriter, r *http.Request) {
+		_ = json.NewEncoder(w).Encode(map[string]int{"revoked": 3})
+	})
 	ts := httptest.NewServer(mux)
 	t.Cleanup(ts.Close)
 	return ts
@@ -99,7 +102,7 @@ func newClient(asURL, rsURL string) *client.Client {
 // TestCommandTree checks the sub-commands are wired under the root.
 func TestCommandTree(t *testing.T) {
 	root := NewRootCmd(&bytes.Buffer{})
-	want := map[string]bool{"catalog": true, "template": true, "op": true, "sign": true, "propose": true, "grants": true}
+	want := map[string]bool{"catalog": true, "template": true, "op": true, "sign": true, "propose": true, "grants": true, "revoke": true}
 	for _, c := range root.Commands() {
 		delete(want, c.Name())
 	}
@@ -118,6 +121,19 @@ func TestRunGrants(t *testing.T) {
 	}
 	if !strings.Contains(buf.String(), "g1") {
 		t.Fatalf("grants output missing g1: %q", buf.String())
+	}
+}
+
+// TestRunRevokeGrants revokes all grants on the caller's own subject token and reports the count.
+func TestRunRevokeGrants(t *testing.T) {
+	as := fakeAS(t)
+	c := newClient(as.URL, "")
+	var buf bytes.Buffer
+	if err := runRevokeGrants(context.Background(), c, &buf); err != nil {
+		t.Fatalf("revoke: %v", err)
+	}
+	if !strings.Contains(buf.String(), "revoked 3 grants") {
+		t.Fatalf("revoke output unexpected: %q", buf.String())
 	}
 }
 

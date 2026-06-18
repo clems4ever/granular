@@ -216,6 +216,55 @@ func TestDestroySubject(t *testing.T) {
 	}
 }
 
+// TestRevokeGrantsForToken removes all of a subject's grants but keeps the token usable.
+func TestRevokeGrantsForToken(t *testing.T) {
+	s := openTemp(t)
+	token, _ := s.CreateSubject()
+	// Attach two grants to the subject across two approved proposals.
+	for i := 0; i < 2; i++ {
+		p, _ := s.CreateProposal(token, "me@example.com", []proposal.SignedGrantRequest{item()}, time.Hour)
+		_, _ = s.Approve(p.ID, time.Hour)
+	}
+	if grants, _ := s.SubjectForToken(token); len(grants) != 2 {
+		t.Fatalf("setup: want 2 grants, got %d", len(grants))
+	}
+
+	n, err := s.RevokeGrantsForToken(token)
+	if err != nil || n != 2 {
+		t.Fatalf("RevokeGrantsForToken: %v n=%d, want 2", err, n)
+	}
+	if grants, _ := s.SubjectForToken(token); len(grants) != 0 {
+		t.Fatalf("want 0 grants after revoke, got %d", len(grants))
+	}
+	// The subject itself survives, so it can keep operating.
+	if !s.SubjectExists(token) {
+		t.Fatal("subject token destroyed by RevokeGrantsForToken; it should survive")
+	}
+	// Revoking again is a harmless no-op.
+	if n, err := s.RevokeGrantsForToken(token); err != nil || n != 0 {
+		t.Fatalf("second revoke: %v n=%d, want 0", err, n)
+	}
+}
+
+// TestRevokeGrantsForTokenScopedToToken leaves other subjects' grants untouched.
+func TestRevokeGrantsForTokenScopedToToken(t *testing.T) {
+	s := openTemp(t)
+	mine, _ := s.CreateSubject()
+	pm, _ := s.CreateProposal(mine, "me@example.com", []proposal.SignedGrantRequest{item()}, time.Hour)
+	_, _ = s.Approve(pm.ID, time.Hour)
+
+	other, _ := s.CreateSubject()
+	po, _ := s.CreateProposal(other, "me@example.com", []proposal.SignedGrantRequest{item()}, time.Hour)
+	_, _ = s.Approve(po.ID, time.Hour)
+
+	if n, err := s.RevokeGrantsForToken(mine); err != nil || n != 1 {
+		t.Fatalf("RevokeGrantsForToken: %v n=%d, want 1", err, n)
+	}
+	if grants, _ := s.SubjectForToken(other); len(grants) != 1 {
+		t.Fatalf("other subject's grant was revoked; want 1, got %d", len(grants))
+	}
+}
+
 // TestPurgeExpired deletes elapsed grants and keeps live ones.
 func TestPurgeExpired(t *testing.T) {
 	s := openTemp(t)

@@ -146,7 +146,8 @@ granular (granular-client)
 │     ├── --template <name> --bind k=v     #   from a template
 │     └── --reason --actions --resource --match   # or freeform
 ├── propose <signed-file ...> --approver <email>   # submit a proposal for approval
-└── grants                                  # list the grants on your own subject token
+├── grants                                  # list the grants on your own subject token
+└── revoke                                  # revoke all grants on your own subject token
 
 granular-subject                            # admin: --admin-token[-file]
 ├── create                                 # mint a subject token

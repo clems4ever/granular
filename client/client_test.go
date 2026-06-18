@@ -80,6 +80,9 @@ func fakeAS(t *testing.T, got *proposalSubmit) *httptest.Server {
 	mux.HandleFunc("GET /api/subject/me", func(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewEncoder(w).Encode(subjectResult{Grants: []Grant{{ResourceServerID: "g1", ExpiresAt: "soon"}}})
 	})
+	mux.HandleFunc("DELETE /api/subject/me/grants", func(w http.ResponseWriter, r *http.Request) {
+		_ = json.NewEncoder(w).Encode(map[string]int{"revoked": 2})
+	})
 	mux.HandleFunc("GET /api/activity", func(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewEncoder(w).Encode(Activity{
 			Grants:  []Grant{{SubjectToken: "tok", ResourceServerID: "g1", ExpiresAt: "soon"}},
@@ -288,6 +291,25 @@ func TestMySubjectReturnsOwnGrants(t *testing.T) {
 	}
 	// Without a subject token there is nothing to introspect.
 	if _, err := New(Config{ASURL: as.URL}).MySubject(context.Background()); !errors.Is(err, ErrNoToken) {
+		t.Fatalf("want ErrNoToken, got %v", err)
+	}
+}
+
+// TestRevokeMyGrantsRevokesOwnGrants revokes the caller's own grants via the subject token
+// and reports how many were removed.
+func TestRevokeMyGrantsRevokesOwnGrants(t *testing.T) {
+	as := fakeAS(t, nil)
+	c := New(Config{ASURL: as.URL, Token: "subjecttok"})
+	n, err := c.RevokeMyGrants(context.Background())
+	if err != nil || n != 2 {
+		t.Fatalf("revoke: %d %v", n, err)
+	}
+}
+
+// TestRevokeMyGrantsRequiresToken fails with ErrNoToken when no subject token is configured.
+func TestRevokeMyGrantsRequiresToken(t *testing.T) {
+	as := fakeAS(t, nil)
+	if _, err := New(Config{ASURL: as.URL}).RevokeMyGrants(context.Background()); !errors.Is(err, ErrNoToken) {
 		t.Fatalf("want ErrNoToken, got %v", err)
 	}
 }
