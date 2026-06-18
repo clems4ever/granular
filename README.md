@@ -1,5 +1,7 @@
 # granular
 
+![coverage](.github/badges/coverage.svg)
+
 Fine-grained, time-limited, **human-approved** permissions for operations on
 third-party platforms (GitHub, and others later).
 
