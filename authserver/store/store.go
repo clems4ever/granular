@@ -438,30 +438,68 @@ func (s *Store) DestroySubject(token string) (int, error) {
 		if err := tx.Bucket(bucketSubjects).Delete([]byte(token)); err != nil {
 			return err
 		}
-		gb := tx.Bucket(bucketGrants)
-		var keys [][]byte
-		err := gb.ForEach(func(k, v []byte) error {
-			var g Grant
-			if err := json.Unmarshal(v, &g); err != nil {
-				return err
-			}
-			if g.Token == token {
-				keys = append(keys, append([]byte(nil), k...))
-			}
-			return nil
-		})
-		if err != nil {
+		n, err := deleteGrantsForToken(tx.Bucket(bucketGrants), token)
+		deleted = n
+		return err
+	})
+	return deleted, err
+}
+
+// RevokeGrantsForToken deletes every grant attached to a subject token while leaving the
+// subject itself intact, returning how many grants were removed. Unlike DestroySubject it
+// keeps the token usable, so a subject can revoke everything it currently holds in one
+// step and still introspect or submit fresh proposals afterward.
+//
+// @arg token The subject whose grants are revoked.
+// @return int The number of grants deleted.
+// @error error when the database cannot be updated.
+//
+// @testcase TestRevokeGrantsForToken removes all of a subject's grants but keeps the token.
+// @testcase TestRevokeGrantsForTokenScopedToToken leaves other subjects' grants untouched.
+func (s *Store) RevokeGrantsForToken(token string) (int, error) {
+	deleted := 0
+	err := s.db.Update(func(tx *bolt.Tx) error {
+		n, err := deleteGrantsForToken(tx.Bucket(bucketGrants), token)
+		deleted = n
+		return err
+	})
+	return deleted, err
+}
+
+// deleteGrantsForToken deletes every grant in the bucket attached to the subject token,
+// returning how many were removed. It runs inside the caller's update transaction so the
+// subject's grants are revoked atomically with whatever else the caller does.
+//
+// @arg gb The grants bucket handle from the enclosing transaction.
+// @arg token The subject whose grants are deleted.
+// @return int The number of grants deleted.
+// @error error when the bucket cannot be scanned or a delete fails.
+//
+// @testcase TestDestroySubject removes a subject's grants via this helper.
+// @testcase TestRevokeGrantsForToken revokes a subject's grants via this helper.
+func deleteGrantsForToken(gb *bolt.Bucket, token string) (int, error) {
+	var keys [][]byte
+	err := gb.ForEach(func(k, v []byte) error {
+		var g Grant
+		if err := json.Unmarshal(v, &g); err != nil {
 			return err
 		}
-		for _, k := range keys {
-			if err := gb.Delete(k); err != nil {
-				return err
-			}
-			deleted++
+		if g.Token == token {
+			keys = append(keys, append([]byte(nil), k...))
 		}
 		return nil
 	})
-	return deleted, err
+	if err != nil {
+		return 0, err
+	}
+	deleted := 0
+	for _, k := range keys {
+		if err := gb.Delete(k); err != nil {
+			return deleted, err
+		}
+		deleted++
+	}
+	return deleted, nil
 }
 
 // PurgeExpired deletes every grant whose expiry has passed and automatically revokes

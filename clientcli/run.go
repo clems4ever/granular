@@ -140,6 +140,33 @@ func runGrants(ctx context.Context, c *client.Client, w io.Writer) error {
 	return nil
 }
 
+// runRevokeGrants revokes every active grant attached to the caller's own subject token in
+// one step, authenticated by that token (DELETE /api/subject/me/grants) — no admin
+// credential needed. The subject token itself survives, so the agent can keep operating and
+// request fresh grants. It reports how many grants were revoked.
+//
+// @arg ctx Context for cancellation.
+// @arg c The client SDK (authenticated with the subject token).
+// @arg w The writer for user-facing output.
+// @error error when the AS call fails.
+//
+// @testcase TestRunRevokeGrants revokes the caller's own grants and reports the count.
+func runRevokeGrants(ctx context.Context, c *client.Client, w io.Writer) error {
+	n, err := c.RevokeMyGrants(ctx)
+	if err != nil {
+		return err
+	}
+	switch n {
+	case 0:
+		fmt.Fprintln(w, "no active grants to revoke")
+	case 1:
+		fmt.Fprintln(w, "revoked 1 grant")
+	default:
+		fmt.Fprintf(w, "revoked %d grants\n", n)
+	}
+	return nil
+}
+
 // runCatalog fetches the schemas of the requested resource servers (or all of them) and prints
 // everything an agent needs to build a grant request: the resource types with their
 // match fields and hierarchy, the action groups, every action with the resource type it

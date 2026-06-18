@@ -68,6 +68,27 @@ paths:
               schema: { $ref: "#/components/schemas/SubjectResponse" }
         "401": { $ref: "#/components/responses/Unauthorized" }
 
+  /api/subject/me/grants:
+    delete:
+      tags: [subjects]
+      summary: Revoke all the caller's own grants, authenticated by the subject token.
+      description: >
+        Deletes every grant attached to the caller's subject token in one step. The
+        subject itself survives, so it can keep operating and request fresh grants.
+      operationId: revokeMyGrants
+      security:
+        - subjectBearer: []
+      responses:
+        "200":
+          description: The number of grants revoked.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  revoked: { type: integer }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
   /api/subject/{token}:
     parameters:
       - name: token
