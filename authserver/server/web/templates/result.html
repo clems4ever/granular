@@ -9,6 +9,65 @@
   {{end}}
   <h1>Request {{.Status}}</h1>
   <p class="lead" style="margin-top:.5rem">{{.Message}}</p>
+  {{if eq (printf "%s" .Status) "approved"}}
+  <div class="autoclose" id="autoclose" data-seconds="3" hidden>
+    <p class="muted" style="font-size:.85rem">Closing this tab in <span id="autoclose-count">3</span>s…</p>
+    <div class="autoclose-bar"><div class="autoclose-fill" id="autoclose-fill"></div></div>
+    <button type="button" class="btn-link" id="autoclose-cancel">Keep this tab open</button>
+  </div>
+  <p class="muted" style="font-size:.85rem" id="autoclose-fallback" hidden>You can close this tab and return to your terminal.</p>
+  <p class="muted" style="font-size:.85rem" id="autoclose-static">You can close this tab and return to your terminal.</p>
+  <script>
+    (function () {
+      var box = document.getElementById('autoclose');
+      var staticMsg = document.getElementById('autoclose-static');
+      var fallback = document.getElementById('autoclose-fallback');
+      var count = document.getElementById('autoclose-count');
+      var fill = document.getElementById('autoclose-fill');
+      var cancel = document.getElementById('autoclose-cancel');
+      var total = parseInt(box.getAttribute('data-seconds'), 10) || 3;
+
+      // JS is available: swap the static message for the interactive countdown.
+      staticMsg.hidden = true;
+      box.hidden = false;
+      count.textContent = total;
+
+      var start = null;
+      var cancelled = false;
+      var raf = window.requestAnimationFrame || function (cb) { return setTimeout(function () { cb(Date.now()); }, 16); };
+
+      function tick(now) {
+        if (cancelled) return;
+        if (start === null) start = now;
+        var elapsed = (now - start) / 1000;
+        var remaining = Math.max(0, total - elapsed);
+        fill.style.width = (100 * remaining / total) + '%';
+        count.textContent = Math.ceil(remaining);
+        if (remaining <= 0) {
+          close();
+          return;
+        }
+        raf(tick);
+      }
+
+      function close() {
+        window.close();
+        // Browsers block close() for tabs not opened by script; show a fallback.
+        box.hidden = true;
+        fallback.hidden = false;
+      }
+
+      cancel.addEventListener('click', function () {
+        cancelled = true;
+        box.hidden = true;
+        fallback.hidden = false;
+      });
+
+      raf(tick);
+    })();
+  </script>
+  {{else}}
   <p class="muted" style="font-size:.85rem">You can close this tab and return to your terminal.</p>
+  {{end}}
 </div>
 {{end}}
