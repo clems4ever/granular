@@ -4,10 +4,12 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/clems4ever/granular/resourceserver"
 	"github.com/clems4ever/granular/resourceserver-github/internal/authz"
@@ -15,6 +17,14 @@ import (
 
 // DefaultGitHubUpstream is the GitHub git-over-HTTPS origin the proxy forwards to.
 const DefaultGitHubUpstream = "https://github.com"
+
+// ctxKey is the private type for this package's request-context keys.
+type ctxKey int
+
+// anonymousKey marks a forwarded request that must reach the upstream with no
+// credentials at all (a public-repo read), so direct injects neither the PAT nor the
+// client's token.
+const anonymousKey ctxKey = iota
 
 // Authorizer decides whether a subject token is permitted a set of requirements.
 // *resourceserver.ResourceServer satisfies it, so the git proxy gates a clone or push
@@ -29,11 +39,16 @@ type Authorizer interface {
 // the repository (upload-pack needs repo.clone, receive-pack needs repo.push), and only
 // then forwards the request to GitHub with the server-held PAT injected. The client never
 // sees the PAT and the server never decides approval — it only enforces a prior grant.
+//
+// A read of a publicly cloneable repository is the exception: since anyone can already
+// clone it anonymously, the proxy forwards it without a grant and without the PAT, so a
+// public repo is never blocked for lack of an approval.
 type GitProxy struct {
 	authorizer Authorizer
 	pat        string
 	upstream   *url.URL
 	proxy      *httputil.ReverseProxy
+	client     *http.Client // probes the upstream to decide whether a repo is public
 }
 
 // NewGitProxy builds a GitProxy forwarding to GitHub (DefaultGitHubUpstream), injecting
@@ -59,14 +74,21 @@ func NewGitProxy(pat string, a Authorizer) *GitProxy {
 // @testcase TestGitProxyForwardsWithPAT builds a proxy against a fake upstream.
 func newGitProxy(pat, upstream string, a Authorizer) *GitProxy {
 	up, _ := url.Parse(upstream)
-	g := &GitProxy{authorizer: a, pat: pat, upstream: up}
+	g := &GitProxy{
+		authorizer: a,
+		pat:        pat,
+		upstream:   up,
+		client:     &http.Client{Timeout: 10 * time.Second},
+	}
 	g.proxy = &httputil.ReverseProxy{Director: g.direct}
 	return g
 }
 
-// ServeHTTP authorizes the git request and, on an allow, forwards it to GitHub. A request
-// with no credentials is challenged with 401 so the client's git supplies them; a denied
-// request is 403; a malformed path is 400; an AS failure is 502.
+// ServeHTTP authorizes the git request and, on an allow, forwards it to GitHub. A read
+// (clone/fetch) of a publicly cloneable repository is served anonymously with no grant,
+// since anyone could already clone it without credentials. Otherwise a request with no
+// credentials is challenged with 401 so the client's git supplies them; a denied request
+// is 403; a malformed path is 400; an AS failure is 502.
 //
 // @arg w The response writer.
 // @arg r The incoming git smart-HTTP request.
@@ -74,6 +96,7 @@ func newGitProxy(pat, upstream string, a Authorizer) *GitProxy {
 // @testcase TestGitProxyRequiresToken challenges an unauthenticated request.
 // @testcase TestGitProxyDeniesUnauthorized returns 403 when the AS denies.
 // @testcase TestGitProxyForwardsWithPAT forwards an allowed request to the upstream.
+// @testcase TestGitProxyServesPublicRepoWithoutGrant forwards a public-repo read with no grant.
 // @testcase TestGitProxyRejectsBadPath rejects a non-git path.
 func (g *GitProxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	repo, service, err := parseGitRequest(r)
@@ -84,6 +107,12 @@ func (g *GitProxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	action, ok := serviceAction(service)
 	if !ok {
 		http.Error(w, "unsupported git service: "+service, http.StatusBadRequest)
+		return
+	}
+	// A read of a public repo needs no grant: forward it anonymously, never touching the
+	// PAT or the AS. Pushes (and reads of private repos) still go through authorization.
+	if action == "repo.clone" && g.publiclyCloneable(r.Context(), repo) {
+		g.proxy.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), anonymousKey, true)))
 		return
 	}
 	token := subjectToken(r)
@@ -105,29 +134,57 @@ func (g *GitProxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	g.proxy.ServeHTTP(w, r)
 }
 
+// publiclyCloneable reports whether repo can be cloned from the upstream with no
+// credentials at all, by probing its upload-pack ref advertisement anonymously. A 200
+// means anyone can already read it, so the proxy may serve it without a grant. Any other
+// status, or a probe error, is treated as not-public so the request falls through to
+// authorization (fail closed).
+//
+// @arg ctx Context for cancellation, carried from the inbound request.
+// @arg repo The "owner/repo" to probe.
+// @return bool True when the upstream advertises the repo's refs without credentials.
+//
+// @testcase TestGitProxyServesPublicRepoWithoutGrant treats a 200 probe as public.
+// @testcase TestGitProxyPrivateRepoStillAuthorizes treats a non-200 probe as private.
+func (g *GitProxy) publiclyCloneable(ctx context.Context, repo string) bool {
+	probeURL := g.upstream.String() + "/" + repo + ".git/info/refs?service=git-upload-pack"
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, probeURL, nil)
+	if err != nil {
+		return false
+	}
+	resp, err := g.client.Do(req)
+	if err != nil {
+		return false
+	}
+	defer resp.Body.Close()
+	_, _ = io.Copy(io.Discard, resp.Body)
+	return resp.StatusCode == http.StatusOK
+}
+
 // direct rewrites an outbound request onto the GitHub upstream: it strips the /git/ mount
 // prefix, points the request at the upstream host, and replaces any client credentials
-// with HTTP basic auth carrying the server-held PAT. When no PAT is configured it forwards
-// anonymously instead of sending an empty "x-access-token:" credential — GitHub rejects an
-// invalid credential with 401 even for a public repo, which would otherwise clone fine
-// without auth.
+// with HTTP basic auth carrying the server-held PAT. A request marked anonymous (a public
+// repo read) and one made when no PAT is configured are both forwarded with no credentials
+// at all: the client's subject token is dropped so it never leaks upstream, and no empty
+// "x-access-token:" credential is sent — GitHub rejects an invalid credential with 401 even
+// for a public repo, which would otherwise clone fine without auth.
 //
 // @arg req The outbound request the ReverseProxy is about to send.
 //
 // @testcase TestGitProxyForwardsWithPAT checks the rewritten path and injected PAT.
 // @testcase TestGitProxyForwardsAnonymouslyWithoutPAT forwards with no auth when the PAT is empty.
+// @testcase TestGitProxyServesPublicRepoWithoutGrant forwards a public read with no credentials.
 func (g *GitProxy) direct(req *http.Request) {
 	req.URL.Scheme = g.upstream.Scheme
 	req.URL.Host = g.upstream.Host
 	req.Host = g.upstream.Host
 	req.URL.Path = "/" + strings.TrimPrefix(req.URL.Path, "/git/")
-	if g.pat != "" {
-		req.Header.Set("Authorization", "Basic "+basicAuth("x-access-token", g.pat))
+	anon, _ := req.Context().Value(anonymousKey).(bool)
+	if anon || g.pat == "" {
+		req.Header.Del("Authorization")
 		return
 	}
-	// No PAT: drop the client's subject token so it never leaks upstream, and let the
-	// request reach GitHub anonymously so public repos remain cloneable.
-	req.Header.Del("Authorization")
+	req.Header.Set("Authorization", "Basic "+basicAuth("x-access-token", g.pat))
 }
 
 // parseGitRequest extracts the owner/repo and the git service from a /git/ request. The

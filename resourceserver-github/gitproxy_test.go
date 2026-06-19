@@ -83,6 +83,12 @@ func TestGitProxyDeniesUnauthorized(t *testing.T) {
 func TestGitProxyForwardsWithPAT(t *testing.T) {
 	var gotPath, gotAuth, gotQuery string
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Model a private repo: the anonymous public-repo probe is rejected, so the proxy
+		// falls through to authorization and forwards with the PAT.
+		if r.Header.Get("Authorization") == "" {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
 		gotPath, gotAuth, gotQuery = r.URL.Path, r.Header.Get("Authorization"), r.URL.RawQuery
 		io.WriteString(w, "refs")
 	}))
@@ -113,17 +119,21 @@ func TestGitProxyForwardsWithPAT(t *testing.T) {
 	}
 }
 
-// TestGitProxyForwardsAnonymouslyWithoutPAT checks that when no PAT is configured the proxy
-// forwards with no Authorization header at all, rather than an empty "x-access-token:"
-// credential. GitHub rejects an invalid credential with 401 even for a public repo, so
-// injecting one would turn a public-repo clone into an auth error.
+// TestGitProxyForwardsAnonymouslyWithoutPAT checks that when no PAT is configured an
+// authorized request is forwarded with no Authorization header at all, rather than an empty
+// "x-access-token:" credential. GitHub rejects an invalid credential with 401 even for a
+// public repo, so injecting one would turn a clone into an auth error. The repo here is
+// private (the anonymous probe is rejected) so the public-repo bypass does not apply and the
+// empty-PAT path in direct is exercised in isolation.
 func TestGitProxyForwardsAnonymouslyWithoutPAT(t *testing.T) {
 	var gotAuth string
 	var hadAuth bool
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		gotAuth = r.Header.Get("Authorization")
 		_, hadAuth = r.Header["Authorization"]
-		io.WriteString(w, "refs")
+		if r.Header.Get("Authorization") == "" {
+			w.WriteHeader(http.StatusUnauthorized) // private: no anonymous access
+		}
 	}))
 	defer upstream.Close()
 
@@ -133,11 +143,92 @@ func TestGitProxyForwardsAnonymouslyWithoutPAT(t *testing.T) {
 	w := httptest.NewRecorder()
 	p.ServeHTTP(w, r)
 
+	if hadAuth {
+		t.Fatalf("upstream received Authorization %q, want none (no PAT to inject)", gotAuth)
+	}
+}
+
+// TestGitProxyServesPublicRepoWithoutGrant is the regression test for a public repo being
+// blocked: when the upstream advertises the repo's refs anonymously, a clone is forwarded
+// without consulting the AS and without any credentials — even though the authorizer would
+// deny it — so a public repo is never blocked for lack of a grant.
+func TestGitProxyServesPublicRepoWithoutGrant(t *testing.T) {
+	var hadAuth bool
+	var hits int
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		hits++
+		if _, ok := r.Header["Authorization"]; ok {
+			hadAuth = true
+		}
+		io.WriteString(w, "refs") // public: anonymous access succeeds
+	}))
+	defer upstream.Close()
+
+	auth := &stubAuthorizer{allow: false} // AS would deny; it must not be consulted
+	p := newGitProxy("PATSECRET", upstream.URL, auth)
+	r := httptest.NewRequest(http.MethodGet, "/git/clems4ever/llmbox.git/info/refs?service=git-upload-pack", nil)
+	w := httptest.NewRecorder()
+	p.ServeHTTP(w, r)
+
 	if w.Code != http.StatusOK {
-		t.Fatalf("status = %d, want 200", w.Code)
+		t.Fatalf("status = %d, want 200 for a public repo", w.Code)
+	}
+	if auth.token != "" || auth.reqs != nil {
+		t.Fatalf("authorizer was consulted (%q, %+v); a public read must not be", auth.token, auth.reqs)
 	}
 	if hadAuth {
-		t.Fatalf("upstream received Authorization %q, want none (anonymous)", gotAuth)
+		t.Fatal("a public-repo read leaked credentials upstream")
+	}
+	if hits == 0 {
+		t.Fatal("request was not forwarded to the upstream")
+	}
+}
+
+// TestGitProxyPrivateRepoStillAuthorizes checks a private repo (anonymous probe rejected) is
+// still gated: a denied subject gets 403 and the authorizer is consulted.
+func TestGitProxyPrivateRepoStillAuthorizes(t *testing.T) {
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Authorization") == "" {
+			w.WriteHeader(http.StatusUnauthorized) // private
+		}
+	}))
+	defer upstream.Close()
+
+	auth := &stubAuthorizer{allow: false}
+	p := newGitProxy("PATSECRET", upstream.URL, auth)
+	r := httptest.NewRequest(http.MethodGet, "/git/clems4ever/secret.git/info/refs?service=git-upload-pack", nil)
+	r.Header.Set("Authorization", basicHeader("granular", "subtok"))
+	w := httptest.NewRecorder()
+	p.ServeHTTP(w, r)
+
+	if w.Code != http.StatusForbidden {
+		t.Fatalf("status = %d, want 403 for a denied private repo", w.Code)
+	}
+	if auth.token != "subtok" {
+		t.Fatalf("authorizer saw token %q, want subtok", auth.token)
+	}
+}
+
+// TestGitProxyPushAlwaysAuthorizes checks a push is gated even when the repo is publicly
+// readable: the public-repo bypass is read-only, so receive-pack still requires a grant.
+func TestGitProxyPushAlwaysAuthorizes(t *testing.T) {
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		io.WriteString(w, "refs") // public for reads
+	}))
+	defer upstream.Close()
+
+	auth := &stubAuthorizer{allow: false}
+	p := newGitProxy("PATSECRET", upstream.URL, auth)
+	r := httptest.NewRequest(http.MethodGet, "/git/clems4ever/llmbox.git/info/refs?service=git-receive-pack", nil)
+	r.Header.Set("Authorization", basicHeader("granular", "subtok"))
+	w := httptest.NewRecorder()
+	p.ServeHTTP(w, r)
+
+	if w.Code != http.StatusForbidden {
+		t.Fatalf("status = %d, want 403 (a push must be authorized even on a public repo)", w.Code)
+	}
+	if len(auth.reqs) != 1 || auth.reqs[0].Action != "repo.push" {
+		t.Fatalf("requirement = %+v, want a single repo.push", auth.reqs)
 	}
 }
 

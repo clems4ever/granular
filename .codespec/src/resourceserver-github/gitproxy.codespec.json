@@ -9,22 +9,22 @@
 		{
 			"function_name": "newGitProxy",
 			"documentation_hash": "0b16510c6ad206649a00f98b1add0d616a2fc37b03e99bf43588fd989824f6de",
-			"definition_hash": "73853f498f9f3d812f6d208e3c49f715b432ffc4725752993660727f6e6d3c87",
-			"reviewed_at": "2026-06-17T21:57:56.201564492Z"
+			"definition_hash": "02ecf20630a6db4e31d03865754d454cdcc8c8e011029b85132b57e91ebabe40",
+			"reviewed_at": "2026-06-19T20:11:34.642590669Z"
 		},
 		{
 			"function_name": "ServeHTTP",
 			"receiver": "GitProxy",
-			"documentation_hash": "a39ba2e7b2793628ddd40201c793346f377d891bb303c2d0ca52644ad0b2188f",
-			"definition_hash": "3e38e787f4abbf4fcd95c6fe452c1a8357e574438210fb6074855cf21774130f",
-			"reviewed_at": "2026-06-17T21:57:56.203495632Z"
+			"documentation_hash": "dcac4ba88b4c83c2415aaf7467d1d18dd7dd8d496e677c21fd4707c38337bedd",
+			"definition_hash": "fca68f5e02946df7d6af0bb773169f5716cf3edfa3b3dcf6b8f641032417bb1e",
+			"reviewed_at": "2026-06-19T20:11:34.651439391Z"
 		},
 		{
 			"function_name": "direct",
 			"receiver": "GitProxy",
-			"documentation_hash": "d14aa034c6565f9de516f3c80cdb41351dabb7ed87934f1e9faef50385aff22c",
-			"definition_hash": "010bc34875663802e9729f8166625c25a6f2fc2f49fd61a6fbc1b02dd0ca1403",
-			"reviewed_at": "2026-06-19T15:52:00.877425523Z"
+			"documentation_hash": "edac439d6df8c5f4f9ec449671f3172530dee244c32f40ec8b92242291063d5e",
+			"definition_hash": "f3a468c6adc8ab85a9310a7d42292a8b5380b006688d4f86d56f5e9cafc79e6e",
+			"reviewed_at": "2026-06-19T20:11:34.673387163Z"
 		},
 		{
 			"function_name": "parseGitRequest",
@@ -49,6 +49,13 @@
 			"documentation_hash": "6c86970d0aa19464ccaee78aee26f1d9ae3e30d58368ec5eff55e7da3c1efd4d",
 			"definition_hash": "3cef22995197168b1a7fb22ff5ce541b59e0c3888e68f1aaf6e63d98da0de800",
 			"reviewed_at": "2026-06-17T21:57:56.206386135Z"
+		},
+		{
+			"function_name": "publiclyCloneable",
+			"receiver": "GitProxy",
+			"documentation_hash": "201832fc33678107968ee2115bc8ae7e2e4cc4f72a0e40c82a7ecdcbdc698f4a",
+			"definition_hash": "885c54e3988dd01ce847390908b9a5f55bb9868dc2f673be97fbb1a429f08edc",
+			"reviewed_at": "2026-06-19T20:11:34.663691739Z"
 		}
 	]
 }

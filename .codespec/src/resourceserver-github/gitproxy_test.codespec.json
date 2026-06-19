@@ -28,8 +28,8 @@
 		{
 			"function_name": "TestGitProxyForwardsWithPAT",
 			"documentation_hash": "92ac64f68499e732df89d8ca4a3fea01336255ecc8fd1bb31a7da29e4f1a46c5",
-			"definition_hash": "ea3aa184a4e2a9816ac820b55d53dd9c4cd25653eaeb2261bc7c6d7949b4ac3f",
-			"reviewed_at": "2026-06-17T21:57:56.208231185Z"
+			"definition_hash": "759edc9b63b4040ab48ff55d5957cc9a14166b868b3b32316e060bf6fddcc0f9",
+			"reviewed_at": "2026-06-19T20:11:46.338495513Z"
 		},
 		{
 			"function_name": "TestGitProxyRejectsBadPath",
@@ -57,9 +57,27 @@
 		},
 		{
 			"function_name": "TestGitProxyForwardsAnonymouslyWithoutPAT",
-			"documentation_hash": "7f65a3247780e1b4567a600c4a124a313a3c651717332bfb11deaace2a9b0f00",
-			"definition_hash": "ca7f34a1b2bea681cf1014a8a982c60c3a6103de94cc589aba8d651fec2ffc7d",
-			"reviewed_at": "2026-06-19T15:52:18.016855531Z"
+			"documentation_hash": "e28c007769a81b00bdb99baa3e8b940e4ee5ca15edf931a588d395d7f8cd2a73",
+			"definition_hash": "81c7cff526fc37e7a9e8c26516758188e7dd2a49835aa52bf724b9dcecfb4c3d",
+			"reviewed_at": "2026-06-19T20:11:46.341852554Z"
+		},
+		{
+			"function_name": "TestGitProxyServesPublicRepoWithoutGrant",
+			"documentation_hash": "fc2ba982c7e0b64c9b78f7bb9873b553f72bd26eaf43265b660b4b04481443ef",
+			"definition_hash": "852e5c1c44476bb79ad0bc9ed3a1bf42554aba8136eaf532dc671f0aef87c398",
+			"reviewed_at": "2026-06-19T20:11:46.346212881Z"
+		},
+		{
+			"function_name": "TestGitProxyPrivateRepoStillAuthorizes",
+			"documentation_hash": "bdea5586481d51349692e7a2f5e182cf8fd9c79defa854829c1cfe21845ffff5",
+			"definition_hash": "286e79935b4f9eefdb191eec2be225fd48063f1ef50e417f36392542e2a83723",
+			"reviewed_at": "2026-06-19T20:11:46.352350026Z"
+		},
+		{
+			"function_name": "TestGitProxyPushAlwaysAuthorizes",
+			"documentation_hash": "a3c8e4a67179560bfc9f9b1a627285ef77c05c244b252855d9a2313efdd90b80",
+			"definition_hash": "5e3ee8b166e16a0ce32190e25eabcccbe421f750766f4d6e943c2a424170c4f4",
+			"reviewed_at": "2026-06-19T20:11:46.359961316Z"
 		}
 	]
 }
