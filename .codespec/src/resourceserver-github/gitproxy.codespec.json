@@ -22,9 +22,9 @@
 		{
 			"function_name": "direct",
 			"receiver": "GitProxy",
-			"documentation_hash": "353cb602a6cf5f34273eb54c44718dbc91544d11e4458cf7be05d0c759e30414",
-			"definition_hash": "693d1d1c7a707a9d21eb0d19eb1cf4e61d97b6af4a8bc73d34730d76f786752c",
-			"reviewed_at": "2026-06-17T21:57:56.204895833Z"
+			"documentation_hash": "d14aa034c6565f9de516f3c80cdb41351dabb7ed87934f1e9faef50385aff22c",
+			"definition_hash": "010bc34875663802e9729f8166625c25a6f2fc2f49fd61a6fbc1b02dd0ca1403",
+			"reviewed_at": "2026-06-19T15:52:00.877425523Z"
 		},
 		{
 			"function_name": "parseGitRequest",

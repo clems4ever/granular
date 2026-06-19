@@ -54,6 +54,12 @@
 			"documentation_hash": "90040b9d7d2a38f3661db4e651762e2aa31a8686dee90d4203967f3f20fc2576",
 			"definition_hash": "b90fe55ef1ca17fdf26247d95a7c2cbe796ef49c0f9a4569e719c047ba3f0cc8",
 			"reviewed_at": "2026-06-17T21:57:56.210624528Z"
+		},
+		{
+			"function_name": "TestGitProxyForwardsAnonymouslyWithoutPAT",
+			"documentation_hash": "7f65a3247780e1b4567a600c4a124a313a3c651717332bfb11deaace2a9b0f00",
+			"definition_hash": "ca7f34a1b2bea681cf1014a8a982c60c3a6103de94cc589aba8d651fec2ffc7d",
+			"reviewed_at": "2026-06-19T15:52:18.016855531Z"
 		}
 	]
 }

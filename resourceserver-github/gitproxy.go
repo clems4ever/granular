@@ -107,17 +107,27 @@ func (g *GitProxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // direct rewrites an outbound request onto the GitHub upstream: it strips the /git/ mount
 // prefix, points the request at the upstream host, and replaces any client credentials
-// with HTTP basic auth carrying the server-held PAT.
+// with HTTP basic auth carrying the server-held PAT. When no PAT is configured it forwards
+// anonymously instead of sending an empty "x-access-token:" credential — GitHub rejects an
+// invalid credential with 401 even for a public repo, which would otherwise clone fine
+// without auth.
 //
 // @arg req The outbound request the ReverseProxy is about to send.
 //
 // @testcase TestGitProxyForwardsWithPAT checks the rewritten path and injected PAT.
+// @testcase TestGitProxyForwardsAnonymouslyWithoutPAT forwards with no auth when the PAT is empty.
 func (g *GitProxy) direct(req *http.Request) {
 	req.URL.Scheme = g.upstream.Scheme
 	req.URL.Host = g.upstream.Host
 	req.Host = g.upstream.Host
 	req.URL.Path = "/" + strings.TrimPrefix(req.URL.Path, "/git/")
-	req.Header.Set("Authorization", "Basic "+basicAuth("x-access-token", g.pat))
+	if g.pat != "" {
+		req.Header.Set("Authorization", "Basic "+basicAuth("x-access-token", g.pat))
+		return
+	}
+	// No PAT: drop the client's subject token so it never leaks upstream, and let the
+	// request reach GitHub anonymously so public repos remain cloneable.
+	req.Header.Del("Authorization")
 }
 
 // parseGitRequest extracts the owner/repo and the git service from a /git/ request. The

@@ -113,6 +113,34 @@ func TestGitProxyForwardsWithPAT(t *testing.T) {
 	}
 }
 
+// TestGitProxyForwardsAnonymouslyWithoutPAT checks that when no PAT is configured the proxy
+// forwards with no Authorization header at all, rather than an empty "x-access-token:"
+// credential. GitHub rejects an invalid credential with 401 even for a public repo, so
+// injecting one would turn a public-repo clone into an auth error.
+func TestGitProxyForwardsAnonymouslyWithoutPAT(t *testing.T) {
+	var gotAuth string
+	var hadAuth bool
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotAuth = r.Header.Get("Authorization")
+		_, hadAuth = r.Header["Authorization"]
+		io.WriteString(w, "refs")
+	}))
+	defer upstream.Close()
+
+	p := newGitProxy("", upstream.URL, &stubAuthorizer{allow: true})
+	r := httptest.NewRequest(http.MethodGet, "/git/clems4ever/granular.git/info/refs?service=git-upload-pack", nil)
+	r.Header.Set("Authorization", basicHeader("granular", "subtok"))
+	w := httptest.NewRecorder()
+	p.ServeHTTP(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", w.Code)
+	}
+	if hadAuth {
+		t.Fatalf("upstream received Authorization %q, want none (anonymous)", gotAuth)
+	}
+}
+
 // TestGitProxyRejectsBadPath checks a path with no .git/ segment is a 400.
 func TestGitProxyRejectsBadPath(t *testing.T) {
 	p := newGitProxy("pat", "http://upstream.invalid", &stubAuthorizer{allow: true})
