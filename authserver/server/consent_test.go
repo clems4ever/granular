@@ -57,6 +57,34 @@ func TestApprovePageRendersItems(t *testing.T) {
 	}
 }
 
+// TestApprovePageShowsGrantWhenDecided renders the grant content on an already-decided
+// proposal so the approver can review what was approved, while hiding the decision form.
+func TestApprovePageShowsGrantWhenDecided(t *testing.T) {
+	srv, h := newServer(t)
+	token := createSubject(t, h)
+	id := propose(t, h, token, "me@example.com")
+	if _, err := srv.store.Approve(id, time.Hour); err != nil {
+		t.Fatalf("approve: %v", err)
+	}
+
+	resp := do(t, h, http.MethodGet, "/proposal/"+id, nil, "", false)
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("GET /proposal/{id} = %d, want 200", resp.StatusCode)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	s := string(body)
+	if !strings.Contains(s, "View repo r") {
+		t.Fatal("decided consent page missing the grant content")
+	}
+	if !strings.Contains(s, "badge-approved") {
+		t.Fatal("decided consent page missing the approved status badge")
+	}
+	if strings.Contains(s, `name="decision"`) {
+		t.Fatal("decided consent page should not render the approve/reject form")
+	}
+}
+
 // TestApprovePageNotFound returns 404 for an unknown proposal id.
 func TestApprovePageNotFound(t *testing.T) {
 	_, h := newServer(t)

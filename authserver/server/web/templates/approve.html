@@ -2,7 +2,7 @@
 {{define "container-class"}} narrow{{end}}
 {{define "content"}}
 <div class="card">
-  <p class="eyebrow">Approval requested</p>
+  <p class="eyebrow">{{if .Decided}}Past request{{else}}Approval requested{{end}}</p>
   <h1>Review this request</h1>
 
   {{if .Decided}}
@@ -10,11 +10,14 @@
       This request has already been
       <span class="badge badge-{{.Status}}">{{.Status}}</span>.
     </p>
+    <p class="kv">Approver: <code>{{.Approver}}</code></p>
+    <p class="block-label" style="margin-top:1.2rem">What was requested</p>
   {{else}}
     <p class="lead">An agent is asking permission to perform the {{if gt (len .Items) 1}}actions{{else}}action{{end}}
       below. Nothing happens until you approve, and the grant expires after the time you choose.</p>
     <p class="kv">Approver: <code>{{.Approver}}</code></p>
     {{if .ExpiresIn}}<p class="expiry-notice">⏱ This request is only valid <strong>{{.ExpiresIn}}</strong> — after that it is automatically revoked and the agent must request again.</p>{{end}}
+  {{end}}
 
     {{range .Items}}
     <section class="review-block">
@@ -52,6 +55,7 @@
     </section>
     {{end}}
 
+    {{if not .Decided}}
     <form method="post" action="/proposal/{{.ID}}">
       <div class="form-row">
         <label for="ttl">Grant valid for</label>
