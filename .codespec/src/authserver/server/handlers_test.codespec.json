@@ -65,6 +65,12 @@
 			"documentation_hash": "710a463b4aeb190a8943fadd8d065520c0bf687b0d1a3f49b571bb50c8e4a0a0",
 			"definition_hash": "8212c50d4023ec8e78e489261c51198245dee716ecd6e4b5d8f09cfb03ef807d",
 			"reviewed_at": "2026-06-17T17:53:52.370390927Z"
+		},
+		{
+			"function_name": "TestApprovePageShowsAgentReason",
+			"documentation_hash": "8d5201a66805bc65adef1093175abd35d4a85b8fb7acb2b4f595e6edf4cc9ee8",
+			"definition_hash": "69708f58f51d0c0118cc104ac604d9cf6dccbdd0e2ff0dcaa8d423649c643754",
+			"reviewed_at": "2026-06-19T16:15:43.414149136Z"
 		}
 	]
 }

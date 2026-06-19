@@ -11,13 +11,22 @@
       <span class="badge badge-{{.Status}}">{{.Status}}</span>.
     </p>
     <p class="kv">Approver: <code>{{.Approver}}</code></p>
-    <p class="block-label" style="margin-top:1.2rem">What was requested</p>
   {{else}}
     <p class="lead">An agent is asking permission to perform the {{if gt (len .Items) 1}}actions{{else}}action{{end}}
       below. Nothing happens until you approve, and the grant expires after the time you choose.</p>
     <p class="kv">Approver: <code>{{.Approver}}</code></p>
     {{if .ExpiresIn}}<p class="expiry-notice">⏱ This request is only valid <strong>{{.ExpiresIn}}</strong> — after that it is automatically revoked and the agent must request again.</p>{{end}}
   {{end}}
+
+    {{if .Reason}}
+    <section class="agent-reason">
+      <p class="block-label">Why the agent says it needs this</p>
+      <blockquote class="content-body">{{.Reason}}</blockquote>
+      <p class="hint">Context provided by the requesting agent — it is unsigned and unverified. Approve based on the exact permissions below.</p>
+    </section>
+    {{end}}
+
+    {{if .Decided}}<p class="block-label" style="margin-top:1.2rem">What was requested</p>{{end}}
 
     {{range .Items}}
     <section class="review-block">

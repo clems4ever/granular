@@ -66,7 +66,7 @@ func runRequest(ctx context.Context, a *App, req resourceserver.GrantRequest, ap
 	if err != nil {
 		return err
 	}
-	p, err := a.c.Submit(ctx, approver, []proposal.SignedGrantRequest{signed})
+	p, err := a.c.Submit(ctx, approver, "", []proposal.SignedGrantRequest{signed})
 	if err != nil {
 		return err
 	}

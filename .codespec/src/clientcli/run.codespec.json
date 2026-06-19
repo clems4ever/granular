@@ -38,9 +38,9 @@
 		},
 		{
 			"function_name": "runPropose",
-			"documentation_hash": "e07a290daebb9274f0544d2791cdf2c9185f5ca171f72d564d1f0a4362556d25",
-			"definition_hash": "4cf14ec2877790951946d1bf79462f1d2a4dba27a4312ce0690a60cf73cd682f",
-			"reviewed_at": "2026-06-17T11:00:14.416091521Z"
+			"documentation_hash": "64cb46d8e0b861deba8bb0e87cff0c00f6c8ede39f57e467c5ccd2f5b101fb19",
+			"definition_hash": "60ee610829c0c0cdfc9b226fcb073cc97bd93b57b7987833a9c2c7bc3f4feeb4",
+			"reviewed_at": "2026-06-19T16:17:28.741736369Z"
 		},
 		{
 			"function_name": "readSignedRequests",
@@ -119,6 +119,12 @@
 			"documentation_hash": "8d49b573bd6520f76532cd11f4b41ffd0f6e50b117cfcc3a7194762f82dc92be",
 			"definition_hash": "6e9a4c7134c47c7779c95b0bb2f4d26f83df3018c330f963ced471d164cf9884",
 			"reviewed_at": "2026-06-17T15:49:45.820951108Z"
+		},
+		{
+			"function_name": "runRevokeGrants",
+			"documentation_hash": "a1b52af5cb0785d9a3b6fef44046671d56ee3f83c4b6e735056327305cada164",
+			"definition_hash": "c9eb4c0512b15fa3bc72167aca2439b036c51636f2c4a309edb6849f5aae8666",
+			"reviewed_at": "2026-06-19T16:17:28.740551233Z"
 		}
 	]
 }

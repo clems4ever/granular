@@ -20,6 +20,7 @@ type Proposal struct {
 // proposalSubmit is the body posted to the AS POST /api/proposals endpoint.
 type proposalSubmit struct {
 	ApproverEmail string                        `json:"approver_email"`
+	Reason        string                        `json:"reason,omitempty"`
 	Items         []proposal.SignedGrantRequest `json:"items"`
 }
 
@@ -65,17 +66,19 @@ func (c *Client) Sign(ctx context.Context, resourceServerID string, req resource
 // Submit packs one or more resource server-signed grant requests into a proposal and submits it
 // to the AS under the client's subject token, returning the proposal id and the approval
 // URL to hand to the user. The signed items may come from different resource servers; the AS
-// verifies each one's signature independently.
+// verifies each one's signature independently. The optional reason is unsigned context shown
+// to the approver explaining why the grants are needed.
 //
 // @arg ctx Context for cancellation.
 // @arg approverEmail The email of the human who must approve.
+// @arg reason The optional, unsigned context explaining why the grants are needed.
 // @arg items The resource server-signed grant requests to bundle.
 // @return Proposal The submitted proposal's id and approval URL.
 // @error ErrNoToken when no subject token is configured.
 // @error error when the approver/items are missing or the AS rejects the proposal.
 //
 // @testcase TestSubmitSendsBundle submits a signed bundle to the AS.
-func (c *Client) Submit(ctx context.Context, approverEmail string, items []proposal.SignedGrantRequest) (Proposal, error) {
+func (c *Client) Submit(ctx context.Context, approverEmail, reason string, items []proposal.SignedGrantRequest) (Proposal, error) {
 	var out Proposal
 	if c.token == "" {
 		return out, ErrNoToken
@@ -89,6 +92,7 @@ func (c *Client) Submit(ctx context.Context, approverEmail string, items []propo
 	var res proposalResult
 	status, err := c.doJSON(ctx, http.MethodPost, c.asURL+"/api/proposals", c.token, proposalSubmit{
 		ApproverEmail: approverEmail,
+		Reason:        reason,
 		Items:         items,
 	}, &res)
 	if err != nil {

@@ -223,7 +223,7 @@ func TestSubmitSendsBundle(t *testing.T) {
 	if err != nil {
 		t.Fatalf("sign: %v", err)
 	}
-	p, err := c.Submit(context.Background(), "approver@example.com", []proposal.SignedGrantRequest{signed})
+	p, err := c.Submit(context.Background(), "approver@example.com", "agent needs to open a PR", []proposal.SignedGrantRequest{signed})
 	if err != nil {
 		t.Fatalf("submit: %v", err)
 	}
@@ -233,12 +233,15 @@ func TestSubmitSendsBundle(t *testing.T) {
 	if got.ApproverEmail != "approver@example.com" || len(got.Items) != 1 {
 		t.Fatalf("AS received %+v", got)
 	}
+	if got.Reason != "agent needs to open a PR" {
+		t.Fatalf("AS received reason %q, want the submitted reason", got.Reason)
+	}
 	if !got.Items[0].Verify([]byte(rsSecret)) || got.Items[0].ResourceServerID != "g1" {
 		t.Fatal("submitted item is not a valid g1 signature")
 	}
 
 	noTok := New(Config{ASURL: as.URL, ResourceServers: []ResourceServer{{ID: "g1", BaseURL: g1.URL}}})
-	if _, err := noTok.Submit(context.Background(), "a@b.c", []proposal.SignedGrantRequest{signed}); !errors.Is(err, ErrNoToken) {
+	if _, err := noTok.Submit(context.Background(), "a@b.c", "", []proposal.SignedGrantRequest{signed}); !errors.Is(err, ErrNoToken) {
 		t.Fatalf("want ErrNoToken, got %v", err)
 	}
 }

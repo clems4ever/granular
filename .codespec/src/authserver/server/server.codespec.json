@@ -17,15 +17,15 @@
 			"function_name": "Handler",
 			"receiver": "Server",
 			"documentation_hash": "e4b02e73163179adebe24952b4c53b8e12572f93e4e80c270e803c18dc358c33",
-			"definition_hash": "d18206d2f96ae0187fe6a6104c5a390fe74430ae844685586ba96f568ea870c3",
-			"reviewed_at": "2026-06-17T19:06:15.618223955Z"
+			"definition_hash": "a35e9ac64cad205753bfce8e62e8d4046a42341e1491ee3202714ef138bc5bfb",
+			"reviewed_at": "2026-06-19T16:16:31.837306918Z"
 		},
 		{
 			"function_name": "handleProposal",
 			"receiver": "Server",
-			"documentation_hash": "6e71dc7a0056faec9b9321c68b66e830793e941e53d8a7722e42b1371dc4487b",
-			"definition_hash": "7a069b2b66b705c8a67b1bda62b5f040e3e65bf536624fef97de9235a8fe9648",
-			"reviewed_at": "2026-06-17T15:18:49.663397184Z"
+			"documentation_hash": "caacbaa010a856275f65d3792914ea329c701ecfab3bca08e3724b2d21fc2d41",
+			"definition_hash": "dcab0145e6ed95f22c3cdbf2021956b50b8766cbfb5224e973170f7e3212c93e",
+			"reviewed_at": "2026-06-19T16:16:31.827472311Z"
 		},
 		{
 			"function_name": "handleVerify",
@@ -156,6 +156,13 @@
 			"documentation_hash": "028a56a6cea42373736e162f20389a87a6bc0c6765f34974cc3c96b7cb97c654",
 			"definition_hash": "a8ab78ad1c026b8333682e326602674ed13c772cdf8c089f136156ebcc758b8c",
 			"reviewed_at": "2026-06-17T17:52:09.882595676Z"
+		},
+		{
+			"function_name": "handleRevokeMyGrants",
+			"receiver": "Server",
+			"documentation_hash": "50ef9f0b32dae73d3c3038d84c508039687f18e2be86894b2b1c5bbfd380a7f7",
+			"definition_hash": "11966b65ede7d0317effe725828fa647d9d9784dba27a512c44af1b361621eb4",
+			"reviewed_at": "2026-06-19T16:16:31.850015524Z"
 		}
 	]
 }

@@ -45,6 +45,7 @@ type itemView struct {
 type approvalView struct {
 	ID         string
 	Approver   string
+	Reason     string // optional, unsigned client-authored context for why the grants are needed
 	Items      []itemView
 	Decided    bool
 	Status     store.Status
@@ -239,6 +240,7 @@ func (s *Server) handleApprovePage(w http.ResponseWriter, r *http.Request) {
 	_ = s.render(w, r, "approve", approvalView{
 		ID:         p.ID,
 		Approver:   p.ApproverEmail,
+		Reason:     p.Reason,
 		Items:      viewItems(p),
 		Decided:    status != store.StatusPending,
 		Status:     status,

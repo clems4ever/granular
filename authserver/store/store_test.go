@@ -53,7 +53,7 @@ func TestSubjectLifecycle(t *testing.T) {
 func TestProposalApprovalAttachesGrants(t *testing.T) {
 	s := openTemp(t)
 	token, _ := s.CreateSubject()
-	p, err := s.CreateProposal(token, "me@example.com", []proposal.SignedGrantRequest{item()}, time.Hour)
+	p, err := s.CreateProposal(token, "me@example.com", "", []proposal.SignedGrantRequest{item()}, time.Hour)
 	if err != nil {
 		t.Fatalf("CreateProposal: %v", err)
 	}
@@ -73,7 +73,7 @@ func TestProposalApprovalAttachesGrants(t *testing.T) {
 func TestApproveTwiceFails(t *testing.T) {
 	s := openTemp(t)
 	token, _ := s.CreateSubject()
-	p, _ := s.CreateProposal(token, "me@example.com", []proposal.SignedGrantRequest{item()}, time.Hour)
+	p, _ := s.CreateProposal(token, "me@example.com", "", []proposal.SignedGrantRequest{item()}, time.Hour)
 	if _, err := s.Approve(p.ID, time.Hour); err != nil {
 		t.Fatalf("first approve: %v", err)
 	}
@@ -86,7 +86,7 @@ func TestApproveTwiceFails(t *testing.T) {
 func TestRejectProposal(t *testing.T) {
 	s := openTemp(t)
 	token, _ := s.CreateSubject()
-	p, _ := s.CreateProposal(token, "me@example.com", []proposal.SignedGrantRequest{item()}, time.Hour)
+	p, _ := s.CreateProposal(token, "me@example.com", "", []proposal.SignedGrantRequest{item()}, time.Hour)
 	if _, err := s.Reject(p.ID); err != nil {
 		t.Fatalf("Reject: %v", err)
 	}
@@ -108,7 +108,7 @@ func TestGetMissingProposal(t *testing.T) {
 func TestExpiredGrantDropped(t *testing.T) {
 	s := openTemp(t)
 	token, _ := s.CreateSubject()
-	p, _ := s.CreateProposal(token, "me@example.com", []proposal.SignedGrantRequest{item()}, time.Hour)
+	p, _ := s.CreateProposal(token, "me@example.com", "", []proposal.SignedGrantRequest{item()}, time.Hour)
 	if _, err := s.Approve(p.ID, time.Millisecond); err != nil {
 		t.Fatalf("Approve: %v", err)
 	}
@@ -127,19 +127,19 @@ func TestAllGrantsAndProposals(t *testing.T) {
 
 	// An approved proposal with a long-lived grant.
 	tokA, _ := s.CreateSubject()
-	pA, _ := s.CreateProposal(tokA, "a@example.com", []proposal.SignedGrantRequest{item()}, time.Hour)
+	pA, _ := s.CreateProposal(tokA, "a@example.com", "", []proposal.SignedGrantRequest{item()}, time.Hour)
 	if _, err := s.Approve(pA.ID, 24*time.Hour); err != nil {
 		t.Fatalf("approve A: %v", err)
 	}
 	// An approved proposal whose grant expires almost immediately.
 	tokB, _ := s.CreateSubject()
-	pB, _ := s.CreateProposal(tokB, "b@example.com", []proposal.SignedGrantRequest{item()}, time.Hour)
+	pB, _ := s.CreateProposal(tokB, "b@example.com", "", []proposal.SignedGrantRequest{item()}, time.Hour)
 	if _, err := s.Approve(pB.ID, time.Millisecond); err != nil {
 		t.Fatalf("approve B: %v", err)
 	}
 	// A rejected proposal (history only, no grant).
 	tokC, _ := s.CreateSubject()
-	pC, _ := s.CreateProposal(tokC, "c@example.com", []proposal.SignedGrantRequest{item()}, time.Hour)
+	pC, _ := s.CreateProposal(tokC, "c@example.com", "", []proposal.SignedGrantRequest{item()}, time.Hour)
 	if _, err := s.Reject(pC.ID); err != nil {
 		t.Fatalf("reject C: %v", err)
 	}
@@ -170,9 +170,9 @@ func TestAllGrantsAndProposals(t *testing.T) {
 func TestProposalExpires(t *testing.T) {
 	s := openTemp(t)
 	tok1, _ := s.CreateSubject()
-	p1, _ := s.CreateProposal(tok1, "a@example.com", []proposal.SignedGrantRequest{item()}, time.Minute)
+	p1, _ := s.CreateProposal(tok1, "a@example.com", "", []proposal.SignedGrantRequest{item()}, time.Minute)
 	tok2, _ := s.CreateSubject()
-	p2, _ := s.CreateProposal(tok2, "b@example.com", []proposal.SignedGrantRequest{item()}, time.Minute)
+	p2, _ := s.CreateProposal(tok2, "b@example.com", "", []proposal.SignedGrantRequest{item()}, time.Minute)
 
 	if p1.Expired(time.Now()) {
 		t.Fatal("a fresh proposal reports expired")
@@ -205,7 +205,7 @@ func TestProposalExpires(t *testing.T) {
 func TestDestroySubject(t *testing.T) {
 	s := openTemp(t)
 	token, _ := s.CreateSubject()
-	p, _ := s.CreateProposal(token, "me@example.com", []proposal.SignedGrantRequest{item()}, time.Hour)
+	p, _ := s.CreateProposal(token, "me@example.com", "", []proposal.SignedGrantRequest{item()}, time.Hour)
 	_, _ = s.Approve(p.ID, time.Hour)
 	n, err := s.DestroySubject(token)
 	if err != nil || n != 1 {
@@ -222,7 +222,7 @@ func TestRevokeGrantsForToken(t *testing.T) {
 	token, _ := s.CreateSubject()
 	// Attach two grants to the subject across two approved proposals.
 	for i := 0; i < 2; i++ {
-		p, _ := s.CreateProposal(token, "me@example.com", []proposal.SignedGrantRequest{item()}, time.Hour)
+		p, _ := s.CreateProposal(token, "me@example.com", "", []proposal.SignedGrantRequest{item()}, time.Hour)
 		_, _ = s.Approve(p.ID, time.Hour)
 	}
 	if grants, _ := s.SubjectForToken(token); len(grants) != 2 {
@@ -250,11 +250,11 @@ func TestRevokeGrantsForToken(t *testing.T) {
 func TestRevokeGrantsForTokenScopedToToken(t *testing.T) {
 	s := openTemp(t)
 	mine, _ := s.CreateSubject()
-	pm, _ := s.CreateProposal(mine, "me@example.com", []proposal.SignedGrantRequest{item()}, time.Hour)
+	pm, _ := s.CreateProposal(mine, "me@example.com", "", []proposal.SignedGrantRequest{item()}, time.Hour)
 	_, _ = s.Approve(pm.ID, time.Hour)
 
 	other, _ := s.CreateSubject()
-	po, _ := s.CreateProposal(other, "me@example.com", []proposal.SignedGrantRequest{item()}, time.Hour)
+	po, _ := s.CreateProposal(other, "me@example.com", "", []proposal.SignedGrantRequest{item()}, time.Hour)
 	_, _ = s.Approve(po.ID, time.Hour)
 
 	if n, err := s.RevokeGrantsForToken(mine); err != nil || n != 1 {
@@ -269,11 +269,11 @@ func TestRevokeGrantsForTokenScopedToToken(t *testing.T) {
 func TestPurgeExpired(t *testing.T) {
 	s := openTemp(t)
 	live, _ := s.CreateSubject()
-	pl, _ := s.CreateProposal(live, "me@example.com", []proposal.SignedGrantRequest{item()}, time.Hour)
+	pl, _ := s.CreateProposal(live, "me@example.com", "", []proposal.SignedGrantRequest{item()}, time.Hour)
 	_, _ = s.Approve(pl.ID, time.Hour)
 
 	dead, _ := s.CreateSubject()
-	pd, _ := s.CreateProposal(dead, "me@example.com", []proposal.SignedGrantRequest{item()}, time.Hour)
+	pd, _ := s.CreateProposal(dead, "me@example.com", "", []proposal.SignedGrantRequest{item()}, time.Hour)
 	_, _ = s.Approve(pd.ID, time.Millisecond)
 
 	s.now = func() time.Time { return time.Now().Add(time.Minute) }
@@ -287,7 +287,7 @@ func TestPurgeExpired(t *testing.T) {
 func TestStartCleanupPurges(t *testing.T) {
 	s := openTemp(t)
 	token, _ := s.CreateSubject()
-	p, _ := s.CreateProposal(token, "me@example.com", []proposal.SignedGrantRequest{item()}, time.Hour)
+	p, _ := s.CreateProposal(token, "me@example.com", "", []proposal.SignedGrantRequest{item()}, time.Hour)
 	_, _ = s.Approve(p.ID, time.Millisecond)
 	s.now = func() time.Time { return time.Now().Add(time.Minute) }
 

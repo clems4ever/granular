@@ -52,12 +52,15 @@ type subjectRecord struct {
 
 // Proposal is a bundle of resource server-signed grant requests a holder submitted for
 // approval against its subject token. ApproverEmail names the human who must sign in
-// to decide it. A proposal is only approvable while pending and before ExpiresAt; past
+// to decide it. Reason is the optional, client-authored context explaining why the grants
+// are needed; it is unsigned and shown to the approver verbatim, carrying no machine
+// meaning. A proposal is only approvable while pending and before ExpiresAt; past
 // that it is automatically revoked (StatusExpired).
 type Proposal struct {
 	ID            string                        `json:"id"`
 	Token         string                        `json:"token"`
 	ApproverEmail string                        `json:"approver_email"`
+	Reason        string                        `json:"reason,omitempty"`
 	Items         []proposal.SignedGrantRequest `json:"items"`
 	Status        Status                        `json:"status"`
 	CreatedAt     time.Time                     `json:"created_at"`
@@ -162,11 +165,13 @@ func (s *Store) SubjectExists(token string) bool {
 }
 
 // CreateProposal records a pending proposal against the subject token, carrying the
-// signed items and the approver's email. The proposal expires ttl after creation; once
-// expired it is automatically revoked and can no longer be approved.
+// signed items, the approver's email and the optional client-authored reason. The proposal
+// expires ttl after creation; once expired it is automatically revoked and can no longer
+// be approved.
 //
 // @arg token The subject the approved grants will attach to.
 // @arg approverEmail The human who must sign in to decide the proposal.
+// @arg reason The optional, unsigned context explaining why the grants are needed.
 // @arg items The resource server-signed grant requests bundled by the client.
 // @arg ttl How long the proposal may stay pending before it is automatically revoked.
 // @return *Proposal The stored proposal with its generated id, pending status and expiry.
@@ -174,12 +179,13 @@ func (s *Store) SubjectExists(token string) bool {
 //
 // @testcase TestProposalApprovalAttachesGrants creates and approves a proposal.
 // @testcase TestProposalExpires creates a proposal that lapses.
-func (s *Store) CreateProposal(token, approverEmail string, items []proposal.SignedGrantRequest, ttl time.Duration) (*Proposal, error) {
+func (s *Store) CreateProposal(token, approverEmail, reason string, items []proposal.SignedGrantRequest, ttl time.Duration) (*Proposal, error) {
 	now := s.now()
 	p := &Proposal{
 		ID:            s.newID(),
 		Token:         token,
 		ApproverEmail: approverEmail,
+		Reason:        reason,
 		Items:         items,
 		Status:        StatusPending,
 		CreatedAt:     now,

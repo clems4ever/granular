@@ -47,8 +47,8 @@
 			"function_name": "handleApprovePage",
 			"receiver": "Server",
 			"documentation_hash": "1d1abdc8d30f8adba488763c1c58236a23f90d08edddc627746300fc312f152d",
-			"definition_hash": "b0615114346fe09e34f6f9b5508f8d0c92d5dde62199ca678bac5663b0622860",
-			"reviewed_at": "2026-06-17T17:53:52.363322328Z"
+			"definition_hash": "5459fa8fe5b6693d9030dbe6d0e1b30ef8ea1a3d2d7d8ebc66f64faf3ae68f01",
+			"reviewed_at": "2026-06-19T16:15:30.705209383Z"
 		},
 		{
 			"function_name": "handleApproveSubmit",

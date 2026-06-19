@@ -252,6 +252,11 @@ summary:hover { color: var(--text); }
   padding: 1.2rem 1.3rem; margin: 1.1rem 0;
   background: var(--surface-soft);
 }
+.agent-reason {
+  border: 1px dashed var(--border-strong); border-radius: var(--radius-sm);
+  padding: 1rem 1.2rem; margin: 1.1rem 0;
+  background: var(--accent-soft);
+}
 .block-label {
   text-transform: uppercase; letter-spacing: .07em;
   font-size: .7rem; font-weight: 700; color: var(--muted); margin: 0 0 .5rem;

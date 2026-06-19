@@ -3,8 +3,8 @@
 		{
 			"function_name": "fakeAS",
 			"documentation_hash": "d3862888d20b382addfc51515cd15c77864dfae8e45bde01178494a860981512",
-			"definition_hash": "4f8257066311bea820a05205475ee406c4363913eb8b43aa6e632a838479ce1a",
-			"reviewed_at": "2026-06-17T15:49:45.817427365Z"
+			"definition_hash": "f284352ca09d6fac1335652df45dcaacffd3c955bd520feb6b07d45ed90c1f34",
+			"reviewed_at": "2026-06-19T16:17:28.737205176Z"
 		},
 		{
 			"function_name": "newClient",
@@ -15,8 +15,8 @@
 		{
 			"function_name": "TestCommandTree",
 			"documentation_hash": "c1e57b04f868fea558432ff202043079b936f719387449ac16995f9492655d9e",
-			"definition_hash": "48c9484934f3c067c3a19c63846d804e260bc149b9b6c7b9b60dd7af38368267",
-			"reviewed_at": "2026-06-17T15:49:45.818433366Z"
+			"definition_hash": "7db7b59b339f619be20626bd804d5d3d2d4cfac6f15f86aa8d437a100d788214",
+			"reviewed_at": "2026-06-19T16:17:28.738139826Z"
 		},
 		{
 			"function_name": "TestDefaultConfig",
@@ -81,8 +81,8 @@
 		{
 			"function_name": "TestRunPropose",
 			"documentation_hash": "0159dcf934434d07970e145a11bc6538db94b14f374b12e99723a0cbad142150",
-			"definition_hash": "b860129a1852e483c4d77ebde6b9abfa3755078247a66592d08bdc0bdf774ec6",
-			"reviewed_at": "2026-06-17T14:46:17.106697503Z"
+			"definition_hash": "b8d363ca1bd32941f70bd6e108efa5480c7ded45a174d3e9e87c72547019c072",
+			"reviewed_at": "2026-06-19T16:17:28.739699234Z"
 		},
 		{
 			"function_name": "TestRunCatalogJSON",
@@ -113,6 +113,12 @@
 			"documentation_hash": "ab6888895196d84ba93734c2f7ae38a42d4923966e50159524bf188cec1a1e8b",
 			"definition_hash": "54d0ebfd98c1adb247b357806a58115e120f59969cac2801468058294908b3bd",
 			"reviewed_at": "2026-06-17T15:49:45.819814253Z"
+		},
+		{
+			"function_name": "TestRunRevokeGrants",
+			"documentation_hash": "c4373d807fa17b8c9e8051d41dfe4ed4eb3ae391929e0c7e82502d94203a065c",
+			"definition_hash": "639aae8ae584795eddc50f310f276a4797f83d0fd9b9473e9179d997d02ab4e9",
+			"reviewed_at": "2026-06-19T16:17:28.738841606Z"
 		}
 	]
 }

@@ -596,22 +596,25 @@ func runSign(ctx context.Context, c *client.Client, resourceServerID string, req
 }
 
 // runPropose reads one or more stored signed grant requests, packs them into a single
-// proposal, submits it to the AS, and prints the approval URL to hand to the user.
+// proposal, submits it to the AS, and prints the approval URL to hand to the user. The
+// optional reason is unsigned context shown to the approver explaining why the grants are
+// needed.
 //
 // @arg ctx Context for cancellation.
 // @arg c The client SDK.
 // @arg approver The email of the human who must approve.
+// @arg reason The optional, unsigned context explaining why the grants are needed.
 // @arg files The paths of the stored signed grant requests to bundle.
 // @arg w The writer for user-facing output.
 // @error error when a file cannot be read or the submission fails.
 //
 // @testcase TestRunPropose bundles signed requests and prints the approval URL.
-func runPropose(ctx context.Context, c *client.Client, approver string, files []string, w io.Writer) error {
+func runPropose(ctx context.Context, c *client.Client, approver, reason string, files []string, w io.Writer) error {
 	items, err := readSignedRequests(files)
 	if err != nil {
 		return err
 	}
-	p, err := c.Submit(ctx, approver, items)
+	p, err := c.Submit(ctx, approver, reason, items)
 	if err != nil {
 		return err
 	}

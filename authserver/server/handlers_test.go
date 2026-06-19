@@ -58,6 +58,33 @@ func approve(t *testing.T, h http.Handler, id string) {
 	}
 }
 
+// TestApprovePageShowsAgentReason renders the client-authored reason on the consent screen
+// so the approver sees the context the agent gave for why it needs the grants.
+func TestApprovePageShowsAgentReason(t *testing.T) {
+	_, h := newServer(t)
+	token := createSubject(t, h)
+	const reason = "Opening a PR to fix the failing build"
+	pin, _ := json.Marshal(proposalInput{
+		ApproverEmail: "me@example.com",
+		Reason:        reason,
+		Items:         []proposal.SignedGrantRequest{signedItem()},
+	})
+	resp := do(t, h, http.MethodPost, "/api/proposals", pin, token, false)
+	if resp.StatusCode != http.StatusAccepted {
+		t.Fatalf("propose = %d, want 202", resp.StatusCode)
+	}
+	var out proposalOutput
+	_ = json.NewDecoder(resp.Body).Decode(&out)
+	resp.Body.Close()
+
+	page := do(t, h, http.MethodGet, "/proposal/"+out.ProposalID, nil, "", false)
+	defer page.Body.Close()
+	body, _ := io.ReadAll(page.Body)
+	if !strings.Contains(string(body), reason) {
+		t.Fatalf("consent page missing the agent-provided reason %q", reason)
+	}
+}
+
 // TestGetSubjectReturnsGrants returns the attached grants once a proposal is approved.
 func TestGetSubjectReturnsGrants(t *testing.T) {
 	_, h := newServer(t)

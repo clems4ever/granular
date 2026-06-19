@@ -3,8 +3,8 @@
 		{
 			"function_name": "fakeAS",
 			"documentation_hash": "01bd443d4abc18852beaef2c22ff8d1cee19dc9363b4e1b982574ad409490eab",
-			"definition_hash": "c3ebd4d9777b81387b842c759b24623837b9aab442096d690bfc8cd8c3677a26",
-			"reviewed_at": "2026-06-17T15:49:45.81502779Z"
+			"definition_hash": "3acc779dcd2997a6bf65626cd59256bed0bb65243481a4e92a3c4d31db7d708c",
+			"reviewed_at": "2026-06-19T16:17:28.734565109Z"
 		},
 		{
 			"function_name": "readCap",
@@ -33,8 +33,8 @@
 		{
 			"function_name": "TestSubmitSendsBundle",
 			"documentation_hash": "fd87665faa5b5cabea34ce4c9e72a55b67029111161c0601ae1df4fe537925f3",
-			"definition_hash": "e917f71f3571bad849f413c14fd0537604217fe2761177e61e9408b7a885679a",
-			"reviewed_at": "2026-06-17T14:46:17.086473908Z"
+			"definition_hash": "81b567181cc585069cab0778fc16ba125bbc83fc8e9bc1b5c029dc8ade6f61db",
+			"reviewed_at": "2026-06-19T16:17:28.735234953Z"
 		},
 		{
 			"function_name": "fakeResourceServer",
@@ -95,6 +95,18 @@
 			"documentation_hash": "aca21eba1e0bd6f04d2929517106f48f5ecb7bf7f7d511be3b6f3d7fc6cb1eac",
 			"definition_hash": "cd0360e8aa46f09013f70360995ed749d8da65047083b318ed33240d60840937",
 			"reviewed_at": "2026-06-17T21:58:02.247134203Z"
+		},
+		{
+			"function_name": "TestRevokeMyGrantsRevokesOwnGrants",
+			"documentation_hash": "4c23cf87202e5fdfa2c9efb5872a5a7f58c1de64303bc07a3186f2a4e6a9e545",
+			"definition_hash": "ead6f7bb6ea4d9c15ff8a902457c4da691c318c77ee8d47c18bfbb35a77e02b4",
+			"reviewed_at": "2026-06-19T16:17:28.735651588Z"
+		},
+		{
+			"function_name": "TestRevokeMyGrantsRequiresToken",
+			"documentation_hash": "5f34c215f92d1040be524b19a49ea567ee12fe7e98ac53b821e0ecfed8b30854",
+			"definition_hash": "9cfa24ce3c1e4d295b4c4277affbb89b4cde3a2bd9b54763bc66802805f9a94d",
+			"reviewed_at": "2026-06-19T16:17:28.73601561Z"
 		}
 	]
 }

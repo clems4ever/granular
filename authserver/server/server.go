@@ -46,9 +46,11 @@ type Server struct {
 const defaultRequestTTL = 15 * time.Minute
 
 // proposalInput is the body a client posts to POST /api/proposals: the email of the
-// human who must approve, and the resource server-signed grant requests to bundle.
+// human who must approve, an optional client-authored reason explaining why the grants are
+// needed, and the resource server-signed grant requests to bundle.
 type proposalInput struct {
 	ApproverEmail string                        `json:"approver_email"`
+	Reason        string                        `json:"reason,omitempty"`
 	Items         []proposal.SignedGrantRequest `json:"items"`
 }
 
@@ -398,10 +400,10 @@ func (s *Server) requireAdmin(w http.ResponseWriter, r *http.Request) bool {
 }
 
 // handleProposal handles POST /api/proposals: a client (authenticated by its subject
-// token) submits a bundle of resource server-signed grant requests and an approver email. The
-// AS verifies each item's HMAC against the named resource server's shared secret (so the
-// client cannot tamper or forge), records a pending proposal, and returns a review
-// URL for the approver.
+// token) submits a bundle of resource server-signed grant requests, an approver email and
+// an optional unsigned reason. The AS verifies each item's HMAC against the named resource
+// server's shared secret (so the client cannot tamper or forge), records a pending proposal
+// carrying the reason verbatim, and returns a review URL for the approver.
 //
 // @arg w The response writer.
 // @arg r The request whose body is a proposalInput, with a Bearer subject token.
@@ -439,7 +441,7 @@ func (s *Server) handleProposal(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	p, err := s.store.CreateProposal(token, strings.ToLower(in.ApproverEmail), in.Items, s.requestTTL)
+	p, err := s.store.CreateProposal(token, strings.ToLower(in.ApproverEmail), in.Reason, in.Items, s.requestTTL)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, proposalOutput{Error: err.Error()})
 		return

@@ -3,8 +3,8 @@
 		{
 			"function_name": "NewRootCmd",
 			"documentation_hash": "a7e0c969dcf98016fb51b807576a6203f477365fe4606b6473a7c38f8bde66eb",
-			"definition_hash": "e32b799859e40b5a728eb108e355efe41b937cc193884987a96cf8a7b8e8abb9",
-			"reviewed_at": "2026-06-17T15:49:45.81669453Z"
+			"definition_hash": "54802f2e2b123aff4d2ef5e700d0ee41bc085d34285416e01dea368687622b5f",
+			"reviewed_at": "2026-06-19T16:17:28.736459599Z"
 		},
 		{
 			"function_name": "load",
@@ -38,8 +38,8 @@
 			"function_name": "proposeCmd",
 			"receiver": "app",
 			"documentation_hash": "9939e94154ff7d0315fdea72bef591cb49bf0e01eb94ffab6201005e508f4f03",
-			"definition_hash": "45dd1a13ac739c01466490981481f08476f7a9108100166bcb548321697c60e2",
-			"reviewed_at": "2026-06-17T07:27:11.059342204Z"
+			"definition_hash": "31f3da99c84046e3637cee7796466cd0f25fdc5f61e6d6ac80b1e4dfe4a2bea0",
+			"reviewed_at": "2026-06-19T16:17:28.736864278Z"
 		},
 		{
 			"function_name": "templateCmd",
@@ -54,6 +54,13 @@
 			"documentation_hash": "7dac6430d337a19b712314428a118f64e3d00d2bf6b910c002e999105dbe9815",
 			"definition_hash": "cc377a89d83dc3c0ed64c28b95c785acd6cf631f2f9d5a5db4dea1a1eb8d6dc0",
 			"reviewed_at": "2026-06-17T15:49:45.816984375Z"
+		},
+		{
+			"function_name": "revokeCmd",
+			"receiver": "app",
+			"documentation_hash": "102c947e4d0695d5217fa57cb2120bedf40457823189282bf825aad8649e1b2e",
+			"definition_hash": "f1de2922100fd0f25e8e26c055f80f61667d77fdf03a319196195e88a03a31ea",
+			"reviewed_at": "2026-06-19T16:17:28.736671338Z"
 		}
 	]
 }

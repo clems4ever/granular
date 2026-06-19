@@ -215,16 +215,17 @@ func (a *app) revokeCmd() *cobra.Command {
 //
 // @testcase TestCommandTree checks the propose command is present.
 func (a *app) proposeCmd() *cobra.Command {
-	var approver string
+	var approver, reason string
 	cmd := &cobra.Command{
 		Use:   "propose <signed-request-file ...>",
 		Short: "Pack signed grant requests and submit them to the AS for approval",
 		Args:  cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runPropose(context.Background(), a.c, approver, args, a.out)
+			return runPropose(context.Background(), a.c, approver, reason, args, a.out)
 		},
 	}
 	cmd.Flags().StringVar(&approver, "approver", "", "email of the human who must approve (required)")
+	cmd.Flags().StringVar(&reason, "reason", "", "why these permissions are needed; shown to the approver on the consent screen (optional but recommended)")
 	_ = cmd.MarkFlagRequired("approver")
 	return cmd
 }

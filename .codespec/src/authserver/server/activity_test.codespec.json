@@ -53,6 +53,18 @@
 			"documentation_hash": "cf4461c9f6a5e15080c3e908c9e7ec630dfb060d2040ddd4f5bc9bccf7584f25",
 			"definition_hash": "65540e9a01bbb3483c546d2b040a73fe65536c30dfe149b28bbdbee98129ff91",
 			"reviewed_at": "2026-06-17T17:53:16.277493837Z"
+		},
+		{
+			"function_name": "TestRevokeMyGrantsRevokesOwnGrants",
+			"documentation_hash": "6f700c00895ccd6d4436202828080ff524bec0cf10b71e67730050b3dfee1fca",
+			"definition_hash": "12a44a62476e9e81f1319a80ae1e8811d86b14564746a547fa631d0f3bb02d94",
+			"reviewed_at": "2026-06-19T16:17:28.728232579Z"
+		},
+		{
+			"function_name": "TestRevokeMyGrantsRejectsUnknownToken",
+			"documentation_hash": "b5d1395f0a317a27500e96b4fc79475bb33af58f2eff9d27c1608322666c7a40",
+			"definition_hash": "9c0961f44d5f329757378e2c8877d653d2dcb5d7d2c23d480adddbd721af7b9a",
+			"reviewed_at": "2026-06-19T16:17:28.728713382Z"
 		}
 	]
 }

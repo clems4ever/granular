@@ -16,9 +16,9 @@
 		{
 			"function_name": "CreateProposal",
 			"receiver": "Store",
-			"documentation_hash": "ac868f8ac2b5503b9dc4c40ef7bd5526946314016277cf97dbc8b909114bcc36",
-			"definition_hash": "512bfbb4bb0bf041074e6a3ff7c70f026d6a0aec027399433e7693015b4008c2",
-			"reviewed_at": "2026-06-17T15:18:49.689763117Z"
+			"documentation_hash": "e8de19a51949a4184acced8dc694de7a9e90da732eb96191e1f2a4738c2d87a3",
+			"definition_hash": "e77e2186b231fde225147d705fb7ebe0b7c14e51b6f8b154e28bb551a0cab39c",
+			"reviewed_at": "2026-06-19T16:17:01.822200775Z"
 		},
 		{
 			"function_name": "GetProposal",
@@ -126,8 +126,21 @@
 			"function_name": "DestroySubject",
 			"receiver": "Store",
 			"documentation_hash": "d996f944497fe5a9eb8bf9b556b4334b8c860fc3ef19ff938e68ea2b4bd18f80",
-			"definition_hash": "d9dec7f8be3caef25f44c19eea50bbd57421972edba2be235af5202c79136eeb",
-			"reviewed_at": "2026-06-17T15:18:49.698818921Z"
+			"definition_hash": "86de865d15cc3d80852815295b07202e262db9e19a97d37613e19419d7796a34",
+			"reviewed_at": "2026-06-19T16:17:01.833127869Z"
+		},
+		{
+			"function_name": "RevokeGrantsForToken",
+			"receiver": "Store",
+			"documentation_hash": "ea7ba0e438088ce9781f7b838b969120eb6acad71c43562fe0b470c2878b79d2",
+			"definition_hash": "a49847cd7baf52827a14a5bb8b5ce4a00de0902eaf42d975de60c182f1357f1b",
+			"reviewed_at": "2026-06-19T16:17:01.844053314Z"
+		},
+		{
+			"function_name": "deleteGrantsForToken",
+			"documentation_hash": "733c10933cc34dccf0bd167f6eaa97fe99001cc82af41dbb4a98e1d0df6f9925",
+			"definition_hash": "df4833ec424bfa10e90705ec2ee451b0435848eb659505d6a08ca64344026c09",
+			"reviewed_at": "2026-06-19T16:17:01.858598216Z"
 		}
 	]
 }

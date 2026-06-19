@@ -366,7 +366,7 @@ func TestRunPropose(t *testing.T) {
 	}
 
 	var buf bytes.Buffer
-	if err := runPropose(context.Background(), c, "a@b.c", []string{f}, &buf); err != nil {
+	if err := runPropose(context.Background(), c, "a@b.c", "needs to read the repo", []string{f}, &buf); err != nil {
 		t.Fatalf("propose: %v", err)
 	}
 	if !strings.Contains(buf.String(), "/proposal/p1") {

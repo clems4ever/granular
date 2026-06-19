@@ -41,6 +41,13 @@
 			"documentation_hash": "1808c080c4e051ac09fafb80934b24d7b4ff42a00ce0d0e9b5bfbdc14e741bf5",
 			"definition_hash": "b2539b7b1169f47dfe2c64eb508eba8bbd85ca2c8ec1bf853f220cb5595a57b3",
 			"reviewed_at": "2026-06-17T15:49:45.816502044Z"
+		},
+		{
+			"function_name": "RevokeMyGrants",
+			"receiver": "Client",
+			"documentation_hash": "42a3593b718254f4ff3eb9d74d1c78f2a1101f48e2bc40f99872287d4a58ad1b",
+			"definition_hash": "f00953344a0b2e9c52494215b2cb944f6ee469696291a4f4bacb295b1b0799fc",
+			"reviewed_at": "2026-06-19T16:17:28.736284342Z"
 		}
 	]
 }
