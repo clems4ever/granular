@@ -1,0 +1,74 @@
+{
+	"functions": [
+		{
+			"function_name": "ServeHTTP",
+			"receiver": "RESTProxy",
+			"documentation_hash": "86716c35061e7177852e35c269a53e23631e3af64cc4f005d6ef715560493bc6",
+			"definition_hash": "ce80254b9dddd645421d3943dca378f541c75ef46559b395e941ce3f787e7f94",
+			"reviewed_at": "2026-06-19T20:33:57.530388763Z"
+		},
+		{
+			"function_name": "requirementFor",
+			"receiver": "RESTProxy",
+			"documentation_hash": "1857856e2af264a0ae1d32267267b2f2e09380b4a1cf218532efdb952a5c956a",
+			"definition_hash": "81de238613bb10add8aead307acb8542d542a92d57d96ecf6146e8335b6382f0",
+			"reviewed_at": "2026-06-19T20:33:57.541339068Z"
+		},
+		{
+			"function_name": "match",
+			"receiver": "RESTProxy",
+			"documentation_hash": "f5a04adbf32609c8697419256168308499c9f7af8504fd677601c7de807b07cb",
+			"definition_hash": "fa0130515e5bdeeca1bae43a458fbe9966db95151fef2a508b6aa6a3e72c5eda",
+			"reviewed_at": "2026-06-19T20:33:57.554166912Z"
+		},
+		{
+			"function_name": "direct",
+			"receiver": "RESTProxy",
+			"documentation_hash": "74de8a459acb782df324325b69c6122a383d960ebba8e88f14848a6b15347aa5",
+			"definition_hash": "386c96168a8e6e617e46cbe326ee13ed580dd4810c212b6ec5dcd1a419e829ad",
+			"reviewed_at": "2026-06-19T20:33:57.563552906Z"
+		},
+		{
+			"function_name": "NewRESTProxy",
+			"documentation_hash": "dd4b0917eec73dfe94fe2089c04440c670845e9ec936322b4d6d079012228200",
+			"definition_hash": "ee32e768c6667dc50d1a2eadbb555e57b53623f4ad9315a3289b427233a9872e",
+			"reviewed_at": "2026-06-19T20:33:57.568812216Z"
+		},
+		{
+			"function_name": "newRESTProxy",
+			"documentation_hash": "d07839399a26113d6eb09d32f176af85b48634cacabe338043f7113d4554e7cd",
+			"definition_hash": "c2170b1f3b234d826abdcafb39ff165b04097ce1936d4034d150129e0ec2555e",
+			"reviewed_at": "2026-06-19T20:33:57.576654715Z"
+		},
+		{
+			"function_name": "resourceFromPath",
+			"documentation_hash": "2652d5d1b8f0c7abbc19aca73ef134815e9015d8bc7289e0920b1b10ba8e894a",
+			"definition_hash": "35f2f76d75c22191b12934d44d2120bcb53af62f61f446ae0e7c58a961783d8a",
+			"reviewed_at": "2026-06-19T20:33:57.586540488Z"
+		},
+		{
+			"function_name": "bodyHash",
+			"documentation_hash": "e262b8d3bb24c468864b6c2bc5db21d16f8a1ca5e683c8349c8187e51a5fac54",
+			"definition_hash": "dc7f1be539262a501fc734e71e4293c83b830762adedcdc588f0757697c8dc7d",
+			"reviewed_at": "2026-06-19T20:33:57.594493528Z"
+		},
+		{
+			"function_name": "sha256hex",
+			"documentation_hash": "4c449f3715a5757e03f131c9d782f402f6a4469a5dc98e02bb12a5c61dfb734a",
+			"definition_hash": "de2414d059e741358f6809e21d8ae10dd032240d938cfd6399d748f733219577",
+			"reviewed_at": "2026-06-19T20:33:57.601520978Z"
+		},
+		{
+			"function_name": "segments",
+			"documentation_hash": "b1a17bd56e549d5f2e2a811563d89864806e1346e324c04a2e2baa110f61af4d",
+			"definition_hash": "8a182b2723939801007539cbaa0d17be52231763c3ce2b5f51c9d3170d27175a",
+			"reviewed_at": "2026-06-19T20:33:57.612325522Z"
+		},
+		{
+			"function_name": "atoi",
+			"documentation_hash": "9540d2de57b37a1dd793c6fa656d1b18ed4b687e6ebf1c7474277f0366bbc98d",
+			"definition_hash": "e03499179395296da928f3410e5b6b6439c85cdee4bc57527f9661b4d63de343",
+			"reviewed_at": "2026-06-19T20:33:57.624456209Z"
+		}
+	]
+}

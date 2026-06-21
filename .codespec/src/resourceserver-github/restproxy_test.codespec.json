@@ -1,0 +1,40 @@
+{
+	"functions": [
+		{
+			"function_name": "TestRESTProxyRefinedRouteMapsToAction",
+			"documentation_hash": "0143ddad5d8ca31ad4eced9768bb05e3b18ab1cbd3e63bf68c9f4786c74c5f73",
+			"definition_hash": "b90d36b52918476be6b212fdda61ed23724477f0986ab98d2c026ebe21461186",
+			"reviewed_at": "2026-06-19T20:34:07.269984523Z"
+		},
+		{
+			"function_name": "TestRESTProxyDefaultMapping",
+			"documentation_hash": "a34eb1bdb9cfc0bc8fb722430dfd1193a1b7ffd33f332c22314d8a7a2583b7c8",
+			"definition_hash": "d2e27dbc2138efb279986b2d9496eecccb02d365e472167bc45b860d43038ac9",
+			"reviewed_at": "2026-06-19T20:34:07.277303012Z"
+		},
+		{
+			"function_name": "TestRESTProxyDeniesUnauthorized",
+			"documentation_hash": "e3c49250482204ee59a488081c9006cccc798ab57ffd1d67bebfa60c0313084b",
+			"definition_hash": "6696d575b1758174eda14b5ff61b2c5c3cc42bee1ec40ac2343d50a185d9579a",
+			"reviewed_at": "2026-06-19T20:34:07.283307232Z"
+		},
+		{
+			"function_name": "TestRESTProxyRequiresToken",
+			"documentation_hash": "83589b6be118b7928a66b2249fd850ce2a5170395ece51cd510d7ca41b88b5a8",
+			"definition_hash": "1d2fd1044a2682da9d948df582986a3ba2cda9978fb241a8344207d70cb573bc",
+			"reviewed_at": "2026-06-19T20:34:07.29254153Z"
+		},
+		{
+			"function_name": "TestRESTProxyForwardsWithPAT",
+			"documentation_hash": "f1263e5852949e9c91101322077b52d7ba187845a1107386f1f8b5a84800788f",
+			"definition_hash": "dbf5842c65bdb7ccbda7670f8d4607512ca22f95e42a6501e98230a2aa4acb78",
+			"reviewed_at": "2026-06-19T20:34:07.299697899Z"
+		},
+		{
+			"function_name": "TestRESTProxyContentBindingDistinguishesBodies",
+			"documentation_hash": "6b0f48cdf3d87c764cd33d5ccbdfd4ceb0aeb67878adb7a2d3b3cdd68c6a3616",
+			"definition_hash": "70856857f194d12e79471dae7d4cbff3eacab9ee2e6b375f9f8ec3856d4a6727",
+			"reviewed_at": "2026-06-19T20:34:07.306029974Z"
+		}
+	]
+}

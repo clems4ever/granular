@@ -80,11 +80,13 @@ func run(cfg *rsconfig.Config) error {
 		Verifier:         verifier,
 	})
 
-	// The git proxy serves authorized `git clone`/`git push` traffic under /git/,
-	// injecting the server-held PAT; everything else (schema, sign, operations, docs)
-	// is the generic SDK handler.
+	// The git proxy serves authorized `git clone`/`git push` traffic under /git/, and the
+	// REST proxy gates the whole GitHub REST API under /api/github/ — both inject the
+	// server-held PAT so agents can use real git and GitHub tooling pointed at granular.
+	// Everything else (schema, sign, operations, docs) is the generic SDK handler.
 	mux := http.NewServeMux()
 	mux.Handle("/git/", resourceservergithub.NewGitProxy(cfg.GitHubToken, rs))
+	mux.Handle("/api/github/", resourceservergithub.NewRESTProxy(cfg.GitHubToken, rs))
 	mux.Handle("/", rs.Handler())
 
 	log.Printf("granular-github-resource-server %q listening on %s (AS %s)", cfg.ResourceServerID, cfg.Addr, cfg.ASURL)
